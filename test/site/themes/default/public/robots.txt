@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /*/edit
+Disallow: /*/delete

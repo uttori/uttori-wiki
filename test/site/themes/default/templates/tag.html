@@ -1,0 +1,72 @@
+<!-- View Object
+{
+    taggedDocuments = [array] Collection of result documents,
+    popularSearches = [array],
+    siteSections = [array],
+}
+-->
+<div class="before-main-wrapper">
+    <div class="header-wrapper">
+        <div class="container header-center">
+            <div class="header-sidebar">
+                <div class="widget clearfix">
+                    <h3 class="widget-title">Document Search</h3>
+                    <div class="live-search">
+                        <form role="search" method="get" id="searchform" class="form-search" action="search">
+                            <div class="input-group">
+                                <input type="text" id="autocomplete-ajax" name="s" id="s" class="searchajax search-query form-control" autocomplete="off" placeholder="Search for documents here...">
+                                <span class="input-group-btn">
+                                    <input type="submit" value="Search" class="btn btn-primary">
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <% if(popularSearches && popularSearches.length > 0){ %>
+                        <p class="top-searches">Popular searches:
+                        <% for(var i = 0; i < popularSearches.length; i++){ var search = popularSearches[i]; %>
+                            <a href="search?s=<%= encodeURIComponent(search) %>"><%= search + ((i != popularSearches.length -1) ?"," :"") %></a>
+                        <% } %>
+                        </p>
+                    <% } %>
+                </div>
+            </div >
+        </div >
+    </div >
+</div >
+<div class="container wrap main-section" id="wrap-main-section">
+    <div id="content" class="content">
+        <div class="row bg knowledge-base-row">
+            <main class="main col-sm-8"  role="main">
+                <% if(section){ %>
+                    <h2><%= section.title %></h2>
+                    <h4><%= section.description %></h4>
+                <% } %>
+                <% if(taggedDocuments && taggedDocuments.length > 0){ %>
+                    <ul class="category-posts">
+                        <% for(var i = 0; i < taggedDocuments.length; i++){ var document = taggedDocuments[i];%>
+                        <li class="list-post pa-post-format">
+                            <i class="fa fa-file-text fa-fw"></i> <a href="<%= document.slug %>"><%= document.title %></a>
+                        </li>
+                        <% } %>
+                    </ul>
+                <% } else { %>
+                    <p> No results found for tag</p>
+                <% } %>
+            </main>
+            <aside id="sidebar-primary" class="sidebar col-sm-4" role="complementary">
+                <% if(siteSections && siteSections.length > 0){ %>
+                <section class="widget widget_recent_entries">
+                    <h3 class="widget-title">Categories</h3>
+                    <ul>
+                        <% for(var i = 0; i < siteSections.length; i++){ var category = siteSections[i];%>
+                        <li class="list-post pa-post-format">
+                            <i class="fa fa-folder fa-fw"></i> <a href="~<%= category.tag %>"><%= category.title %></a>
+                        </li>
+                        <% } %>
+                    </ul>
+                </section>
+                <% } %>
+            </aside>
+        </div>
+    </div>
+</div>
