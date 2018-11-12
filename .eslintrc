@@ -27,10 +27,8 @@
     "import/no-dynamic-require": 0,
     "node/no-unpublished-require": 0,
     camelcase: 0,
-    class-methods-use-this: 0,
     global-require: 0,
     max-len: 0,
-    no-console: 0,
     no-empty: ["error", { "allowEmptyCatch": true }],
     no-param-reassign: 0,
     no-plusplus: 0, # Meaningless as other rules prevent the errors that could happen.

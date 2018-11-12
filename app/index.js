@@ -25,7 +25,7 @@ class UttoriWiki {
 
     this.config = { ...defaultConfig, ...config };
 
-    this.validateConfig(this.config);
+    UttoriWiki.validateConfig(this.config);
 
     this.server = server;
     this.render = render;
@@ -46,15 +46,18 @@ class UttoriWiki {
     this.bindRoutes();
   }
 
-  validateConfig(config) {
+  static validateConfig(config) {
     debug('Validating config...');
     if (!config.StorageProvider) {
+      debug('No StorageProvider provided.');
       throw new Error('No StorageProvider provided.');
     }
     if (!config.SearchProvider) {
+      debug('No SearchProvider provided.');
       throw new Error('No SearchProvider provided.');
     }
     if (!config.UploadProvider) {
+      debug('No UploadProvider provided.');
       throw new Error('No UploadProvider provided.');
     }
     debug('Validated config.');
@@ -76,6 +79,7 @@ class UttoriWiki {
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
+    this.server.post('/save', this.save.bind(this));
     this.server.post('/:slug/save', this.save.bind(this));
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));

@@ -108,7 +108,7 @@ test('Uttori: throws when missing render', (t) => {
   t.is(error.message, 'No render provided.');
 });
 
-test('Uttori: validateConfig(config): throws when missing StorageProvider', (t) => {
+test('Uttori: validateConfig.validateConfig(config): throws when missing StorageProvider', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
       SearchProvider,
