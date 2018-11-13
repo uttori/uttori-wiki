@@ -208,7 +208,7 @@ class UttoriWiki {
     document.title = req.body.title;
     document.content = MarkdownHelpers.prepare(this.config, req.body.content);
     document.tags = req.body.tags ? req.body.tags.split(',') : [];
-    document.slug = req.body.slug || req.params.slug;
+    document.slug = req.params.slug;
     document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
 
     // Save document
