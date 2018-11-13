@@ -597,19 +597,17 @@ test('Uttori: updateViewCount(slug): updates the view count for a given slug', a
 });
 
 test('Uttori: getViewCount(slug): returns 0 without a slug', async (t) => {
-  t.plan(2);
+  t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.pageVisits, {});
   t.is(uttori.getViewCount(), 0);
 });
 
 test('Uttori: getViewCount(slug): returns 0 when a match is not found', async (t) => {
-  t.plan(3);
+  t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.pageVisits, {});
-  uttori.updateViewCount('test');
-  t.deepEqual(uttori.pageVisits, { test: 1 });
-  t.is(uttori.getViewCount('test'), 1);
+  t.is(uttori.getViewCount('getViewCount-2'), 0);
+  uttori.updateViewCount('getViewCount-2');
+  t.is(uttori.getViewCount('getViewCount-2'), 1);
 });

@@ -19,7 +19,7 @@
     "ramda": "^0.25.0",
     "request": "^2.88.0",
     "slugify": "^1.3.3",
-    "uttori-document": "^1.0.1"
+    "uttori-document": "^1.1.0"
   },
   "devDependencies": {
     "ava": "1.0.0-rc.1",
@@ -40,7 +40,7 @@
     "nyc": "^13.1.0",
     "sinon": "^7.1.1",
     "supertest": "^3.3.0",
-    "uttori-storage-provider-json-file": "^1.1.0",
+    "uttori-storage-provider-json-file": "^1.2.0",
     "uttori-upload-provider-multer": "^1.1.0"
   },
   "files": [

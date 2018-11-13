@@ -209,6 +209,7 @@ class UttoriWiki {
     document.content = MarkdownHelpers.prepare(this.config, req.body.content);
     document.tags = req.body.tags ? req.body.tags.split(',') : [];
     document.slug = req.body.slug || req.params.slug;
+    document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
 
     // Save document
     this.storageProvider.update(document);
@@ -226,6 +227,7 @@ class UttoriWiki {
   }
 
   new(req, res, _next) {
+    debug('New Route');
     const document = new Document();
     document.slug = '';
     document.title = 'New Document';
@@ -237,13 +239,16 @@ class UttoriWiki {
   }
 
   detail(req, res, next) {
+    debug('Detail Route');
     if (!req.params.slug) {
+      debug('Missing slug.');
       next();
       return;
     }
 
     const document = this.storageProvider.get(req.params.slug);
     if (!document || document.content.length === 0) {
+      debug('No document found for given slug:', req.params.slug);
       next();
       return;
     }
