@@ -79,7 +79,6 @@ class UttoriWiki {
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
-    this.server.post('/save', this.save.bind(this));
     this.server.post('/:slug/save', this.save.bind(this));
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));
