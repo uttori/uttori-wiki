@@ -217,8 +217,8 @@ class UttoriWiki {
 
     // Remove old document if one existed
     const { originalSlug } = req.body;
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== req.body.slug) {
-      debug(`Chaning slug from ${originalSlug} to ${req.body.slug}, cleaning up old files.`);
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== req.params.slug) {
+      debug(`Changing slug from "${originalSlug}" to "${req.body.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
       this.searchProvider.indexRemove({ slug: originalSlug });
     }

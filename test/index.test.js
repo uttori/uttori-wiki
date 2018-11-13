@@ -276,8 +276,8 @@ test('Uttori: save(req, res, next): redirects to the article after saving with n
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/test-old/save')
-    .send('originalSlug=test-old&slug=test-new');
+  const res = await request(uttori.server).post('/test-new/save')
+    .send('originalSlug=test-old');
 
   t.is(res.status, 302);
   t.is(res.text, 'Found. Redirecting to /test-new');
