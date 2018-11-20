@@ -1,6 +1,6 @@
 # Uttori Wiki
 
-UttoriWiki is a wiki module for the Uttori system. Does everything a wiki should.
+UttoriWiki is a wiki module for the [Uttori](https://github.com/uttori) set of components. UttoriWiki was originally a fork of [Hazel](http://hazel.wmk.io/) but has since become a set of projects with every aspect of the original codebase having been fully refactored into several smaller projects each with a full set of unit tests. The goal has shifted away from just being a wiki to becoming a modular set of components to quickly spin up not only a wiki, but many other types of sites all powered by the same underlying components.
 
 # Config
 
@@ -96,7 +96,7 @@ $ DEBUG=Uttori* npm test
   - Change Log
 - History View
 - Allow sections to be edited outside of config.
-- Syncing
+- Rewrite Syncing
   - Read Only Sync
   - Authentication for Sync (Writes)
 
@@ -114,3 +114,12 @@ $ DEBUG=Uttori* npm test
 # Namesake
 
 > ウットリ, うっとり: When you become enraptured by beauty. In rapture, in ecstasy, captivated. A rapt stare.
+
+# Contributors
+
+ - [Matthew Callis](https://github.com/MatthewCallis) - refactor, rewrite, testing of UttoriWiki
+ - [Wade Kallhoff](https://github.com/wkallhof) - original author of Hazel
+ - [Egor Kuryanovich](https://github.com/Sontan) - contributions to Hazel
+
+# License
+  [GPL-3.0](LICENSE)
