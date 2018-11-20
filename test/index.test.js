@@ -337,7 +337,7 @@ test('Uttori: upload(req, res, next): uploads the file and returns the filename'
 
   const uttori = new UttoriWiki(config, server, md);
   const res = await request(uttori.server).post('/upload')
-    .attach('file', 'test/site/themes/default/public/favicon.gif');
+    .attach('file', 'test/site/favicon.gif');
 
   t.is(res.status, 200);
   t.is(res.text.substring(0, 8), 'favicon-');
