@@ -126,6 +126,9 @@ class UttoriWiki {
     res.render('tag', {
       title: req.params.tag,
       config: this.config,
+      recentDocuments: this.getRecentDocuments(5),
+      randomDocuments: this.getRandomDocuments(5),
+      popularDocuments: this.getPopularDocuments(5),
       popularSearches: this.searchProvider.getPopularSearchTerms(5) || [],
       taggedDocuments: this.getTaggedDocuments(req.params.tag),
       section: R.find(R.propEq('tag', req.params.tag))(this.config.site_sections) || {},
@@ -259,6 +262,7 @@ class UttoriWiki {
       title: document.title,
       config: this.config,
       document,
+      popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
     });
