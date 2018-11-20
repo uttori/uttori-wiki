@@ -16,7 +16,7 @@
   "dependencies": {
     "debug": "^4.1.0",
     "dotenv": "^6.1.0",
-    "ramda": "^0.25.0",
+    "ramda": "^0.26.0",
     "request": "^2.88.0",
     "slugify": "^1.3.3",
     "uttori-document": "^1.1.0"
