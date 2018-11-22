@@ -196,7 +196,7 @@ class UttoriWiki {
 
   save(req, res, next) {
     debug('Save Route');
-    if (!req.params.slug || req.body.slug) {
+    if (!req.params.slug && !req.body.slug) {
       debug('Missing slug!');
       next();
       return;
