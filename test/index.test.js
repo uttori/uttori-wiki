@@ -239,12 +239,12 @@ test('Uttori: delete(req, res, next): falls to 404 when miss matched key', async
   t.is(title[1], '404 Not Found | Wiki');
 });
 
-test('Uttori: save(req, res, next): redirects to the article after saving without changing slug', async (t) => {
+test('Uttori: save(req, res, next): redirects to the article after saving without changing slug (original-slug set)', async (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
   const res = await request(uttori.server).post('/test-old/save')
-    .send('slug=test-old');
+    .send('original-slug=test-old');
 
   t.is(res.status, 302);
   t.is(res.text, 'Found. Redirecting to /test-old');

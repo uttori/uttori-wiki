@@ -196,8 +196,13 @@ class UttoriWiki {
 
   save(req, res, next) {
     debug('Save Route');
-    if (!req.params.slug || !req.body || Object.keys(req.body).length === 0) {
-      debug('Missing slug or body!');
+    if (!req.params.slug || req.body.slug) {
+      debug('Missing slug!');
+      next();
+      return;
+    }
+    if (!req.body || Object.keys(req.body).length === 0) {
+      debug('Missing body!');
       next();
       return;
     }
@@ -210,7 +215,7 @@ class UttoriWiki {
     document.title = req.body.title;
     document.content = MarkdownHelpers.prepare(this.config, req.body.content);
     document.tags = req.body.tags ? req.body.tags.split(',') : [];
-    document.slug = req.params.slug;
+    document.slug = req.body.slug || req.params.slug;
     document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
 
     // Save document
@@ -218,8 +223,8 @@ class UttoriWiki {
     this.searchProvider.indexUpdate(document);
 
     // Remove old document if one existed
-    const { originalSlug } = req.body;
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== req.params.slug) {
+    const originalSlug = req.body['original-slug'];
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== req.body.slug) {
       debug(`Changing slug from "${originalSlug}" to "${req.body.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
       this.searchProvider.indexRemove({ slug: originalSlug });

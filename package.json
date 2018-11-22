@@ -22,7 +22,7 @@
     "uttori-document": "^1.1.0"
   },
   "devDependencies": {
-    "ava": "1.0.0-rc.1",
+    "ava": "1.0.0-rc.2",
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
     "eslint": "^5.9.0",
