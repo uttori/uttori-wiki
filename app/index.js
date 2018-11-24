@@ -5,8 +5,6 @@ const Document = require('uttori-document');
 const MarkdownHelpers = require('./utilities/markdownHelpers.js');
 const defaultConfig = require('./config.default.js');
 
-require('dotenv').config();
-
 class UttoriWiki {
   constructor(config, server, render) {
     debug('Contructing...');
@@ -26,6 +24,27 @@ class UttoriWiki {
     this.config = { ...defaultConfig, ...config };
 
     UttoriWiki.validateConfig(this.config);
+
+    // reCaptcha Spam Prevention
+    this.recaptcha = undefined;
+    /* istanbul ignore next */
+    if (config.use_recaptcha) {
+      if (!config.recaptcha_site_key) {
+        debug('Error initializing reCaptcha: missing config variable recaptcha_site_key');
+      }
+      if (!config.recaptcha_secret_key) {
+        debug('Error initializing reCaptcha: missing config variable recaptcha_secret_key');
+      }
+      if (config.recaptcha_site_key && config.recaptcha_secret_key) {
+        try {
+          const { Recaptcha } = require('express-recaptcha');
+          this.recaptcha = new Recaptcha(config.recaptcha_site_key, config.recaptcha_secret_key);
+        } catch (error) {
+          debug('Error initializing reCaptcha:', error);
+          throw new Error('Error initializing reCaptcha:', error);
+        }
+      }
+    }
 
     this.server = server;
     this.render = render;
@@ -175,8 +194,16 @@ class UttoriWiki {
 
   delete(req, res, next) {
     debug('Delete Route');
-    if (!req.params.slug || !req.params.key || req.params.key !== process.env.DELETE_KEY) {
-      debug('Missing one or more of: slug, key, or a key mismatch!');
+    /* istanbul ignore else */
+    if (this.config.use_delete_key) {
+      if (!req.params.key || req.params.key !== this.config.delete_key) {
+        debug('Missing delete key, or a delete key mismatch!');
+        next();
+        return;
+      }
+    }
+    if (!req.params.slug) {
+      debug('Missing slug!');
       next();
       return;
     }
@@ -194,6 +221,7 @@ class UttoriWiki {
     }
   }
 
+<<<<<<< HEAD
   save(req, res, next) {
     debug('Save Route');
     if (!req.params.slug && !req.body.slug) {
@@ -207,6 +235,9 @@ class UttoriWiki {
       return;
     }
 
+=======
+  saveValid(req, res, _next) {
+>>>>>>> Add reCaptch support, better delete_key support
     debug(`Updating with params: ${JSON.stringify(req.params, null, 2)}`);
     debug(`Updating with body: ${JSON.stringify(req.body, null, 2)}`);
 
@@ -231,6 +262,32 @@ class UttoriWiki {
     }
 
     res.redirect(`${this.config.base}${req.body.slug || req.params.slug}`);
+  }
+
+  save(req, res, next) {
+    debug('Save Route');
+    if (!req.params.slug || !req.body || Object.keys(req.body).length === 0) {
+      debug('Missing slug or body!');
+      next();
+      return;
+    }
+    /* istanbul ignore next */
+    if (this.config.use_recaptcha) {
+      debug('Verifying with reCaptcha...');
+      this.recaptcha.verify(req, (error, data) => {
+        debug('reCaptch Verification Data:', data);
+        if (!error) {
+          debug('reCaptch Verified!');
+          this.saveValid(req, res, next);
+        } else {
+          debug('Invalid reCaptcha:', error);
+          next();
+        }
+      });
+    } else {
+      debug('Skipping reCaptcha...');
+      this.saveValid(req, res, next);
+    }
   }
 
   new(req, res, _next) {

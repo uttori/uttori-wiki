@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "debug": "^4.1.0",
-    "dotenv": "^6.1.0",
     "ramda": "^0.26.0",
     "request": "^2.88.0",
     "slugify": "^1.3.3",
     "uttori-document": "^1.1.0"
+  },
+  "optionalDependencies": {
+    "express-recaptcha": "^4.1.1"
   },
   "devDependencies": {
     "ava": "1.0.0-rc.2",
@@ -59,6 +61,8 @@
   "scripts": {
     "lint": "eslint .",
     "report": "nyc report --reporter=html",
+    "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
+    "posttest": "killall -SIGINT uttori-wiki-test-server",
     "test": "NODE_ENV=test nyc ava",
     "validate": "npm ls"
   }
