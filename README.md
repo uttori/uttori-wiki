@@ -8,14 +8,6 @@ UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) b
 
 # Config
 
-## Environment
-
-`.env` used by dotenv:
-
-```
-DELETE_KEY=YOUR_KEY_GOES_HERE // This used to lock deletion of pages behind a given private key.
-```
-
 ## Site Configuration
 
 ```js
