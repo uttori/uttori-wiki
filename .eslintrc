@@ -1,7 +1,7 @@
 {
   "extends": [
     "airbnb",
-    "plugin:node/recommended",
+    "plugin:node/recommended"
   ],
   "plugins": [
     "ava",
@@ -12,19 +12,26 @@
   "env": {
     "es6": true,
     "browser": true,
-    "mocha": true,
+    "mocha": true
   },
   "globals": {
     "sinon": false,
     "mocha": true,
-    "expect": true,
+    "expect": true
   },
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 10
   },
   # Custom Disabled Rules
   rules: {
     "import/no-dynamic-require": 0,
+    "import/no-extraneous-dependencies": [
+      "error", {
+        "devDependencies": ["**/*.test.js", "**/test/**/*.js"],
+        "optionalDependencies": true,
+        "peerDependencies": false
+      }
+    ],
     "node/no-unpublished-require": 0,
     camelcase: 0,
     global-require: 0,
@@ -34,6 +41,6 @@
     no-plusplus: 0, # Meaningless as other rules prevent the errors that could happen.
     no-restricted-syntax: 0,
     no-underscore-dangle: 0,
-    no-unused-vars: ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
+    no-unused-vars: ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }]
   }
 }

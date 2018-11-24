@@ -1,6 +1,10 @@
 # Uttori Wiki
 
-UttoriWiki is a wiki module for the [Uttori](https://github.com/uttori) set of components. UttoriWiki was originally a fork of [Hazel](http://hazel.wmk.io/) but has since become a set of projects with every aspect of the original codebase having been fully refactored into several smaller projects each with a full set of unit tests. The goal has shifted away from just being a wiki to becoming a modular set of components to quickly spin up not only a wiki, but many other types of sites all powered by the same underlying components.
+UttoriWiki is a fast, simple, wiki knowledge base for Express.js & Node.js that stores data in any format (Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.), and renders to HTML.
+
+UttoriWiki is the wiki module for the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or update to fit specific needs. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage module! Already running a bunch of external dependencies and want to plug into those? You can most likely do it!
+
+UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) but has since become a set of projects with every aspect of the original codebase having been fully refactored into several smaller projects each with a brand spankin' new set of unit tests. The goal has shifted away from just being a wiki to becoming a modular set of components to quickly spin up not only a wiki, but many other types of sites all powered by the same underlying components.
 
 # Config
 
@@ -43,8 +47,7 @@ DELETE_KEY=YOUR_KEY_GOES_HERE // This used to lock deletion of pages behind a gi
   // Excerpt length (used in search)
   excerpt_length: 400,
 
-  // Application base url. While most of the application uses relative paths
-  // for routing, this is used for things like SEO which require absolute URLs
+  // Application base url.
   base: '/',
 
   // Specify the theme to use
@@ -75,8 +78,29 @@ DELETE_KEY=YOUR_KEY_GOES_HERE // This used to lock deletion of pages behind a gi
   // Flat file storageProvider config
   extension: 'json',
 
-  // Is content for the wiki written in Markdown format?
+  // Content is in the Markdown language
   markdown: true,
+
+  // Enable hiding document deletion behind a private key
+  use_delete_key: false,
+
+  // Key used for verifying document deletion
+  delete_key: '',
+
+  // Enable reCaptcha on Creation & Document Editing
+  use_recaptcha: false,
+
+  // reCaptcha Site key
+  recaptcha_site_key: '',
+
+  // reCaptcha Secret key
+  recaptcha_secret_key: '',
+
+  // Enable Google Analytics
+  use_google_analytics: false,
+
+  // Google Analytics UA ID
+  google_analytics_id: '',
 }
 ```
 
@@ -117,9 +141,10 @@ $ DEBUG=Uttori* npm test
 
 # Contributors
 
- - [Matthew Callis](https://github.com/MatthewCallis) - refactor, rewrite, testing of UttoriWiki
+ - [Matthew Callis](https://github.com/MatthewCallis) - rewrite, refactor, testing of UttoriWiki
  - [Wade Kallhoff](https://github.com/wkallhof) - original author of Hazel
- - [Egor Kuryanovich](https://github.com/Sontan) - contributions to Hazel
+ - [Egor Kuryanovich](https://github.com/Sontan) - contributions to the original codebase
+
 
 # License
   [GPL-3.0](LICENSE)

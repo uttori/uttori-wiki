@@ -4,75 +4,22 @@ const request = require('supertest');
 const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
-// Server
-const express = require('express');
-const ejs = require('ejs');
-const layouts = require('express-ejs-layouts');
-const bodyParser = require('body-parser');
-const path = require('path');
-
 const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
 const SearchProvider = require('./__stubs/SearchProvider.js');
 
-const defaultConfig = require('../app/config.default.js');
 const UttoriWiki = require('../app/index.js');
+
+const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-let app;
-let config;
-let server;
-
 test.before((_t) => {
-  process.env.DELETE_KEY = 'test-key';
-  config = {
-    ...defaultConfig,
-    site_sections: [
-      {
-        title: 'Example',
-        description: 'Example description text.',
-        tag: 'example',
-      },
-    ],
-    // Specify the theme to use
-    theme_dir: 'test/site/themes/',
-    theme_name: 'default',
-    content_dir: 'test/site/content/',
-    history_dir: 'test/site/content/history/',
-    uploads_dir: 'test/site/uploads/',
-    data_dir: 'test/site/data/',
-    public_dir: 'test/site/themes/default/public/',
-    // Providers
-    StorageProvider,
-    SearchProvider,
-    UploadProvider,
-    // Syncing
-    sync_key: 'test-key',
-  };
-
-  server = express();
-  server.set('port', process.env.PORT || 8000);
-  server.set('ip', process.env.IP || '127.0.0.1');
-
-  server.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
-  server.use(layouts);
-  server.set('layout extractScripts', true);
-  server.set('layout extractStyles', true);
-  server.set('view engine', 'html');
-  // server.enable('view cache');
-  server.engine('html', ejs.renderFile);
-
-  // Setup Express
-  server.use(express.static(config.public_dir));
-  server.use('/uploads', express.static(config.uploads_dir));
-  server.use(bodyParser.json({ limit: '50mb' }));
-  server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
-  app = server.listen(server.get('port'), server.get('ip'));
+  cleanup();
 });
 
 test.after(() => {
-  app.close();
+  cleanup();
 });
 
 test.beforeEach(() => {
@@ -80,11 +27,7 @@ test.beforeEach(() => {
 });
 
 test.afterEach(() => {
-  // NOTE: What is the best way to do this
-  try {
-    fs.unlinkSync('test/site/content/test-old.json', () => {});
-    fs.unlinkSync('test/site/data/visits.json', () => {});
-  } catch (e) {}
+  cleanup();
 });
 
 test('Uttori: throws when missing config', (t) => {
@@ -186,6 +129,7 @@ test('Uttori: search(req, res, _next): renders', async (t) => {
   t.is(title[1], 'Searching &#34;test&#34; | Wiki');
 });
 
+<<<<<<< HEAD
 test('Uttori: edit(req, res, next): renders the edit page for a given slug', async (t) => {
   t.plan(3);
 
@@ -302,6 +246,8 @@ test('Uttori: save(req, res, next): falls through to next when missing body', as
   t.true(next.calledOnce);
 });
 
+=======
+>>>>>>> Refactor config to add new keys
 test('Uttori: new(req, res, _next): renders', async (t) => {
   t.plan(3);
 
@@ -311,25 +257,6 @@ test('Uttori: new(req, res, _next): renders', async (t) => {
   t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
   const title = res.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'New Document | Wiki');
-});
-
-test('Uttori: detail(req, res, _next): renders the requested slug', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/example-title');
-  t.is(res.status, 200);
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Example Title | Wiki');
-});
-
-test('Uttori: detail(req, res, _next): falls throught to next() when there is no slug', async (t) => {
-  t.plan(1);
-
-  const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.detail({ params: { slug: '' } }, null, next);
-  t.true(next.calledOnce);
 });
 
 test('Uttori: upload(req, res, next): uploads the file and returns the filename', async (t) => {
@@ -558,40 +485,24 @@ test('Uttori: updateViewCount(slug): does not update without a slug', async (t) 
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.pageVisits, {
-    'demo-title': 0,
-    'example-title': 2,
-    'fake-title': 1,
-  });
+  uttori.pageVisits = {};
+  t.deepEqual(uttori.pageVisits, {});
   uttori.updateViewCount();
-  t.deepEqual(uttori.pageVisits, {
-    'demo-title': 0,
-    'example-title': 2,
-    'fake-title': 1,
-  });
+  t.deepEqual(uttori.pageVisits, {});
 });
 
 test('Uttori: updateViewCount(slug): updates the view count for a given slug', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.pageVisits, {
-    'demo-title': 0,
-    'example-title': 2,
-    'fake-title': 1,
-  });
+  uttori.pageVisits = {};
+  t.deepEqual(uttori.pageVisits, {});
   uttori.updateViewCount('test');
   t.deepEqual(uttori.pageVisits, {
-    'demo-title': 0,
-    'example-title': 2,
-    'fake-title': 1,
     test: 1,
   });
   uttori.updateViewCount('test');
   t.deepEqual(uttori.pageVisits, {
-    'demo-title': 0,
-    'example-title': 2,
-    'fake-title': 1,
     test: 2,
   });
 });

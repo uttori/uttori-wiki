@@ -58,8 +58,29 @@ const config = {
   // Flat file storageProvider config
   extension: 'json',
 
-  // Is content for the wiki written in the Markdown language?
+  // Content is in the Markdown language
   markdown: true,
+
+  // Enable hiding document deletion behind a private key
+  use_delete_key: false,
+
+  // Key used for verifying document deletion
+  delete_key: '',
+
+  // Enable reCaptcha on Creation & Document Editing
+  use_recaptcha: false,
+
+  // reCaptcha Site key
+  recaptcha_site_key: '',
+
+  // reCaptcha Secret key
+  recaptcha_secret_key: '',
+
+  // Enable Google Analytics
+  use_google_analytics: false,
+
+  // Google Analytics UA ID
+  google_analytics_id: '',
 };
 
 module.exports = config;
