@@ -6,8 +6,6 @@ UttoriWiki is the wiki module for the [Uttori](https://github.com/uttori) set of
 
 UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) but has since become a set of projects with every aspect of the original codebase having been fully refactored into several smaller projects each with a brand spankin' new set of unit tests. The goal has shifted away from just being a wiki to becoming a modular set of components to quickly spin up not only a wiki, but many other types of sites all powered by the same underlying components.
 
-# Config
-
 ## Site Configuration
 
 ```js
