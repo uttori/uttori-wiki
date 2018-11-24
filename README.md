@@ -29,7 +29,7 @@ UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) b
     },
     {
       'title': 'FAQ',
-      'description': 'Frquently Asked Questions',
+      'description': 'Frequently Asked Questions',
       'tag': 'faq'
     }
   ],
@@ -104,7 +104,6 @@ $ DEBUG=Uttori* npm test
 ```
 
 ## TODO
-- Spam Filter
 - Richer Meta Data
   - Authors
   - Change Log
