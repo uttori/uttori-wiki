@@ -221,23 +221,7 @@ class UttoriWiki {
     }
   }
 
-<<<<<<< HEAD
-  save(req, res, next) {
-    debug('Save Route');
-    if (!req.params.slug && !req.body.slug) {
-      debug('Missing slug!');
-      next();
-      return;
-    }
-    if (!req.body || Object.keys(req.body).length === 0) {
-      debug('Missing body!');
-      next();
-      return;
-    }
-
-=======
   saveValid(req, res, _next) {
->>>>>>> Add reCaptch support, better delete_key support
     debug(`Updating with params: ${JSON.stringify(req.params, null, 2)}`);
     debug(`Updating with body: ${JSON.stringify(req.body, null, 2)}`);
 
@@ -266,8 +250,13 @@ class UttoriWiki {
 
   save(req, res, next) {
     debug('Save Route');
-    if (!req.params.slug || !req.body || Object.keys(req.body).length === 0) {
-      debug('Missing slug or body!');
+    if (!req.params.slug && !req.body.slug) {
+      debug('Missing slug!');
+      next();
+      return;
+    }
+    if (!req.body || Object.keys(req.body).length === 0) {
+      debug('Missing body!');
       next();
       return;
     }

@@ -62,7 +62,7 @@
     "lint": "eslint .",
     "report": "nyc report --reporter=html",
     "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
-    "posttest": "killall -SIGINT uttori-wiki-test-server",
+    "posttest": "killall -SIGINT uttori-wiki-test-server || true",
     "test": "NODE_ENV=test nyc ava",
     "validate": "npm ls"
   }
