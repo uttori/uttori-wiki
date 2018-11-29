@@ -89,7 +89,8 @@ class UttoriWiki {
     this.server.get('/', this.home.bind(this));
 
     // Tags
-    this.server.get('/~:tag/', this.tag.bind(this));
+    this.server.get('/tags', this.tagIndex.bind(this));
+    this.server.get('/tags/:tag/', this.tag.bind(this));
 
     // Search
     this.server.get('/search', this.search.bind(this));
@@ -106,6 +107,8 @@ class UttoriWiki {
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
+    // this.server.get('/:slug/history', this.history.bind(this));
+    // this.server.post('/:slug/history/restore/:revision', this.historyRestore.bind(this));
     this.server.post('/:slug/save', this.save.bind(this));
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));
@@ -128,7 +131,6 @@ class UttoriWiki {
     res.render('home', {
       title: 'Home',
       config: this.config,
-      popularSearches: this.searchProvider.getPopularSearchTerms(5),
       recentDocuments: this.getRecentDocuments(5),
       randomDocuments: this.getRandomDocuments(5),
       popularDocuments: this.getPopularDocuments(5),
@@ -137,10 +139,28 @@ class UttoriWiki {
     });
   }
 
+  tagIndex(req, res, _next) {
+    debug('Tag Index Route');
+    const taggedDocuments = this.getTags().reduce((acc, tag) => {
+      acc[tag] = this.getTaggedDocuments(tag);
+      return acc;
+    }, {});
+    res.render('tags', {
+      title: 'Tags',
+      config: this.config,
+      taggedDocuments,
+      recentDocuments: this.getRecentDocuments(5),
+      randomDocuments: this.getRandomDocuments(5),
+      popularDocuments: this.getPopularDocuments(5),
+      siteSections: this.config.site_sections,
+    });
+  }
+
   tag(req, res, next) {
     debug('Tag Route');
-    if (!req.params.tag) {
-      debug('Missing tag!');
+    const taggedDocuments = this.getTaggedDocuments(req.params.tag);
+    if (taggedDocuments.length === 0) {
+      debug('No documents for tag!');
       next();
       return;
     }
@@ -150,8 +170,7 @@ class UttoriWiki {
       recentDocuments: this.getRecentDocuments(5),
       randomDocuments: this.getRandomDocuments(5),
       popularDocuments: this.getPopularDocuments(5),
-      popularSearches: this.searchProvider.getPopularSearchTerms(5) || [],
-      taggedDocuments: this.getTaggedDocuments(req.params.tag),
+      taggedDocuments,
       section: R.find(R.propEq('tag', req.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
     });
@@ -549,6 +568,16 @@ class UttoriWiki {
         this.storageProvider.all(),
       ),
     );
+  }
+
+  getTags() {
+    debug('getTags');
+    let tags = R.pluck('tags')(this.storageProvider.all() || []);
+    tags = R.uniq(R.flatten(tags));
+    tags = R.filter(R.identity)(tags);
+    tags = R.sort((a, b) => a.localeCompare(b), tags);
+    debug('getTags:', tags);
+    return tags;
   }
 
   getTaggedDocuments(tag) {
