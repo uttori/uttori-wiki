@@ -44,3 +44,12 @@ test('falls throught to next() when there is no slug', async (t) => {
   uttori.detail({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
+
+test('falls throught to next() when there is no document found', async (t) => {
+  t.plan(1);
+
+  const next = sinon.spy();
+  const uttori = new UttoriWiki(config, server, md);
+  uttori.detail({ params: { slug: 'fake' } }, null, next);
+  t.true(next.calledOnce);
+});

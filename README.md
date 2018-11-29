@@ -106,7 +106,6 @@ $ DEBUG=Uttori* npm test
 ## TODO
 - Richer Meta Data
   - Authors
-  - Change Log
 - History View
 - Allow sections to be edited outside of config.
 - Rewrite Syncing
@@ -133,7 +132,6 @@ $ DEBUG=Uttori* npm test
  - [Matthew Callis](https://github.com/MatthewCallis) - rewrite, refactor, testing of UttoriWiki
  - [Wade Kallhoff](https://github.com/wkallhof) - original author of Hazel
  - [Egor Kuryanovich](https://github.com/Sontan) - contributions to the original codebase
-
 
 # License
   [GPL-3.0](LICENSE)

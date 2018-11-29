@@ -94,6 +94,14 @@ class UttoriWiki {
     // Search
     this.server.get('/search', this.search.bind(this));
 
+    // Not Found Placeholder
+    this.server.head('/404', this.notFound.bind(this));
+    this.server.get('/404', this.notFound.bind(this));
+    this.server.delete('/404', this.notFound.bind(this));
+    this.server.patch('/404', this.notFound.bind(this));
+    this.server.put('/404', this.notFound.bind(this));
+    this.server.post('/404', this.notFound.bind(this));
+
     // Document
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
@@ -110,13 +118,7 @@ class UttoriWiki {
     // this.server.get('/sync-request/:key/:server', this.requestList.bind(this));
     // this.server.post('/sync-write/:key', this.write.bind(this));
 
-    // Not Found
-    this.server.head('/404', this.notFound.bind(this));
-    this.server.get('/404', this.notFound.bind(this));
-    this.server.delete('/404', this.notFound.bind(this));
-    this.server.patch('/404', this.notFound.bind(this));
-    this.server.put('/404', this.notFound.bind(this));
-    this.server.post('/404', this.notFound.bind(this));
+    // Not Found - Catch All
     this.server.get('/*', this.notFound.bind(this));
     debug('Bound routes.');
   }
@@ -234,11 +236,11 @@ class UttoriWiki {
     document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
 
     // Save document
-    this.storageProvider.update(document);
+    const originalSlug = req.body['original-slug'];
+    this.storageProvider.update(document, originalSlug);
     this.searchProvider.indexUpdate(document);
 
     // Remove old document if one existed
-    const originalSlug = req.body['original-slug'];
     if (originalSlug && originalSlug.length > 0 && originalSlug !== req.body.slug) {
       debug(`Changing slug from "${originalSlug}" to "${req.body.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
@@ -300,7 +302,7 @@ class UttoriWiki {
     }
 
     const document = this.storageProvider.get(req.params.slug);
-    if (!document || document.content.length === 0) {
+    if ((!document.createDate && !document.updateDate) || document.content.length === 0) {
       debug('No document found for given slug:', req.params.slug);
       next();
       return;
