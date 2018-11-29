@@ -49,7 +49,7 @@ test('Uttori: tag(req, res, next): renders that tag page for a given tag', async
 });
 
 test('Uttori: tag(req, res, next): falls through to next when tag is missing', async (t) => {
-  t.plan(1);
+  t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
   const res = await request(uttori.server).get('/tags/_');

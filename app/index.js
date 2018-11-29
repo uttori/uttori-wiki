@@ -107,8 +107,9 @@ class UttoriWiki {
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
-    // this.server.get('/:slug/history', this.history.bind(this));
-    // this.server.post('/:slug/history/restore/:revision', this.historyRestore.bind(this));
+    // this.server.get('/:slug/history', this.historyIndex.bind(this));
+    // this.server.get('/:slug/history/:revision', this.historyDetail.bind(this));
+    // this.server.post('/:slug/history/:revision/restore', this.historyRestore.bind(this));
     this.server.post('/:slug/save', this.save.bind(this));
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));
@@ -231,7 +232,7 @@ class UttoriWiki {
 
     const { slug } = req.params;
     const document = this.storageProvider.get(slug);
-    if (document && (document.content || document.html)) {
+    if (document) {
       debug('Deleting document', document);
       this.storageProvider.delete(slug);
       this.searchProvider.indexRemove({ slug });
@@ -321,7 +322,7 @@ class UttoriWiki {
     }
 
     const document = this.storageProvider.get(req.params.slug);
-    if ((!document.createDate && !document.updateDate) || document.content.length === 0) {
+    if (!document) {
       debug('No document found for given slug:', req.params.slug);
       next();
       return;

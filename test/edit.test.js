@@ -30,11 +30,11 @@ test('renders the edit page for a given slug', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/test/edit');
+  const res = await request(uttori.server).get('/demo-title/edit');
   t.is(res.status, 200);
   t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
   const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'test | Wiki');
+  t.is(title[1], 'Demo Title | Wiki');
 });
 
 test('falls through to next when slug is missing', async (t) => {

@@ -42,7 +42,7 @@
     "nyc": "^13.1.0",
     "sinon": "^7.1.1",
     "supertest": "^3.3.0",
-    "uttori-storage-provider-json-file": "^1.4.0",
+    "uttori-storage-provider-json-file": "^2.0.0",
     "uttori-upload-provider-multer": "^1.1.0"
   },
   "files": [

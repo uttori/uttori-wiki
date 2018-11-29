@@ -71,7 +71,7 @@ test('redirects to the article after saving with new slug', async (t) => {
   fs.unlinkSync('test/site/content/test-new.json', () => {});
 });
 
-test('falls through to next when missing slug', async (t) => {
+test('falls through to next when missing slug (params)', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
