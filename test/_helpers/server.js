@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 
 // Server
 const express = require('express');
@@ -69,15 +69,19 @@ if (process.argv[2] && process.argv[2] !== 'undefined') {
   process.title = process.argv[2];
 }
 
-// Is this an require()?
+// Is this a require()?
 if (require.main === module) {
   console.log('Starting test server...');
   server.listen(server.get('port'), server.get('ip'));
 }
 
-const cleanup = () => {
-  try { fs.unlinkSync('test/site/content/test-old.json', () => {}); } catch (e) {}
-  try { fs.unlinkSync('test/site/data/visits.json', () => {}); } catch (e) {}
+const cleanup = async () => {
+  await fs.removeSync('test/site/content/history/test-delete');
+  await fs.removeSync('test/site/content/history/test-new');
+  await fs.removeSync('test/site/content/test-old.json');
+  await fs.removeSync('test/site/data/visits.json');
+  await fs.removeSync('test/site/uploads');
+  await fs.ensureDirSync('test/site/uploads', { recursive: true });
 };
 
 module.exports = { config, server, cleanup };

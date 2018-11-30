@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "debug": "^4.1.0",
+    "fs-extra": "^7.0.1",
     "ramda": "^0.26.1",
     "request": "^2.88.0",
     "slugify": "^1.3.3",
@@ -63,7 +64,7 @@
     "report": "nyc report --reporter=html",
     "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
     "posttest": "killall -SIGINT uttori-wiki-test-server || true",
-    "test": "NODE_ENV=test nyc ava",
+    "test": "NODE_ENV=test nyc ava --serial",
     "validate": "npm ls"
   }
 }

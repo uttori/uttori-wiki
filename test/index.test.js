@@ -106,7 +106,7 @@ test('Uttori: search(req, res, _next): renders', async (t) => {
   t.is(res.status, 200);
   t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
   const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Searching &#34;test&#34; | Wiki');
+  t.is(title[1], 'Search results for &#34;test&#34; | Wiki');
 });
 
 test('Uttori: new(req, res, _next): renders', async (t) => {

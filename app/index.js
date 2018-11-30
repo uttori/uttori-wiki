@@ -107,9 +107,9 @@ class UttoriWiki {
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
-    // this.server.get('/:slug/history', this.historyIndex.bind(this));
-    // this.server.get('/:slug/history/:revision', this.historyDetail.bind(this));
-    // this.server.post('/:slug/history/:revision/restore', this.historyRestore.bind(this));
+    this.server.get('/:slug/history', this.historyIndex.bind(this));
+    this.server.get('/:slug/history/:revision', this.historyDetail.bind(this));
+    this.server.get('/:slug/history/:revision/restore', this.historyRestore.bind(this));
     this.server.post('/:slug/save', this.save.bind(this));
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));
@@ -187,7 +187,7 @@ class UttoriWiki {
     /* istanbul ignore else */
     if (req.query && req.query.s) {
       const term = decodeURIComponent(req.query.s);
-      viewModel.title = `Searching "${req.query.s}"`;
+      viewModel.title = `Search results for "${req.query.s}"`;
       viewModel.searchTerm = term;
       viewModel.searchResults = this.getSearchResults(term, 10);
       viewModel.searchResults.map((document) => {
@@ -208,7 +208,7 @@ class UttoriWiki {
     }
     const document = this.storageProvider.get(req.params.slug);
     res.render('edit', {
-      title: document.title,
+      title: `Editing ${document.title}`,
       document,
       config: this.config,
     });
@@ -338,6 +338,94 @@ class UttoriWiki {
       popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
+    });
+  }
+
+  historyIndex(req, res, next) {
+    debug('History Index Route');
+    if (!req.params.slug) {
+      debug('Missing slug.');
+      next();
+      return;
+    }
+    const document = this.storageProvider.get(req.params.slug);
+    if (!document) {
+      debug('No document found for given slug:', req.params.slug);
+      next();
+      return;
+    }
+    const history = this.storageProvider.getHistory(req.params.slug);
+    const historyByDay = history.reduce((acc, value) => {
+      const d = new Date(parseInt(value, 10));
+      const key = d.toISOString().split('T')[0];
+      acc[key] = acc[key] || [];
+      acc[key].push(value);
+      return acc;
+    }, {});
+
+    res.render('history_index', {
+      title: `${document.title} Revision History`,
+      document,
+      historyByDay,
+      config: this.config,
+    });
+  }
+
+  historyDetail(req, res, next) {
+    debug('History Detail Route');
+    if (!req.params.slug) {
+      debug('Missing slug.');
+      next();
+      return;
+    }
+    if (!req.params.revision) {
+      debug('Missing revision.');
+      next();
+      return;
+    }
+    const document = this.storageProvider.getRevision(req.params.slug, req.params.revision);
+    if (!document) {
+      debug('No revision found for given slug & revision pair:', req.params.slug, req.params.revision);
+      next();
+      return;
+    }
+
+    document.html = this.render.render(document.content);
+
+    res.render('detail', {
+      title: `${document.title} Revision ${req.params.revision}`,
+      config: this.config,
+      document,
+      revision: req.params.revision,
+      popularDocuments: this.getPopularDocuments(5),
+      relatedDocuments: this.getRelatedDocuments(document.title, 5),
+      recentDocuments: this.getRecentDocuments(5),
+    });
+  }
+
+  historyRestore(req, res, next) {
+    debug('History Restore Route');
+    if (!req.params.slug) {
+      debug('Missing slug!');
+      next();
+      return;
+    }
+    if (!req.params.revision) {
+      debug('Missing revision.');
+      next();
+      return;
+    }
+    const document = this.storageProvider.getRevision(req.params.slug, req.params.revision);
+    if (!document) {
+      debug('No revision found for given slug & revision pair:', req.params.slug, req.params.revision);
+      next();
+      return;
+    }
+    res.render('edit', {
+      title: `Editing ${document.title} from Revision ${req.params.revision}`,
+      document,
+      revision: req.params.revision,
+      config: this.config,
     });
   }
 
