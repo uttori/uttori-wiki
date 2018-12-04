@@ -82,6 +82,28 @@ class UttoriWiki {
     debug('Validated config.');
   }
 
+  buildMetadata(document = {}, path = '', robots = '') {
+    const canonical = `${this.config.site_url}${path}`;
+
+    const excerpt = `${document.content.substring(0, 160)}...`;
+    const description = this.render.render(excerpt).trim();
+
+    const image = '';
+    const modified = document && document.updateDate ? new Date(document.updateDate).toISOString() : '';
+    const published = document && document.createDate ? new Date(document.createDate).toISOString() : '';
+    const title = document.title || this.config.site_title;
+
+    return {
+      canonical,
+      description,
+      image,
+      modified,
+      published,
+      robots,
+      title,
+    };
+  }
+
   bindRoutes() {
     debug('Binding routes...');
     // Order: Home, Tags, Search, Document, Sync, Not Found
@@ -137,6 +159,7 @@ class UttoriWiki {
       popularDocuments: this.getPopularDocuments(5),
       siteSections: this.getSiteSections(),
       homeDocument: this.getHomeDocument(),
+      meta: this.buildMetadata({}, '/'),
     });
   }
 
@@ -154,6 +177,7 @@ class UttoriWiki {
       randomDocuments: this.getRandomDocuments(5),
       popularDocuments: this.getPopularDocuments(5),
       siteSections: this.config.site_sections,
+      meta: this.buildMetadata({}, '/tags'),
     });
   }
 
@@ -174,6 +198,7 @@ class UttoriWiki {
       taggedDocuments,
       section: R.find(R.propEq('tag', req.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
+      meta: this.buildMetadata({}, `/tags/${req.params.tag}`),
     });
   }
 
@@ -183,6 +208,7 @@ class UttoriWiki {
       title: 'Search',
       config: this.config,
       searchTerm: '',
+      meta: this.buildMetadata({ title: 'Search' }, '/search'),
     };
     /* istanbul ignore else */
     if (req.query && req.query.s) {
@@ -195,7 +221,9 @@ class UttoriWiki {
         document.html = this.render.render(excerpt).trim();
         return document;
       });
+      viewModel.meta = this.buildMetadata({ title: `Search results for "${req.query.s}"` }, `/search/${req.query.s}`, 'noindex');
     }
+    res.set('X-Robots-Tag', 'noindex');
     res.render('search', viewModel);
   }
 
@@ -211,6 +239,7 @@ class UttoriWiki {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
+      meta: this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${req.params.slug}/edit`),
     });
   }
 
@@ -236,7 +265,7 @@ class UttoriWiki {
       debug('Deleting document', document);
       this.storageProvider.delete(slug);
       this.searchProvider.indexRemove({ slug });
-      res.redirect(this.config.base);
+      res.redirect(this.config.site_url);
     } else {
       debug('Nothing found to delete, next.');
       next();
@@ -267,7 +296,7 @@ class UttoriWiki {
       this.searchProvider.indexRemove({ slug: originalSlug });
     }
 
-    res.redirect(`${this.config.base}${req.body.slug || req.params.slug}`);
+    res.redirect(`${this.config.site_url}${req.body.slug || req.params.slug}`);
   }
 
   save(req, res, next) {
@@ -310,6 +339,7 @@ class UttoriWiki {
       document,
       title: document.title,
       config: this.config,
+      meta: this.buildMetadata(document, '/new'),
     });
   }
 
@@ -338,6 +368,7 @@ class UttoriWiki {
       popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
+      meta: this.buildMetadata(document, `/${req.params.slug}`),
     });
   }
 
@@ -363,11 +394,16 @@ class UttoriWiki {
       return acc;
     }, {});
 
+    res.set('X-Robots-Tag', 'noindex');
     res.render('history_index', {
       title: `${document.title} Revision History`,
       document,
       historyByDay,
       config: this.config,
+      meta: this.buildMetadata({
+        ...document,
+        title: `${document.title} Revision History`,
+      }, `/${req.params.slug}/history`, 'noindex'),
     });
   }
 
@@ -392,6 +428,7 @@ class UttoriWiki {
 
     document.html = this.render.render(document.content);
 
+    res.set('X-Robots-Tag', 'noindex');
     res.render('detail', {
       title: `${document.title} Revision ${req.params.revision}`,
       config: this.config,
@@ -400,6 +437,10 @@ class UttoriWiki {
       popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
+      meta: this.buildMetadata({
+        ...document,
+        title: `${document.title} Revision ${req.params.revision}`,
+      }, `/${req.params.slug}/history/${req.params.revision}`, 'noindex'),
     });
   }
 
@@ -421,11 +462,16 @@ class UttoriWiki {
       next();
       return;
     }
+    res.set('X-Robots-Tag', 'noindex');
     res.render('edit', {
       title: `Editing ${document.title} from Revision ${req.params.revision}`,
       document,
       revision: req.params.revision,
       config: this.config,
+      meta: this.buildMetadata({
+        ...document,
+        title: `Editing ${document.title} from Revision ${req.params.revision}`,
+      }, `/${req.params.slug}/history/${req.params.revision}/restore`, 'noindex'),
     });
   }
 
@@ -591,14 +637,16 @@ class UttoriWiki {
 
   // 404
   notFound(req, res, _next) {
+    res.set('X-Robots-Tag', 'noindex');
     res.render('404', {
       title: '404 Not Found',
       config: this.config,
       slug: req.params.slug || '404',
+      meta: this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex'),
     });
   }
 
-  // Home
+  // Helpers
   getHomeDocument() {
     const document = this.storageProvider.get('home-page');
 
