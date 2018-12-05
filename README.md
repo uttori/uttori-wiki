@@ -107,8 +107,8 @@ $ DEBUG=Uttori* npm test
 - XML Sitemap
 - Richer Meta Data
   - Authors
+  - Images
 - History Diff View
-- Allow sections to be edited outside of config.
 - Rewrite Syncing
   - Read Only Sync
   - Authentication for Sync (Writes)
