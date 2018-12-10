@@ -22,14 +22,15 @@ const config = {
       tag: 'example',
     },
   ],
+  site_url: 'https://fake.test',
   // Specify the theme to use
-  theme_dir: 'test/site/themes/',
+  theme_dir: 'test/site/themes',
   theme_name: 'default',
-  content_dir: 'test/site/content/',
-  history_dir: 'test/site/content/history/',
-  uploads_dir: 'test/site/uploads/',
-  data_dir: 'test/site/data/',
-  public_dir: 'test/site/themes/default/public/',
+  content_dir: 'test/site/content',
+  history_dir: 'test/site/content/history',
+  uploads_dir: 'test/site/uploads',
+  data_dir: 'test/site/data',
+  public_dir: 'test/site/themes/default/public',
   // Providers
   StorageProvider,
   SearchProvider,
@@ -76,12 +77,13 @@ if (require.main === module) {
 }
 
 const cleanup = async () => {
-  await fs.removeSync('test/site/content/history/test-delete');
-  await fs.removeSync('test/site/content/history/test-new');
-  await fs.removeSync('test/site/content/test-old.json');
-  await fs.removeSync('test/site/data/visits.json');
-  await fs.removeSync('test/site/uploads');
-  await fs.ensureDirSync('test/site/uploads', { recursive: true });
+  try { await fs.remove('test/site/content/history/test-delete'); } catch (e) {}
+  try { await fs.remove('test/site/content/history/test-new'); } catch (e) {}
+  try { await fs.remove('test/site/content/test-old.json'); } catch (e) {}
+  try { await fs.remove('test/site/data/visits.json'); } catch (e) {}
+  try { await fs.remove('test/site/themes/default/public/sitemap.xml'); } catch (e) {}
+  try { await fs.remove('test/site/uploads'); } catch (e) {}
+  try { await fs.ensureDir('test/site/uploads'); } catch (e) {}
 };
 
 module.exports = { config, server, cleanup };

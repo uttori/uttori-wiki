@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
@@ -18,8 +18,12 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(() => {
-  fs.writeFileSync('test/site/data/visits.json', '{"example-title":2,"demo-title":0,"fake-title":1}');
+test.beforeEach(async () => {
+  await fs.writeJson('test/site/data/visits.json', {
+    'example-title': 2,
+    'demo-title': 0,
+    'fake-title': 1,
+  });
 });
 
 test.afterEach(() => {
@@ -29,14 +33,20 @@ test.afterEach(() => {
 test('deletes the document and redirects to the home page', async (t) => {
   t.plan(2);
 
-  fs.writeFileSync('test/site/content/test-delete.json', '{"title": "Delete Page","slug": "test-delete","content": "## Delete Page","html": "","updateDate": 1412921841841,"createDate": null,"tags": []}');
+  await fs.writeJson('test/site/content/test-delete.json', {
+    title: 'Delete Page',
+    slug: 'test-delete',
+    content: '## Delete Page',
+    html: '',
+    updateDate: 1412921841841,
+    createDate: null,
+    tags: [],
+  });
   const uttori = new UttoriWiki(config, server, md);
   const res = await request(uttori.server).get('/test-delete/delete/test-key');
   t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to /');
-  try {
-    fs.unlinkSync('test/site/content/test-delete.json', () => {});
-  } catch (e) {}
+  t.is(res.text, 'Found. Redirecting to https://fake.test');
+  await fs.remove('test/site/content/test-delete.json');
 });
 
 test('falls through to next when slug is missing', async (t) => {

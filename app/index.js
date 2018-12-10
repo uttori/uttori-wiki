@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const debug = require('debug')('Uttori.Wiki');
 // const request = require('request'); // Sync
 const R = require('ramda');
@@ -68,25 +69,37 @@ class UttoriWiki {
   static validateConfig(config) {
     debug('Validating config...');
     if (!config.StorageProvider) {
-      debug('No StorageProvider provided.');
+      debug('Config Error: No StorageProvider provided.');
       throw new Error('No StorageProvider provided.');
     }
     if (!config.SearchProvider) {
-      debug('No SearchProvider provided.');
+      debug('Config Error: No SearchProvider provided.');
       throw new Error('No SearchProvider provided.');
     }
     if (!config.UploadProvider) {
-      debug('No UploadProvider provided.');
+      debug('Config Error: No UploadProvider provided.');
       throw new Error('No UploadProvider provided.');
+    }
+    if (config.sitemap_url_filter && !Array.isArray(config.sitemap_url_filter)) {
+      debug('Config Error: `sitemap_url_filter` should be an array.');
+      throw new Error('sitemap_url_filter should be an array.');
+    }
+    if (!config.theme_dir) {
+      debug('Config Error: No theme_dir provided.');
+      throw new Error('No theme_dir provided.');
+    }
+    if (!config.public_dir) {
+      debug('Config Error: No public_dir provided.');
+      throw new Error('No public_dir provided.');
     }
     debug('Validated config.');
   }
 
   buildMetadata(document = {}, path = '', robots = '') {
-    const canonical = `${this.config.site_url}${path}`;
+    const canonical = `${this.config.site_url}/${path.trim()}`;
 
-    const excerpt = `${document.content.substring(0, 160)}...`;
-    const description = this.render.render(excerpt).trim();
+    const excerpt = document.content ? `${document.content.substring(0, 160)}...` : '';
+    const description = excerpt ? this.render.render(excerpt).trim() : '';
 
     const image = '';
     const modified = document && document.updateDate ? new Date(document.updateDate).toISOString() : '';
@@ -216,9 +229,10 @@ class UttoriWiki {
       viewModel.title = `Search results for "${req.query.s}"`;
       viewModel.searchTerm = term;
       viewModel.searchResults = this.getSearchResults(term, 10);
+      /* istanbul ignore next */
       viewModel.searchResults.map((document) => {
-        const excerpt = `${document.content.substring(0, this.config.excerpt_length)} ...`;
-        document.html = this.render.render(excerpt).trim();
+        const excerpt = document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
+        document.html = excerpt ? this.render.render(excerpt).trim() : '';
         return document;
       });
       viewModel.meta = this.buildMetadata({ title: `Search results for "${req.query.s}"` }, `/search/${req.query.s}`, 'noindex');
@@ -296,7 +310,8 @@ class UttoriWiki {
       this.searchProvider.indexRemove({ slug: originalSlug });
     }
 
-    res.redirect(`${this.config.site_url}${req.body.slug || req.params.slug}`);
+    this.generateSitemap();
+    res.redirect(`${this.config.site_url}/${req.body.slug || req.params.slug}`);
   }
 
   save(req, res, next) {
@@ -637,6 +652,7 @@ class UttoriWiki {
 
   // 404
   notFound(req, res, _next) {
+    debug('404 Not Found Route');
     res.set('X-Robots-Tag', 'noindex');
     res.render('404', {
       title: '404 Not Found',
@@ -793,6 +809,93 @@ class UttoriWiki {
 
   getViewCount(slug) {
     return this.pageVisits[slug] || 0;
+  }
+
+  // Sitemaps
+  generateSitemapXML() {
+    debug('Generating Sitemap XML');
+    const sitemap = [
+      {
+        url: '/',
+        lastmod: new Date().toISOString(),
+        priority: '1.00',
+      },
+      {
+        url: '/tags',
+        lastmod: new Date().toISOString(),
+        priority: '0.90',
+      },
+      {
+        url: '/new',
+        lastmod: new Date().toISOString(),
+        priority: '0.90',
+      },
+    ];
+
+    // Add all documents to the sitemap
+    this.storageProvider.all().forEach((document) => {
+      let lastmod = document.updateDate ? new Date(document.updateDate).toISOString() : '';
+      /* istanbul ignore next */
+      if (!lastmod) {
+        lastmod = document.createDate ? new Date(document.createDate).toISOString() : '';
+      }
+      sitemap.push({
+        url: `/${document.slug}`,
+        lastmod,
+        priority: '0.80',
+      });
+    });
+
+    let urlFilter = () => true;
+    /* istanbul ignore else */
+    if (Array.isArray(this.config.sitemap_url_filter) && this.config.sitemap_url_filter.length > 0) {
+      urlFilter = (route) => {
+        let pass = true;
+        this.config.sitemap_url_filter.forEach((url_filter) => {
+          try {
+            if (url_filter.test(route.url)) {
+              pass = false;
+            }
+          } catch (error) {
+            /* istanbul ignore next */
+            debug('Sitemap Filter Error:', error, url_filter, route.url);
+          }
+        });
+        return pass;
+      };
+    }
+
+    const data = sitemap.reduce((accumulator, route) => {
+      if (urlFilter(route)) {
+        accumulator += `<url><loc>${this.config.sitemap_url}${route.url}</loc>`;
+        /* istanbul ignore else */
+        if (route.lastmod) {
+          accumulator += `<lastmod>${route.lastmod}</lastmod>`;
+        }
+        /* istanbul ignore else */
+        if (route.priority) {
+          accumulator += `<priority>${route.priority}</priority>`;
+        }
+        /* istanbul ignore next */
+        if (route.changefreq) {
+          accumulator += `<changefreq>${route.changefreq}</changefreq>`;
+        }
+        accumulator += '</url>';
+      }
+      return accumulator;
+    }, '');
+
+    return `${this.config.sitemap_header}${data}${this.config.sitemap_footer}`;
+  }
+
+  generateSitemap() {
+    debug('Generating Sitemap');
+    try {
+      fs.outputFileSync(`${this.config.public_dir}/${this.config.sitemap_filename}`, this.generateSitemapXML());
+    } catch (error) {
+      /* istanbul ignore next */
+      debug('Error Generating Sitemap:', error);
+    }
   }
 }
 

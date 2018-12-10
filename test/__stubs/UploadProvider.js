@@ -1,7 +1,7 @@
 class UploadProvider {
   constructor(config = {}) {
     this.config = {
-      uploads_dir: '',
+      uploads_dir: 'test/site/uploads',
       ...config,
     };
   }

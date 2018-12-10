@@ -36,24 +36,24 @@ const config = {
   // Site URL used for canonical URLs and Open Graph, no trailing slash.
   site_url: '',
 
-  // Specify the theme to use
-  theme_dir: `${__dirname}/themes/`,
+  // Specify the theme to use, no trailing slash
+  theme_dir: '',
   theme_name: 'default',
 
-  // Path in which to store uploads (images etc.)
-  uploads_dir: `${__dirname}/uploads/`,
+  // Path in which to store uploads (images etc.), no trailing slash
+  uploads_dir: '',
 
-  // Path in which to store content (markdown files, etc.)
-  content_dir: `${__dirname}/content/`,
+  // Path in which to store content (markdown files, etc.), no trailing slash
+  content_dir: '',
 
-  // Path in which to store content history (markdown files, etc.)
-  history_dir: `${__dirname}/content/history`,
+  // Path in which to store content history (markdown files, etc.), no trailing slash
+  history_dir: '',
 
-  // Path in which to store data (analytics, etc.)
-  data_dir: `${__dirname}/data/`,
+  // Path in which to store data (analytics, etc.), no trailing slash
+  data_dir: '',
 
-  // Path to the static file directory for themes
-  public_dir: `${__dirname}/themes/default/public/`,
+  // Path to the static file directory for themes, no trailing slash
+  public_dir: '',
 
   // Optional Lunr locales
   lunr_locales: [],
@@ -105,6 +105,21 @@ const config = {
 
   // Open Graph: Image
   site_image: '',
+
+  // Sitemap URL (ie httsp://sfc.fm)
+  sitemap_url: '',
+
+  // Sitemap URL Filter
+  sitemap_url_filter: [/home-page$/i],
+
+  // Sitemap XML Header
+  sitemap_header: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">',
+
+  // Sitemap XML Footer
+  sitemap_footer: '</urlset>',
+
+  // Sitemap Filename
+  sitemap_filename: 'sitemap.xml',
 };
 
 module.exports = config;

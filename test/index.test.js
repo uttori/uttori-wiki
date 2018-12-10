@@ -1,12 +1,6 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
-
-const StorageProvider = require('uttori-storage-provider-json-file');
-const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
-const SearchProvider = require('./__stubs/SearchProvider.js');
 
 const UttoriWiki = require('../app/index.js');
 
@@ -22,364 +16,41 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(() => {
-  fs.writeFileSync('test/site/data/visits.json', '{"example-title":2,"demo-title":0,"fake-title":1}');
+test.beforeEach(async () => {
+  await fs.writeJson('test/site/data/visits.json', {
+    'example-title': 2,
+    'demo-title': 0,
+    'fake-title': 1,
+  });
 });
 
 test.afterEach(() => {
   cleanup();
 });
 
-test('Uttori: throws when missing config', (t) => {
+test('throws when missing config', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki();
   }, Error);
   t.is(error.message, 'No config provided.');
 });
 
-test('Uttori: throws when missing server', (t) => {
+test('throws when missing server', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki(config);
   }, Error);
   t.is(error.message, 'No server provided.');
 });
 
-test('Uttori: throws when missing render', (t) => {
+test('throws when missing render', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki(config, server);
   }, Error);
   t.is(error.message, 'No render provided.');
 });
 
-test('Uttori: validateConfig.validateConfig(config): throws when missing StorageProvider', (t) => {
-  const error = t.throws(() => {
-    const _uttori = new UttoriWiki({
-      SearchProvider,
-      UploadProvider,
-    }, server, md);
-  }, Error);
-  t.is(error.message, 'No StorageProvider provided.');
-});
-
-test('Uttori: validateConfig(config): throws when missing SearchProvider', (t) => {
-  const error = t.throws(() => {
-    const _uttori = new UttoriWiki({
-      StorageProvider,
-      UploadProvider,
-    }, server, md);
-  }, Error);
-  t.is(error.message, 'No SearchProvider provided.');
-});
-
-test('Uttori: validateConfig(config): throws when missing UploadProvider', (t) => {
-  const error = t.throws(() => {
-    const _uttori = new UttoriWiki({
-      SearchProvider,
-      StorageProvider,
-    }, server, md);
-  }, Error);
-  t.is(error.message, 'No UploadProvider provided.');
-});
-
-test('Uttori: can stand up', (t) => {
+test('can stand up', (t) => {
   t.notThrows(() => {
     const _uttori = new UttoriWiki(config, server, md);
   }, Error);
-});
-
-test('Uttori: home(req, res, _next): renders', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/');
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Home | Wiki');
-});
-
-test('Uttori: search(req, res, _next): renders', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/search?s=test');
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Search results for &#34;test&#34; | Wiki');
-});
-
-test('Uttori: new(req, res, _next): renders', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/new');
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'New Document | Wiki');
-});
-
-test('Uttori: upload(req, res, next): uploads the file and returns the filename', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/upload')
-    .attach('file', 'test/site/favicon.gif');
-
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 8), 'favicon-');
-});
-
-// TODO all sync test need proper clean up
-test.skip('Uttori: sync(req, res, _next): renders', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/sync');
-  // t.is(res.status, 200);
-  t.is(res.text, '');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'test | Wiki');
-});
-
-test.skip('Uttori: returnSingle(req, res, next): returns status on an individual file', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/sync-target/test-key/test-slug');
-  t.is(res.status, 200);
-  t.is(res.text, '{"success":false}');
-});
-
-test.skip('Uttori: returnList(req, res, next): returns status on a list of files', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/sync-target/test-key');
-  t.is(res.status, 200);
-  t.is(res.text, '{"success":false,"message":"Error fetching data. "}');
-});
-
-test.skip('Uttori: returnSingle(req, res, next): returns status on an individual file from a specific server', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/sync-request/test-key/test-server/test-slug');
-  t.is(res.status, 200);
-  t.is(res.text, '{"success":false,"message":"Error fetching data. "}');
-});
-
-test.skip('Uttori: returnList(req, res, next): returns status on a list of files from a specific server', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/sync-request/test-key/test-server/');
-  t.is(res.status, 200);
-  t.is(res.text, '');
-});
-
-// TODO More `write` branches tests
-test.skip('Uttori: write(req, res, next): renders error message when no valid body found', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/sync-write/test-key').send({});
-  t.is(res.status, 200);
-  t.is(res.text, '{"message":"Invalid document provided"}');
-});
-
-test('Uttori: notFound(req, res, next): renders a 404 page', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/404');
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], '404 Not Found | Wiki');
-});
-
-test('Uttori: getHomeDocument(count): returns an empty object when there is no home document', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getHomeDocument(), {});
-});
-
-test('Uttori: getHomeDocument(count): returns the homepage when present', async (t) => {
-  t.plan(1);
-
-  fs.writeFileSync('test/site/content/home-page.json', '{"title": "Home Page","slug": "home-page","content": "## Home Page","html": "","updateDate": 1512921841841,"createDate": null,"tags": []}');
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getHomeDocument(), {
-    content: '## Home Page',
-    createDate: null,
-    html: '<h2>Home Page</h2>',
-    slug: 'home-page',
-    tags: [],
-    title: 'Home Page',
-    updateDate: 1512921841841,
-  });
-  fs.unlinkSync('test/site/content/home-page.json', () => {});
-});
-
-test('Uttori: getSiteSections(count): returns the config sections with tag counts', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-
-  t.deepEqual(uttori.getSiteSections(), [{
-    description: 'Example description text.',
-    documentCount: 1,
-    tag: 'example',
-    title: 'Example',
-  }]);
-});
-
-test('Uttori: getRecentDocuments(count): returns the requested number of the most recently updated documents', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getRecentDocuments(1), [{
-    content: '## Demo Title',
-    createDate: 1459310452002,
-    html: '',
-    slug: 'demo-title',
-    tags: ['Demo Tag', 'Cool'],
-    title: 'Demo Title',
-    updateDate: 1459310452002,
-  }]);
-});
-
-test('Uttori: getPopularDocuments(count): returns the requested number of popular documents', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.pageVisits = {};
-  uttori.pageVisits['example-title'] = 0;
-  t.deepEqual(uttori.getPopularDocuments(1), []);
-
-  uttori.pageVisits['example-title'] = 1;
-  t.deepEqual(uttori.getPopularDocuments(1), [{
-    content: '## Example Title',
-    createDate: 1459310452001,
-    html: '',
-    slug: 'example-title',
-    tags: ['Example Tag', 'example'],
-    title: 'Example Title',
-    updateDate: 1459310452001,
-  }]);
-
-  uttori.pageVisits['demo-title'] = 1;
-  t.is(uttori.getPopularDocuments(2).length, 2);
-});
-
-test('Uttori: getRandomDocuments(count): returns the requested number of random documents', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.is(uttori.getRandomDocuments(1).length, 1);
-  t.is(uttori.getRandomDocuments(2).length, 2);
-  t.is(uttori.getRandomDocuments(3).length, 3);
-});
-
-test('Uttori: getTaggedDocuments(tag): returns documents with the given tag', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getTaggedDocuments('Cool'), [
-    {
-      title: 'Demo Title',
-      slug: 'demo-title',
-      content: '## Demo Title',
-      html: '',
-      updateDate: 1459310452002,
-      createDate: 1459310452002,
-      tags: ['Demo Tag', 'Cool'],
-    },
-    {
-      title: 'Fake Title',
-      slug: 'fake-title',
-      content: '## Fake Title',
-      html: '',
-      updateDate: 1459310452000,
-      createDate: 1459310452000,
-      tags: ['Fake Tag', 'Cool'],
-    },
-  ]);
-
-  t.deepEqual(uttori.getTaggedDocuments('No Tag'), []);
-});
-
-test('Uttori: getRelatedDocuments(title, count): returns related documents', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getRelatedDocuments('example', 1), [{
-    content: '## Example Title',
-    createDate: 1459310452001,
-    html: '',
-    slug: 'example-title',
-    tags: ['Example Tag', 'example'],
-    title: 'Example Title',
-    updateDate: 1459310452001,
-  }]);
-});
-
-test('Uttori: getSearchResults(query, count): returns search results', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.deepEqual(uttori.getSearchResults('example', 1), [{
-    content: '## Example Title',
-    createDate: 1459310452001,
-    html: '',
-    slug: 'example-title',
-    tags: ['Example Tag', 'example'],
-    title: 'Example Title',
-    updateDate: 1459310452001,
-  }]);
-});
-
-test('Uttori: updateViewCount(slug): does not update without a slug', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.pageVisits = {};
-  t.deepEqual(uttori.pageVisits, {});
-  uttori.updateViewCount();
-  t.deepEqual(uttori.pageVisits, {});
-});
-
-test('Uttori: updateViewCount(slug): updates the view count for a given slug', async (t) => {
-  t.plan(3);
-
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.pageVisits = {};
-  t.deepEqual(uttori.pageVisits, {});
-  uttori.updateViewCount('test');
-  t.deepEqual(uttori.pageVisits, {
-    test: 1,
-  });
-  uttori.updateViewCount('test');
-  t.deepEqual(uttori.pageVisits, {
-    test: 2,
-  });
-});
-
-test('Uttori: getViewCount(slug): returns 0 without a slug', async (t) => {
-  t.plan(1);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.is(uttori.getViewCount(), 0);
-});
-
-test('Uttori: getViewCount(slug): returns 0 when a match is not found', async (t) => {
-  t.plan(2);
-
-  const uttori = new UttoriWiki(config, server, md);
-  t.is(uttori.getViewCount('getViewCount-2'), 0);
-  uttori.updateViewCount('getViewCount-2');
-  t.is(uttori.getViewCount('getViewCount-2'), 1);
 });

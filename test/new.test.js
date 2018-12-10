@@ -1,7 +1,6 @@
 const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
-const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app/index.js');
@@ -30,22 +29,13 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('renders the edit page for a given slug', async (t) => {
+test('new(req, res, _next): renders', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/demo-title/edit');
+  const res = await request(uttori.server).get('/new');
   t.is(res.status, 200);
   t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
   const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Editing Demo Title | Wiki');
-});
-
-test('falls through to next when slug is missing', async (t) => {
-  t.plan(1);
-
-  const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.edit({ params: { slug: '' } }, null, next);
-  t.true(next.calledOnce);
+  t.is(title[1], 'New Document | Wiki');
 });

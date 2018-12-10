@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
@@ -18,8 +18,12 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(() => {
-  fs.writeFileSync('test/site/data/visits.json', '{"example-title":2,"demo-title":0,"fake-title":1}');
+test.beforeEach(async () => {
+  await fs.writeJson('test/site/data/visits.json', {
+    'example-title': 2,
+    'demo-title': 0,
+    'fake-title': 1,
+  });
 });
 
 test.afterEach(() => {

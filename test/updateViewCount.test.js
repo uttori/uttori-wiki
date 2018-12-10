@@ -1,7 +1,5 @@
 const fs = require('fs-extra');
 const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app/index.js');
@@ -30,22 +28,28 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('renders the edit page for a given slug', async (t) => {
+test('updateViewCount(slug): does not update without a slug', async (t) => {
+  t.plan(2);
+
+  const uttori = new UttoriWiki(config, server, md);
+  uttori.pageVisits = {};
+  t.deepEqual(uttori.pageVisits, {});
+  uttori.updateViewCount();
+  t.deepEqual(uttori.pageVisits, {});
+});
+
+test('updateViewCount(slug): updates the view count for a given slug', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/demo-title/edit');
-  t.is(res.status, 200);
-  t.is(res.text.substring(0, 15), '<!DOCTYPE html>');
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Editing Demo Title | Wiki');
-});
-
-test('falls through to next when slug is missing', async (t) => {
-  t.plan(1);
-
-  const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server, md);
-  uttori.edit({ params: { slug: '' } }, null, next);
-  t.true(next.calledOnce);
+  uttori.pageVisits = {};
+  t.deepEqual(uttori.pageVisits, {});
+  uttori.updateViewCount('test');
+  t.deepEqual(uttori.pageVisits, {
+    test: 1,
+  });
+  uttori.updateViewCount('test');
+  t.deepEqual(uttori.pageVisits, {
+    test: 2,
+  });
 });

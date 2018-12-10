@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
@@ -18,8 +18,12 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(() => {
-  fs.writeFileSync('test/site/data/visits.json', '{"example-title":2,"demo-title":0,"fake-title":1}');
+test.beforeEach(async () => {
+  await fs.writeJson('test/site/data/visits.json', {
+    'example-title': 2,
+    'demo-title': 0,
+    'fake-title': 1,
+  });
 });
 
 test.afterEach(() => {
@@ -34,7 +38,7 @@ test('redirects to the article after saving without changing slug', async (t) =>
     .send('slug=test-old');
 
   t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to /test-old');
+  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('redirects to the article after saving without changing slug or providing one in the POST body', async (t) => {
@@ -45,7 +49,7 @@ test('redirects to the article after saving without changing slug or providing o
     .send('title=Title');
 
   t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to /test-old');
+  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('splits tags correctly', async (t) => {
@@ -56,7 +60,7 @@ test('splits tags correctly', async (t) => {
     .send('tags=tag-1,tag-2');
 
   t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to /test-old');
+  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('redirects to the article after saving with new slug', async (t) => {
@@ -67,8 +71,8 @@ test('redirects to the article after saving with new slug', async (t) => {
     .send('original-slug=test-old');
 
   t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to /test-new');
-  fs.unlinkSync('test/site/content/test-new.json', () => {});
+  t.is(res.text, 'Found. Redirecting to https://fake.test/test-new');
+  await fs.remove('test/site/content/test-new.json');
 });
 
 test('falls through to next when missing slug (params)', async (t) => {

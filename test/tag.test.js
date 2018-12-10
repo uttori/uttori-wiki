@@ -1,7 +1,6 @@
-const fs = require('fs');
+const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
-const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app/index.js');
@@ -18,15 +17,19 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(() => {
-  fs.writeFileSync('test/site/data/visits.json', '{"example-title":2,"demo-title":0,"fake-title":1}');
+test.beforeEach(async () => {
+  await fs.writeJson('test/site/data/visits.json', {
+    'example-title': 2,
+    'demo-title': 0,
+    'fake-title': 1,
+  });
 });
 
 test.afterEach(() => {
   cleanup();
 });
 
-test('Uttori: tagsIndex(req, res, next): renders that tag index page', async (t) => {
+test('tagsIndex(req, res, next): renders that tag index page', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -37,7 +40,7 @@ test('Uttori: tagsIndex(req, res, next): renders that tag index page', async (t)
   t.is(title[1], 'Tags | Wiki');
 });
 
-test('Uttori: tag(req, res, next): renders that tag page for a given tag', async (t) => {
+test('tag(req, res, next): renders that tag page for a given tag', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -48,7 +51,7 @@ test('Uttori: tag(req, res, next): renders that tag page for a given tag', async
   t.is(title[1], 'Cool | Wiki');
 });
 
-test('Uttori: tag(req, res, next): falls through to next when tag is missing', async (t) => {
+test('tag(req, res, next): falls through to next when tag is missing', async (t) => {
   t.plan(3);
 
   const uttori = new UttoriWiki(config, server, md);
