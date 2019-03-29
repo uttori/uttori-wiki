@@ -106,7 +106,7 @@ const config = {
   // Open Graph: Image
   site_image: '',
 
-  // Sitemap URL (ie httsp://sfc.fm)
+  // Sitemap URL (ie https://sfc.fm)
   sitemap_url: '',
 
   // Sitemap URL Filter
