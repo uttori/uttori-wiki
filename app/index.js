@@ -98,11 +98,11 @@ class UttoriWiki {
   buildMetadata(document = {}, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
 
-    let excerpt = document && document.excerpt ? document.excerpt : '';
-    if (!excerpt) {
-      excerpt = document && document.content ? `${document.content.substring(0, 160)}...` : '';
+    let description = document && document.excerpt ? document.excerpt : '';
+    if (!description) {
+      description = document && document.content ? `${document.content.substring(0, 160)}` : '';
+      description = this.render.render(description).trim();
     }
-    const description = excerpt ? this.render.render(excerpt).trim() : '';
 
     const image = '';
     const modified = document && document.updateDate ? new Date(document.updateDate).toISOString() : '';
@@ -232,10 +232,13 @@ class UttoriWiki {
       const term = decodeURIComponent(req.query.s);
       viewModel.title = `Search results for "${req.query.s}"`;
       viewModel.searchTerm = term;
-      viewModel.searchResults = this.getSearchResults(term, 10);
+      const searchResults = this.getSearchResults(term, 10);
       /* istanbul ignore next */
-      viewModel.searchResults.map((document) => {
-        const excerpt = document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
+      viewModel.searchResults = searchResults.map((document) => {
+        let excerpt = document && document.excerpt ? document.excerpt.substring(0, this.config.excerpt_length) : '';
+        if (!excerpt) {
+          excerpt = document && document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
+        }
         document.html = excerpt ? this.render.render(excerpt).trim() : '';
         return document;
       });
@@ -297,9 +300,11 @@ class UttoriWiki {
     // Create document from form
     const document = new Document();
     document.title = req.body.title;
+    document.excerpt = req.body.excerpt;
     document.content = MarkdownHelpers.prepare(this.config, req.body.content);
     document.tags = req.body.tags ? req.body.tags.split(',') : [];
     document.slug = req.body.slug || req.params.slug;
+    /* istanbul ignore next */
     document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
 
     // Save document
@@ -729,6 +734,7 @@ class UttoriWiki {
 
   getTags() {
     debug('getTags');
+    /* istanbul ignore next */
     let tags = R.pluck('tags')(this.storageProvider.all() || []);
     tags = R.uniq(R.flatten(tags));
     tags = R.filter(R.identity)(tags);
@@ -838,6 +844,7 @@ class UttoriWiki {
 
     // Add all documents to the sitemap
     this.storageProvider.all().forEach((document) => {
+      /* istanbul ignore next */
       let lastmod = document.updateDate ? new Date(document.updateDate).toISOString() : '';
       /* istanbul ignore next */
       if (!lastmod) {
