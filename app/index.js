@@ -98,13 +98,16 @@ class UttoriWiki {
   buildMetadata(document = {}, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
 
-    const excerpt = document.content ? `${document.content.substring(0, 160)}...` : '';
+    let excerpt = document && document.excerpt ? document.excerpt : '';
+    if (!excerpt) {
+      excerpt = document && document.content ? `${document.content.substring(0, 160)}...` : '';
+    }
     const description = excerpt ? this.render.render(excerpt).trim() : '';
 
     const image = '';
     const modified = document && document.updateDate ? new Date(document.updateDate).toISOString() : '';
     const published = document && document.createDate ? new Date(document.createDate).toISOString() : '';
-    const title = document.title || this.config.site_title;
+    const title = document && document.title ? document.title : this.config.site_title;
 
     return {
       canonical,
@@ -164,6 +167,7 @@ class UttoriWiki {
 
   home(req, res, _next) {
     debug('Home Route');
+    const homeDocument = this.getHomeDocument();
     res.render('home', {
       title: 'Home',
       config: this.config,
@@ -171,8 +175,8 @@ class UttoriWiki {
       randomDocuments: this.getRandomDocuments(5),
       popularDocuments: this.getPopularDocuments(5),
       siteSections: this.getSiteSections(),
-      homeDocument: this.getHomeDocument(),
-      meta: this.buildMetadata({}, '/'),
+      homeDocument,
+      meta: this.buildMetadata(homeDocument, '/'),
     });
   }
 
