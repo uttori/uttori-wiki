@@ -256,6 +256,11 @@ class UttoriWiki {
       return;
     }
     const document = this.storageProvider.get(req.params.slug);
+    if (!document) {
+      debug('Missing document!');
+      next();
+      return;
+    }
     res.render('edit', {
       title: `Editing ${document.title}`,
       document,

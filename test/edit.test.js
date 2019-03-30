@@ -49,3 +49,12 @@ test('falls through to next when slug is missing', async (t) => {
   uttori.edit({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
+
+test('falls through to next when document is missing', async (t) => {
+  t.plan(1);
+
+  const next = sinon.spy();
+  const uttori = new UttoriWiki(config, server, md);
+  uttori.edit({ params: { slug: 'missing-document' } }, null, next);
+  t.true(next.calledOnce);
+});
