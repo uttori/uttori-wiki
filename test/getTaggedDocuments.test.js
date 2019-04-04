@@ -2,13 +2,13 @@ const fs = require('fs-extra');
 const test = require('ava');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -28,7 +28,7 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('getTaggedDocuments(tag): returns documents with the given tag', async (t) => {
+test('getTaggedDocuments(tag): returns documents with the given tag', (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);

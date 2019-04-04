@@ -4,13 +4,13 @@ const request = require('supertest');
 const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -34,48 +34,48 @@ test('redirects to the article after saving without changing slug', async (t) =>
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/test-old/save')
+  const response = await request(uttori.server).post('/test-old/save')
     .send('slug=test-old');
 
-  t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('redirects to the article after saving without changing slug or providing one in the POST body', async (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/test-old/save')
+  const response = await request(uttori.server).post('/test-old/save')
     .send('title=Title');
 
-  t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('splits tags correctly', async (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/test-old/save')
+  const response = await request(uttori.server).post('/test-old/save')
     .send('tags=tag-1,tag-2');
 
-  t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to https://fake.test/test-old');
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
 test('redirects to the article after saving with new slug', async (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).post('/test-new/save')
+  const response = await request(uttori.server).post('/test-new/save')
     .send('original-slug=test-old');
 
-  t.is(res.status, 302);
-  t.is(res.text, 'Found. Redirecting to https://fake.test/test-new');
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-new');
   await fs.remove('test/site/content/test-new.json');
 });
 
-test('falls through to next when missing slug (params)', async (t) => {
+test('falls through to next when missing slug (params)', (t) => {
   t.plan(1);
 
   const next = sinon.spy();
@@ -84,7 +84,7 @@ test('falls through to next when missing slug (params)', async (t) => {
   t.true(next.calledOnce);
 });
 
-test('falls through to next when missing body', async (t) => {
+test('falls through to next when missing body', (t) => {
   t.plan(1);
 
   const next = sinon.spy();

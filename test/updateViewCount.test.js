@@ -2,13 +2,13 @@ const fs = require('fs-extra');
 const test = require('ava');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -28,7 +28,7 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('updateViewCount(slug): does not update without a slug', async (t) => {
+test('updateViewCount(slug): does not update without a slug', (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -38,8 +38,8 @@ test('updateViewCount(slug): does not update without a slug', async (t) => {
   t.deepEqual(uttori.pageVisits, {});
 });
 
-test('updateViewCount(slug): updates the view count for a given slug', async (t) => {
-  t.plan(3);
+test('updateViewCount(slug): updates the view count for a given slug', (t) => {
+  t.plan(5);
 
   const uttori = new UttoriWiki(config, server, md);
   uttori.pageVisits = {};
@@ -51,5 +51,15 @@ test('updateViewCount(slug): updates the view count for a given slug', async (t)
   uttori.updateViewCount('test');
   t.deepEqual(uttori.pageVisits, {
     test: 2,
+  });
+  uttori.updateViewCount('fake');
+  t.deepEqual(uttori.pageVisits, {
+    test: 2,
+    fake: 1,
+  });
+  uttori.updateViewCount('test');
+  t.deepEqual(uttori.pageVisits, {
+    test: 3,
+    fake: 1,
   });
 });

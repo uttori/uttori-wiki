@@ -2,13 +2,13 @@ const fs = require('fs-extra');
 const test = require('ava');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -28,7 +28,7 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('buildMetadata(document, path, robots): can build metadata with empty object', async (t) => {
+test('buildMetadata(document, path, robots): can build metadata with empty object', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -44,7 +44,7 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata with simple document', async (t) => {
+test('buildMetadata(document, path, robots): can build metadata with simple document', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -66,7 +66,7 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata without an excerpt', async (t) => {
+test('buildMetadata(document, path, robots): can build metadata without an excerpt', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);

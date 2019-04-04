@@ -165,10 +165,10 @@ class UttoriWiki {
     debug('Bound routes.');
   }
 
-  home(req, res, _next) {
+  home(request, response, _next) {
     debug('Home Route');
     const homeDocument = this.getHomeDocument();
-    res.render('home', {
+    response.render('home', {
       title: 'Home',
       config: this.config,
       recentDocuments: this.getRecentDocuments(5),
@@ -180,13 +180,13 @@ class UttoriWiki {
     });
   }
 
-  tagIndex(req, res, _next) {
+  tagIndex(request, response, _next) {
     debug('Tag Index Route');
     const taggedDocuments = this.getTags().reduce((acc, tag) => {
       acc[tag] = this.getTaggedDocuments(tag);
       return acc;
     }, {});
-    res.render('tags', {
+    response.render('tags', {
       title: 'Tags',
       config: this.config,
       taggedDocuments,
@@ -198,28 +198,28 @@ class UttoriWiki {
     });
   }
 
-  tag(req, res, next) {
+  tag(request, response, next) {
     debug('Tag Route');
-    const taggedDocuments = this.getTaggedDocuments(req.params.tag);
+    const taggedDocuments = this.getTaggedDocuments(request.params.tag);
     if (taggedDocuments.length === 0) {
       debug('No documents for tag!');
       next();
       return;
     }
-    res.render('tag', {
-      title: req.params.tag,
+    response.render('tag', {
+      title: request.params.tag,
       config: this.config,
       recentDocuments: this.getRecentDocuments(5),
       randomDocuments: this.getRandomDocuments(5),
       popularDocuments: this.getPopularDocuments(5),
       taggedDocuments,
-      section: R.find(R.propEq('tag', req.params.tag))(this.config.site_sections) || {},
+      section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
-      meta: this.buildMetadata({}, `/tags/${req.params.tag}`),
+      meta: this.buildMetadata({}, `/tags/${request.params.tag}`),
     });
   }
 
-  search(req, res, _next) {
+  search(request, response, _next) {
     debug('Search Route');
     const viewModel = {
       title: 'Search',
@@ -228,9 +228,9 @@ class UttoriWiki {
       meta: this.buildMetadata({ title: 'Search' }, '/search'),
     };
     /* istanbul ignore else */
-    if (req.query && req.query.s) {
-      const term = decodeURIComponent(req.query.s);
-      viewModel.title = `Search results for "${req.query.s}"`;
+    if (request.query && request.query.s) {
+      const term = decodeURIComponent(request.query.s);
+      viewModel.title = `Search results for "${request.query.s}"`;
       viewModel.searchTerm = term;
       const searchResults = this.getSearchResults(term, 10);
       /* istanbul ignore next */
@@ -242,100 +242,100 @@ class UttoriWiki {
         document.html = excerpt ? this.render.render(excerpt).trim() : '';
         return document;
       });
-      viewModel.meta = this.buildMetadata({ title: `Search results for "${req.query.s}"` }, `/search/${req.query.s}`, 'noindex');
+      viewModel.meta = this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
     }
-    res.set('X-Robots-Tag', 'noindex');
-    res.render('search', viewModel);
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('search', viewModel);
   }
 
-  edit(req, res, next) {
+  edit(request, response, next) {
     debug('Edit Route');
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug!');
       next();
       return;
     }
-    const document = this.storageProvider.get(req.params.slug);
+    const document = this.storageProvider.get(request.params.slug);
     if (!document) {
       debug('Missing document!');
       next();
       return;
     }
-    res.render('edit', {
+    response.render('edit', {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
-      meta: this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${req.params.slug}/edit`),
+      meta: this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`),
     });
   }
 
-  delete(req, res, next) {
+  delete(request, response, next) {
     debug('Delete Route');
     /* istanbul ignore else */
     if (this.config.use_delete_key) {
-      if (!req.params.key || req.params.key !== this.config.delete_key) {
+      if (!request.params.key || request.params.key !== this.config.delete_key) {
         debug('Missing delete key, or a delete key mismatch!');
         next();
         return;
       }
     }
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug!');
       next();
       return;
     }
 
-    const { slug } = req.params;
+    const { slug } = request.params;
     const document = this.storageProvider.get(slug);
     if (document) {
       debug('Deleting document', document);
       this.storageProvider.delete(slug);
       this.searchProvider.indexRemove({ slug });
-      res.redirect(this.config.site_url);
+      response.redirect(this.config.site_url);
     } else {
       debug('Nothing found to delete, next.');
       next();
     }
   }
 
-  saveValid(req, res, _next) {
-    debug(`Updating with params: ${JSON.stringify(req.params, null, 2)}`);
-    debug(`Updating with body: ${JSON.stringify(req.body, null, 2)}`);
+  saveValid(request, response, _next) {
+    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
+    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
 
     // Create document from form
     const document = new Document();
-    document.title = req.body.title;
-    document.excerpt = req.body.excerpt;
-    document.content = MarkdownHelpers.prepare(this.config, req.body.content);
-    document.tags = req.body.tags ? req.body.tags.split(',') : [];
-    document.slug = req.body.slug || req.params.slug;
+    document.title = request.body.title;
+    document.excerpt = request.body.excerpt;
+    document.content = MarkdownHelpers.prepare(this.config, request.body.content);
+    document.tags = request.body.tags ? request.body.tags.split(',') : [];
+    document.slug = request.body.slug || request.params.slug;
     /* istanbul ignore next */
-    document.customData = R.isEmpty(req.body.customData) ? {} : req.body.customData;
+    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
 
     // Save document
-    const originalSlug = req.body['original-slug'];
+    const originalSlug = request.body['original-slug'];
     this.storageProvider.update(document, originalSlug);
     this.searchProvider.indexUpdate(document);
 
     // Remove old document if one existed
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== req.body.slug) {
-      debug(`Changing slug from "${originalSlug}" to "${req.body.slug}", cleaning up old files.`);
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== request.body.slug) {
+      debug(`Changing slug from "${originalSlug}" to "${request.body.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
       this.searchProvider.indexRemove({ slug: originalSlug });
     }
 
     this.generateSitemap();
-    res.redirect(`${this.config.site_url}/${req.body.slug || req.params.slug}`);
+    response.redirect(`${this.config.site_url}/${request.body.slug || request.params.slug}`);
   }
 
-  save(req, res, next) {
+  save(request, response, next) {
     debug('Save Route');
-    if (!req.params.slug && !req.body.slug) {
+    if (!request.params.slug && !request.body.slug) {
       debug('Missing slug!');
       next();
       return;
     }
-    if (!req.body || Object.keys(req.body).length === 0) {
+    if (!request.body || Object.keys(request.body).length === 0) {
       debug('Missing body!');
       next();
       return;
@@ -343,11 +343,11 @@ class UttoriWiki {
     /* istanbul ignore next */
     if (this.config.use_recaptcha) {
       debug('Verifying with reCaptcha...');
-      this.recaptcha.verify(req, (error, data) => {
+      this.recaptcha.verify(request, (error, data) => {
         debug('reCaptch Verification Data:', data);
         if (!error) {
           debug('reCaptch Verified!');
-          this.saveValid(req, res, next);
+          this.saveValid(request, response, next);
         } else {
           debug('Invalid reCaptcha:', error);
           next();
@@ -355,16 +355,16 @@ class UttoriWiki {
       });
     } else {
       debug('Skipping reCaptcha...');
-      this.saveValid(req, res, next);
+      this.saveValid(request, response, next);
     }
   }
 
-  new(req, res, _next) {
+  new(request, response, _next) {
     debug('New Route');
     const document = new Document();
     document.slug = '';
     document.title = 'New Document';
-    res.render('edit', {
+    response.render('edit', {
       document,
       title: document.title,
       config: this.config,
@@ -372,49 +372,49 @@ class UttoriWiki {
     });
   }
 
-  detail(req, res, next) {
+  detail(request, response, next) {
     debug('Detail Route');
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug.');
       next();
       return;
     }
 
-    const document = this.storageProvider.get(req.params.slug);
+    const document = this.storageProvider.get(request.params.slug);
     if (!document) {
-      debug('No document found for given slug:', req.params.slug);
+      debug('No document found for given slug:', request.params.slug);
       next();
       return;
     }
 
     document.html = this.render.render(document.content);
-    this.updateViewCount(req.params.slug);
+    this.updateViewCount(request.params.slug);
 
-    res.render('detail', {
+    response.render('detail', {
       title: document.title,
       config: this.config,
       document,
       popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
-      meta: this.buildMetadata(document, `/${req.params.slug}`),
+      meta: this.buildMetadata(document, `/${request.params.slug}`),
     });
   }
 
-  historyIndex(req, res, next) {
+  historyIndex(request, response, next) {
     debug('History Index Route');
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug.');
       next();
       return;
     }
-    const document = this.storageProvider.get(req.params.slug);
+    const document = this.storageProvider.get(request.params.slug);
     if (!document) {
-      debug('No document found for given slug:', req.params.slug);
+      debug('No document found for given slug:', request.params.slug);
       next();
       return;
     }
-    const history = this.storageProvider.getHistory(req.params.slug);
+    const history = this.storageProvider.getHistory(request.params.slug);
     const historyByDay = history.reduce((acc, value) => {
       const d = new Date(parseInt(value, 10));
       const key = d.toISOString().split('T')[0];
@@ -423,8 +423,8 @@ class UttoriWiki {
       return acc;
     }, {});
 
-    res.set('X-Robots-Tag', 'noindex');
-    res.render('history_index', {
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('history_index', {
       title: `${document.title} Revision History`,
       document,
       historyByDay,
@@ -432,87 +432,90 @@ class UttoriWiki {
       meta: this.buildMetadata({
         ...document,
         title: `${document.title} Revision History`,
-      }, `/${req.params.slug}/history`, 'noindex'),
+      }, `/${request.params.slug}/history`, 'noindex'),
     });
   }
 
-  historyDetail(req, res, next) {
+  historyDetail(request, response, next) {
     debug('History Detail Route');
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug.');
       next();
       return;
     }
-    if (!req.params.revision) {
+    if (!request.params.revision) {
       debug('Missing revision.');
       next();
       return;
     }
-    const document = this.storageProvider.getRevision(req.params.slug, req.params.revision);
+    const document = this.storageProvider.getRevision(request.params.slug, request.params.revision);
     if (!document) {
-      debug('No revision found for given slug & revision pair:', req.params.slug, req.params.revision);
+      debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
       next();
       return;
     }
 
     document.html = this.render.render(document.content);
 
-    res.set('X-Robots-Tag', 'noindex');
-    res.render('detail', {
-      title: `${document.title} Revision ${req.params.revision}`,
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('detail', {
+      title: `${document.title} Revision ${request.params.revision}`,
       config: this.config,
       document,
-      revision: req.params.revision,
+      revision: request.params.revision,
       popularDocuments: this.getPopularDocuments(5),
       relatedDocuments: this.getRelatedDocuments(document.title, 5),
       recentDocuments: this.getRecentDocuments(5),
       meta: this.buildMetadata({
         ...document,
-        title: `${document.title} Revision ${req.params.revision}`,
-      }, `/${req.params.slug}/history/${req.params.revision}`, 'noindex'),
+        title: `${document.title} Revision ${request.params.revision}`,
+      }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex'),
     });
   }
 
-  historyRestore(req, res, next) {
+  historyRestore(request, response, next) {
     debug('History Restore Route');
-    if (!req.params.slug) {
+    if (!request.params.slug) {
       debug('Missing slug!');
       next();
       return;
     }
-    if (!req.params.revision) {
+    if (!request.params.revision) {
       debug('Missing revision.');
       next();
       return;
     }
-    const document = this.storageProvider.getRevision(req.params.slug, req.params.revision);
+    const document = this.storageProvider.getRevision(request.params.slug, request.params.revision);
     if (!document) {
-      debug('No revision found for given slug & revision pair:', req.params.slug, req.params.revision);
+      debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
       next();
       return;
     }
-    res.set('X-Robots-Tag', 'noindex');
-    res.render('edit', {
-      title: `Editing ${document.title} from Revision ${req.params.revision}`,
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('edit', {
+      title: `Editing ${document.title} from Revision ${request.params.revision}`,
       document,
-      revision: req.params.revision,
+      revision: request.params.revision,
       config: this.config,
       meta: this.buildMetadata({
         ...document,
-        title: `Editing ${document.title} from Revision ${req.params.revision}`,
-      }, `/${req.params.slug}/history/${req.params.revision}/restore`, 'noindex'),
+        title: `Editing ${document.title} from Revision ${request.params.revision}`,
+      }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex'),
     });
   }
 
-  upload(req, res, _next) {
+  upload(request, response, _next) {
     debug('Upload Route');
-    this.uploadProvider.storeFile(req, res, (error) => {
+    this.uploadProvider.storeFile(request, response, (error) => {
+      let status = 200;
+      let send = request.file.filename;
       /* istanbul ignore next */
       if (error) {
         debug('Upload Error:', error);
-        return res.status(422).send(error);
+        status = 422;
+        send = error;
       }
-      return res.status(200).send(req.file.filename);
+      return response.status(status).send(send);
     });
   }
 
@@ -665,28 +668,25 @@ class UttoriWiki {
   // }
 
   // 404
-  notFound(req, res, _next) {
+  notFound(request, response, _next) {
     debug('404 Not Found Route');
-    res.set('X-Robots-Tag', 'noindex');
-    res.render('404', {
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('404', {
       title: '404 Not Found',
       config: this.config,
-      slug: req.params.slug || '404',
+      slug: request.params.slug || '404',
       meta: this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex'),
     });
   }
 
   // Helpers
   getHomeDocument() {
+    debug('getHomeDocument');
     const document = this.storageProvider.get('home-page');
-
-    // check if no content
     if (!document || document.content <= 0) {
       return {};
     }
-
     document.html = this.render.render(document.content).trim();
-
     return document;
   }
 
@@ -809,20 +809,16 @@ class UttoriWiki {
 
   // Analytics
   updateViewCount(slug) {
+    debug('updateViewCount:', slug);
     if (!slug) {
       return;
     }
-
-    if (this.pageVisits[slug]) {
-      this.pageVisits[slug]++;
-    } else {
-      this.pageVisits[slug] = 1;
-    }
-
+    this.pageVisits[slug] = (this.pageVisits[slug] || 0) + 1;
     this.storageProvider.storeObject('visits', this.pageVisits);
   }
 
   getViewCount(slug) {
+    debug('getViewCount:', slug);
     return this.pageVisits[slug] || 0;
   }
 
@@ -862,7 +858,7 @@ class UttoriWiki {
       });
     });
 
-    let urlFilter = () => true;
+    let urlFilter = R.identity;
     /* istanbul ignore else */
     if (Array.isArray(this.config.sitemap_url_filter) && this.config.sitemap_url_filter.length > 0) {
       urlFilter = (route) => {

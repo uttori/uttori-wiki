@@ -43,6 +43,7 @@ $ DEBUG=Uttori* npm test
 - Richer Meta Data
   - Authors
   - Images
+  - Language
 - History Diff View
 - Rewrite Syncing
   - Read Only Sync

@@ -4,13 +4,13 @@ const request = require('supertest');
 const sinon = require('sinon');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -34,13 +34,13 @@ test('renders the requested slug', async (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);
-  const res = await request(uttori.server).get('/example-title');
-  t.is(res.status, 200);
-  const title = res.text.match(/<title>(.*?)<\/title>/i);
+  const response = await request(uttori.server).get('/example-title');
+  t.is(response.status, 200);
+  const title = response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'Example Title | Wiki');
 });
 
-test('falls throught to next() when there is no slug', async (t) => {
+test('falls throught to next() when there is no slug', (t) => {
   t.plan(1);
 
   const next = sinon.spy();
@@ -49,7 +49,7 @@ test('falls throught to next() when there is no slug', async (t) => {
   t.true(next.calledOnce);
 });
 
-test('falls throught to next() when there is no document found', async (t) => {
+test('falls throught to next() when there is no document found', (t) => {
   t.plan(1);
 
   const next = sinon.spy();

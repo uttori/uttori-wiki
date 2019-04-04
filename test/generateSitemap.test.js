@@ -2,13 +2,13 @@ const fs = require('fs-extra');
 const test = require('ava');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -20,7 +20,7 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('generateSitemap(): writes a valid sitemap', async (t) => {
+test('generateSitemap(): writes a valid sitemap', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
@@ -29,14 +29,14 @@ test('generateSitemap(): writes a valid sitemap', async (t) => {
   t.is(data.length, 868);
 });
 
-test('generateSitemapXML(): generates a valid sitemap', async (t) => {
+test('generateSitemapXML(): generates a valid sitemap', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
   t.is(uttori.generateSitemapXML().length, 868);
 });
 
-test('generateSitemapXML(): filters out urls with a filter', async (t) => {
+test('generateSitemapXML(): filters out urls with a filter', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki({ ...config, sitemap_url_filter: [/fake-title$/i] }, server, md);

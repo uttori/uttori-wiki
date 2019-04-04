@@ -1,12 +1,19 @@
 {
   "extends": [
     "airbnb",
-    "plugin:node/recommended"
+    "plugin:ava/recommended",
+    "plugin:node/recommended",
+    "plugin:ramda/recommended",
+    "plugin:security/recommended",
+    "plugin:unicorn/recommended"
   ],
   "plugins": [
     "ava",
     "no-inferred-method-name",
     "node",
+    "optimize-regex",
+    "ramda",
+    "security",
     "xss"
   ],
   "env": {
@@ -41,6 +48,9 @@
     no-plusplus: 0, # Meaningless as other rules prevent the errors that could happen.
     no-restricted-syntax: 0,
     no-underscore-dangle: 0,
-    no-unused-vars: ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }]
+    no-unused-vars: ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
+    "security/detect-object-injection": 0,
+    "optimize-regex/optimize-regex": "warn",
+    "unicorn/filename-case": 0
   }
 }

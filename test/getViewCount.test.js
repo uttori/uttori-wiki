@@ -2,13 +2,13 @@ const fs = require('fs-extra');
 const test = require('ava');
 const MarkdownIt = require('markdown-it');
 
-const UttoriWiki = require('../app/index.js');
+const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
 const md = new MarkdownIt();
 
-test.before((_t) => {
+test.before(() => {
   cleanup();
 });
 
@@ -28,14 +28,14 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('getViewCount(slug): returns 0 without a slug', async (t) => {
+test('getViewCount(slug): returns 0 without a slug', (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server, md);
   t.is(uttori.getViewCount(), 0);
 });
 
-test('getViewCount(slug): returns 0 when a match is not found', async (t) => {
+test('getViewCount(slug): returns 0 when a match is not found', (t) => {
   t.plan(2);
 
   const uttori = new UttoriWiki(config, server, md);

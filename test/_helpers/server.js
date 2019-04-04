@@ -77,13 +77,13 @@ if (require.main === module) {
 }
 
 const cleanup = async () => {
-  try { await fs.remove('test/site/content/history/test-delete'); } catch (e) {}
-  try { await fs.remove('test/site/content/history/test-new'); } catch (e) {}
-  try { await fs.remove('test/site/content/test-old.json'); } catch (e) {}
-  try { await fs.remove('test/site/data/visits.json'); } catch (e) {}
-  try { await fs.remove('test/site/themes/default/public/sitemap.xml'); } catch (e) {}
-  try { await fs.remove('test/site/uploads'); } catch (e) {}
-  try { await fs.ensureDir('test/site/uploads'); } catch (e) {}
+  try { await fs.remove('test/site/content/history/test-delete'); } catch (error) {}
+  try { await fs.remove('test/site/content/history/test-new'); } catch (error) {}
+  try { await fs.remove('test/site/content/test-old.json'); } catch (error) {}
+  try { await fs.remove('test/site/data/visits.json'); } catch (error) {}
+  try { await fs.remove('test/site/themes/default/public/sitemap.xml'); } catch (error) {}
+  try { await fs.remove('test/site/uploads'); } catch (error) {}
+  try { await fs.ensureDir('test/site/uploads'); } catch (error) {}
 };
 
 module.exports = { config, server, cleanup };
