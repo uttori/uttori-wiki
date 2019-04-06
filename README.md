@@ -45,9 +45,6 @@ $ DEBUG=Uttori* npm test
   - Images
   - Language
 - History Diff View
-- Rewrite Syncing
-  - Read Only Sync
-  - Authentication for Sync (Writes)
 
 ### TODO Eventually / Would Be Nice
 - Convert to `import` Syntax (Breaks Node v8)

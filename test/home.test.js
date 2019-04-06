@@ -1,13 +1,10 @@
 const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -32,7 +29,7 @@ test.afterEach(() => {
 test('home(request, response, _next): renders', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/');
   t.is(response.status, 200);
   t.is(response.text.substring(0, 15), '<!DOCTYPE html>');

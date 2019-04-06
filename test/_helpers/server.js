@@ -10,7 +10,7 @@ const path = require('path');
 const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
-
+const Renderer = require('./../__stubs/Renderer.js');
 const defaultConfig = require('../../app/config.default.js');
 
 const config = {
@@ -22,6 +22,7 @@ const config = {
       tag: 'example',
     },
   ],
+  home_page: 'home-page',
   site_url: 'https://fake.test',
   // Specify the theme to use
   theme_dir: 'test/site/themes',
@@ -35,9 +36,7 @@ const config = {
   StorageProvider,
   SearchProvider,
   UploadProvider,
-  // Syncing
-  sync_key: 'test-key',
-  markdown: true,
+  Renderer,
   use_delete_key: true,
   delete_key: 'test-key',
   use_recaptcha: false,

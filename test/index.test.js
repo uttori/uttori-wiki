@@ -1,12 +1,9 @@
 const fs = require('fs-extra');
 const test = require('ava');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -42,15 +39,8 @@ test('throws when missing server', (t) => {
   t.is(error.message, 'No server provided.');
 });
 
-test('throws when missing render', (t) => {
-  const error = t.throws(() => {
-    const _uttori = new UttoriWiki(config, server);
-  }, Error);
-  t.is(error.message, 'No render provided.');
-});
-
 test('can stand up', (t) => {
   t.notThrows(() => {
-    const _uttori = new UttoriWiki(config, server, md);
+    const _uttori = new UttoriWiki(config, server);
   }, Error);
 });

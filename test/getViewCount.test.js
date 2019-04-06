@@ -1,12 +1,9 @@
 const fs = require('fs-extra');
 const test = require('ava');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -31,14 +28,14 @@ test.afterEach(() => {
 test('getViewCount(slug): returns 0 without a slug', (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   t.is(uttori.getViewCount(), 0);
 });
 
 test('getViewCount(slug): returns 0 when a match is not found', (t) => {
   t.plan(2);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   t.is(uttori.getViewCount('getViewCount-2'), 0);
   uttori.updateViewCount('getViewCount-2');
   t.is(uttori.getViewCount('getViewCount-2'), 1);

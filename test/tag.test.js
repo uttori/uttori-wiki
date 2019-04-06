@@ -1,13 +1,10 @@
 const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -32,7 +29,7 @@ test.afterEach(() => {
 test('tagsIndex(request, response, next): renders that tag index page', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/tags');
   t.is(response.status, 200);
   t.is(response.text.substring(0, 15), '<!DOCTYPE html>');
@@ -43,7 +40,7 @@ test('tagsIndex(request, response, next): renders that tag index page', async (t
 test('tag(request, response, next): renders that tag page for a given tag', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/tags/Cool');
   t.is(response.status, 200);
   t.is(response.text.substring(0, 15), '<!DOCTYPE html>');
@@ -54,7 +51,7 @@ test('tag(request, response, next): renders that tag page for a given tag', asyn
 test('tag(request, response, next): falls through to next when tag is missing', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/tags/_');
   t.is(response.status, 200);
   t.is(response.text.substring(0, 15), '<!DOCTYPE html>');

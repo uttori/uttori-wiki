@@ -1,13 +1,11 @@
 const fs = require('fs-extra');
 const debug = require('debug')('Uttori.Wiki');
-// const request = require('request'); // Sync
 const R = require('ramda');
 const Document = require('uttori-document');
-const MarkdownHelpers = require('./utilities/markdownHelpers.js');
 const defaultConfig = require('./config.default.js');
 
 class UttoriWiki {
-  constructor(config, server, render) {
+  constructor(config, server) {
     debug('Contructing...');
     if (!config) {
       debug('No config provided.');
@@ -16,10 +14,6 @@ class UttoriWiki {
     if (!server) {
       debug('No server provided.');
       throw new Error('No server provided.');
-    }
-    if (!render) {
-      debug('No render provided.');
-      throw new Error('No render provided.');
     }
 
     this.config = { ...defaultConfig, ...config };
@@ -48,7 +42,9 @@ class UttoriWiki {
     }
 
     this.server = server;
-    this.render = render;
+
+    // Rendering
+    this.renderer = new this.config.Renderer(this.config);
 
     // Storage
     this.storageProvider = new this.config.StorageProvider(this.config);
@@ -56,12 +52,12 @@ class UttoriWiki {
     // Uploads
     this.uploadProvider = new this.config.UploadProvider(this.config);
 
-    // Analytics
-    this.pageVisits = this.storageProvider.readObject('visits') || {};
-
     // Search
     this.searchProvider = new this.config.SearchProvider();
     this.searchProvider.setup(this);
+
+    // Analytics
+    this.pageVisits = this.storageProvider.readObject('visits') || {};
 
     this.bindRoutes();
   }
@@ -79,6 +75,10 @@ class UttoriWiki {
     if (!config.UploadProvider) {
       debug('Config Error: No UploadProvider provided.');
       throw new Error('No UploadProvider provided.');
+    }
+    if (!config.Renderer) {
+      debug('Config Error: No Renderer provided.');
+      throw new Error('No Renderer provided.');
     }
     if (config.sitemap_url_filter && !Array.isArray(config.sitemap_url_filter)) {
       debug('Config Error: `sitemap_url_filter` should be an array.');
@@ -101,7 +101,7 @@ class UttoriWiki {
     let description = document && document.excerpt ? document.excerpt : '';
     if (!description) {
       description = document && document.content ? `${document.content.substring(0, 160)}` : '';
-      description = this.render.render(description).trim();
+      description = this.renderer.render(description);
     }
 
     const image = '';
@@ -122,7 +122,7 @@ class UttoriWiki {
 
   bindRoutes() {
     debug('Binding routes...');
-    // Order: Home, Tags, Search, Document, Sync, Not Found
+    // Order: Home, Tags, Search, Placeholders, Document, Not Found
     // Home
     this.server.get('/', this.home.bind(this));
 
@@ -152,14 +152,6 @@ class UttoriWiki {
     this.server.get('/:slug', this.detail.bind(this));
     this.server.post('/upload', this.upload.bind(this));
 
-    // Sync
-    // this.server.get('/sync', this.sync.bind(this));
-    // this.server.get('/sync-target/:key/:slug', this.returnSingle.bind(this));
-    // this.server.get('/sync-target/:key', this.returnList.bind(this));
-    // this.server.get('/sync-request/:key/:server/:slug', this.requestSingle.bind(this));
-    // this.server.get('/sync-request/:key/:server', this.requestList.bind(this));
-    // this.server.post('/sync-write/:key', this.write.bind(this));
-
     // Not Found - Catch All
     this.server.get('/*', this.notFound.bind(this));
     debug('Bound routes.');
@@ -167,7 +159,8 @@ class UttoriWiki {
 
   home(request, response, _next) {
     debug('Home Route');
-    const homeDocument = this.getHomeDocument();
+    const homeDocument = this.storageProvider.get(this.config.home_page);
+    homeDocument.html = this.renderer.render(homeDocument.content);
     response.render('home', {
       title: 'Home',
       config: this.config,
@@ -239,7 +232,7 @@ class UttoriWiki {
         if (!excerpt) {
           excerpt = document && document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
         }
-        document.html = excerpt ? this.render.render(excerpt).trim() : '';
+        document.html = this.renderer.render(excerpt);
         return document;
       });
       viewModel.meta = this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
@@ -306,7 +299,7 @@ class UttoriWiki {
     const document = new Document();
     document.title = request.body.title;
     document.excerpt = request.body.excerpt;
-    document.content = MarkdownHelpers.prepare(this.config, request.body.content);
+    document.content = request.body.content;
     document.tags = request.body.tags ? request.body.tags.split(',') : [];
     document.slug = request.body.slug || request.params.slug;
     /* istanbul ignore next */
@@ -387,7 +380,7 @@ class UttoriWiki {
       return;
     }
 
-    document.html = this.render.render(document.content);
+    document.html = this.renderer.render(document.content);
     this.updateViewCount(request.params.slug);
 
     response.render('detail', {
@@ -455,7 +448,7 @@ class UttoriWiki {
       return;
     }
 
-    document.html = this.render.render(document.content);
+    document.html = this.renderer.render(document.content);
 
     response.set('X-Robots-Tag', 'noindex');
     response.render('detail', {
@@ -519,154 +512,6 @@ class UttoriWiki {
     });
   }
 
-  // // Sync
-  // sync(req, res, _next) {
-  //   res.render('sync', { syncKey: this.config.sync_key });
-  // }
-  //
-  // returnSingle(req, res, next) {
-  //   if (!req.params.key || !req.params.slug) {
-  //     next();
-  //     return;
-  //   }
-  //
-  //   if (!this._validateKey(res, req.params.key)) {
-  //     return;
-  //   }
-  //
-  //   const doc = R.find(
-  //     R.propEq('slug', req.params.slug),
-  //     this.storageProvider.all(),
-  //   );
-  //
-  //   res.json({
-  //     success: doc != null,
-  //     result: doc,
-  //   });
-  // }
-  //
-  // returnList(req, res, next) {
-  //   if (!req.params.key) {
-  //     next();
-  //     return;
-  //   }
-  //
-  //   if (!this._validateKey(res, req.params.key)) {
-  //     return;
-  //   }
-  //
-  //   const documentSlugs = R.map(
-  //     doc => doc.slug,
-  //     this.storageProvider.all(),
-  //   );
-  //
-  //   res.json({
-  //     success: true,
-  //     results: documentSlugs,
-  //   });
-  // }
-  //
-  // requestSingle(req, res, next) {
-  //   if (!req.params.key || !req.params.server || !req.params.slug) {
-  //     next();
-  //     return;
-  //   }
-  //
-  //   if (!this._validateKey(res, req.params.key)) {
-  //     return;
-  //   }
-  //
-  //   let server = Buffer.from(req.params.server, 'base64').toString('ascii');
-  //   server = server.replace(/\/$/, '');
-  //
-  //   const endpoint = `${server}/sync-target/${req.params.key}/${req.params.slug}`;
-  //
-  //   request(endpoint, (error, response, body) => {
-  //     if (!error && response.statusCode === 200) {
-  //       const result = JSON.parse(body);
-  //       res.json({ success: result.success, result: result.result });
-  //     } else {
-  //       res.json({ success: false, message: 'Error fetching data. ' });
-  //     }
-  //   });
-  // }
-  //
-  // requestList(req, res, next) {
-  //   if (!req.params.key || !req.params.server) {
-  //     next();
-  //     return;
-  //   }
-  //
-  //   if (!this._validateKey(res, req.params.key)) {
-  //     return;
-  //   }
-  //
-  //   let server = Buffer.from(req.params.server, 'base64').toString('ascii');
-  //   server = server.replace(/\/$/, '');
-  //
-  //   const endpoint = `${server}/sync-target/${req.params.key}`;
-  //
-  //   request(endpoint, (error, response, body) => {
-  //     if (!error && response.statusCode === 200) {
-  //       const result = JSON.parse(body);
-  //       res.json({ success: result.success, results: result.results });
-  //     } else {
-  //       res.json({ success: false, message: 'Error fetching data. ' });
-  //     }
-  //   });
-  // }
-  //
-  // write(req, res, next) {
-  //   if (!req.params.key) {
-  //     next();
-  //     return;
-  //   }
-  //
-  //   if (!this._validateKey(res, req.params.key)) {
-  //     return;
-  //   }
-  //   if (R.isEmpty(req.body)) {
-  //     res.json({ message: 'Invalid document provided' });
-  //     return;
-  //   }
-  //
-  //   const newDoc = req.body;
-  //   const matchingDocument = R.find(
-  //     R.propEq('slug', newDoc.slug),
-  //     this.storageProvider.all(),
-  //   );
-  //
-  //   // handle new document
-  //   if (!matchingDocument) {
-  //     this.storageProvider.add(newDoc);
-  //     this.searchProvider.indexAdd(newDoc);
-  //
-  //     res.json({ message: `Added new document: ${newDoc.title}` });
-  //
-  //
-  //     // handle existing and newer document
-  //   } else if (newDoc.updateDate > matchingDocument.updateDate) {
-  //     this.storageProvider.update(newDoc);
-  //     this.searchProvider.indexUpdate(newDoc);
-  //
-  //     res.json({ message: `Found newer document, updating: ${newDoc.title}` });
-  //
-  //
-  //     // handle local copy is newer
-  //   } else {
-  //     res.json({ message: `Local document is newer, ignoring: ${newDoc.title}` });
-  //   }
-  // }
-  //
-  // _validateKey(res, key) {
-  //   if (key === this.config.sync_key) {
-  //     return true;
-  //   }
-  //
-  //   res.json({ message: 'Invalid Sync Key' });
-  //   return false;
-  // }
-
   // 404
   notFound(request, response, _next) {
     debug('404 Not Found Route');
@@ -680,14 +525,12 @@ class UttoriWiki {
   }
 
   // Helpers
-  getHomeDocument() {
-    debug('getHomeDocument');
-    const document = this.storageProvider.get('home-page');
-    if (!document || document.content <= 0) {
-      return {};
-    }
-    document.html = this.render.render(document.content).trim();
-    return document;
+  getDocuments() {
+    debug('getDocuments');
+    return R.reject(
+      R.propEq('slug', this.config.home_page),
+      this.storageProvider.all(),
+    );
   }
 
   getSiteSections() {
@@ -706,7 +549,7 @@ class UttoriWiki {
         (a, b) => (b.updateDate - a.updateDate),
         R.reject(
           document => !document.updateDate,
-          this.storageProvider.all(),
+          this.getDocuments(),
         ),
       ),
     );
@@ -720,7 +563,7 @@ class UttoriWiki {
         (a, b) => this.getViewCount(b.slug) - this.getViewCount(a.slug),
         R.reject(
           document => this.getViewCount(document.slug) === 0,
-          this.storageProvider.all(),
+          this.getDocuments(),
         ),
       ),
     );
@@ -732,15 +575,14 @@ class UttoriWiki {
       count,
       R.sort(
         (_a, _b) => Math.random() - Math.random(),
-        this.storageProvider.all(),
+        this.getDocuments(),
       ),
     );
   }
 
   getTags() {
     debug('getTags');
-    /* istanbul ignore next */
-    let tags = R.pluck('tags')(this.storageProvider.all() || []);
+    let tags = R.pluck('tags')(this.getDocuments());
     tags = R.uniq(R.flatten(tags));
     tags = R.filter(R.identity)(tags);
     tags = R.sort((a, b) => a.localeCompare(b), tags);
@@ -754,7 +596,7 @@ class UttoriWiki {
       (a, b) => (b.updateDate - a.updateDate),
       R.filter(
         document => document.tags.includes(tag),
-        this.storageProvider.all(),
+        this.getDocuments(),
       ),
     );
   }
@@ -775,7 +617,7 @@ class UttoriWiki {
         R.map(
           result => R.find(
             R.propEq('slug', result.ref),
-            this.storageProvider.all(),
+            this.getDocuments(),
           ),
           results,
         ),
@@ -799,7 +641,7 @@ class UttoriWiki {
         R.map(
           result => R.find(
             R.propEq('slug', result.ref),
-            this.storageProvider.all(),
+            this.getDocuments(),
           ),
           results,
         ),
@@ -844,7 +686,7 @@ class UttoriWiki {
     ];
 
     // Add all documents to the sitemap
-    this.storageProvider.all().forEach((document) => {
+    this.getDocuments().forEach((document) => {
       /* istanbul ignore next */
       let lastmod = document.updateDate ? new Date(document.updateDate).toISOString() : '';
       /* istanbul ignore next */
