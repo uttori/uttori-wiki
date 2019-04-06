@@ -49,6 +49,17 @@ test('redirects to the article after saving without changing slug or providing o
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
+test('redirects to the article after saving with case transforms', async (t) => {
+  t.plan(2);
+
+  const uttori = new UttoriWiki(config, server);
+  const response = await request(uttori.server).post('/test-old/save')
+    .send('slug=Test-OLD');
+
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
+});
+
 test('splits tags correctly', async (t) => {
   t.plan(2);
 
@@ -65,6 +76,18 @@ test('redirects to the article after saving with new slug', async (t) => {
 
   const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).post('/test-new/save')
+    .send('original-slug=test-old');
+
+  t.is(response.status, 302);
+  t.is(response.text, 'Found. Redirecting to https://fake.test/test-new');
+  await fs.remove('test/site/content/test-new.json');
+});
+
+test('redirects to the article after saving with new slug with case transforms', async (t) => {
+  t.plan(2);
+
+  const uttori = new UttoriWiki(config, server);
+  const response = await request(uttori.server).post('/Test-NEW/save')
     .send('original-slug=test-old');
 
   t.is(response.status, 302);

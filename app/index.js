@@ -302,6 +302,7 @@ class UttoriWiki {
     document.content = request.body.content;
     document.tags = request.body.tags ? request.body.tags.split(',') : [];
     document.slug = request.body.slug || request.params.slug;
+    document.slug = document.slug.toLowerCase();
     /* istanbul ignore next */
     document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
 
@@ -311,14 +312,14 @@ class UttoriWiki {
     this.searchProvider.indexUpdate(document);
 
     // Remove old document if one existed
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== request.body.slug) {
-      debug(`Changing slug from "${originalSlug}" to "${request.body.slug}", cleaning up old files.`);
+    if (originalSlug && originalSlug.length > 0 && document.slug) {
+      debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
       this.searchProvider.indexRemove({ slug: originalSlug });
     }
 
     this.generateSitemap();
-    response.redirect(`${this.config.site_url}/${request.body.slug || request.params.slug}`);
+    response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
   save(request, response, next) {
