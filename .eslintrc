@@ -14,6 +14,7 @@
     "optimize-regex",
     "ramda",
     "security",
+    "unicorn",
     "xss"
   ],
   "env": {

@@ -1,12 +1,9 @@
 const fs = require('fs-extra');
 const test = require('ava');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -31,7 +28,7 @@ test.afterEach(() => {
 test('buildMetadata(document, path, robots): can build metadata with empty object', (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
 
   t.deepEqual(uttori.buildMetadata(), {
     canonical: `${config.site_url}/`,
@@ -47,7 +44,7 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
 test('buildMetadata(document, path, robots): can build metadata with simple document', (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
 
   t.deepEqual(uttori.buildMetadata({
     excerpt: 'Test',
@@ -69,7 +66,7 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
 test('buildMetadata(document, path, robots): can build metadata without an excerpt', (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
 
   t.deepEqual(uttori.buildMetadata({
     excerpt: '',
@@ -79,7 +76,7 @@ test('buildMetadata(document, path, robots): can build metadata without an excer
     title: 'Title',
   }, 'path', 'robots'), {
     canonical: `${config.site_url}/path`,
-    description: '<h1>Test</h1>',
+    description: '# Test',
     image: '',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',

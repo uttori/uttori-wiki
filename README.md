@@ -8,26 +8,55 @@ UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) b
 
 ## Site Configuration
 
-Please see `app/config.default.js`. You will likely want something like the following changes:
+Please see `app/config.default.js` for all options. You will likely want something like the following changes for your site:
 
 ```javascript
-// Specify the theme to use, no trailing slash
-theme_dir: `${__dirname}/themes`,
+const StorageProvider = require('uttori-storage-provider-json-file');
+const SearchProvider = require('uttori-search-provider-lunr');
+const UploadProvider = require('uttori-upload-provider-multer');
+const Renderer = require('uttori-renderer-markdown-it');
 
-// Path in which to store uploads (images etc.), no trailing slash
-uploads_dir: `${__dirname}/uploads`,
+const config = {
+  // Specify the theme to use, no trailing slash
+  theme_dir: `${__dirname}/themes`,
 
-// Path in which to store content (markdown files, etc.), no trailing slash
-content_dir: `${__dirname}/content`,
+  // Path to the static file directory for themes, no trailing slash
+  public_dir: `${__dirname}/themes/default/public`,
 
-// Path in which to store content history (markdown files, etc.), no trailing slash
-history_dir: `${__dirname}/content/history`,
+  // Use the Markdown Renderer
+  Renderer,
 
-// Path in which to store data (analytics, etc.), no trailing slash
-data_dir: `${__dirname}/data`,
+  // Use the JSON to Disk Storage Provider
+  StorageProvider,
 
-// Path to the static file directory for themes, no trailing slash
-public_dir: `${__dirname}/themes/default/public`,
+  // File extension for saved files
+  extension: 'json',
+
+  // Path in which to store content (Markdown files), no trailing slash
+  content_dir: `${__dirname}/content`,
+
+  // Path in which to store content history (Markdown files), no trailing slash
+  history_dir: `${__dirname}/content/history`,
+
+  // Path in which to store data (analytics, etc.), no trailing slash
+  data_dir: `${__dirname}/data`,
+
+  // Use the Lunr Search Provider
+  SearchProvider,
+
+  // Optional Lunr locale
+  lunr_locales: [],
+
+  // Use the Multer Upload Provider
+  UploadProvider,
+
+  // Path in which to store uploads (images etc.), no trailing slash
+  uploads_dir: `${__dirname}/uploads`,
+
+  ...
+};
+
+module.exports = config;
 ```
 
 ## Tests
@@ -45,9 +74,6 @@ $ DEBUG=Uttori* npm test
   - Images
   - Language
 - History Diff View
-- Rewrite Syncing
-  - Read Only Sync
-  - Authentication for Sync (Writes)
 
 ### TODO Eventually / Would Be Nice
 - Convert to `import` Syntax (Breaks Node v8)

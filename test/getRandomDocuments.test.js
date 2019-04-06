@@ -1,12 +1,9 @@
 const fs = require('fs-extra');
 const test = require('ava');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -31,7 +28,7 @@ test.afterEach(() => {
 test('getRandomDocuments(count): returns the requested number of random documents', (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   t.is(uttori.getRandomDocuments(1).length, 1);
   t.is(uttori.getRandomDocuments(2).length, 2);
   t.is(uttori.getRandomDocuments(3).length, 3);

@@ -2,13 +2,10 @@ const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
-const MarkdownIt = require('markdown-it');
 
 const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
-
-const md = new MarkdownIt();
 
 test.before(() => {
   cleanup();
@@ -33,7 +30,7 @@ test.afterEach(() => {
 test('renders the edit page for a given slug', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/demo-title/edit');
   t.is(response.status, 200);
   t.is(response.text.substring(0, 15), '<!DOCTYPE html>');
@@ -45,7 +42,7 @@ test('falls through to next when slug is missing', (t) => {
   t.plan(1);
 
   const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   uttori.edit({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
@@ -54,7 +51,7 @@ test('falls through to next when document is missing', (t) => {
   t.plan(1);
 
   const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server, md);
+  const uttori = new UttoriWiki(config, server);
   uttori.edit({ params: { slug: 'missing-document' } }, null, next);
   t.true(next.calledOnce);
 });

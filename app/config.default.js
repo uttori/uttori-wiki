@@ -29,6 +29,9 @@ const config = {
     // }
   ],
 
+  // Slug of the root `/` page
+  home_page: 'home-page',
+
   // Excerpt length (used in search)
   excerpt_length: 400,
 
@@ -54,18 +57,6 @@ const config = {
 
   // Path to the static file directory for themes, no trailing slash
   public_dir: '',
-
-  // Optional Lunr locales
-  lunr_locales: [],
-
-  // Secret key used to sync two servers
-  sync_key: '',
-
-  // Flat file storageProvider config
-  extension: 'json',
-
-  // Content is in the Markdown language
-  markdown: true,
 
   // Enable hiding document deletion behind a private key
   use_delete_key: false,
@@ -110,7 +101,7 @@ const config = {
   sitemap_url: '',
 
   // Sitemap URL Filter
-  sitemap_url_filter: [/home-page$/i],
+  sitemap_url_filter: [],
 
   // Sitemap XML Header
   sitemap_header: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">',
