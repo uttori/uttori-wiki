@@ -29,6 +29,9 @@ const config = {
   // Use the JSON to Disk Storage Provider
   StorageProvider,
 
+  // File extension for saved files
+  extension: 'json',
+
   // Path in which to store content (Markdown files), no trailing slash
   content_dir: `${__dirname}/content`,
 

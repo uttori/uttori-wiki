@@ -58,12 +58,6 @@ const config = {
   // Path to the static file directory for themes, no trailing slash
   public_dir: '',
 
-  // Optional Lunr locales
-  lunr_locales: [],
-
-  // Flat file storageProvider config
-  extension: 'json',
-
   // Enable hiding document deletion behind a private key
   use_delete_key: false,
 
