@@ -312,7 +312,7 @@ class UttoriWiki {
     this.searchProvider.indexUpdate(document);
 
     // Remove old document if one existed
-    if (originalSlug && originalSlug.length > 0 && document.slug) {
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== document.slug) {
       debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
       this.storageProvider.delete(originalSlug);
       this.searchProvider.indexRemove({ slug: originalSlug });
