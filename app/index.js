@@ -32,7 +32,7 @@ class UttoriWiki {
       }
       if (config.recaptcha_site_key && config.recaptcha_secret_key) {
         try {
-          const Recaptcha = require('express-recaptcha').RecaptchaV3;
+          const { Recaptcha } = require('express-recaptcha');
           this.recaptcha = new Recaptcha(config.recaptcha_site_key, config.recaptcha_secret_key);
         } catch (error) {
           debug('Error initializing reCaptcha:', error);
