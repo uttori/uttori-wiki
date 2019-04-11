@@ -65,3 +65,4 @@ convert/
 # test files
 test/test.json
 test/site/uploads/*
+SETUP.md
