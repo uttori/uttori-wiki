@@ -17,7 +17,7 @@ test.after(() => {
   cleanup();
 });
 
-test('validateConfig.validateConfig(config): throws when missing StorageProvider', (t) => {
+test('validateConfig(config): throws when missing StorageProvider', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
       SearchProvider,

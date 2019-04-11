@@ -142,6 +142,7 @@ class UttoriWiki {
     this.server.post('/404', this.notFound.bind(this));
 
     // Document
+    this.server.get(`/${this.config.home_page}`, this.homepageRedirect.bind(this));
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
@@ -171,6 +172,11 @@ class UttoriWiki {
       homeDocument,
       meta: this.buildMetadata(homeDocument, ''),
     });
+  }
+
+  homepageRedirect(request, response, _next) {
+    debug('Home-Page Redirect');
+    return response.redirect(301, `${request.protocol}://${request.hostname}/`);
   }
 
   tagIndex(request, response, _next) {
