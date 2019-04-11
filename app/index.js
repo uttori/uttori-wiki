@@ -169,7 +169,7 @@ class UttoriWiki {
       popularDocuments: this.getPopularDocuments(5),
       siteSections: this.getSiteSections(),
       homeDocument,
-      meta: this.buildMetadata(homeDocument, '/'),
+      meta: this.buildMetadata(homeDocument, ''),
     });
   }
 
