@@ -125,6 +125,7 @@ class UttoriWiki {
     // Order: Home, Tags, Search, Placeholders, Document, Not Found
     // Home
     this.server.get('/', this.home.bind(this));
+    this.server.get(`/${this.config.home_page}`, this.homepageRedirect.bind(this));
 
     // Tags
     this.server.get('/tags', this.tagIndex.bind(this));
@@ -142,7 +143,6 @@ class UttoriWiki {
     this.server.post('/404', this.notFound.bind(this));
 
     // Document
-    this.server.get(`/${this.config.home_page}`, this.homepageRedirect.bind(this));
     this.server.get('/new', this.new.bind(this));
     this.server.get('/:slug/edit', this.edit.bind(this));
     this.server.get('/:slug/delete/:key', this.delete.bind(this));
