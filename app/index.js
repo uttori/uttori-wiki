@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
 const debug = require('debug')('Uttori.Wiki');
 const R = require('ramda');
 const Document = require('uttori-document');
+const UttoriSitemap = require('./sitemap');
 const defaultConfig = require('./config.default.js');
 
 class UttoriWiki {
@@ -55,9 +55,6 @@ class UttoriWiki {
     // Search
     this.searchProvider = new this.config.SearchProvider();
     this.searchProvider.setup(this);
-
-    // Analytics
-    this.pageVisits = this.storageProvider.readObject('visits') || {};
 
     this.bindRoutes();
   }
@@ -175,13 +172,13 @@ class UttoriWiki {
   }
 
   homepageRedirect(request, response, _next) {
-    debug('Home-Page Redirect');
+    debug('homepageRedirect');
     return response.redirect(301, `${request.protocol}://${request.hostname}/`);
   }
 
   tagIndex(request, response, _next) {
     debug('Tag Index Route');
-    const taggedDocuments = this.getTags().reduce((acc, tag) => {
+    const taggedDocuments = this.storageProvider.tags().reduce((acc, tag) => {
       acc[tag] = this.getTaggedDocuments(tag);
       return acc;
     }, {});
@@ -324,7 +321,7 @@ class UttoriWiki {
       this.searchProvider.indexRemove({ slug: originalSlug });
     }
 
-    this.generateSitemap();
+    UttoriSitemap.generateSitemap(this.config, this.getDocuments(['slug', 'createDate', 'updateDate']));
     response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
@@ -388,7 +385,6 @@ class UttoriWiki {
     }
 
     document.html = this.renderer.render(document.content);
-    this.updateViewCount(request.params.slug);
 
     response.render('detail', {
       title: document.title,
@@ -532,11 +528,11 @@ class UttoriWiki {
   }
 
   // Helpers
-  getDocuments() {
+  getDocuments(fields) {
     debug('getDocuments');
     return R.reject(
       R.propEq('slug', this.config.home_page),
-      this.storageProvider.all(),
+      this.storageProvider.all(fields),
     );
   }
 
@@ -548,215 +544,72 @@ class UttoriWiki {
     }), this.config.site_sections);
   }
 
-  getRecentDocuments(count) {
-    debug('getRecentDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (a, b) => (b.updateDate - a.updateDate),
-        R.reject(
-          document => !document.updateDate,
-          this.getDocuments(),
-        ),
-      ),
-    );
+  getRecentDocuments(limit) {
+    debug('getRecentDocuments:', limit);
+    let results = [];
+    try {
+      results = this.storageProvider.getRecentDocuments(limit, ['slug', 'title']);
+    } catch (error) {
+      debug('getRecentDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
   }
 
-  getPopularDocuments(count) {
-    debug('getPopularDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (a, b) => this.getViewCount(b.slug) - this.getViewCount(a.slug),
-        R.reject(
-          document => this.getViewCount(document.slug) === 0,
-          this.getDocuments(),
-        ),
-      ),
-    );
+  getPopularDocuments(limit) {
+    debug('getPopularDocuments:', limit);
+    let results = [];
+    try {
+      results = this.storageProvider.getPopularDocuments(limit, ['slug', 'title']);
+    } catch (error) {
+      debug('getPopularDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
   }
 
-  getRandomDocuments(count) {
-    debug('getRandomDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (_a, _b) => Math.random() - Math.random(),
-        this.getDocuments(),
-      ),
-    );
-  }
-
-  getTags() {
-    debug('getTags');
-    let tags = R.pluck('tags')(this.getDocuments());
-    tags = R.uniq(R.flatten(tags));
-    tags = R.filter(R.identity)(tags);
-    tags = R.sort((a, b) => a.localeCompare(b), tags);
-    debug('getTags:', tags);
-    return tags;
+  getRandomDocuments(limit) {
+    debug('getRandomDocuments:', limit);
+    let results = [];
+    try {
+      results = this.storageProvider.getRandomDocuments(limit, ['slug', 'title']);
+    } catch (error) {
+      debug('getRandomDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
   }
 
   getTaggedDocuments(tag) {
     debug('getTaggedDocuments:', tag);
-    return R.sort(
-      (a, b) => (b.updateDate - a.updateDate),
-      R.filter(
-        document => document.tags.includes(tag),
-        this.getDocuments(),
-      ),
-    );
+    let results = [];
+    try {
+      results = this.storageProvider.getTaggedDocuments(tag, ['slug', 'title', 'tags', 'updateDate']);
+    } catch (error) {
+      debug('getTaggedDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
   }
 
-  getRelatedDocuments(title, count) {
-    debug('getRelatedDocuments:', title, count);
+  getRelatedDocuments(title, limit) {
+    debug('getRelatedDocuments:', title, limit);
     let results = [];
-    /* istanbul ignore next */
     try {
-      results = this.searchProvider.relatedDocuments(title);
+      results = this.searchProvider.relatedDocuments(title, limit);
+      results = this.storageProvider.augmentDocuments(results, ['slug', 'title']);
     } catch (error) {
       debug('getRelatedDocuments Error:', error);
     }
-    return R.take(
-      count,
-      R.reject(
-        document => !document || document.title === title,
-        R.map(
-          result => R.find(
-            R.propEq('slug', result.ref),
-            this.getDocuments(),
-          ),
-          results,
-        ),
-      ),
-    );
+    return R.reject(R.isNil, results);
   }
 
-  getSearchResults(query, count) {
-    debug('getSearchResults:', query, count);
+  getSearchResults(query, limit) {
+    debug('getSearchResults:', query, limit);
     let results = [];
-    /* istanbul ignore next */
     try {
-      results = this.searchProvider.search(query);
+      results = this.searchProvider.search(query, limit);
+      results = this.storageProvider.augmentDocuments(results, ['slug', 'title', 'excerpt', 'content']);
     } catch (error) {
       debug('getSearchResults Error:', error);
     }
-    return R.take(
-      count,
-      R.reject(
-        R.isNil,
-        R.map(
-          result => R.find(
-            R.propEq('slug', result.ref),
-            this.getDocuments(),
-          ),
-          results,
-        ),
-      ),
-    );
-  }
-
-  // Analytics
-  updateViewCount(slug) {
-    debug('updateViewCount:', slug);
-    if (!slug) {
-      return;
-    }
-    this.pageVisits[slug] = (this.pageVisits[slug] || 0) + 1;
-    this.storageProvider.storeObject('visits', this.pageVisits);
-  }
-
-  getViewCount(slug) {
-    debug('getViewCount:', slug);
-    return this.pageVisits[slug] || 0;
-  }
-
-  // Sitemaps
-  generateSitemapXML() {
-    debug('Generating Sitemap XML');
-    const sitemap = [
-      {
-        url: '/',
-        lastmod: new Date().toISOString(),
-        priority: '1.00',
-      },
-      {
-        url: '/tags',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-      {
-        url: '/new',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-    ];
-
-    // Add all documents to the sitemap
-    this.getDocuments().forEach((document) => {
-      /* istanbul ignore next */
-      let lastmod = document.updateDate ? new Date(document.updateDate).toISOString() : '';
-      /* istanbul ignore next */
-      if (!lastmod) {
-        lastmod = document.createDate ? new Date(document.createDate).toISOString() : '';
-      }
-      sitemap.push({
-        url: `/${document.slug}`,
-        lastmod,
-        priority: '0.80',
-      });
-    });
-
-    let urlFilter = R.identity;
-    /* istanbul ignore else */
-    if (Array.isArray(this.config.sitemap_url_filter) && this.config.sitemap_url_filter.length > 0) {
-      urlFilter = (route) => {
-        let pass = true;
-        this.config.sitemap_url_filter.forEach((url_filter) => {
-          try {
-            if (url_filter.test(route.url)) {
-              pass = false;
-            }
-          } catch (error) {
-            /* istanbul ignore next */
-            debug('Sitemap Filter Error:', error, url_filter, route.url);
-          }
-        });
-        return pass;
-      };
-    }
-
-    const data = sitemap.reduce((accumulator, route) => {
-      if (urlFilter(route)) {
-        accumulator += `<url><loc>${this.config.sitemap_url}${route.url}</loc>`;
-        /* istanbul ignore else */
-        if (route.lastmod) {
-          accumulator += `<lastmod>${route.lastmod}</lastmod>`;
-        }
-        /* istanbul ignore else */
-        if (route.priority) {
-          accumulator += `<priority>${route.priority}</priority>`;
-        }
-        /* istanbul ignore next */
-        if (route.changefreq) {
-          accumulator += `<changefreq>${route.changefreq}</changefreq>`;
-        }
-        accumulator += '</url>';
-      }
-      return accumulator;
-    }, '');
-
-    return `${this.config.sitemap_header}${data}${this.config.sitemap_footer}`;
-  }
-
-  generateSitemap() {
-    debug('Generating Sitemap');
-    try {
-      fs.outputFileSync(`${this.config.public_dir}/${this.config.sitemap_filename}`, this.generateSitemapXML());
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('Error Generating Sitemap:', error);
-    }
+    return R.reject(R.isNil, results);
   }
 }
 
