@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-empty-function, class-methods-use-this */
 class UploadProvider {
   constructor(config = {}) {
     this.config = {

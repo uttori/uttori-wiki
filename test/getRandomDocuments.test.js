@@ -5,12 +5,12 @@ const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
-test.before(() => {
-  cleanup();
+test.before(async () => {
+  await cleanup();
 });
 
-test.after(() => {
-  cleanup();
+test.after(async () => {
+  await cleanup();
 });
 
 test.beforeEach(async () => {
@@ -21,15 +21,19 @@ test.beforeEach(async () => {
   });
 });
 
-test.afterEach(() => {
-  cleanup();
+test.afterEach(async () => {
+  await cleanup();
 });
 
-test('getRandomDocuments(count): returns the requested number of random documents', (t) => {
+test('getRandomDocuments(count): returns the requested number of random documents', async (t) => {
   t.plan(3);
 
+  let random;
   const uttori = new UttoriWiki(config, server);
-  t.is(uttori.getRandomDocuments(1).length, 1);
-  t.is(uttori.getRandomDocuments(2).length, 2);
-  t.is(uttori.getRandomDocuments(3).length, 3);
+  random = await uttori.getRandomDocuments(1);
+  t.is(random.length, 1);
+  random = await uttori.getRandomDocuments(2);
+  t.is(random.length, 2);
+  random = await uttori.getRandomDocuments(3);
+  t.is(random.length, 3);
 });

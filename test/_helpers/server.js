@@ -9,6 +9,7 @@ const path = require('path');
 
 const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
+const AnalyticsProvider = require('uttori-analytics-provider-json-file');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
 const Renderer = require('./../__stubs/Renderer.js');
 const defaultConfig = require('../../app/config.default.js');
@@ -33,6 +34,7 @@ const config = {
   data_dir: 'test/site/data',
   public_dir: 'test/site/themes/default/public',
   // Providers
+  AnalyticsProvider,
   StorageProvider,
   SearchProvider,
   UploadProvider,
@@ -43,6 +45,9 @@ const config = {
   recaptcha_site_key: '',
   use_google_analytics: false,
   google_analytics_id: '',
+  analyticsProviderConfig: {
+    directory: 'test/site/data',
+  },
 };
 
 // Server & process.title (for stopping after)

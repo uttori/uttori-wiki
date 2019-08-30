@@ -32,6 +32,9 @@ const config = {
   // Slug of the root `/` page
   home_page: 'home-page',
 
+  // Slugs to ignore in search, recent and popular items
+  ignore_slugs: ['home-page'],
+
   // Excerpt length (used in search)
   excerpt_length: 400,
 
@@ -111,6 +114,28 @@ const config = {
 
   // Sitemap Filename
   sitemap_filename: 'sitemap.xml',
+
+  // Sitemap default page priority
+  sitemap_page_priority: '0.80',
+
+  // Sitemap Routes, must be an array.
+  sitemap: [
+    {
+      url: '/',
+      lastmod: new Date().toISOString(),
+      priority: '1.00',
+    },
+    {
+      url: '/tags',
+      lastmod: new Date().toISOString(),
+      priority: '0.90',
+    },
+    {
+      url: '/new',
+      lastmod: new Date().toISOString(),
+      priority: '0.90',
+    },
+  ],
 };
 
 module.exports = config;

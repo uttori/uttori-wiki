@@ -5,12 +5,12 @@ const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
-test.before(() => {
-  cleanup();
+test.before(async () => {
+  await cleanup();
 });
 
-test.after(() => {
-  cleanup();
+test.after(async () => {
+  await cleanup();
 });
 
 test.beforeEach(async () => {
@@ -21,29 +21,14 @@ test.beforeEach(async () => {
   });
 });
 
-test.afterEach(() => {
-  cleanup();
+test.afterEach(async () => {
+  await cleanup();
 });
 
-test('getPopularDocuments(count): returns the requested number of popular documents', (t) => {
-  t.plan(3);
+test('getPopularDocuments(count): returns the requested number of popular documents', async (t) => {
+  t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
-  uttori.pageVisits = {};
-  uttori.pageVisits['example-title'] = 0;
-  t.deepEqual(uttori.getPopularDocuments(1), []);
-
-  uttori.pageVisits['example-title'] = 1;
-  t.deepEqual(uttori.getPopularDocuments(1), [{
-    content: '## Example Title',
-    createDate: 1459310452001,
-    html: '',
-    slug: 'example-title',
-    tags: ['Example Tag', 'example'],
-    title: 'Example Title',
-    updateDate: 1459310452001,
-  }]);
-
-  uttori.pageVisits['demo-title'] = 1;
-  t.is(uttori.getPopularDocuments(2).length, 2);
+  const popular = await uttori.getPopularDocuments(2);
+  t.is(popular.length, 2);
 });

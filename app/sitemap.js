@@ -3,25 +3,11 @@ const R = require('ramda');
 const fs = require('fs-extra');
 
 class UttoriSitemap {
-  static generateSitemapXML(config, documents) {
-    debug('generateSitemapXML', config, documents.length);
-    const sitemap = [
-      {
-        url: '/',
-        lastmod: new Date().toISOString(),
-        priority: '1.00',
-      },
-      {
-        url: '/tags',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-      {
-        url: '/new',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-    ];
+  static generateSitemapXML(config, documents = []) {
+    debug('Generating Sitemap XML');
+    const {
+      sitemap, sitemap_url, sitemap_url_filter, sitemap_page_priority, sitemap_header, sitemap_footer,
+    } = config;
 
     // Add all documents to the sitemap
     documents.forEach((document) => {
@@ -34,16 +20,16 @@ class UttoriSitemap {
       sitemap.push({
         url: `/${document.slug}`,
         lastmod,
-        priority: '0.80',
+        priority: sitemap_page_priority,
       });
     });
 
     let urlFilter = R.identity;
     /* istanbul ignore else */
-    if (Array.isArray(config.sitemap_url_filter) && config.sitemap_url_filter.length > 0) {
+    if (Array.isArray(sitemap_url_filter) && sitemap_url_filter.length > 0) {
       urlFilter = (route) => {
         let pass = true;
-        config.sitemap_url_filter.forEach((url_filter) => {
+        sitemap_url_filter.forEach((url_filter) => {
           try {
             if (url_filter.test(route.url)) {
               pass = false;
@@ -59,7 +45,7 @@ class UttoriSitemap {
 
     const data = sitemap.reduce((accumulator, route) => {
       if (urlFilter(route)) {
-        accumulator += `<url><loc>${config.sitemap_url}${route.url}</loc>`;
+        accumulator += `<url><loc>${sitemap_url}${route.url}</loc>`;
         /* istanbul ignore else */
         if (route.lastmod) {
           accumulator += `<lastmod>${route.lastmod}</lastmod>`;
@@ -77,14 +63,15 @@ class UttoriSitemap {
       return accumulator;
     }, '');
 
-    return `${config.sitemap_header}${data}${config.sitemap_footer}`;
+    return `${sitemap_header}${data}${sitemap_footer}`;
   }
 
-  static generateSitemap(config, documents) {
-    debug('generateSitemap', config, documents.length);
+  static async generateSitemap(config, documents = []) {
+    debug('Generating Sitemap');
     try {
+      const { public_dir, sitemap_filename } = config;
       const sitemap = UttoriSitemap.generateSitemapXML(config, documents);
-      fs.outputFileSync(`${config.public_dir}/${config.sitemap_filename}`, sitemap);
+      await fs.outputFile(`${public_dir}/${sitemap_filename}`, sitemap);
     } catch (error) {
       /* istanbul ignore next */
       debug('Error Generating Sitemap:', error);

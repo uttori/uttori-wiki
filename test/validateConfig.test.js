@@ -3,6 +3,7 @@ const test = require('ava');
 const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
 const SearchProvider = require('./__stubs/SearchProvider.js');
+const AnalyticsProvider = require('./__stubs/AnalyticsProvider.js');
 const Renderer = require('./__stubs/Renderer.js');
 
 const UttoriWiki = require('../app');
@@ -17,9 +18,22 @@ test.after(() => {
   cleanup();
 });
 
+test('validateConfig(config): throws when missing AnalyticsProvider', (t) => {
+  const error = t.throws(() => {
+    const _uttori = new UttoriWiki({
+      StorageProvider,
+      SearchProvider,
+      UploadProvider,
+      Renderer,
+    }, server);
+  }, Error);
+  t.is(error.message, 'No AnalyticsProvider provided.');
+});
+
 test('validateConfig(config): throws when missing StorageProvider', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       UploadProvider,
       Renderer,
@@ -31,6 +45,7 @@ test('validateConfig(config): throws when missing StorageProvider', (t) => {
 test('validateConfig(config): throws when missing SearchProvider', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       StorageProvider,
       UploadProvider,
       Renderer,
@@ -42,6 +57,7 @@ test('validateConfig(config): throws when missing SearchProvider', (t) => {
 test('validateConfig(config): throws when missing UploadProvider', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       StorageProvider,
       Renderer,
@@ -53,6 +69,7 @@ test('validateConfig(config): throws when missing UploadProvider', (t) => {
 test('validateConfig(config): throws when missing Renderer', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       StorageProvider,
       UploadProvider,
@@ -61,9 +78,24 @@ test('validateConfig(config): throws when missing Renderer', (t) => {
   t.is(error.message, 'No Renderer provided.');
 });
 
+test('validateConfig(config): throws when incorrect sitemap', (t) => {
+  const error = t.throws(() => {
+    const _uttori = new UttoriWiki({
+      AnalyticsProvider,
+      SearchProvider,
+      StorageProvider,
+      UploadProvider,
+      Renderer,
+      sitemap: {},
+    }, server);
+  }, Error);
+  t.is(error.message, 'sitemap should be an array.');
+});
+
 test('validateConfig(config): throws when incorrect sitemap_url_filter', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       StorageProvider,
       UploadProvider,
@@ -77,6 +109,7 @@ test('validateConfig(config): throws when incorrect sitemap_url_filter', (t) => 
 test('validateConfig(config): throws when missing theme_dir', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       StorageProvider,
       UploadProvider,
@@ -90,6 +123,7 @@ test('validateConfig(config): throws when missing theme_dir', (t) => {
 test('validateConfig(config): throws when missing public_dir', (t) => {
   const error = t.throws(() => {
     const _uttori = new UttoriWiki({
+      AnalyticsProvider,
       SearchProvider,
       StorageProvider,
       UploadProvider,

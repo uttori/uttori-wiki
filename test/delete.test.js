@@ -46,21 +46,21 @@ test('deletes the document and redirects to the home page', async (t) => {
   await fs.remove('test/site/content/test-delete.json');
 });
 
-test('falls through to next when slug is missing', (t) => {
+test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.delete({ params: { key: 'test-key' } }, null, next);
+  await uttori.delete({ params: { key: 'test-key' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when document is not found', (t) => {
+test('falls through to next when document is not found', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.delete({ params: { slug: 'missing', key: 'test-key' } }, null, next);
+  await uttori.delete({ params: { slug: 'missing', key: 'test-key' } }, null, next);
   t.true(next.calledOnce);
 });
 

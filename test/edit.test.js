@@ -38,20 +38,20 @@ test('renders the edit page for a given slug', async (t) => {
   t.is(title[1], 'Editing Demo Title | Wiki');
 });
 
-test('falls through to next when slug is missing', (t) => {
+test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.edit({ params: { slug: '' } }, null, next);
+  await uttori.edit({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when document is missing', (t) => {
+test('falls through to next when document is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.edit({ params: { slug: 'missing-document' } }, null, next);
+  await uttori.edit({ params: { slug: 'missing-document' } }, null, next);
   t.true(next.calledOnce);
 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars, no-empty-function, class-methods-use-this */
 class SearchProvider {
   constructor() {
     this.searchTerms = {};
@@ -5,12 +6,14 @@ class SearchProvider {
     this.documents = [];
   }
 
-  setup(uttori) {}
+  setup(config) {
+    return Promise.resolve([]);
+  }
 
   search(term) {
-    return [
+    return Promise.resolve([
       {
-        ref: `first-${term}`,
+        slug: `first-${term}`,
         score: 0.134,
         matchData: {
           metadata: {
@@ -21,7 +24,7 @@ class SearchProvider {
         },
       },
       {
-        ref: `second-${term}`,
+        slug: `second-${term}`,
         score: 0.134,
         matchData: {
           metadata: {
@@ -32,7 +35,7 @@ class SearchProvider {
         },
       },
       {
-        ref: `third-${term}`,
+        slug: `third-${term}`,
         score: 0.134,
         matchData: {
           metadata: {
@@ -43,7 +46,7 @@ class SearchProvider {
         },
       },
       {
-        ref: 'example-title',
+        slug: 'example-title',
         score: 0.134,
         matchData: {
           metadata: {
@@ -53,7 +56,7 @@ class SearchProvider {
           },
         },
       },
-    ];
+    ]);
   }
 
   internalSearch(term) {
@@ -73,6 +76,10 @@ class SearchProvider {
   updateTermCount(term) {}
 
   getPopularSearchTerms(count = 10) {}
+
+  shouldAugment() {
+    return true;
+  }
 }
 
 module.exports = SearchProvider;

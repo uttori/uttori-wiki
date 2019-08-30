@@ -37,20 +37,20 @@ test('renders the requested slug', async (t) => {
   t.is(title[1], 'Example Title | Wiki');
 });
 
-test('falls throught to next() when there is no slug', (t) => {
+test('falls throught to next() when there is no slug', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.detail({ params: { slug: '' } }, null, next);
+  await uttori.detail({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls throught to next() when there is no document found', (t) => {
+test('falls throught to next() when there is no document found', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.detail({ params: { slug: 'fake' } }, null, next);
+  await uttori.detail({ params: { slug: 'fake' } }, null, next);
   t.true(next.calledOnce);
 });

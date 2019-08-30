@@ -25,11 +25,13 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('getTaggedDocuments(tag): returns documents with the given tag', (t) => {
+test('getTaggedDocuments(tag): returns documents with the given tag', async (t) => {
   t.plan(2);
 
+  let documents;
   const uttori = new UttoriWiki(config, server);
-  t.deepEqual(uttori.getTaggedDocuments('Cool'), [
+  documents = await uttori.getTaggedDocuments('Cool');
+  t.deepEqual(documents, [
     {
       title: 'Demo Title',
       slug: 'demo-title',
@@ -50,5 +52,6 @@ test('getTaggedDocuments(tag): returns documents with the given tag', (t) => {
     },
   ]);
 
-  t.deepEqual(uttori.getTaggedDocuments('No Tag'), []);
+  documents = await uttori.getTaggedDocuments('No Tag');
+  t.deepEqual(documents, []);
 });
