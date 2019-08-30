@@ -41,8 +41,6 @@ const config = {
   Renderer,
   use_delete_key: true,
   delete_key: 'test-key',
-  use_recaptcha: false,
-  recaptcha_site_key: '',
   use_google_analytics: false,
   google_analytics_id: '',
   analyticsProviderConfig: {
@@ -71,6 +69,7 @@ server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
 if (process.argv[2] && process.argv[2] !== 'undefined') {
   console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
+  // eslint-disable-next-line prefer-destructuring
   process.title = process.argv[2];
 }
 

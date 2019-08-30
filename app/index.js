@@ -26,9 +26,6 @@ class UttoriWiki {
 
     this.server = server;
 
-    // reCaptcha Spam Prevention
-    this.recaptcha = undefined;
-
     if (config.skip_setup !== true) {
       this.setup();
     }
@@ -37,10 +34,6 @@ class UttoriWiki {
 
   async setup() {
     debug('Setting up...');
-    /* istanbul ignore next */
-    if (this.config.use_recaptcha) {
-      this.spam(this.config);
-    }
     // Rendering
     this.renderer = new this.config.Renderer(this.config);
 
@@ -58,31 +51,6 @@ class UttoriWiki {
     this.searchProvider = new this.config.SearchProvider(this.config);
     await this.searchProvider.setup({ documents });
     debug('Setup complete!');
-  }
-
-  spam(config) {
-    debug('Setting up reCaptcha...');
-    let message;
-    if (!config.recaptcha_site_key) {
-      message = 'Error initializing reCaptcha: missing config variable recaptcha_site_key';
-      debug(message);
-      throw new Error(message);
-    }
-    if (!config.recaptcha_secret_key) {
-      message = 'Error initializing reCaptcha: missing config variable recaptcha_secret_key';
-      debug(message);
-      throw new Error(message);
-    }
-    /* istanbul ignore next */
-    try {
-      const { Recaptcha } = require('express-recaptcha');
-      this.recaptcha = new Recaptcha(config.recaptcha_site_key, config.recaptcha_secret_key);
-      debug('Setup reCaptcha!');
-    } catch (error) {
-      message = 'Error initializing reCaptcha:';
-      debug(message, error);
-      throw new Error(message, error);
-    }
   }
 
   static validateConfig(config) {
@@ -396,23 +364,7 @@ class UttoriWiki {
       next();
       return;
     }
-    /* istanbul ignore next */
-    if (this.config.use_recaptcha) {
-      debug('Verifying with reCaptcha...');
-      this.recaptcha.verify(request, (error, data) => {
-        debug('reCaptch Verification Data:', data);
-        if (!error) {
-          debug('reCaptch Verified!');
-          this.saveValid(request, response, next);
-        } else {
-          debug('Invalid reCaptcha:', error);
-          next();
-        }
-      });
-    } else {
-      debug('Skipping reCaptcha...');
-      this.saveValid(request, response, next);
-    }
+    this.saveValid(request, response, next);
   }
 
   async new(request, response, _next) {
@@ -446,7 +398,7 @@ class UttoriWiki {
     document.html = this.renderer.render(document.content);
 
     const recentDocuments = await this.getRecentDocuments(5);
-    const relatedDocuments = await this.getRelatedDocuments(5, document);
+    const relatedDocuments = await this.getRelatedDocuments(document, 5);
     const popularDocuments = await this.getPopularDocuments(5);
 
     response.render('detail', {
@@ -679,8 +631,8 @@ class UttoriWiki {
     return R.reject(R.isNil, results);
   }
 
-  async getRelatedDocuments(limit, document) {
-    debug('getRelatedDocuments:', limit, document);
+  async getRelatedDocuments(document, limit) {
+    debug('getRelatedDocuments:', document, limit);
     let results = [];
     /* istanbul ignore else */
     if (document && Array.isArray(document.tags)) {

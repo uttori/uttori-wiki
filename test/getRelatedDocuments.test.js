@@ -30,7 +30,7 @@ test('getRelatedDocuments(limit, tags): returns related documents', async (t) =>
 
   const uttori = new UttoriWiki({ ...config, skip_setup: true }, server);
   await uttori.setup();
-  const related = await uttori.getRelatedDocuments(3, { slug: '___', tags: ['Cool'] });
+  const related = await uttori.getRelatedDocuments({ slug: '___', tags: ['Cool'] }, 3);
   t.deepEqual(related, [
     {
       title: 'Demo Title',

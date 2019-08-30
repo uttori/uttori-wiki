@@ -67,15 +67,6 @@ const config = {
   // Key used for verifying document deletion
   delete_key: '',
 
-  // Enable reCaptcha on Creation & Document Editing
-  use_recaptcha: false,
-
-  // reCaptcha Site key
-  recaptcha_site_key: '',
-
-  // reCaptcha Secret key
-  recaptcha_secret_key: '',
-
   // Enable Google Analytics
   use_google_analytics: false,
 
