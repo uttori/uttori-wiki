@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars, no-empty-function, class-methods-use-this */
+/* eslint-disable ramda/prefer-ramda-boolean, no-unused-vars, no-empty-function, class-methods-use-this */
 class SearchProvider {
   constructor() {
     this.searchTerms = {};
