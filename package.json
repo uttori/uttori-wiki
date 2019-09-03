@@ -23,8 +23,8 @@
   "devDependencies": {
     "ava": "^2.3.0",
     "body-parser": "^1.19.0",
-    "ejs": "^2.6.2",
-    "eslint": "^5",
+    "ejs": "^2.7.1",
+    "eslint": "^6.3.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-plugin-ava": "^8.0.0",
     "eslint-plugin-import": "^2.18.2",
@@ -34,6 +34,7 @@
     "eslint-plugin-optimize-regex": "^1.1.6",
     "eslint-plugin-ramda": "^2.5.1",
     "eslint-plugin-react": "^7.14.3",
+    "eslint-plugin-react-hooks": "^2.0.1",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-unicorn": "^10.0.0",
     "eslint-plugin-xss": "^0.1.9",
@@ -42,11 +43,11 @@
     "fs-extra-debug": "^1.0.4",
     "markdown-it": "^9.1.0",
     "nyc": "^14.1.1",
-    "sinon": "^7.4.1",
+    "sinon": "^7.4.2",
     "supertest": "^4.0.2",
-    "uttori-analytics-provider-json-file": "^2.0.0",
-    "uttori-storage-provider-json-file": "^2.2.3",
-    "uttori-upload-provider-multer": "^1.2.4"
+    "uttori-analytics-provider-json-file": "^2.1.0",
+    "uttori-storage-provider-json-file": "^2.3.1",
+    "uttori-upload-provider-multer": "^2.0.0"
   },
   "files": [
     "app/*"

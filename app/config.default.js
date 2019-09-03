@@ -46,18 +46,6 @@ const config = {
   theme_dir: '',
   theme_name: 'default',
 
-  // Path in which to store uploads (images etc.), no trailing slash
-  uploads_dir: '',
-
-  // Path in which to store content (markdown files, etc.), no trailing slash
-  content_dir: '',
-
-  // Path in which to store content history (markdown files, etc.), no trailing slash
-  history_dir: '',
-
-  // Path in which to store data (analytics, etc.), no trailing slash
-  data_dir: '',
-
   // Path to the static file directory for themes, no trailing slash
   public_dir: '',
 
@@ -127,6 +115,13 @@ const config = {
       priority: '0.90',
     },
   ],
+
+  // Provider Specific Configurations
+  rendererConfig: {},
+  analyticsProviderConfig: {},
+  searchProviderConfig: {},
+  storageProviderConfig: {},
+  uploadProviderConfig: {},
 };
 
 module.exports = config;

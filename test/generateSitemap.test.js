@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 const fs = require('fs-extra');
 const test = require('ava');
 

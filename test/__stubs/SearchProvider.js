@@ -3,10 +3,9 @@ class SearchProvider {
   constructor() {
     this.searchTerms = {};
     this.index = null;
-    this.documents = [];
   }
 
-  setup(config) {
+  setup(config, storageProvider) {
     return Promise.resolve([]);
   }
 

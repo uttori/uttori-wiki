@@ -25,33 +25,44 @@ const config = {
 
   // Use the Markdown Renderer
   Renderer,
+  rendererConfig: {},
 
   // Use the JSON to Disk Storage Provider
   StorageProvider,
+  storageProviderConfig: {
+    // Path in which to store content (markdown files, etc.)
+    content_dir: `${__dirname}/content`,
 
-  // File extension for saved files
-  extension: 'json',
+    // Path in which to store content history (markdown files, etc.)
+    history_dir: `${__dirname}/content/history`,
 
-  // Path in which to store content (Markdown files), no trailing slash
-  content_dir: `${__dirname}/content`,
+    // File Extension
+    extension: 'json',
 
-  // Path in which to store content history (Markdown files), no trailing slash
-  history_dir: `${__dirname}/content/history`,
+    // JSON stringify parameter for formatting output
+    spaces_article: 2,
+    spaces_history: 2,
+  },
 
-  // Path in which to store data (analytics, etc.), no trailing slash
-  data_dir: `${__dirname}/data`,
+  // Use the JSON analyticsProvider
+  AnalyticsProvider,
+  analyticsProviderConfig: {
+    directory: `${__dirname}/data`,
+  },
 
   // Use the Lunr Search Provider
   SearchProvider,
-
-  // Optional Lunr locale
-  lunr_locales: [],
+  searchProviderConfig: {
+    // Optional Lunr locale
+    lunr_locales: [],
+  },
 
   // Use the Multer Upload Provider
   UploadProvider,
-
-  // Path in which to store uploads (images etc.), no trailing slash
-  uploads_dir: `${__dirname}/uploads`,
+  uploadProviderConfig: {
+    // Path in which to store uploads (images etc.), no trailing slash
+    uploads_dir: `${__dirname}/uploads`,
+  }
 
   ...
 };
@@ -67,24 +78,6 @@ To run the test suite, first install the dependencies, then run `npm test`:
 $ npm install
 $ DEBUG=Uttori* npm test
 ```
-
-## TODO
-- Richer Meta Data
-  - Authors
-  - Images
-  - Language
-- History Diff View
-
-### TODO Eventually / Would Be Nice
-- Convert to `import` Syntax (Breaks Node v8)
-- Electron wrapper for wiki app.
-- Support for more Storage Providers:
-  - MySQL
-- Support for more Search Providers:
-  - http://fusejs.io/
-  - https://github.com/fergiemcdowall/search-index
-  - https://github.com/techfort/LokiJS
-  - https://github.com/weixsong/elasticlunr.js
 
 # Namesake
 

@@ -35,21 +35,20 @@ class UttoriWiki {
   async setup() {
     debug('Setting up...');
     // Rendering
-    this.renderer = new this.config.Renderer(this.config);
+    this.renderer = new this.config.Renderer(this.config.rendererConfig);
 
     // Storage
-    this.storageProvider = new this.config.StorageProvider(this.config);
+    this.storageProvider = new this.config.StorageProvider(this.config.storageProviderConfig);
 
     // Analytics
     this.analyticsProvider = new this.config.AnalyticsProvider(this.config.analyticsProviderConfig);
 
     // Uploads
-    this.uploadProvider = new this.config.UploadProvider(this.config);
+    this.uploadProvider = new this.config.UploadProvider(this.config.uploadProviderConfig);
 
     // Search
-    const documents = await this.getDocuments(['title', 'slug', 'content', 'tags']);
-    this.searchProvider = new this.config.SearchProvider(this.config);
-    await this.searchProvider.setup({ documents });
+    this.searchProvider = new this.config.SearchProvider(this.config.searchProviderConfig);
+    await this.searchProvider.setup(this.storageProvider);
     debug('Setup complete!');
   }
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const fs = require('fs-extra');
 
 // Server
@@ -28,24 +29,30 @@ const config = {
   // Specify the theme to use
   theme_dir: 'test/site/themes',
   theme_name: 'default',
-  content_dir: 'test/site/content',
-  history_dir: 'test/site/content/history',
-  uploads_dir: 'test/site/uploads',
-  data_dir: 'test/site/data',
   public_dir: 'test/site/themes/default/public',
-  // Providers
-  AnalyticsProvider,
-  StorageProvider,
-  SearchProvider,
-  UploadProvider,
-  Renderer,
   use_delete_key: true,
   delete_key: 'test-key',
   use_google_analytics: false,
   google_analytics_id: '',
+
+  // Providers
+  AnalyticsProvider,
   analyticsProviderConfig: {
     directory: 'test/site/data',
   },
+  StorageProvider,
+  storageProviderConfig: {
+    content_dir: 'test/site/content',
+    history_dir: 'test/site/content/history',
+  },
+  SearchProvider,
+  searchProviderConfig: {},
+  UploadProvider,
+  uploadProviderConfig: {
+    directory: 'test/site/uploads',
+  },
+  Renderer,
+  rendererConfig: {},
 };
 
 // Server & process.title (for stopping after)
@@ -63,7 +70,7 @@ server.engine('html', ejs.renderFile);
 
 // Setup Express
 server.use(express.static(config.public_dir));
-server.use('/uploads', express.static(config.uploads_dir));
+server.use('/uploads', express.static(config.uploadProviderConfig.directory));
 server.use(bodyParser.json({ limit: '50mb' }));
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
