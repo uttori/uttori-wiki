@@ -650,6 +650,7 @@ class UttoriWiki {
     try {
       popular = await this.analyticsProvider.getPopularDocuments(limit);
       debug('popular:', popular);
+      /* istanbul ignore else */
       if (popular.length > 0) {
         popular = R.reverse(R.pluck('slug')(popular));
         const slugs = `"${popular.join('", "')}"`;
@@ -657,7 +658,6 @@ class UttoriWiki {
         results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
         results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, popular)))(results);
       } else {
-        /* istanbul ignore next */
         debug('No popular documents returned from AnalyticsProvider');
       }
     } catch (error) {
