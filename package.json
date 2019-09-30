@@ -18,8 +18,6 @@
     "fs-extra": "^8.1.0",
     "ramda": "^0.26.1",
     "uttori-document": "^1.4.0",
-    "uttori-plugin-generator-sitemap": "^1.0.0",
-    "uttori-plugin-renderer-markdown-it": "^1.0.1",
     "uttori-utilities": "^1.6.0"
   },
   "optionalDependencies": {},
