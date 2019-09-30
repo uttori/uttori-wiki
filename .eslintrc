@@ -28,10 +28,9 @@
     "expect": true
   },
   "parserOptions": {
-    "ecmaVersion": 10
+    "ecmaVersion": 2018
   },
-  # Custom Disabled Rules
-  rules: {
+  "rules": {
     "import/no-dynamic-require": 0,
     "import/no-extraneous-dependencies": [
       "error", {
@@ -41,17 +40,19 @@
       }
     ],
     "node/no-unpublished-require": 0,
-    camelcase: 0,
-    global-require: 0,
-    max-len: 0,
-    no-empty: ["error", { "allowEmptyCatch": true }],
-    no-param-reassign: 0,
-    no-plusplus: 0, # Meaningless as other rules prevent the errors that could happen.
-    no-restricted-syntax: 0,
-    no-underscore-dangle: 0,
-    no-unused-vars: ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
+    "camelcase": 0,
+    "global-require": 0,
+    "max-len": 0,
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "no-param-reassign": 0,
+    "no-plusplus": 0,
+    "no-restricted-syntax": 0,
+    "no-underscore-dangle": 0,
+    "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
     "security/detect-object-injection": 0,
     "optimize-regex/optimize-regex": "warn",
-    "unicorn/filename-case": 0
+    "unicorn/filename-case": 0,
+    "unicorn/prevent-abbreviations": 0,
+    "ava/no-only-test": 0
   }
 }

@@ -95,20 +95,20 @@ test('redirects to the article after saving with new slug with case transforms',
   await fs.remove('test/site/content/test-new.json');
 });
 
-test('falls through to next when missing slug (params)', (t) => {
+test('falls through to next when missing slug (params)', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, null, next);
+  await uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when missing body', (t) => {
+test('falls through to next when missing body', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.save({ params: { slug: 'test-old' }, body: {} }, null, next);
+  await uttori.save({ params: { slug: 'test-old' }, body: {} }, null, next);
   t.true(next.calledOnce);
 });

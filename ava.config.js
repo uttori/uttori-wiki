@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 export default {
   files: [
     'test/**/*.test.js',

@@ -5,12 +5,12 @@ const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
-test.before(() => {
-  cleanup();
+test.before(async () => {
+  await cleanup();
 });
 
-test.after(() => {
-  cleanup();
+test.after(async () => {
+  await cleanup();
 });
 
 test.beforeEach(async () => {
@@ -21,21 +21,34 @@ test.beforeEach(async () => {
   });
 });
 
-test.afterEach(() => {
-  cleanup();
+test.afterEach(async () => {
+  await cleanup();
 });
 
-test('getRelatedDocuments(title, count): returns related documents', (t) => {
+test('getRelatedDocuments(limit, tags): returns related documents', async (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server);
-  t.deepEqual(uttori.getRelatedDocuments('example', 1), [{
-    content: '## Example Title',
-    createDate: 1459310452001,
-    html: '',
-    slug: 'example-title',
-    tags: ['Example Tag', 'example'],
-    title: 'Example Title',
-    updateDate: 1459310452001,
-  }]);
+  const uttori = new UttoriWiki({ ...config, skip_setup: true }, server);
+  await uttori.setup();
+  const related = await uttori.getRelatedDocuments({ slug: '___', tags: ['Cool'] }, 3);
+  t.deepEqual(related, [
+    {
+      title: 'Demo Title',
+      slug: 'demo-title',
+      content: '## Demo Title',
+      html: '',
+      updateDate: 1459310452002,
+      createDate: 1459310452002,
+      tags: ['Demo Tag', 'Cool'],
+    },
+    {
+      title: 'Fake Title',
+      slug: 'fake-title',
+      content: '## Fake Title',
+      html: '',
+      updateDate: 1459310452000,
+      createDate: 1459310452000,
+      tags: ['Fake Tag', 'Cool'],
+    },
+  ]);
 });

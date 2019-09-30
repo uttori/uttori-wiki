@@ -37,20 +37,20 @@ test('renders the requested slug history', async (t) => {
   t.is(title[1], 'Demo Title Revision History | Wiki');
 });
 
-test('falls through to next when slug is missing', (t) => {
+test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.historyIndex({ params: { slug: '' } }, null, next);
+  await uttori.historyIndex({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when no revision is found', (t) => {
+test('falls through to next when no revision is found', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.historyIndex({ params: { slug: 'missing' } }, null, next);
+  await uttori.historyIndex({ params: { slug: 'missing' } }, null, next);
   t.true(next.calledOnce);
 });

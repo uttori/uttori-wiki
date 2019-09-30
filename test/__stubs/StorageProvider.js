@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars, no-empty-function, class-methods-use-this */
-class UploadProvider {
+class StorageProvider {
   constructor(config = {}) {
     this.config = {
       uploads_dir: 'test/site/uploads',
@@ -7,13 +7,7 @@ class UploadProvider {
     };
   }
 
-  all() {}
-
-  deleteFile(fileName) {}
-
-  readFile(fileName) {}
-
-  storeFile(req, res, callback) {}
+  getQuery(query) {}
 }
 
-module.exports = UploadProvider;
+module.exports = StorageProvider;

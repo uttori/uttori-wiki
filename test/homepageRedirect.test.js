@@ -1,7 +1,6 @@
 const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
-const sinon = require('sinon');
 
 const UttoriWiki = require('../app');
 

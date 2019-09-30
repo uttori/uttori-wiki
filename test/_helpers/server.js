@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const fs = require('fs-extra');
 
 // Server
@@ -9,8 +10,8 @@ const path = require('path');
 
 const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
+const AnalyticsProvider = require('uttori-analytics-provider-json-file');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
-const Renderer = require('./../__stubs/Renderer.js');
 const defaultConfig = require('../../app/config.default.js');
 
 const config = {
@@ -27,22 +28,26 @@ const config = {
   // Specify the theme to use
   theme_dir: 'test/site/themes',
   theme_name: 'default',
-  content_dir: 'test/site/content',
-  history_dir: 'test/site/content/history',
-  uploads_dir: 'test/site/uploads',
-  data_dir: 'test/site/data',
   public_dir: 'test/site/themes/default/public',
-  // Providers
-  StorageProvider,
-  SearchProvider,
-  UploadProvider,
-  Renderer,
   use_delete_key: true,
   delete_key: 'test-key',
-  use_recaptcha: false,
-  recaptcha_site_key: '',
-  use_google_analytics: false,
-  google_analytics_id: '',
+
+  // Providers
+  AnalyticsProvider,
+  analyticsProviderConfig: {
+    directory: 'test/site/data',
+  },
+  StorageProvider,
+  storageProviderConfig: {
+    content_dir: 'test/site/content',
+    history_dir: 'test/site/content/history',
+  },
+  SearchProvider,
+  searchProviderConfig: {},
+  UploadProvider,
+  uploadProviderConfig: {
+    directory: 'test/site/uploads',
+  },
 };
 
 // Server & process.title (for stopping after)
@@ -60,12 +65,13 @@ server.engine('html', ejs.renderFile);
 
 // Setup Express
 server.use(express.static(config.public_dir));
-server.use('/uploads', express.static(config.uploads_dir));
+server.use('/uploads', express.static(config.uploadProviderConfig.directory));
 server.use(bodyParser.json({ limit: '50mb' }));
 server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
 if (process.argv[2] && process.argv[2] !== 'undefined') {
   console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
+  // eslint-disable-next-line prefer-destructuring
   process.title = process.argv[2];
 }
 

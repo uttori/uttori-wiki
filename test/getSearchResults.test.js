@@ -25,11 +25,13 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('getSearchResults(query, count): returns search results', (t) => {
+test('getSearchResults(query, count): returns search results', async (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki(config, server);
-  t.deepEqual(uttori.getSearchResults('example', 1), [{
+  const uttori = new UttoriWiki({ ...config, skip_setup: true }, server);
+  await uttori.setup();
+  const results = await uttori.getSearchResults('example', 1);
+  t.deepEqual(results, [{
     content: '## Example Title',
     createDate: 1459310452001,
     html: '',

@@ -1,8 +1,12 @@
-const fs = require('fs-extra');
 const debug = require('debug')('Uttori.Wiki');
 const R = require('ramda');
 const Document = require('uttori-document');
+const { EventDispatcher } = require('uttori-utilities');
 const defaultConfig = require('./config.default.js');
+
+const asyncHandler = (fn) => (request, response, next) => Promise
+  .resolve(fn(request, response, next))
+  .catch(next);
 
 class UttoriWiki {
   constructor(config, server) {
@@ -16,57 +20,75 @@ class UttoriWiki {
       throw new Error('No server provided.');
     }
 
+    // Setup configuration with defaults applied and overwritten with passed in custom values.
     this.config = { ...defaultConfig, ...config };
 
-    UttoriWiki.validateConfig(this.config);
+    // Instantiate the event bus / event dispatcher / hooks systems, as we will need it for every other step.
+    this.hooks = new EventDispatcher();
 
-    // reCaptcha Spam Prevention
-    this.recaptcha = undefined;
-    /* istanbul ignore next */
-    if (config.use_recaptcha) {
-      if (!config.recaptcha_site_key) {
-        debug('Error initializing reCaptcha: missing config variable recaptcha_site_key');
-      }
-      if (!config.recaptcha_secret_key) {
-        debug('Error initializing reCaptcha: missing config variable recaptcha_secret_key');
-      }
-      if (config.recaptcha_site_key && config.recaptcha_secret_key) {
-        try {
-          const { Recaptcha } = require('express-recaptcha');
-          this.recaptcha = new Recaptcha(config.recaptcha_site_key, config.recaptcha_secret_key);
-        } catch (error) {
-          debug('Error initializing reCaptcha:', error);
-          throw new Error('Error initializing reCaptcha:', error);
-        }
-      }
+    // Register any plugins found in the configuration.
+    this.registerPlugins(this.config);
+
+    // Validate the configuration and allow plugins to validate their own configruation.
+    this.validateConfig(this.config);
+
+    if (config.skip_setup !== true) {
+      this.setup();
     }
 
+    // Bind routes and expose the server for testing.
     this.server = server;
-
-    // Rendering
-    this.renderer = new this.config.Renderer(this.config);
-
-    // Storage
-    this.storageProvider = new this.config.StorageProvider(this.config);
-
-    // Uploads
-    this.uploadProvider = new this.config.UploadProvider(this.config);
-
-    // Search
-    this.searchProvider = new this.config.SearchProvider();
-    this.searchProvider.setup(this);
-
-    // Analytics
-    this.pageVisits = this.storageProvider.readObject('visits') || {};
-
-    this.bindRoutes();
+    this.bindRoutes(server);
   }
 
-  static validateConfig(config) {
+  async setup() {
+    debug('Setting up...');
+    // Storage
+    this.storageProvider = new this.config.StorageProvider(this.config.storageProviderConfig);
+
+    // Analytics
+    this.analyticsProvider = new this.config.AnalyticsProvider(this.config.analyticsProviderConfig);
+
+    // Uploads
+    this.uploadProvider = new this.config.UploadProvider(this.config.uploadProviderConfig);
+
+    // Search
+    this.searchProvider = new this.config.SearchProvider(this.config.searchProviderConfig);
+    await this.searchProvider.setup(this.storageProvider);
+
+    debug('Setup complete!');
+  }
+
+  registerPlugins(config) {
+    if (!config.plugins || !Array.isArray(config.plugins)) {
+      debug('No plugins configuration provided or plugins is not an Array, skipping.');
+      return;
+    }
+    if (config.plugins.length > 0) {
+      debug('Registering Plugins: ', config.plugins.length);
+      config.plugins.forEach(async (plugin) => {
+        /* istanbul ignore next */
+        if (plugin.startsWith('uttori-plugin-')) {
+          // eslint-disable-next-line security/detect-non-literal-require
+          const instance = require(plugin);
+          await instance.register(this);
+        } else {
+          debug(`Plugins must begin with 'uttori-plugin-', you provided: ${plugin}`);
+        }
+      });
+      debug('Registered Plugins');
+    }
+  }
+
+  validateConfig(config) {
     debug('Validating config...');
     if (!config.StorageProvider) {
       debug('Config Error: No StorageProvider provided.');
       throw new Error('No StorageProvider provided.');
+    }
+    if (!config.AnalyticsProvider) {
+      debug('Config Error: No AnalyticsProvider provided.');
+      throw new Error('No AnalyticsProvider provided.');
     }
     if (!config.SearchProvider) {
       debug('Config Error: No SearchProvider provided.');
@@ -76,14 +98,6 @@ class UttoriWiki {
       debug('Config Error: No UploadProvider provided.');
       throw new Error('No UploadProvider provided.');
     }
-    if (!config.Renderer) {
-      debug('Config Error: No Renderer provided.');
-      throw new Error('No Renderer provided.');
-    }
-    if (config.sitemap_url_filter && !Array.isArray(config.sitemap_url_filter)) {
-      debug('Config Error: `sitemap_url_filter` should be an array.');
-      throw new Error('sitemap_url_filter should be an array.');
-    }
     if (!config.theme_dir) {
       debug('Config Error: No theme_dir provided.');
       throw new Error('No theme_dir provided.');
@@ -92,16 +106,20 @@ class UttoriWiki {
       debug('Config Error: No public_dir provided.');
       throw new Error('No public_dir provided.');
     }
+
+    this.hooks.dispatch('validate-config', config, this);
+
     debug('Validated config.');
   }
 
-  buildMetadata(document = {}, path = '', robots = '') {
+  async buildMetadata(document = {}, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
 
     let description = document && document.excerpt ? document.excerpt : '';
-    if (!description) {
-      description = document && document.content ? `${document.content.substring(0, 160)}` : '';
-      description = this.renderer.render(description);
+    if (document && document.content && !description) {
+      /* istanbul ignore next */
+      description = document && document.content ? `${document.content.slice(0, 160)}` : '';
+      description = await this.hooks.filter('render-content', description, this);
     }
 
     const image = '';
@@ -109,7 +127,7 @@ class UttoriWiki {
     const published = document && document.createDate ? new Date(document.createDate).toISOString() : '';
     const title = document && document.title ? document.title : this.config.site_title;
 
-    return {
+    let metadata = {
       canonical,
       description,
       image,
@@ -118,157 +136,208 @@ class UttoriWiki {
       robots,
       title,
     };
+    metadata = await this.hooks.filter('view-model-metadata', metadata, this);
+
+    return metadata;
   }
 
-  bindRoutes() {
+  bindRoutes(server) {
     debug('Binding routes...');
     // Order: Home, Tags, Search, Placeholders, Document, Not Found
     // Home
-    this.server.get('/', this.home.bind(this));
-    this.server.get(`/${this.config.home_page}`, this.homepageRedirect.bind(this));
+    server.get('/', asyncHandler(this.home.bind(this)));
+    server.get(`/${this.config.home_page}`, asyncHandler(this.homepageRedirect.bind(this)));
 
     // Tags
-    this.server.get('/tags', this.tagIndex.bind(this));
-    this.server.get('/tags/:tag/', this.tag.bind(this));
+    server.get('/tags', asyncHandler(this.tagIndex.bind(this)));
+    server.get('/tags/:tag/', asyncHandler(this.tag.bind(this)));
 
     // Search
-    this.server.get('/search', this.search.bind(this));
+    server.get('/search', asyncHandler(this.search.bind(this)));
 
     // Not Found Placeholder
-    this.server.head('/404', this.notFound.bind(this));
-    this.server.get('/404', this.notFound.bind(this));
-    this.server.delete('/404', this.notFound.bind(this));
-    this.server.patch('/404', this.notFound.bind(this));
-    this.server.put('/404', this.notFound.bind(this));
-    this.server.post('/404', this.notFound.bind(this));
+    server.head('/404', asyncHandler(this.notFound.bind(this)));
+    server.get('/404', asyncHandler(this.notFound.bind(this)));
+    server.delete('/404', asyncHandler(this.notFound.bind(this)));
+    server.patch('/404', asyncHandler(this.notFound.bind(this)));
+    server.put('/404', asyncHandler(this.notFound.bind(this)));
+    server.post('/404', asyncHandler(this.notFound.bind(this)));
 
     // Document
-    this.server.get('/new', this.new.bind(this));
-    this.server.get('/:slug/edit', this.edit.bind(this));
-    this.server.get('/:slug/delete/:key', this.delete.bind(this));
-    this.server.get('/:slug/history', this.historyIndex.bind(this));
-    this.server.get('/:slug/history/:revision', this.historyDetail.bind(this));
-    this.server.get('/:slug/history/:revision/restore', this.historyRestore.bind(this));
-    this.server.post('/:slug/save', this.save.bind(this));
-    this.server.get('/:slug', this.detail.bind(this));
-    this.server.post('/upload', this.upload.bind(this));
+    server.get('/new', asyncHandler(this.new.bind(this)));
+    server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
+    server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
+    server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
+    server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
+    server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
+    server.post('/:slug/save', asyncHandler(this.save.bind(this)));
+    server.get('/:slug', asyncHandler(this.detail.bind(this)));
+    server.post('/upload', asyncHandler(this.upload.bind(this)));
 
     // Not Found - Catch All
-    this.server.get('/*', this.notFound.bind(this));
+    server.get('/*', asyncHandler(this.notFound.bind(this)));
+
+    this.hooks.dispatch('bind-routes', server, this);
+
     debug('Bound routes.');
   }
 
-  home(request, response, _next) {
+  async home(request, response, _next) {
     debug('Home Route');
-    const homeDocument = this.storageProvider.get(this.config.home_page);
-    homeDocument.html = this.renderer.render(homeDocument.content);
-    response.render('home', {
+    const homeDocument = await this.storageProvider.get(this.config.home_page);
+    /* istanbul ignore else */
+    if (homeDocument) {
+      homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
+    }
+
+    const recentDocuments = await this.getRecentDocuments(5);
+    const randomDocuments = await this.getRandomDocuments(5);
+    const popularDocuments = await this.getPopularDocuments(5);
+    const siteSections = await this.getSiteSections();
+    const meta = await this.buildMetadata(homeDocument, '');
+
+    let viewModel = {
       title: 'Home',
       config: this.config,
-      recentDocuments: this.getRecentDocuments(5),
-      randomDocuments: this.getRandomDocuments(5),
-      popularDocuments: this.getPopularDocuments(5),
-      siteSections: this.getSiteSections(),
+      recentDocuments,
+      randomDocuments,
+      popularDocuments,
+      siteSections,
       homeDocument,
-      meta: this.buildMetadata(homeDocument, ''),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-home', viewModel, this);
+
+    response.render('home', viewModel);
   }
 
+  /* eslint-disable class-methods-use-this */
   homepageRedirect(request, response, _next) {
-    debug('Home-Page Redirect');
+    debug('homepageRedirect');
     return response.redirect(301, `${request.protocol}://${request.hostname}/`);
   }
+  /* eslint-enable class-methods-use-this */
 
-  tagIndex(request, response, _next) {
+  async tagIndex(request, response, _next) {
     debug('Tag Index Route');
-    const taggedDocuments = this.getTags().reduce((acc, tag) => {
-      acc[tag] = this.getTaggedDocuments(tag);
-      return acc;
-    }, {});
-    response.render('tags', {
+    const tags = await this.storageProvider.tags();
+
+    const taggedDocuments = {};
+    Promise.all(tags.map(async (tag) => {
+      taggedDocuments[tag] = await this.getTaggedDocuments(tag);
+    }));
+
+    const recentDocuments = await this.getRecentDocuments(5);
+    const randomDocuments = await this.getRandomDocuments(5);
+    const popularDocuments = await this.getPopularDocuments(5);
+    const siteSections = await this.getSiteSections();
+    const meta = await this.buildMetadata({}, '/tags');
+
+    let viewModel = {
       title: 'Tags',
       config: this.config,
       taggedDocuments,
-      recentDocuments: this.getRecentDocuments(5),
-      randomDocuments: this.getRandomDocuments(5),
-      popularDocuments: this.getPopularDocuments(5),
-      siteSections: this.config.site_sections,
-      meta: this.buildMetadata({}, '/tags'),
-    });
+      recentDocuments,
+      randomDocuments,
+      popularDocuments,
+      siteSections,
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
+
+    response.render('tags', viewModel);
   }
 
-  tag(request, response, next) {
+  async tag(request, response, next) {
     debug('Tag Route');
-    const taggedDocuments = this.getTaggedDocuments(request.params.tag);
+    const taggedDocuments = await this.getTaggedDocuments(request.params.tag);
     if (taggedDocuments.length === 0) {
       debug('No documents for tag!');
       next();
       return;
     }
-    response.render('tag', {
+
+    const recentDocuments = await this.getRecentDocuments(5);
+    const randomDocuments = await this.getRandomDocuments(5);
+    const popularDocuments = await this.getPopularDocuments(5);
+    const meta = await this.buildMetadata({}, `/tags/${request.params.tag}`);
+
+    let viewModel = {
       title: request.params.tag,
       config: this.config,
-      recentDocuments: this.getRecentDocuments(5),
-      randomDocuments: this.getRandomDocuments(5),
-      popularDocuments: this.getPopularDocuments(5),
+      recentDocuments,
+      randomDocuments,
+      popularDocuments,
       taggedDocuments,
       section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
-      meta: this.buildMetadata({}, `/tags/${request.params.tag}`),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
+
+    response.render('tag', viewModel);
   }
 
-  search(request, response, _next) {
+  async search(request, response, _next) {
     debug('Search Route');
-    const viewModel = {
+    const meta = await this.buildMetadata({ title: 'Search' }, '/search');
+    let viewModel = {
       title: 'Search',
       config: this.config,
       searchTerm: '',
-      meta: this.buildMetadata({ title: 'Search' }, '/search'),
+      meta,
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
       const term = decodeURIComponent(request.query.s);
       viewModel.title = `Search results for "${request.query.s}"`;
       viewModel.searchTerm = term;
-      const searchResults = this.getSearchResults(term, 10);
+      const searchResults = await this.getSearchResults(term, 10);
       /* istanbul ignore next */
       viewModel.searchResults = searchResults.map((document) => {
-        let excerpt = document && document.excerpt ? document.excerpt.substring(0, this.config.excerpt_length) : '';
+        let excerpt = document && document.excerpt ? document.excerpt.slice(0, this.config.excerpt_length) : '';
         if (!excerpt) {
-          excerpt = document && document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
+          excerpt = document && document.content ? `${document.content.slice(0, this.config.excerpt_length)} ...` : '';
         }
-        document.html = this.renderer.render(excerpt);
+        document.html = excerpt;
         return document;
       });
-      viewModel.meta = this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
+      viewModel.meta = await this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
+      viewModel.searchResults = await this.hooks.filter('render-search-results', viewModel.searchResults, this);
     }
+    viewModel = await this.hooks.filter('view-model-search', viewModel, this);
+
     response.set('X-Robots-Tag', 'noindex');
     response.render('search', viewModel);
   }
 
-  edit(request, response, next) {
+  async edit(request, response, next) {
     debug('Edit Route');
     if (!request.params.slug) {
       debug('Missing slug!');
       next();
       return;
     }
-    const document = this.storageProvider.get(request.params.slug);
+    const document = await this.storageProvider.get(request.params.slug);
     if (!document) {
       debug('Missing document!');
       next();
       return;
     }
-    response.render('edit', {
+
+    const meta = await this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`);
+    let viewModel = {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
-      meta: this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
+
+    response.render('edit', viewModel);
   }
 
-  delete(request, response, next) {
+  async delete(request, response, next) {
     debug('Delete Route');
     /* istanbul ignore else */
     if (this.config.use_delete_key) {
@@ -285,11 +354,12 @@ class UttoriWiki {
     }
 
     const { slug } = request.params;
-    const document = this.storageProvider.get(slug);
+    const document = await this.storageProvider.get(slug);
     if (document) {
+      this.hooks.dispatch('document-delete', document, this);
       debug('Deleting document', document);
-      this.storageProvider.delete(slug);
-      this.searchProvider.indexRemove({ slug });
+      await this.storageProvider.delete(slug);
+      await this.searchProvider.indexRemove([document]);
       response.redirect(this.config.site_url);
     } else {
       debug('Nothing found to delete, next.');
@@ -297,38 +367,7 @@ class UttoriWiki {
     }
   }
 
-  saveValid(request, response, _next) {
-    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
-    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
-
-    // Create document from form
-    const document = new Document();
-    document.title = request.body.title;
-    document.excerpt = request.body.excerpt;
-    document.content = request.body.content;
-    document.tags = request.body.tags ? request.body.tags.split(',') : [];
-    document.slug = request.body.slug || request.params.slug;
-    document.slug = document.slug.toLowerCase();
-    /* istanbul ignore next */
-    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
-
-    // Save document
-    const originalSlug = request.body['original-slug'];
-    this.storageProvider.update(document, originalSlug);
-    this.searchProvider.indexUpdate(document);
-
-    // Remove old document if one existed
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== document.slug) {
-      debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
-      this.storageProvider.delete(originalSlug);
-      this.searchProvider.indexRemove({ slug: originalSlug });
-    }
-
-    this.generateSitemap();
-    response.redirect(`${this.config.site_url}/${document.slug}`);
-  }
-
-  save(request, response, next) {
+  async save(request, response, next) {
     debug('Save Route');
     if (!request.params.slug && !request.body.slug) {
       debug('Missing slug!');
@@ -340,39 +379,28 @@ class UttoriWiki {
       next();
       return;
     }
-    /* istanbul ignore next */
-    if (this.config.use_recaptcha) {
-      debug('Verifying with reCaptcha...');
-      this.recaptcha.verify(request, (error, data) => {
-        debug('reCaptch Verification Data:', data);
-        if (!error) {
-          debug('reCaptch Verified!');
-          this.saveValid(request, response, next);
-        } else {
-          debug('Invalid reCaptcha:', error);
-          next();
-        }
-      });
-    } else {
-      debug('Skipping reCaptcha...');
-      this.saveValid(request, response, next);
-    }
+    this.saveValid(request, response, next);
   }
 
-  new(request, response, _next) {
+  async new(request, response, _next) {
     debug('New Route');
     const document = new Document();
     document.slug = '';
     document.title = 'New Document';
-    response.render('edit', {
+
+    const meta = await this.buildMetadata(document, '/new');
+    let viewModel = {
       document,
       title: document.title,
       config: this.config,
-      meta: this.buildMetadata(document, '/new'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-new', viewModel, this);
+
+    response.render('edit', viewModel);
   }
 
-  detail(request, response, next) {
+  async detail(request, response, next) {
     debug('Detail Route');
     if (!request.params.slug) {
       debug('Missing slug.');
@@ -380,41 +408,48 @@ class UttoriWiki {
       return;
     }
 
-    const document = this.storageProvider.get(request.params.slug);
+    const document = await this.storageProvider.get(request.params.slug);
     if (!document) {
       debug('No document found for given slug:', request.params.slug);
       next();
       return;
     }
 
-    document.html = this.renderer.render(document.content);
-    this.updateViewCount(request.params.slug);
+    document.html = await this.hooks.filter('render-content', document.content, this);
 
-    response.render('detail', {
+    const recentDocuments = await this.getRecentDocuments(5);
+    const relatedDocuments = await this.getRelatedDocuments(document, 5);
+    const popularDocuments = await this.getPopularDocuments(5);
+    const meta = await this.buildMetadata(document, `/${request.params.slug}`);
+
+    let viewModel = {
       title: document.title,
       config: this.config,
       document,
-      popularDocuments: this.getPopularDocuments(5),
-      relatedDocuments: this.getRelatedDocuments(document.title, 5),
-      recentDocuments: this.getRecentDocuments(5),
-      meta: this.buildMetadata(document, `/${request.params.slug}`),
-    });
+      popularDocuments,
+      relatedDocuments,
+      recentDocuments,
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
+
+    response.render('detail', viewModel);
   }
 
-  historyIndex(request, response, next) {
+  async historyIndex(request, response, next) {
     debug('History Index Route');
     if (!request.params.slug) {
       debug('Missing slug.');
       next();
       return;
     }
-    const document = this.storageProvider.get(request.params.slug);
+    const document = await this.storageProvider.get(request.params.slug);
     if (!document) {
       debug('No document found for given slug:', request.params.slug);
       next();
       return;
     }
-    const history = this.storageProvider.getHistory(request.params.slug);
+    const history = await this.storageProvider.getHistory(request.params.slug);
     const historyByDay = history.reduce((acc, value) => {
       const d = new Date(parseInt(value, 10));
       const key = d.toISOString().split('T')[0];
@@ -422,21 +457,25 @@ class UttoriWiki {
       acc[key].push(value);
       return acc;
     }, {});
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `${document.title} Revision History`,
+    }, `/${request.params.slug}/history`, 'noindex');
 
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('history_index', {
+    let viewModel = {
       title: `${document.title} Revision History`,
       document,
       historyByDay,
       config: this.config,
-      meta: this.buildMetadata({
-        ...document,
-        title: `${document.title} Revision History`,
-      }, `/${request.params.slug}/history`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('history_index', viewModel);
   }
 
-  historyDetail(request, response, next) {
+  async historyDetail(request, response, next) {
     debug('History Detail Route');
     if (!request.params.slug) {
       debug('Missing slug.');
@@ -448,32 +487,34 @@ class UttoriWiki {
       next();
       return;
     }
-    const document = this.storageProvider.getRevision(request.params.slug, request.params.revision);
+    const document = await this.storageProvider.getRevision(request.params.slug, request.params.revision);
     if (!document) {
       debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
       next();
       return;
     }
 
-    document.html = this.renderer.render(document.content);
+    document.html = await this.hooks.filter('render-content', document.content, this);
 
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('detail', {
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `${document.title} Revision ${request.params.revision}`,
+    }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex');
+
+    let viewModel = {
       title: `${document.title} Revision ${request.params.revision}`,
       config: this.config,
       document,
       revision: request.params.revision,
-      popularDocuments: this.getPopularDocuments(5),
-      relatedDocuments: this.getRelatedDocuments(document.title, 5),
-      recentDocuments: this.getRecentDocuments(5),
-      meta: this.buildMetadata({
-        ...document,
-        title: `${document.title} Revision ${request.params.revision}`,
-      }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('detail', viewModel);
   }
 
-  historyRestore(request, response, next) {
+  async historyRestore(request, response, next) {
     debug('History Restore Route');
     if (!request.params.slug) {
       debug('Missing slug!');
@@ -485,23 +526,28 @@ class UttoriWiki {
       next();
       return;
     }
-    const document = this.storageProvider.getRevision(request.params.slug, request.params.revision);
+    const document = await this.storageProvider.getRevision(request.params.slug, request.params.revision);
     if (!document) {
       debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
       next();
       return;
     }
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('edit', {
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `Editing ${document.title} from Revision ${request.params.revision}`,
+    }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex');
+
+    let viewModel = {
       title: `Editing ${document.title} from Revision ${request.params.revision}`,
       document,
       revision: request.params.revision,
       config: this.config,
-      meta: this.buildMetadata({
-        ...document,
-        title: `Editing ${document.title} from Revision ${request.params.revision}`,
-      }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('edit', viewModel);
   }
 
   upload(request, response, _next) {
@@ -515,248 +561,174 @@ class UttoriWiki {
         status = 422;
         send = error;
       }
+
+      this.hooks.dispatch('file-upload', request.file, this);
+
       return response.status(status).send(send);
     });
   }
 
   // 404
-  notFound(request, response, _next) {
+  async notFound(request, response, _next) {
     debug('404 Not Found Route');
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('404', {
+
+    const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
+    let viewModel = {
       title: '404 Not Found',
       config: this.config,
       slug: request.params.slug || '404',
-      meta: this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('error-404', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('404', viewModel);
   }
 
   // Helpers
-  getDocuments() {
-    debug('getDocuments');
-    return R.reject(
-      R.propEq('slug', this.config.home_page),
-      this.storageProvider.all(),
-    );
-  }
+  async saveValid(request, response, _next) {
+    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
+    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
 
-  getSiteSections() {
-    debug('getSiteSections');
-    return R.map(section => ({
-      ...section,
-      documentCount: this.getTaggedDocuments(section.tag).length,
-    }), this.config.site_sections);
-  }
-
-  getRecentDocuments(count) {
-    debug('getRecentDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (a, b) => (b.updateDate - a.updateDate),
-        R.reject(
-          document => !document.updateDate,
-          this.getDocuments(),
-        ),
-      ),
-    );
-  }
-
-  getPopularDocuments(count) {
-    debug('getPopularDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (a, b) => this.getViewCount(b.slug) - this.getViewCount(a.slug),
-        R.reject(
-          document => this.getViewCount(document.slug) === 0,
-          this.getDocuments(),
-        ),
-      ),
-    );
-  }
-
-  getRandomDocuments(count) {
-    debug('getRandomDocuments:', count);
-    return R.take(
-      count,
-      R.sort(
-        (_a, _b) => Math.random() - Math.random(),
-        this.getDocuments(),
-      ),
-    );
-  }
-
-  getTags() {
-    debug('getTags');
-    let tags = R.pluck('tags')(this.getDocuments());
-    tags = R.uniq(R.flatten(tags));
-    tags = R.filter(R.identity)(tags);
-    tags = R.sort((a, b) => a.localeCompare(b), tags);
-    debug('getTags:', tags);
-    return tags;
-  }
-
-  getTaggedDocuments(tag) {
-    debug('getTaggedDocuments:', tag);
-    return R.sort(
-      (a, b) => (b.updateDate - a.updateDate),
-      R.filter(
-        document => document.tags.includes(tag),
-        this.getDocuments(),
-      ),
-    );
-  }
-
-  getRelatedDocuments(title, count) {
-    debug('getRelatedDocuments:', title, count);
-    let results = [];
+    // Create document from form
+    let document = new Document();
+    document.title = request.body.title;
+    document.excerpt = request.body.excerpt;
+    document.content = request.body.content;
+    document.tags = request.body.tags ? request.body.tags.split(',') : [];
+    document.slug = request.body.slug || request.params.slug;
+    document.slug = document.slug.toLowerCase();
     /* istanbul ignore next */
-    try {
-      results = this.searchProvider.relatedDocuments(title);
-    } catch (error) {
-      debug('getRelatedDocuments Error:', error);
+    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
+
+    document = await this.hooks.filter('document-save', document, this);
+
+    // Save document
+    const originalSlug = request.body['original-slug'];
+    await this.storageProvider.update(document, originalSlug);
+    await this.searchProvider.indexUpdate([document]);
+
+    // Remove old document if one existed
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== document.slug) {
+      debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
+      await this.storageProvider.delete(originalSlug);
+      await this.searchProvider.indexRemove([{ slug: originalSlug }]);
     }
-    return R.take(
-      count,
-      R.reject(
-        document => !document || document.title === title,
-        R.map(
-          result => R.find(
-            R.propEq('slug', result.ref),
-            this.getDocuments(),
-          ),
-          results,
-        ),
-      ),
-    );
+
+    response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
-  getSearchResults(query, count) {
-    debug('getSearchResults:', query, count);
+  async getSiteSections() {
+    debug('getSiteSections');
+    return Promise.all(this.config.site_sections.map(async (section) => {
+      const documents = await this.getTaggedDocuments(section.tag);
+      const documentCount = documents.length;
+      return {
+        ...section,
+        documentCount,
+      };
+    }));
+  }
+
+  async getRecentDocuments(limit) {
+    debug('getRecentDocuments:', limit);
     let results = [];
-    /* istanbul ignore next */
     try {
-      results = this.searchProvider.search(query);
+      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+      results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
     } catch (error) {
+      /* istanbul ignore next */
+      debug('getRecentDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
+  }
+
+  async getPopularDocuments(limit) {
+    debug('getPopularDocuments:', limit);
+    let results = [];
+    let popular = [];
+    try {
+      popular = await this.analyticsProvider.getPopularDocuments(limit);
+      debug('popular:', popular);
+      /* istanbul ignore else */
+      if (popular.length > 0) {
+        popular = R.reverse(R.pluck('slug')(popular));
+        const slugs = `"${popular.join('", "')}"`;
+        const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+        results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
+        results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, popular)))(results);
+      } else {
+        debug('No popular documents returned from AnalyticsProvider');
+      }
+    } catch (error) {
+      /* istanbul ignore next */
+      debug('getPopularDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
+  }
+
+  async getRandomDocuments(limit) {
+    debug('getRandomDocuments:', limit);
+    let results = [];
+    try {
+      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+      results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY RANDOM LIMIT ${limit}`);
+    } catch (error) {
+      /* istanbul ignore next */
+      debug('getRandomDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
+  }
+
+  async getTaggedDocuments(tag, limit = 1024) {
+    debug('getTaggedDocuments:', tag, limit);
+    let results = [];
+    try {
+      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+      const query = `SELECT 'slug', 'title', 'tags', 'updateDate' FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES "${tag}" ORDER BY title ASC LIMIT ${limit}`;
+      results = await this.storageProvider.getQuery(query);
+    } catch (error) {
+      /* istanbul ignore next */
+      debug('getTaggedDocuments Error:', error);
+    }
+    return R.reject(R.isNil, results);
+  }
+
+  async getRelatedDocuments(document, limit) {
+    debug('getRelatedDocuments:', document, limit);
+    let results = [];
+    /* istanbul ignore else */
+    if (document && Array.isArray(document.tags)) {
+      try {
+        const tags = `("${document.tags.join('", "')}")`;
+        const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+        const query = `SELECT 'slug', 'title', 'tags', 'updateDate' FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES ${tags} ORDER BY title ASC LIMIT ${limit}`;
+        results = await this.storageProvider.getQuery(query);
+      } catch (error) {
+        /* istanbul ignore next */
+        debug('getRelatedDocuments Error:', error);
+      }
+    }
+    return R.reject(R.isNil, results);
+  }
+
+  async getSearchResults(query, limit) {
+    debug('getSearchResults:', query, limit);
+    let results = [];
+    try {
+      const search_results = await this.searchProvider.search(query, limit);
+      /* istanbul ignore else */
+      if (this.searchProvider.shouldAugment(query, ['slug', 'title', 'excerpt', 'content'])) {
+        const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+        const slugs = `"${R.pluck('slug', search_results).join('", "')}"`;
+        results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
+        results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, R.pluck('slug', search_results))))(results);
+      }
+    } catch (error) {
+      /* istanbul ignore next */
       debug('getSearchResults Error:', error);
     }
-    return R.take(
-      count,
-      R.reject(
-        R.isNil,
-        R.map(
-          result => R.find(
-            R.propEq('slug', result.ref),
-            this.getDocuments(),
-          ),
-          results,
-        ),
-      ),
-    );
-  }
-
-  // Analytics
-  updateViewCount(slug) {
-    debug('updateViewCount:', slug);
-    if (!slug) {
-      return;
-    }
-    this.pageVisits[slug] = (this.pageVisits[slug] || 0) + 1;
-    this.storageProvider.storeObject('visits', this.pageVisits);
-  }
-
-  getViewCount(slug) {
-    debug('getViewCount:', slug);
-    return this.pageVisits[slug] || 0;
-  }
-
-  // Sitemaps
-  generateSitemapXML() {
-    debug('Generating Sitemap XML');
-    const sitemap = [
-      {
-        url: '/',
-        lastmod: new Date().toISOString(),
-        priority: '1.00',
-      },
-      {
-        url: '/tags',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-      {
-        url: '/new',
-        lastmod: new Date().toISOString(),
-        priority: '0.90',
-      },
-    ];
-
-    // Add all documents to the sitemap
-    this.getDocuments().forEach((document) => {
-      /* istanbul ignore next */
-      let lastmod = document.updateDate ? new Date(document.updateDate).toISOString() : '';
-      /* istanbul ignore next */
-      if (!lastmod) {
-        lastmod = document.createDate ? new Date(document.createDate).toISOString() : '';
-      }
-      sitemap.push({
-        url: `/${document.slug}`,
-        lastmod,
-        priority: '0.80',
-      });
-    });
-
-    let urlFilter = R.identity;
-    /* istanbul ignore else */
-    if (Array.isArray(this.config.sitemap_url_filter) && this.config.sitemap_url_filter.length > 0) {
-      urlFilter = (route) => {
-        let pass = true;
-        this.config.sitemap_url_filter.forEach((url_filter) => {
-          try {
-            if (url_filter.test(route.url)) {
-              pass = false;
-            }
-          } catch (error) {
-            /* istanbul ignore next */
-            debug('Sitemap Filter Error:', error, url_filter, route.url);
-          }
-        });
-        return pass;
-      };
-    }
-
-    const data = sitemap.reduce((accumulator, route) => {
-      if (urlFilter(route)) {
-        accumulator += `<url><loc>${this.config.sitemap_url}${route.url}</loc>`;
-        /* istanbul ignore else */
-        if (route.lastmod) {
-          accumulator += `<lastmod>${route.lastmod}</lastmod>`;
-        }
-        /* istanbul ignore else */
-        if (route.priority) {
-          accumulator += `<priority>${route.priority}</priority>`;
-        }
-        /* istanbul ignore next */
-        if (route.changefreq) {
-          accumulator += `<changefreq>${route.changefreq}</changefreq>`;
-        }
-        accumulator += '</url>';
-      }
-      return accumulator;
-    }, '');
-
-    return `${this.config.sitemap_header}${data}${this.config.sitemap_footer}`;
-  }
-
-  generateSitemap() {
-    debug('Generating Sitemap');
-    try {
-      fs.outputFileSync(`${this.config.public_dir}/${this.config.sitemap_filename}`, this.generateSitemapXML());
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('Error Generating Sitemap:', error);
-    }
+    return R.reject(R.isNil, results);
   }
 }
 

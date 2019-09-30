@@ -42,5 +42,5 @@ test('throws when missing server', (t) => {
 test('can stand up', (t) => {
   t.notThrows(() => {
     const _uttori = new UttoriWiki(config, server);
-  }, Error);
+  });
 });

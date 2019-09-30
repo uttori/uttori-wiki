@@ -32,6 +32,9 @@ const config = {
   // Slug of the root `/` page
   home_page: 'home-page',
 
+  // Slugs to ignore in search, recent and popular items
+  ignore_slugs: ['home-page'],
+
   // Excerpt length (used in search)
   excerpt_length: 400,
 
@@ -43,18 +46,6 @@ const config = {
   theme_dir: '',
   theme_name: 'default',
 
-  // Path in which to store uploads (images etc.), no trailing slash
-  uploads_dir: '',
-
-  // Path in which to store content (markdown files, etc.), no trailing slash
-  content_dir: '',
-
-  // Path in which to store content history (markdown files, etc.), no trailing slash
-  history_dir: '',
-
-  // Path in which to store data (analytics, etc.), no trailing slash
-  data_dir: '',
-
   // Path to the static file directory for themes, no trailing slash
   public_dir: '',
 
@@ -63,21 +54,6 @@ const config = {
 
   // Key used for verifying document deletion
   delete_key: '',
-
-  // Enable reCaptcha on Creation & Document Editing
-  use_recaptcha: false,
-
-  // reCaptcha Site key
-  recaptcha_site_key: '',
-
-  // reCaptcha Secret key
-  recaptcha_secret_key: '',
-
-  // Enable Google Analytics
-  use_google_analytics: false,
-
-  // Google Analytics UA ID
-  google_analytics_id: '',
 
   // Use OpenGraph and Meta Data
   use_meta_data: true,
@@ -97,20 +73,14 @@ const config = {
   // Open Graph: Image
   site_image: '',
 
-  // Sitemap URL (ie https://sfc.fm)
-  sitemap_url: '',
+  // Plugins
+  plugins: [],
 
-  // Sitemap URL Filter
-  sitemap_url_filter: [],
-
-  // Sitemap XML Header
-  sitemap_header: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">',
-
-  // Sitemap XML Footer
-  sitemap_footer: '</urlset>',
-
-  // Sitemap Filename
-  sitemap_filename: 'sitemap.xml',
+  // Provider Specific Configurations
+  analyticsProviderConfig: {},
+  searchProviderConfig: {},
+  storageProviderConfig: {},
+  uploadProviderConfig: {},
 };
 
 module.exports = config;

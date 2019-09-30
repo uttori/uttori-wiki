@@ -33,34 +33,34 @@ test('renders the edit page for a given slug', async (t) => {
   const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/demo-title/history/1500000000000/restore');
   t.is(response.status, 200);
-  t.is(response.text.substring(0, 15), '<!DOCTYPE html>');
+  t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'Editing Demo Title Beta from Revision 1500000000000 | Wiki');
 });
 
-test('falls through to next when slug is missing', (t) => {
+test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.historyRestore({ params: { slug: '' } }, null, next);
+  await uttori.historyRestore({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when revision is missing', (t) => {
+test('falls through to next when revision is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.historyRestore({ params: { slug: 'demo-title', revision: '' } }, null, next);
+  await uttori.historyRestore({ params: { slug: 'demo-title', revision: '' } }, null, next);
   t.true(next.calledOnce);
 });
 
-test('falls through to next when no revision is found', (t) => {
+test('falls through to next when no revision is found', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
   const uttori = new UttoriWiki(config, server);
-  uttori.historyRestore({ params: { slug: 'demo-title', revision: '1' } }, null, next);
+  await uttori.historyRestore({ params: { slug: 'demo-title', revision: '1' } }, null, next);
   t.true(next.calledOnce);
 });

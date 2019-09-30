@@ -5,12 +5,12 @@ const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
-test.before(() => {
-  cleanup();
+test.before(async () => {
+  await cleanup();
 });
 
-test.after(() => {
-  cleanup();
+test.after(async () => {
+  await cleanup();
 });
 
 test.beforeEach(async () => {
@@ -21,16 +21,16 @@ test.beforeEach(async () => {
   });
 });
 
-test.afterEach(() => {
-  cleanup();
+test.afterEach(async () => {
+  await cleanup();
 });
 
-test('getSiteSections(count): returns the config sections with tag counts', (t) => {
+test('getSiteSections(count): returns the config sections with tag counts', async (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
-
-  t.deepEqual(uttori.getSiteSections(), [{
+  const sections = await uttori.getSiteSections();
+  t.deepEqual(sections, [{
     description: 'Example description text.',
     documentCount: 1,
     tag: 'example',

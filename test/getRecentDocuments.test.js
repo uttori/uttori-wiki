@@ -5,12 +5,12 @@ const UttoriWiki = require('../app');
 
 const { config, server, cleanup } = require('./_helpers/server.js');
 
-test.before(() => {
-  cleanup();
+test.before(async () => {
+  await cleanup();
 });
 
-test.after(() => {
-  cleanup();
+test.after(async () => {
+  await cleanup();
 });
 
 test.beforeEach(async () => {
@@ -21,15 +21,16 @@ test.beforeEach(async () => {
   });
 });
 
-test.afterEach(() => {
-  cleanup();
+test.afterEach(async () => {
+  await cleanup();
 });
 
-test('getRecentDocuments(count): returns the requested number of the most recently updated documents', (t) => {
+test('getRecentDocuments(count): returns the requested number of the most recently updated documents', async (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
-  t.deepEqual(uttori.getRecentDocuments(1), [{
+  const recent = await uttori.getRecentDocuments(1);
+  t.deepEqual(recent, [{
     content: '## Demo Title',
     createDate: 1459310452002,
     html: '',
