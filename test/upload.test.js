@@ -33,5 +33,5 @@ test('upload(req, res, next): uploads the file and returns the filename', async 
   const response = await request(uttori.server).post('/upload').attach('file', 'test/site/favicon.gif');
 
   t.is(response.status, 200);
-  t.is(response.text.substring(0, 8), 'favicon-');
+  t.is(response.text.slice(0, 8), 'favicon-');
 });

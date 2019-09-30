@@ -33,7 +33,7 @@ test('renders the edit page for a given slug', async (t) => {
   const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/demo-title/edit');
   t.is(response.status, 200);
-  t.is(response.text.substring(0, 15), '<!DOCTYPE html>');
+  t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'Editing Demo Title | Wiki');
 });

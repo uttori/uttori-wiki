@@ -4,8 +4,6 @@ UttoriWiki is a fast, simple, wiki knowledge base for Express.js & Node.js that 
 
 UttoriWiki is the wiki module for the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or update to fit specific needs. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage module! Already running a bunch of external dependencies and want to plug into those? You can most likely do it!
 
-UttoriWiki was originally a fork of [Hazel](https://github.com/wkallhof/hazel) but has since become a set of projects with every aspect of the original codebase having been fully rewritten, fully tested, and refactored into several smaller projects each with a brand new set of unit tests. The goal has shifted away from just being a wiki to becoming a modular set of components to quickly spin up not only a wiki, but many other types of content flows all powered by the same underlying components.
-
 ## Site Configuration
 
 Please see `app/config.default.js` for all options. You will likely want something like the following changes for your site:
@@ -14,7 +12,6 @@ Please see `app/config.default.js` for all options. You will likely want somethi
 const StorageProvider = require('uttori-storage-provider-json-file');
 const SearchProvider = require('uttori-search-provider-lunr');
 const UploadProvider = require('uttori-upload-provider-multer');
-const Renderer = require('uttori-renderer-markdown-it');
 
 const config = {
   // Specify the theme to use, no trailing slash
@@ -22,10 +19,6 @@ const config = {
 
   // Path to the static file directory for themes, no trailing slash
   public_dir: `${__dirname}/themes/default/public`,
-
-  // Use the Markdown Renderer
-  Renderer,
-  rendererConfig: {},
 
   // Use the JSON to Disk Storage Provider
   StorageProvider,
@@ -64,6 +57,7 @@ const config = {
     uploads_dir: `${__dirname}/uploads`,
   }
 
+  // Plugins
   ...
 };
 
@@ -79,15 +73,12 @@ $ npm install
 $ DEBUG=Uttori* npm test
 ```
 
-# Namesake
+## Contributors
 
-> ウットリ, うっとり: When you become enraptured by beauty. In rapture, in ecstasy, captivated. A rapt stare.
+- [Matthew Callis](https://github.com/MatthewCallis) - rewrite, refactor, testing of UttoriWiki
+- [Wade Kallhoff](https://github.com/wkallhof) - original author of Hazel
+- [Egor Kuryanovich](https://github.com/Sontan) - contributions to the original Hazel codebase
 
-# Contributors
+## License
 
- - [Matthew Callis](https://github.com/MatthewCallis) - rewrite, refactor, testing of UttoriWiki
- - [Wade Kallhoff](https://github.com/wkallhof) - original author of Hazel
- - [Egor Kuryanovich](https://github.com/Sontan) - contributions to the original Hazel codebase
-
-# License
-  [GPL-3.0](LICENSE)
+[GPL-3.0](LICENSE)

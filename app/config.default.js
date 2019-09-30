@@ -55,12 +55,6 @@ const config = {
   // Key used for verifying document deletion
   delete_key: '',
 
-  // Enable Google Analytics
-  use_google_analytics: false,
-
-  // Google Analytics UA ID
-  google_analytics_id: '',
-
   // Use OpenGraph and Meta Data
   use_meta_data: true,
 
@@ -79,45 +73,10 @@ const config = {
   // Open Graph: Image
   site_image: '',
 
-  // Sitemap URL (ie https://sfc.fm)
-  sitemap_url: '',
-
-  // Sitemap URL Filter
-  sitemap_url_filter: [],
-
-  // Sitemap XML Header
-  sitemap_header: '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">',
-
-  // Sitemap XML Footer
-  sitemap_footer: '</urlset>',
-
-  // Sitemap Filename
-  sitemap_filename: 'sitemap.xml',
-
-  // Sitemap default page priority
-  sitemap_page_priority: '0.80',
-
-  // Sitemap Routes, must be an array.
-  sitemap: [
-    {
-      url: '/',
-      lastmod: new Date().toISOString(),
-      priority: '1.00',
-    },
-    {
-      url: '/tags',
-      lastmod: new Date().toISOString(),
-      priority: '0.90',
-    },
-    {
-      url: '/new',
-      lastmod: new Date().toISOString(),
-      priority: '0.90',
-    },
-  ],
+  // Plugins
+  plugins: [],
 
   // Provider Specific Configurations
-  rendererConfig: {},
   analyticsProviderConfig: {},
   searchProviderConfig: {},
   storageProviderConfig: {},

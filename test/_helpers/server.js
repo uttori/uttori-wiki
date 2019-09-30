@@ -12,7 +12,6 @@ const StorageProvider = require('uttori-storage-provider-json-file');
 const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
 const AnalyticsProvider = require('uttori-analytics-provider-json-file');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
-const Renderer = require('./../__stubs/Renderer.js');
 const defaultConfig = require('../../app/config.default.js');
 
 const config = {
@@ -32,8 +31,6 @@ const config = {
   public_dir: 'test/site/themes/default/public',
   use_delete_key: true,
   delete_key: 'test-key',
-  use_google_analytics: false,
-  google_analytics_id: '',
 
   // Providers
   AnalyticsProvider,
@@ -51,8 +48,6 @@ const config = {
   uploadProviderConfig: {
     directory: 'test/site/uploads',
   },
-  Renderer,
-  rendererConfig: {},
 };
 
 // Server & process.title (for stopping after)

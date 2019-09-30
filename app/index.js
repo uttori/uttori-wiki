@@ -1,7 +1,7 @@
 const debug = require('debug')('Uttori.Wiki');
 const R = require('ramda');
 const Document = require('uttori-document');
-const UttoriSitemap = require('./sitemap');
+const { EventDispatcher } = require('uttori-utilities');
 const defaultConfig = require('./config.default.js');
 
 const asyncHandler = (fn) => (request, response, next) => Promise
@@ -20,23 +20,29 @@ class UttoriWiki {
       throw new Error('No server provided.');
     }
 
+    // Setup configuration with defaults applied and overwritten with passed in custom values.
     this.config = { ...defaultConfig, ...config };
 
-    UttoriWiki.validateConfig(this.config);
+    // Instantiate the event bus / event dispatcher / hooks systems, as we will need it for every other step.
+    this.hooks = new EventDispatcher();
 
-    this.server = server;
+    // Register any plugins found in the configuration.
+    this.registerPlugins(this.config);
+
+    // Validate the configuration and allow plugins to validate their own configruation.
+    this.validateConfig(this.config);
 
     if (config.skip_setup !== true) {
       this.setup();
     }
-    this.bindRoutes();
+
+    // Bind routes and expose the server for testing.
+    this.server = server;
+    this.bindRoutes(server);
   }
 
   async setup() {
     debug('Setting up...');
-    // Rendering
-    this.renderer = new this.config.Renderer(this.config.rendererConfig);
-
     // Storage
     this.storageProvider = new this.config.StorageProvider(this.config.storageProviderConfig);
 
@@ -49,10 +55,32 @@ class UttoriWiki {
     // Search
     this.searchProvider = new this.config.SearchProvider(this.config.searchProviderConfig);
     await this.searchProvider.setup(this.storageProvider);
+
     debug('Setup complete!');
   }
 
-  static validateConfig(config) {
+  registerPlugins(config) {
+    if (!config.plugins || !Array.isArray(config.plugins)) {
+      debug('No plugins configuration provided or plugins is not an Array, skipping.');
+      return;
+    }
+    if (config.plugins.length > 0) {
+      debug('Registering Plugins: ', config.plugins.length);
+      config.plugins.forEach(async (plugin) => {
+        /* istanbul ignore next */
+        if (plugin.startsWith('uttori-plugin-')) {
+          // eslint-disable-next-line security/detect-non-literal-require
+          const instance = require(plugin);
+          await instance.register(this);
+        } else {
+          debug(`Plugins must begin with 'uttori-plugin-', you provided: ${plugin}`);
+        }
+      });
+      debug('Registered Plugins');
+    }
+  }
+
+  validateConfig(config) {
     debug('Validating config...');
     if (!config.StorageProvider) {
       debug('Config Error: No StorageProvider provided.');
@@ -70,18 +98,6 @@ class UttoriWiki {
       debug('Config Error: No UploadProvider provided.');
       throw new Error('No UploadProvider provided.');
     }
-    if (!config.Renderer) {
-      debug('Config Error: No Renderer provided.');
-      throw new Error('No Renderer provided.');
-    }
-    if (!Array.isArray(config.sitemap)) {
-      debug('Config Error: `sitemap` should be an array.');
-      throw new Error('sitemap should be an array.');
-    }
-    if (config.sitemap_url_filter && !Array.isArray(config.sitemap_url_filter)) {
-      debug('Config Error: `sitemap_url_filter` should be an array.');
-      throw new Error('sitemap_url_filter should be an array.');
-    }
     if (!config.theme_dir) {
       debug('Config Error: No theme_dir provided.');
       throw new Error('No theme_dir provided.');
@@ -90,17 +106,20 @@ class UttoriWiki {
       debug('Config Error: No public_dir provided.');
       throw new Error('No public_dir provided.');
     }
+
+    this.hooks.dispatch('validate-config', config, this);
+
     debug('Validated config.');
   }
 
-  buildMetadata(document = {}, path = '', robots = '') {
+  async buildMetadata(document = {}, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
 
     let description = document && document.excerpt ? document.excerpt : '';
     if (document && document.content && !description) {
       /* istanbul ignore next */
-      description = document && document.content ? `${document.content.substring(0, 160)}` : '';
-      description = this.renderer.render(description);
+      description = document && document.content ? `${document.content.slice(0, 160)}` : '';
+      description = await this.hooks.filter('render-content', description, this);
     }
 
     const image = '';
@@ -108,7 +127,7 @@ class UttoriWiki {
     const published = document && document.createDate ? new Date(document.createDate).toISOString() : '';
     const title = document && document.title ? document.title : this.config.site_title;
 
-    return {
+    let metadata = {
       canonical,
       description,
       image,
@@ -117,43 +136,49 @@ class UttoriWiki {
       robots,
       title,
     };
+    metadata = await this.hooks.filter('view-model-metadata', metadata, this);
+
+    return metadata;
   }
 
-  bindRoutes() {
+  bindRoutes(server) {
     debug('Binding routes...');
     // Order: Home, Tags, Search, Placeholders, Document, Not Found
     // Home
-    this.server.get('/', asyncHandler(this.home.bind(this)));
-    this.server.get(`/${this.config.home_page}`, asyncHandler(this.homepageRedirect.bind(this)));
+    server.get('/', asyncHandler(this.home.bind(this)));
+    server.get(`/${this.config.home_page}`, asyncHandler(this.homepageRedirect.bind(this)));
 
     // Tags
-    this.server.get('/tags', asyncHandler(this.tagIndex.bind(this)));
-    this.server.get('/tags/:tag/', asyncHandler(this.tag.bind(this)));
+    server.get('/tags', asyncHandler(this.tagIndex.bind(this)));
+    server.get('/tags/:tag/', asyncHandler(this.tag.bind(this)));
 
     // Search
-    this.server.get('/search', asyncHandler(this.search.bind(this)));
+    server.get('/search', asyncHandler(this.search.bind(this)));
 
     // Not Found Placeholder
-    this.server.head('/404', asyncHandler(this.notFound.bind(this)));
-    this.server.get('/404', asyncHandler(this.notFound.bind(this)));
-    this.server.delete('/404', asyncHandler(this.notFound.bind(this)));
-    this.server.patch('/404', asyncHandler(this.notFound.bind(this)));
-    this.server.put('/404', asyncHandler(this.notFound.bind(this)));
-    this.server.post('/404', asyncHandler(this.notFound.bind(this)));
+    server.head('/404', asyncHandler(this.notFound.bind(this)));
+    server.get('/404', asyncHandler(this.notFound.bind(this)));
+    server.delete('/404', asyncHandler(this.notFound.bind(this)));
+    server.patch('/404', asyncHandler(this.notFound.bind(this)));
+    server.put('/404', asyncHandler(this.notFound.bind(this)));
+    server.post('/404', asyncHandler(this.notFound.bind(this)));
 
     // Document
-    this.server.get('/new', asyncHandler(this.new.bind(this)));
-    this.server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
-    this.server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
-    this.server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
-    this.server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
-    this.server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
-    this.server.post('/:slug/save', asyncHandler(this.save.bind(this)));
-    this.server.get('/:slug', asyncHandler(this.detail.bind(this)));
-    this.server.post('/upload', asyncHandler(this.upload.bind(this)));
+    server.get('/new', asyncHandler(this.new.bind(this)));
+    server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
+    server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
+    server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
+    server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
+    server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
+    server.post('/:slug/save', asyncHandler(this.save.bind(this)));
+    server.get('/:slug', asyncHandler(this.detail.bind(this)));
+    server.post('/upload', asyncHandler(this.upload.bind(this)));
 
     // Not Found - Catch All
-    this.server.get('/*', asyncHandler(this.notFound.bind(this)));
+    server.get('/*', asyncHandler(this.notFound.bind(this)));
+
+    this.hooks.dispatch('bind-routes', server, this);
+
     debug('Bound routes.');
   }
 
@@ -162,15 +187,16 @@ class UttoriWiki {
     const homeDocument = await this.storageProvider.get(this.config.home_page);
     /* istanbul ignore else */
     if (homeDocument) {
-      homeDocument.html = this.renderer.render(homeDocument.content);
+      homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
     }
 
     const recentDocuments = await this.getRecentDocuments(5);
     const randomDocuments = await this.getRandomDocuments(5);
     const popularDocuments = await this.getPopularDocuments(5);
     const siteSections = await this.getSiteSections();
+    const meta = await this.buildMetadata(homeDocument, '');
 
-    response.render('home', {
+    let viewModel = {
       title: 'Home',
       config: this.config,
       recentDocuments,
@@ -178,8 +204,11 @@ class UttoriWiki {
       popularDocuments,
       siteSections,
       homeDocument,
-      meta: this.buildMetadata(homeDocument, ''),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-home', viewModel, this);
+
+    response.render('home', viewModel);
   }
 
   /* eslint-disable class-methods-use-this */
@@ -202,8 +231,9 @@ class UttoriWiki {
     const randomDocuments = await this.getRandomDocuments(5);
     const popularDocuments = await this.getPopularDocuments(5);
     const siteSections = await this.getSiteSections();
+    const meta = await this.buildMetadata({}, '/tags');
 
-    response.render('tags', {
+    let viewModel = {
       title: 'Tags',
       config: this.config,
       taggedDocuments,
@@ -211,8 +241,11 @@ class UttoriWiki {
       randomDocuments,
       popularDocuments,
       siteSections,
-      meta: this.buildMetadata({}, '/tags'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
+
+    response.render('tags', viewModel);
   }
 
   async tag(request, response, next) {
@@ -227,8 +260,9 @@ class UttoriWiki {
     const recentDocuments = await this.getRecentDocuments(5);
     const randomDocuments = await this.getRandomDocuments(5);
     const popularDocuments = await this.getPopularDocuments(5);
+    const meta = await this.buildMetadata({}, `/tags/${request.params.tag}`);
 
-    response.render('tag', {
+    let viewModel = {
       title: request.params.tag,
       config: this.config,
       recentDocuments,
@@ -237,17 +271,21 @@ class UttoriWiki {
       taggedDocuments,
       section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
-      meta: this.buildMetadata({}, `/tags/${request.params.tag}`),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
+
+    response.render('tag', viewModel);
   }
 
   async search(request, response, _next) {
     debug('Search Route');
-    const viewModel = {
+    const meta = await this.buildMetadata({ title: 'Search' }, '/search');
+    let viewModel = {
       title: 'Search',
       config: this.config,
       searchTerm: '',
-      meta: this.buildMetadata({ title: 'Search' }, '/search'),
+      meta,
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
@@ -257,15 +295,18 @@ class UttoriWiki {
       const searchResults = await this.getSearchResults(term, 10);
       /* istanbul ignore next */
       viewModel.searchResults = searchResults.map((document) => {
-        let excerpt = document && document.excerpt ? document.excerpt.substring(0, this.config.excerpt_length) : '';
+        let excerpt = document && document.excerpt ? document.excerpt.slice(0, this.config.excerpt_length) : '';
         if (!excerpt) {
-          excerpt = document && document.content ? `${document.content.substring(0, this.config.excerpt_length)} ...` : '';
+          excerpt = document && document.content ? `${document.content.slice(0, this.config.excerpt_length)} ...` : '';
         }
-        document.html = this.renderer.render(excerpt);
+        document.html = excerpt;
         return document;
       });
-      viewModel.meta = this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
+      viewModel.meta = await this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
+      viewModel.searchResults = await this.hooks.filter('render-search-results', viewModel.searchResults, this);
     }
+    viewModel = await this.hooks.filter('view-model-search', viewModel, this);
+
     response.set('X-Robots-Tag', 'noindex');
     response.render('search', viewModel);
   }
@@ -283,12 +324,17 @@ class UttoriWiki {
       next();
       return;
     }
-    response.render('edit', {
+
+    const meta = await this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`);
+    let viewModel = {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
-      meta: this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
+
+    response.render('edit', viewModel);
   }
 
   async delete(request, response, next) {
@@ -310,6 +356,7 @@ class UttoriWiki {
     const { slug } = request.params;
     const document = await this.storageProvider.get(slug);
     if (document) {
+      this.hooks.dispatch('document-delete', document, this);
       debug('Deleting document', document);
       await this.storageProvider.delete(slug);
       await this.searchProvider.indexRemove([document]);
@@ -318,37 +365,6 @@ class UttoriWiki {
       debug('Nothing found to delete, next.');
       next();
     }
-  }
-
-  async saveValid(request, response, _next) {
-    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
-    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
-
-    // Create document from form
-    const document = new Document();
-    document.title = request.body.title;
-    document.excerpt = request.body.excerpt;
-    document.content = request.body.content;
-    document.tags = request.body.tags ? request.body.tags.split(',') : [];
-    document.slug = request.body.slug || request.params.slug;
-    document.slug = document.slug.toLowerCase();
-    /* istanbul ignore next */
-    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
-
-    // Save document
-    const originalSlug = request.body['original-slug'];
-    await this.storageProvider.update(document, originalSlug);
-    await this.searchProvider.indexUpdate([document]);
-
-    // Remove old document if one existed
-    if (originalSlug && originalSlug.length > 0 && originalSlug !== document.slug) {
-      debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
-      await this.storageProvider.delete(originalSlug);
-      await this.searchProvider.indexRemove([{ slug: originalSlug }]);
-    }
-
-    UttoriSitemap.generateSitemap(this.config, await this.getDocuments(['slug', 'createDate', 'updateDate']));
-    response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
   async save(request, response, next) {
@@ -371,12 +387,17 @@ class UttoriWiki {
     const document = new Document();
     document.slug = '';
     document.title = 'New Document';
-    response.render('edit', {
+
+    const meta = await this.buildMetadata(document, '/new');
+    let viewModel = {
       document,
       title: document.title,
       config: this.config,
-      meta: this.buildMetadata(document, '/new'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-new', viewModel, this);
+
+    response.render('edit', viewModel);
   }
 
   async detail(request, response, next) {
@@ -394,21 +415,25 @@ class UttoriWiki {
       return;
     }
 
-    document.html = this.renderer.render(document.content);
+    document.html = await this.hooks.filter('render-content', document.content, this);
 
     const recentDocuments = await this.getRecentDocuments(5);
     const relatedDocuments = await this.getRelatedDocuments(document, 5);
     const popularDocuments = await this.getPopularDocuments(5);
+    const meta = await this.buildMetadata(document, `/${request.params.slug}`);
 
-    response.render('detail', {
+    let viewModel = {
       title: document.title,
       config: this.config,
       document,
       popularDocuments,
       relatedDocuments,
       recentDocuments,
-      meta: this.buildMetadata(document, `/${request.params.slug}`),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
+
+    response.render('detail', viewModel);
   }
 
   async historyIndex(request, response, next) {
@@ -432,18 +457,22 @@ class UttoriWiki {
       acc[key].push(value);
       return acc;
     }, {});
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `${document.title} Revision History`,
+    }, `/${request.params.slug}/history`, 'noindex');
 
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('history_index', {
+    let viewModel = {
       title: `${document.title} Revision History`,
       document,
       historyByDay,
       config: this.config,
-      meta: this.buildMetadata({
-        ...document,
-        title: `${document.title} Revision History`,
-      }, `/${request.params.slug}/history`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('history_index', viewModel);
   }
 
   async historyDetail(request, response, next) {
@@ -465,19 +494,24 @@ class UttoriWiki {
       return;
     }
 
-    document.html = this.renderer.render(document.content);
+    document.html = await this.hooks.filter('render-content', document.content, this);
 
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('detail', {
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `${document.title} Revision ${request.params.revision}`,
+    }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex');
+
+    let viewModel = {
       title: `${document.title} Revision ${request.params.revision}`,
       config: this.config,
       document,
       revision: request.params.revision,
-      meta: this.buildMetadata({
-        ...document,
-        title: `${document.title} Revision ${request.params.revision}`,
-      }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('detail', viewModel);
   }
 
   async historyRestore(request, response, next) {
@@ -498,18 +532,22 @@ class UttoriWiki {
       next();
       return;
     }
+    const meta = await this.buildMetadata({
+      ...document,
+      title: `Editing ${document.title} from Revision ${request.params.revision}`,
+    }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex');
 
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('edit', {
+    let viewModel = {
       title: `Editing ${document.title} from Revision ${request.params.revision}`,
       document,
       revision: request.params.revision,
       config: this.config,
-      meta: this.buildMetadata({
-        ...document,
-        title: `Editing ${document.title} from Revision ${request.params.revision}`,
-      }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('edit', viewModel);
   }
 
   upload(request, response, _next) {
@@ -523,6 +561,9 @@ class UttoriWiki {
         status = 422;
         send = error;
       }
+
+      this.hooks.dispatch('file-upload', request.file, this);
+
       return response.status(status).send(send);
     });
   }
@@ -530,29 +571,51 @@ class UttoriWiki {
   // 404
   async notFound(request, response, _next) {
     debug('404 Not Found Route');
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('404', {
+
+    const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
+    let viewModel = {
       title: '404 Not Found',
       config: this.config,
       slug: request.params.slug || '404',
-      meta: this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex'),
-    });
+      meta,
+    };
+    viewModel = await this.hooks.filter('error-404', viewModel, this);
+
+    response.set('X-Robots-Tag', 'noindex');
+    response.render('404', viewModel);
   }
 
   // Helpers
-  async getDocuments(fields) {
-    debug('getDocuments');
-    let all = [];
-    try {
-      all = await this.storageProvider.all(fields);
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('getDocuments Error:', error);
+  async saveValid(request, response, _next) {
+    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
+    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
+
+    // Create document from form
+    let document = new Document();
+    document.title = request.body.title;
+    document.excerpt = request.body.excerpt;
+    document.content = request.body.content;
+    document.tags = request.body.tags ? request.body.tags.split(',') : [];
+    document.slug = request.body.slug || request.params.slug;
+    document.slug = document.slug.toLowerCase();
+    /* istanbul ignore next */
+    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
+
+    document = await this.hooks.filter('document-save', document, this);
+
+    // Save document
+    const originalSlug = request.body['original-slug'];
+    await this.storageProvider.update(document, originalSlug);
+    await this.searchProvider.indexUpdate([document]);
+
+    // Remove old document if one existed
+    if (originalSlug && originalSlug.length > 0 && originalSlug !== document.slug) {
+      debug(`Changing slug from "${originalSlug}" to "${document.slug}", cleaning up old files.`);
+      await this.storageProvider.delete(originalSlug);
+      await this.searchProvider.indexRemove([{ slug: originalSlug }]);
     }
-    return R.reject(
-      R.propEq('slug', this.config.home_page),
-      all,
-    );
+
+    response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
   async getSiteSections() {

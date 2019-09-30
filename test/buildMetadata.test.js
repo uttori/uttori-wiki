@@ -25,12 +25,12 @@ test.afterEach(() => {
   cleanup();
 });
 
-test('buildMetadata(document, path, robots): can build metadata with empty object', (t) => {
+test('buildMetadata(document, path, robots): can build metadata with empty object', async (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
 
-  t.deepEqual(uttori.buildMetadata(), {
+  t.deepEqual(await uttori.buildMetadata(), {
     canonical: `${config.site_url}/`,
     description: '',
     image: '',
@@ -41,12 +41,12 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata with simple document', (t) => {
+test('buildMetadata(document, path, robots): can build metadata with simple document', async (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
 
-  t.deepEqual(uttori.buildMetadata({
+  t.deepEqual(await uttori.buildMetadata({
     excerpt: 'Test',
     content: '# Test',
     updateDate: 1553915818665,
@@ -63,12 +63,12 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata without an excerpt', (t) => {
+test('buildMetadata(document, path, robots): can build metadata without an excerpt', async (t) => {
   t.plan(1);
 
   const uttori = new UttoriWiki(config, server);
 
-  t.deepEqual(uttori.buildMetadata({
+  t.deepEqual(await uttori.buildMetadata({
     excerpt: '',
     content: '# Test',
     updateDate: 1553915818665,
