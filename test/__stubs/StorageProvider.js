@@ -2,12 +2,17 @@
 class StorageProvider {
   constructor(config = {}) {
     this.config = {
-      uploads_dir: 'test/site/uploads',
       ...config,
     };
   }
 
-  getQuery(query) {}
+  async getQuery(query) {}
+
+  async get(slug) {}
+
+  async update(document, originalSlug) {}
+
+  async delete(originalSlug) {}
 }
 
 module.exports = StorageProvider;

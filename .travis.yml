@@ -12,9 +12,9 @@ cache:
   - "$HOME/.npm"
 
 script:
-  - npm run validate --prod
   - npm run lint
-  - npm run test
+  - npm run validate --prod
+  - npm run test && nyc report --reporter=text-lcov | coveralls
 
 branches:
   only:

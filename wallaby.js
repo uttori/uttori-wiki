@@ -1,6 +1,6 @@
 module.exports = () => ({
   files: [
-    'app/**/*.js',
+    'src/**/*.js',
     { pattern: 'test/__stubs/*.js', instrument: false },
     { pattern: 'test/_helpers/*.js', instrument: false },
     { pattern: 'test/site/favicon.gif', binary: true },

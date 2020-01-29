@@ -4,20 +4,20 @@ const Document = require('uttori-document');
 const { EventDispatcher } = require('uttori-utilities');
 const defaultConfig = require('./config.default.js');
 
-const asyncHandler = (fn) => (request, response, next) => Promise
-  .resolve(fn(request, response, next))
-  .catch(next);
+const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
 
 class UttoriWiki {
   constructor(config, server) {
     debug('Contructing...');
     if (!config) {
-      debug('No config provided.');
-      throw new Error('No config provided.');
+      const error = 'No config provided.';
+      debug(error);
+      throw new Error(error);
     }
     if (!server) {
-      debug('No server provided.');
-      throw new Error('No server provided.');
+      const error = 'No server provided.';
+      debug(error);
+      throw new Error(error);
     }
 
     // Setup configuration with defaults applied and overwritten with passed in custom values.
@@ -36,8 +36,13 @@ class UttoriWiki {
       this.setup();
     }
 
-    // Bind routes and expose the server for testing.
-    this.server = server;
+    // Expose server to tests.
+    /* istanbul ignore next */
+    if (process.env.NODE_ENV === 'test') {
+      this.server = server;
+    }
+
+    // Bind routes.
     this.bindRoutes(server);
   }
 
@@ -45,12 +50,6 @@ class UttoriWiki {
     debug('Setting up...');
     // Storage
     this.storageProvider = new this.config.StorageProvider(this.config.storageProviderConfig);
-
-    // Analytics
-    this.analyticsProvider = new this.config.AnalyticsProvider(this.config.analyticsProviderConfig);
-
-    // Uploads
-    this.uploadProvider = new this.config.UploadProvider(this.config.uploadProviderConfig);
 
     // Search
     this.searchProvider = new this.config.SearchProvider(this.config.searchProviderConfig);
@@ -68,12 +67,10 @@ class UttoriWiki {
       debug('Registering Plugins: ', config.plugins.length);
       config.plugins.forEach(async (plugin) => {
         /* istanbul ignore next */
-        if (plugin.startsWith('uttori-plugin-')) {
-          // eslint-disable-next-line security/detect-non-literal-require
-          const instance = require(plugin);
-          await instance.register(this);
-        } else {
-          debug(`Plugins must begin with 'uttori-plugin-', you provided: ${plugin}`);
+        try {
+          plugin.register(this);
+        } catch (error) {
+          debug('Plugin Error:', error);
         }
       });
       debug('Registered Plugins');
@@ -86,17 +83,9 @@ class UttoriWiki {
       debug('Config Error: No StorageProvider provided.');
       throw new Error('No StorageProvider provided.');
     }
-    if (!config.AnalyticsProvider) {
-      debug('Config Error: No AnalyticsProvider provided.');
-      throw new Error('No AnalyticsProvider provided.');
-    }
     if (!config.SearchProvider) {
       debug('Config Error: No SearchProvider provided.');
       throw new Error('No SearchProvider provided.');
-    }
-    if (!config.UploadProvider) {
-      debug('Config Error: No UploadProvider provided.');
-      throw new Error('No UploadProvider provided.');
     }
     if (!config.theme_dir) {
       debug('Config Error: No theme_dir provided.');
@@ -172,7 +161,6 @@ class UttoriWiki {
     server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
     server.post('/:slug/save', asyncHandler(this.save.bind(this)));
     server.get('/:slug', asyncHandler(this.detail.bind(this)));
-    server.post('/upload', asyncHandler(this.upload.bind(this)));
 
     // Not Found - Catch All
     server.get('/*', asyncHandler(this.notFound.bind(this)));
@@ -190,18 +178,12 @@ class UttoriWiki {
       homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
     }
 
-    const recentDocuments = await this.getRecentDocuments(5);
-    const randomDocuments = await this.getRandomDocuments(5);
-    const popularDocuments = await this.getPopularDocuments(5);
     const siteSections = await this.getSiteSections();
     const meta = await this.buildMetadata(homeDocument, '');
 
     let viewModel = {
       title: 'Home',
       config: this.config,
-      recentDocuments,
-      randomDocuments,
-      popularDocuments,
       siteSections,
       homeDocument,
       meta,
@@ -218,7 +200,7 @@ class UttoriWiki {
   }
   /* eslint-enable class-methods-use-this */
 
-  async tagIndex(request, response, _next) {
+  async tagIndex(_request, response, _next) {
     debug('Tag Index Route');
     const tags = await this.storageProvider.tags();
 
@@ -227,9 +209,6 @@ class UttoriWiki {
       taggedDocuments[tag] = await this.getTaggedDocuments(tag);
     }));
 
-    const recentDocuments = await this.getRecentDocuments(5);
-    const randomDocuments = await this.getRandomDocuments(5);
-    const popularDocuments = await this.getPopularDocuments(5);
     const siteSections = await this.getSiteSections();
     const meta = await this.buildMetadata({}, '/tags');
 
@@ -237,9 +216,6 @@ class UttoriWiki {
       title: 'Tags',
       config: this.config,
       taggedDocuments,
-      recentDocuments,
-      randomDocuments,
-      popularDocuments,
       siteSections,
       meta,
     };
@@ -257,17 +233,11 @@ class UttoriWiki {
       return;
     }
 
-    const recentDocuments = await this.getRecentDocuments(5);
-    const randomDocuments = await this.getRandomDocuments(5);
-    const popularDocuments = await this.getPopularDocuments(5);
     const meta = await this.buildMetadata({}, `/tags/${request.params.tag}`);
 
     let viewModel = {
       title: request.params.tag,
       config: this.config,
-      recentDocuments,
-      randomDocuments,
-      popularDocuments,
       taggedDocuments,
       section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
@@ -379,10 +349,19 @@ class UttoriWiki {
       next();
       return;
     }
-    this.saveValid(request, response, next);
+    // Check for spam or otherwise veryify, redirect back if true, continue to update if false.
+    const invalid = await this.hooks.validate('validate-save', request, this);
+    if (invalid) {
+      debug('Invalid:', request.params.slug, JSON.stringify(request.body));
+      this.hooks.dispatch('validate-invalid', request, this);
+      response.redirect(request.header('Referer') || '/');
+      return;
+    }
+    this.hooks.dispatch('validate-valid', request, this);
+    await this.saveValid(request, response, next);
   }
 
-  async new(request, response, _next) {
+  async new(_request, response, _next) {
     debug('New Route');
     const document = new Document();
     document.slug = '';
@@ -417,18 +396,12 @@ class UttoriWiki {
 
     document.html = await this.hooks.filter('render-content', document.content, this);
 
-    const recentDocuments = await this.getRecentDocuments(5);
-    const relatedDocuments = await this.getRelatedDocuments(document, 5);
-    const popularDocuments = await this.getPopularDocuments(5);
     const meta = await this.buildMetadata(document, `/${request.params.slug}`);
 
     let viewModel = {
       title: document.title,
       config: this.config,
       document,
-      popularDocuments,
-      relatedDocuments,
-      recentDocuments,
       meta,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
@@ -550,24 +523,6 @@ class UttoriWiki {
     response.render('edit', viewModel);
   }
 
-  upload(request, response, _next) {
-    debug('Upload Route');
-    this.uploadProvider.storeFile(request, response, (error) => {
-      let status = 200;
-      let send = request.file.filename;
-      /* istanbul ignore next */
-      if (error) {
-        debug('Upload Error:', error);
-        status = 422;
-        send = error;
-      }
-
-      this.hooks.dispatch('file-upload', request.file, this);
-
-      return response.status(status).send(send);
-    });
-  }
-
   // 404
   async notFound(request, response, _next) {
     debug('404 Not Found Route');
@@ -579,7 +534,7 @@ class UttoriWiki {
       slug: request.params.slug || '404',
       meta,
     };
-    viewModel = await this.hooks.filter('error-404', viewModel, this);
+    viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
     response.render('404', viewModel);
@@ -630,56 +585,6 @@ class UttoriWiki {
     }));
   }
 
-  async getRecentDocuments(limit) {
-    debug('getRecentDocuments:', limit);
-    let results = [];
-    try {
-      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-      results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('getRecentDocuments Error:', error);
-    }
-    return R.reject(R.isNil, results);
-  }
-
-  async getPopularDocuments(limit) {
-    debug('getPopularDocuments:', limit);
-    let results = [];
-    let popular = [];
-    try {
-      popular = await this.analyticsProvider.getPopularDocuments(limit);
-      debug('popular:', popular);
-      /* istanbul ignore else */
-      if (popular.length > 0) {
-        popular = R.reverse(R.pluck('slug')(popular));
-        const slugs = `"${popular.join('", "')}"`;
-        const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-        results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
-        results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, popular)))(results);
-      } else {
-        debug('No popular documents returned from AnalyticsProvider');
-      }
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('getPopularDocuments Error:', error);
-    }
-    return R.reject(R.isNil, results);
-  }
-
-  async getRandomDocuments(limit) {
-    debug('getRandomDocuments:', limit);
-    let results = [];
-    try {
-      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-      results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY RANDOM LIMIT ${limit}`);
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('getRandomDocuments Error:', error);
-    }
-    return R.reject(R.isNil, results);
-  }
-
   async getTaggedDocuments(tag, limit = 1024) {
     debug('getTaggedDocuments:', tag, limit);
     let results = [];
@@ -694,35 +599,17 @@ class UttoriWiki {
     return R.reject(R.isNil, results);
   }
 
-  async getRelatedDocuments(document, limit) {
-    debug('getRelatedDocuments:', document, limit);
-    let results = [];
-    /* istanbul ignore else */
-    if (document && Array.isArray(document.tags)) {
-      try {
-        const tags = `("${document.tags.join('", "')}")`;
-        const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-        const query = `SELECT 'slug', 'title', 'tags', 'updateDate' FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES ${tags} ORDER BY title ASC LIMIT ${limit}`;
-        results = await this.storageProvider.getQuery(query);
-      } catch (error) {
-        /* istanbul ignore next */
-        debug('getRelatedDocuments Error:', error);
-      }
-    }
-    return R.reject(R.isNil, results);
-  }
-
   async getSearchResults(query, limit) {
     debug('getSearchResults:', query, limit);
     let results = [];
     try {
-      const search_results = await this.searchProvider.search(query, limit);
+      results = await this.searchProvider.search(query, limit);
       /* istanbul ignore else */
       if (this.searchProvider.shouldAugment(query, ['slug', 'title', 'excerpt', 'content'])) {
         const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-        const slugs = `"${R.pluck('slug', search_results).join('", "')}"`;
+        const slugs = `"${R.pluck('slug', results).join('", "')}"`;
         results = await this.storageProvider.getQuery(`SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT ${limit}`);
-        results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, R.pluck('slug', search_results))))(results);
+        results = R.sortBy(R.pipe(R.prop('slug'), R.indexOf(R.__, R.pluck('slug', results))))(results);
       }
     } catch (error) {
       /* istanbul ignore next */

@@ -8,11 +8,10 @@ const layouts = require('express-ejs-layouts');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-const StorageProvider = require('uttori-storage-provider-json-file');
-const UploadProvider = require('uttori-upload-provider-multer'); // require('./__stubs/UploadProvider.js');
-const AnalyticsProvider = require('uttori-analytics-provider-json-file');
+// const StorageProvider = require('uttori-storage-provider-json-file');
+const StorageProvider = require('./../__stubs/StorageProvider.js');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
-const defaultConfig = require('../../app/config.default.js');
+const defaultConfig = require('../../src/config.default.js');
 
 const config = {
   ...defaultConfig,
@@ -33,10 +32,6 @@ const config = {
   delete_key: 'test-key',
 
   // Providers
-  AnalyticsProvider,
-  analyticsProviderConfig: {
-    directory: 'test/site/data',
-  },
   StorageProvider,
   storageProviderConfig: {
     content_dir: 'test/site/content',
@@ -44,51 +39,50 @@ const config = {
   },
   SearchProvider,
   searchProviderConfig: {},
-  UploadProvider,
-  uploadProviderConfig: {
-    directory: 'test/site/uploads',
-  },
 };
 
-// Server & process.title (for stopping after)
-const server = express();
-server.set('port', process.env.PORT || 8123);
-server.set('ip', process.env.IP || '127.0.0.1');
+const serverSetup = () => {
+  // Server & process.title (for stopping after)
+  const server = express();
+  server.set('port', process.env.PORT || 8123);
+  server.set('ip', process.env.IP || '127.0.0.1');
 
-server.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
-server.use(layouts);
-server.set('layout extractScripts', true);
-server.set('layout extractStyles', true);
-server.set('view engine', 'html');
-// server.enable('view cache');
-server.engine('html', ejs.renderFile);
+  server.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
+  server.use(layouts);
+  server.set('layout extractScripts', true);
+  server.set('layout extractStyles', true);
+  server.set('view engine', 'html');
+  // server.enable('view cache');
+  server.engine('html', ejs.renderFile);
 
-// Setup Express
-server.use(express.static(config.public_dir));
-server.use('/uploads', express.static(config.uploadProviderConfig.directory));
-server.use(bodyParser.json({ limit: '50mb' }));
-server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
+  // Setup Express
+  server.use(express.static(config.public_dir));
+  server.use(bodyParser.json({ limit: '50mb' }));
+  server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
-if (process.argv[2] && process.argv[2] !== 'undefined') {
-  console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
-  // eslint-disable-next-line prefer-destructuring
-  process.title = process.argv[2];
-}
+  if (process.argv[2] && process.argv[2] !== 'undefined') {
+    console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
+    // eslint-disable-next-line prefer-destructuring
+    process.title = process.argv[2];
+  }
 
-// Is this a require()?
-if (require.main === module) {
-  console.log('Starting test server...');
-  server.listen(server.get('port'), server.get('ip'));
-}
+  // Is this a require()?
+  if (require.main === module) {
+    console.log('Starting test server...');
+    server.listen(server.get('port'), server.get('ip'));
+  }
+
+  return server;
+};
 
 const cleanup = async () => {
+  try { await fs.remove('test/site/content/history/test-validate-invalid'); } catch (error) {}
+  try { await fs.remove('test/site/content/history/test-validate-valid'); } catch (error) {}
   try { await fs.remove('test/site/content/history/test-delete'); } catch (error) {}
   try { await fs.remove('test/site/content/history/test-new'); } catch (error) {}
   try { await fs.remove('test/site/content/test-old.json'); } catch (error) {}
   try { await fs.remove('test/site/data/visits.json'); } catch (error) {}
   try { await fs.remove('test/site/themes/default/public/sitemap.xml'); } catch (error) {}
-  try { await fs.remove('test/site/uploads'); } catch (error) {}
-  try { await fs.ensureDir('test/site/uploads'); } catch (error) {}
 };
 
-module.exports = { config, server, cleanup };
+module.exports = { config, serverSetup, cleanup };

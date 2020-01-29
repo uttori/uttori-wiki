@@ -1,11 +1,11 @@
-const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
+const StorageProvider = require('uttori-storage-provider-json-file');
 
-const UttoriWiki = require('../app');
+const UttoriWiki = require('../src');
 
-const { config, server, cleanup } = require('./_helpers/server.js');
+const { config, serverSetup, cleanup } = require('./_helpers/server.js');
 
 test.before(() => {
   cleanup();
@@ -15,14 +15,6 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(async () => {
-  await fs.writeJson('test/site/data/visits.json', {
-    'example-title': 2,
-    'demo-title': 0,
-    'fake-title': 1,
-  });
-});
-
 test.afterEach(() => {
   cleanup();
 });
@@ -30,7 +22,8 @@ test.afterEach(() => {
 test('renders the edit page for a given slug', async (t) => {
   t.plan(3);
 
-  const uttori = new UttoriWiki(config, server);
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
   const response = await request(uttori.server).get('/demo-title/edit');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
@@ -42,7 +35,8 @@ test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server);
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
   await uttori.edit({ params: { slug: '' } }, null, next);
   t.true(next.calledOnce);
 });
@@ -51,7 +45,8 @@ test('falls through to next when document is missing', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();
-  const uttori = new UttoriWiki(config, server);
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
   await uttori.edit({ params: { slug: 'missing-document' } }, null, next);
   t.true(next.calledOnce);
 });

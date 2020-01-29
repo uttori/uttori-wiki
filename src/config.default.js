@@ -77,10 +77,8 @@ const config = {
   plugins: [],
 
   // Provider Specific Configurations
-  analyticsProviderConfig: {},
   searchProviderConfig: {},
   storageProviderConfig: {},
-  uploadProviderConfig: {},
 };
 
 module.exports = config;

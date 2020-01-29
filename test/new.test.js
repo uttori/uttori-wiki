@@ -1,10 +1,9 @@
-const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 
-const UttoriWiki = require('../app');
+const UttoriWiki = require('../src');
 
-const { config, server, cleanup } = require('./_helpers/server.js');
+const { config, serverSetup, cleanup } = require('./_helpers/server.js');
 
 test.before(() => {
   cleanup();
@@ -14,14 +13,6 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(async () => {
-  await fs.writeJson('test/site/data/visits.json', {
-    'example-title': 2,
-    'demo-title': 0,
-    'fake-title': 1,
-  });
-});
-
 test.afterEach(() => {
   cleanup();
 });
@@ -29,6 +20,7 @@ test.afterEach(() => {
 test('new(request, response, _next): renders', async (t) => {
   t.plan(3);
 
+  const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   const response = await request(uttori.server).get('/new');
   t.is(response.status, 200);

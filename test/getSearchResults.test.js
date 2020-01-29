@@ -1,9 +1,9 @@
-const fs = require('fs-extra');
 const test = require('ava');
+const StorageProvider = require('uttori-storage-provider-json-file');
 
-const UttoriWiki = require('../app');
+const UttoriWiki = require('../src');
 
-const { config, server, cleanup } = require('./_helpers/server.js');
+const { config, serverSetup, cleanup } = require('./_helpers/server.js');
 
 test.before(() => {
   cleanup();
@@ -13,14 +13,6 @@ test.after(() => {
   cleanup();
 });
 
-test.beforeEach(async () => {
-  await fs.writeJson('test/site/data/visits.json', {
-    'example-title': 2,
-    'demo-title': 0,
-    'fake-title': 1,
-  });
-});
-
 test.afterEach(() => {
   cleanup();
 });
@@ -28,7 +20,8 @@ test.afterEach(() => {
 test('getSearchResults(query, count): returns search results', async (t) => {
   t.plan(1);
 
-  const uttori = new UttoriWiki({ ...config, skip_setup: true }, server);
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, StorageProvider, skip_setup: true }, server);
   await uttori.setup();
   const results = await uttori.getSearchResults('example', 1);
   t.deepEqual(results, [{
