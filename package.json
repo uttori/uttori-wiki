@@ -60,7 +60,7 @@
     "ignoredByWatcher": [
       "!src/**/*.js"
     ],
-    "concurrency": 1,
+    "concurrency": 10,
     "failFast": false,
     "tap": false,
     "verbose": true
@@ -81,7 +81,7 @@
     "report": "nyc report --reporter=html",
     "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
     "posttest": "killall -SIGINT uttori-wiki-test-server || true",
-    "test": "NODE_ENV=test nyc ava --serial",
+    "test": "NODE_ENV=test nyc ava",
     "test-debug": "DEBUG=Uttori* NODE_ENV=test ava --serial",
     "validate": "npm ls"
   }
