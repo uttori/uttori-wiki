@@ -6,7 +6,28 @@ const defaultConfig = require('./config.default.js');
 
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
 
+/**
+  * UttoriWiki is a fast, simple, wiki knowledge base.
+  * @property {Object} config - The configuration object.
+  * @property {EventDispatcher} hooks - The hook / event dispatching object.
+  * @property {Express} server - The Express server instance (only exposed when testing).
+  * @property {StorageProvider} storageProvider - The Storage Provider instance.
+  * @property {SearchProvider} searchProvider - The Search Provider instance.
+  * @example <caption>Init UttoriWiki</caption>
+  * const server = express();
+  * // Server Setup
+  * const wiki = new UttoriWiki(config, server);
+  * server.listen(server.get('port'), server.get('ip'), () => { ... });
+  * @class
+  */
 class UttoriWiki {
+/**
+  * Creates an instance of UttoriWiki.
+  * @param {Object} config - A configuration object.
+  * @param {Boolean} [config.skip_setup] - Skips running provider setup (used for testing).
+  * @param {Express} server - The Express server instance.
+  * @constructor
+  */
   constructor(config, server) {
     debug('Contructing...');
     if (!config) {
@@ -46,6 +67,13 @@ class UttoriWiki {
     this.bindRoutes(server);
   }
 
+  /**
+   * Setups the Storage Provider and the Search Provider.
+   * @async
+   * @example
+   * wiki.setup();
+   * @memberof UttoriWiki
+   */
   async setup() {
     debug('Setting up...');
     // Storage
@@ -58,6 +86,14 @@ class UttoriWiki {
     debug('Setup complete!');
   }
 
+  /**
+   * Registers plugins with the Event Dispatcher.
+   * @param {Object} config - A configuration object.
+   * @param {Object[]} config.plugins - A collection of plugins to register.
+   * @example
+   * wiki.registerPlugins(config);
+   * @memberof UttoriWiki
+   */
   registerPlugins(config) {
     if (!config.plugins || !Array.isArray(config.plugins)) {
       debug('No plugins configuration provided or plugins is not an Array, skipping.');
@@ -77,6 +113,20 @@ class UttoriWiki {
     }
   }
 
+  /**
+   * Validates the config.
+   *
+   * Hooks:
+   * - `dispatch` - `validate-config` - Passes in the config object.
+   * @param {Object} config - A configuration object.
+   * @param {StorageProvider} config.StorageProvider - A StorageProvider class.
+   * @param {SearchProvider} config.SearchProvider - A SearchProvider class.
+   * @param {String} config.theme_dir - The path to the theme directory.
+   * @param {String} config.public_dir - The path to the public facing directory.
+   * @example
+   * wiki.validateConfig(config);
+   * @memberof UttoriWiki
+   */
   validateConfig(config) {
     debug('Validating config...');
     if (!config.StorageProvider) {
@@ -101,6 +151,34 @@ class UttoriWiki {
     debug('Validated config.');
   }
 
+  /**
+   * Builds the metadata for the view model.
+   *
+   * Hooks:
+   * - `filter` - `render-content` - Passes in the meta description.
+   * @async
+   * @param {UttoriDocument} [document={}] - A configuration object.
+   * @param {String} document.excerpt - The meta description to be used.
+   * @param {String} document.content - The document content to be used as a backup meta description when excerpt is not provided.
+   * @param {Number} document.updateDate - The Unix timestamp of the last update date to the document.
+   * @param {Number} document.createDate - The Unix timestamp of the creation date of the document.
+   * @param {String} document.title - The document title to be used in meta data.
+   * @param {String} [path=''] - The URL path to build meta data for.
+   * @param {String} [robots=''] - A meta robots tag value.
+   * @example
+   * const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
+   * ➜ {
+   * ➜   canonical,   // `${this.config.site_url}/private-document-path`
+   * ➜   description, // document.excerpt ? `${document.content.slice(0, 160)}`
+   * ➜   image,       // '' unless augmented via Plugin
+   * ➜   modified,    // new Date(document.updateDate).toISOString()
+   * ➜   published,   // new Date(document.createDate).toISOString()
+   * ➜   robots,      // 'no-index'
+   * ➜   title,       // document.title ? this.config.site_title
+   * ➜ }
+   * @returns {Object} Metadata object.
+   * @memberof UttoriWiki
+   */
   async buildMetadata(document = {}, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
 
@@ -130,9 +208,19 @@ class UttoriWiki {
     return metadata;
   }
 
+  /**
+   * Bind the routes to the server.
+   * Routes are bound in the order of Home, Tags, Search, Not Found Placeholder, Document, Plugins, Not Found - Catch All
+   *
+   * Hooks:
+   * - `dispatch` - `bind-routes` - Passes in the server instance.
+   * @param {Express} server - The Express server instance.
+   * @example
+   * wiki.bindRoutes(server);
+   * @memberof UttoriWiki
+   */
   bindRoutes(server) {
     debug('Binding routes...');
-    // Order: Home, Tags, Search, Placeholders, Document, Not Found
     // Home
     server.get('/', asyncHandler(this.home.bind(this)));
     server.get(`/${this.config.home_page}`, asyncHandler(this.homepageRedirect.bind(this)));
@@ -162,15 +250,29 @@ class UttoriWiki {
     server.post('/:slug/save', asyncHandler(this.save.bind(this)));
     server.get('/:slug', asyncHandler(this.detail.bind(this)));
 
+    this.hooks.dispatch('bind-routes', server, this);
+
     // Not Found - Catch All
     server.get('/*', asyncHandler(this.notFound.bind(this)));
-
-    this.hooks.dispatch('bind-routes', server, this);
 
     debug('Bound routes.');
   }
 
-  async home(request, response, _next) {
+  /**
+   * Renders the homepage with the `home` template.
+   *
+   * Hooks:
+   * - `filter` - `render-content` - Passes in the home-page content.
+   * - `filter` - `view-model-home` - Passes in the viewModel.
+   * @async
+   * @param {Request} _request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} _next - The Express Next function.
+   * @example
+   * wiki.home(_, response, _);
+   * @memberof UttoriWiki
+   */
+  async home(_request, response, _next) {
     debug('Home Route');
     const homeDocument = await this.storageProvider.get(this.config.home_page);
     /* istanbul ignore else */
@@ -193,13 +295,33 @@ class UttoriWiki {
     response.render('home', viewModel);
   }
 
-  /* eslint-disable class-methods-use-this */
+  /**
+   * Redirects to the homepage.
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} _next - The Express Next function.
+   * @example
+   * wiki.homepageRedirect(request, response, _);
+   * @memberof UttoriWiki
+   */
   homepageRedirect(request, response, _next) {
-    debug('homepageRedirect');
+    debug('homepageRedirect:', this.config.home_page);
     return response.redirect(301, `${request.protocol}://${request.hostname}/`);
   }
-  /* eslint-enable class-methods-use-this */
 
+  /**
+   * Renders the tag index page with the `tags` template.
+   *
+   * Hooks:
+   * - `filter` - `view-model-tag-index` - Passes in the viewModel.
+   * @async
+   * @param {Request} _request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} _next - The Express Next function.
+   * @example
+   * wiki.tagIndex(_, response, _);
+   * @memberof UttoriWiki
+   */
   async tagIndex(_request, response, _next) {
     debug('Tag Index Route');
     const tags = await this.storageProvider.tags();
@@ -224,6 +346,20 @@ class UttoriWiki {
     response.render('tags', viewModel);
   }
 
+  /**
+   * Renders the tag detail page with `tag` template.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `filter` - `view-model-tag` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.tag(request, response, next);
+   * @memberof UttoriWiki
+   */
   async tag(request, response, next) {
     debug('Tag Route');
     const taggedDocuments = await this.getTaggedDocuments(request.params.tag);
@@ -248,6 +384,20 @@ class UttoriWiki {
     response.render('tag', viewModel);
   }
 
+  /**
+   * Renders the search page using the `search` template.
+   *
+   * Hooks:
+   * - `filter` - `render-search-results` - Passes in the search results.
+   * - `filter` - `view-model-search` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.search(request, response, next);
+   * @memberof UttoriWiki
+   */
   async search(request, response, _next) {
     debug('Search Route');
     const meta = await this.buildMetadata({ title: 'Search' }, '/search');
@@ -281,6 +431,19 @@ class UttoriWiki {
     response.render('search', viewModel);
   }
 
+  /**
+   * Renders the edit page using the `edit` template.
+   *
+   * Hooks:
+   * - `filter` - `view-model-edit` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.edit(request, response, next);
+   * @memberof UttoriWiki
+   */
   async edit(request, response, next) {
     debug('Edit Route');
     if (!request.params.slug) {
@@ -307,20 +470,34 @@ class UttoriWiki {
     response.render('edit', viewModel);
   }
 
+  /**
+   * Attempts to delete a document and redirect to the homepage.
+   * If the config `use_delete_key` value is true, the key is verified before deleting.
+   *
+   * Hooks:
+   * - `dispatch` - `document-delete` - Passes in the document beind deleted.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.delete(request, response, next);
+   * @memberof UttoriWiki
+   */
   async delete(request, response, next) {
     debug('Delete Route');
+    if (!request.params.slug) {
+      debug('delete: Missing slug!');
+      next();
+      return;
+    }
     /* istanbul ignore else */
     if (this.config.use_delete_key) {
       if (!request.params.key || request.params.key !== this.config.delete_key) {
-        debug('Missing delete key, or a delete key mismatch!');
+        debug('delete: Missing delete key, or a delete key mismatch!');
         next();
         return;
       }
-    }
-    if (!request.params.slug) {
-      debug('Missing slug!');
-      next();
-      return;
     }
 
     const { slug } = request.params;
@@ -337,6 +514,21 @@ class UttoriWiki {
     }
   }
 
+  /**
+   * Attempts to save the document and redirects to the detail view of that document when successful.
+   *
+   * Hooks:
+   * - `validate` - `validate-save` - Passes in the request.
+   * - `dispatch` - `validate-invalid` - Passes in the request.
+   * - `dispatch` - `validate-valid` - Passes in the request.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.save(request, response, next);
+   * @memberof UttoriWiki
+   */
   async save(request, response, next) {
     debug('Save Route');
     if (!request.params.slug && !request.body.slug) {
@@ -361,6 +553,19 @@ class UttoriWiki {
     await this.saveValid(request, response, next);
   }
 
+  /**
+   * Renders the new page using the `edit` template.
+   *
+   * Hooks:
+   * - `filter` - `view-model-new` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.new(request, response, next);
+   * @memberof UttoriWiki
+   */
   async new(_request, response, _next) {
     debug('New Route');
     const document = new Document();
@@ -379,6 +584,20 @@ class UttoriWiki {
     response.render('edit', viewModel);
   }
 
+  /**
+   * Renders the detail page using the `detail` template.
+   *
+   * Hooks:
+   * - `render-content` - `render-content` - Passes in the document content.
+   * - `filter` - `view-model-detail` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.detail(request, response, next);
+   * @memberof UttoriWiki
+   */
   async detail(request, response, next) {
     debug('Detail Route');
     if (!request.params.slug) {
@@ -409,6 +628,20 @@ class UttoriWiki {
     response.render('detail', viewModel);
   }
 
+  /**
+   * Renders the history index page using the `history_index` template.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `filter` - `view-model-history-index` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.historyIndex(request, response, next);
+   * @memberof UttoriWiki
+   */
   async historyIndex(request, response, next) {
     debug('History Index Route');
     if (!request.params.slug) {
@@ -448,6 +681,21 @@ class UttoriWiki {
     response.render('history_index', viewModel);
   }
 
+  /**
+   * Renders the history detail page using the `detail` template.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `render-content` - `render-content` - Passes in the document content.
+   * - `filter` - `view-model-history-index` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.historyDetail(request, response, next);
+   * @memberof UttoriWiki
+   */
   async historyDetail(request, response, next) {
     debug('History Detail Route');
     if (!request.params.slug) {
@@ -487,6 +735,20 @@ class UttoriWiki {
     response.render('detail', viewModel);
   }
 
+  /**
+   * Renders the history restore page using the `edit` template.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `filter` - `view-model-history-restore` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} next - The Express Next function.
+   * @example
+   * wiki.historyRestore(request, response, next);
+   * @memberof UttoriWiki
+   */
   async historyRestore(request, response, next) {
     debug('History Restore Route');
     if (!request.params.slug) {
@@ -523,7 +785,20 @@ class UttoriWiki {
     response.render('edit', viewModel);
   }
 
-  // 404
+  /**
+   * Renders the 404 Not Found page using the `404` template.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `filter` - `view-model-error-404` - Passes in the viewModel.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} _next - The Express Next function.
+   * @example
+   * wiki.notFound(request, response, _);
+   * @memberof UttoriWiki
+   */
   async notFound(request, response, _next) {
     debug('404 Not Found Route');
 
@@ -540,7 +815,19 @@ class UttoriWiki {
     response.render('404', viewModel);
   }
 
-  // Helpers
+  /**
+   * Handles saving documents, and changing the slug of documents, the redirecting to the document.
+   *
+   * Hooks:
+   * - `filter` - `document-save` - Passes in the document.
+   * @async
+   * @param {Request} request - The Express Request object.
+   * @param {Response} response - The Express Response object.
+   * @param {NextFunction} _next - The Express Next function.
+   * @example
+   * wiki.saveValid(request, response, _);
+   * @memberof UttoriWiki
+   */
   async saveValid(request, response, _next) {
     debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
     debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
@@ -573,6 +860,15 @@ class UttoriWiki {
     response.redirect(`${this.config.site_url}/${document.slug}`);
   }
 
+  /**
+   * Returns the site sections from the configuration with their tagged document count.
+   * @async
+   * @example
+   * wiki.getSiteSections();
+   * ➜ [{ title: 'Example', description: 'Example description text.', tag: 'example', documentCount: 10 }]
+   * @returns {Promise} Promise object that resolves to the array of site sections.
+   * @memberof UttoriWiki
+   */
   async getSiteSections() {
     debug('getSiteSections');
     return Promise.all(this.config.site_sections.map(async (section) => {
@@ -585,6 +881,18 @@ class UttoriWiki {
     }));
   }
 
+  /**
+   * Returns the documents with the provided tag, up to the provided limit.
+   * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
+   * @async
+   * @param {String} tag - The tag to look for in documents.
+   * @param {Number} limit - The maximum number of documents to be returned.
+   * @example
+   * wiki.getTaggedDocuments('example', 10);
+   * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
+   * @returns {Promise} Promise object that resolves to the array of the documents.
+   * @memberof UttoriWiki
+   */
   async getTaggedDocuments(tag, limit = 1024) {
     debug('getTaggedDocuments:', tag, limit);
     let results = [];
@@ -599,6 +907,18 @@ class UttoriWiki {
     return R.reject(R.isNil, results);
   }
 
+  /**
+   * Returns the documents that match the provided query string, up to the provided limit.
+   * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
+   * @async
+   * @param {String} query - The query to look for in documents.
+   * @param {Number} limit - The maximum number of documents to be returned.
+   * @example
+   * wiki.getSearchResults('needle', 10);
+   * ➜ [{ slug: 'example', title: 'Example', content: 'Haystack neelde haystack.', tags: ['example'] }]
+   * @returns {Promise} Promise object that resolves to the array of the documents.
+   * @memberof UttoriWiki
+   */
   async getSearchResults(query, limit) {
     debug('getSearchResults:', query, limit);
     let results = [];
