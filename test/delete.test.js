@@ -1,29 +1,16 @@
-const fs = require('fs-extra');
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
-const StorageProvider = require('uttori-storage-provider-json-file');
+const StorageProvider = require('uttori-storage-provider-json-memory');
 
 const UttoriWiki = require('../src');
 
-const { config, serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
-
-test.afterEach(() => {
-  cleanup();
-});
+const { config, serverSetup, seed } = require('./_helpers/server.js');
 
 test('deletes the document and redirects to the home page', async (t) => {
   t.plan(2);
 
-  await fs.writeJson('test/site/content/test-delete.json', {
+  const testDelete = {
     title: 'Delete Page',
     slug: 'test-delete',
     content: '## Delete Page',
@@ -31,13 +18,14 @@ test('deletes the document and redirects to the home page', async (t) => {
     updateDate: 1412921841841,
     createDate: null,
     tags: [],
-  });
+  };
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
+  seed(uttori.storageProvider);
+  uttori.storageProvider.add(testDelete);
   const response = await request(uttori.server).get('/test-delete/delete/test-key');
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test');
-  await fs.remove('test/site/content/test-delete.json');
 });
 
 test('falls through to next when slug is missing', async (t) => {

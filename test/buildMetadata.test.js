@@ -2,19 +2,7 @@ const test = require('ava');
 
 const UttoriWiki = require('../src');
 
-const { config, serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
-
-test.afterEach(() => {
-  cleanup();
-});
+const { config, serverSetup } = require('./_helpers/server.js');
 
 test('buildMetadata(document, path, robots): can build metadata with empty object', async (t) => {
   t.plan(1);

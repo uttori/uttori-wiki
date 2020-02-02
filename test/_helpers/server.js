@@ -1,6 +1,4 @@
 /* eslint-disable no-console */
-const fs = require('fs-extra');
-
 // Server
 const express = require('express');
 const ejs = require('ejs');
@@ -8,8 +6,7 @@ const layouts = require('express-ejs-layouts');
 const bodyParser = require('body-parser');
 const path = require('path');
 
-// const StorageProvider = require('uttori-storage-provider-json-file');
-const StorageProvider = require('./../__stubs/StorageProvider.js');
+const StorageProvider = require('uttori-storage-provider-json-memory');
 const SearchProvider = require('./../__stubs/SearchProvider.js');
 const defaultConfig = require('../../src/config.default.js');
 
@@ -33,10 +30,7 @@ const config = {
 
   // Providers
   StorageProvider,
-  storageProviderConfig: {
-    content_dir: 'test/site/content',
-    history_dir: 'test/site/content/history',
-  },
+  storageProviderConfig: {},
   SearchProvider,
   searchProviderConfig: {},
 };
@@ -75,14 +69,61 @@ const serverSetup = () => {
   return server;
 };
 
-const cleanup = async () => {
-  try { await fs.remove('test/site/content/history/test-validate-invalid'); } catch (error) {}
-  try { await fs.remove('test/site/content/history/test-validate-valid'); } catch (error) {}
-  try { await fs.remove('test/site/content/history/test-delete'); } catch (error) {}
-  try { await fs.remove('test/site/content/history/test-new'); } catch (error) {}
-  try { await fs.remove('test/site/content/test-old.json'); } catch (error) {}
-  try { await fs.remove('test/site/data/visits.json'); } catch (error) {}
-  try { await fs.remove('test/site/themes/default/public/sitemap.xml'); } catch (error) {}
+const seed = (storageProvider) => {
+  const demoTitle = {
+    title: 'Demo Title Beta',
+    slug: 'demo-title',
+    content: '## Demo Title Beta',
+    html: '',
+    updateDate: 1459310452002,
+    createDate: 1459310452002,
+    tags: ['Demo Tag', 'Cool'],
+  };
+  storageProvider.add(demoTitle);
+
+  const demoTitleHistory = {
+    title: 'Demo Title',
+    slug: 'demo-title',
+    content: '## Demo Title',
+    html: '',
+    updateDate: 1500000000000,
+    createDate: 1500000000000,
+    tags: ['Demo Tag', 'Cool'],
+  };
+  storageProvider.update(demoTitleHistory, 'demo-title');
+
+  const exampleTitle = {
+    title: 'Example Title',
+    slug: 'example-title',
+    content: '## Example Title',
+    html: '',
+    updateDate: 1459310452001,
+    createDate: 1459310452001,
+    tags: ['Example Tag', 'example'],
+  };
+  storageProvider.add(exampleTitle);
+
+  const fakeTitle = {
+    title: 'Fake Title',
+    slug: 'fake-title',
+    content: '## Fake Title',
+    html: '',
+    updateDate: 1459310452000,
+    createDate: 1459310452000,
+    tags: ['Fake Tag', 'Cool'],
+  };
+  storageProvider.add(fakeTitle);
+
+  const homePage = {
+    content: '## Home Page',
+    createDate: null,
+    html: '',
+    slug: 'home-page',
+    tags: [],
+    title: 'Home Page',
+    updateDate: 1512921841841,
+  };
+  storageProvider.add(homePage);
 };
 
-module.exports = { config, serverSetup, cleanup };
+module.exports = { config, serverSetup, seed };

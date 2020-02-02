@@ -3,25 +3,14 @@ const request = require('supertest');
 
 const UttoriWiki = require('../src');
 
-const { config, serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
-
-test.afterEach(() => {
-  cleanup();
-});
+const { config, serverSetup, seed } = require('./_helpers/server.js');
 
 test('notFound(request, response, next): renders a 404 page', async (t) => {
   t.plan(3);
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
+  seed(uttori.storageProvider);
   const response = await request(uttori.server).get('/404');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');

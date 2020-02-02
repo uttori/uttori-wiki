@@ -1,19 +1,11 @@
 const test = require('ava');
 
-const StorageProvider = require('./__stubs/StorageProvider.js');
+const StorageProvider = require('uttori-storage-provider-json-memory');
 const SearchProvider = require('./__stubs/SearchProvider.js');
 
 const UttoriWiki = require('../src');
 
-const { serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
+const { serverSetup } = require('./_helpers/server.js');
 
 test('registerPlugins(config): does not fail when plugins is broken', (t) => {
   t.notThrows(() => {

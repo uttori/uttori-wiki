@@ -2,19 +2,7 @@ const test = require('ava');
 
 const UttoriWiki = require('../src');
 
-const { config, serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
-
-test.afterEach(() => {
-  cleanup();
-});
+const { config, serverSetup } = require('./_helpers/server.js');
 
 test('throws when missing config', (t) => {
   t.throws(() => {

@@ -1,18 +1,10 @@
 const test = require('ava');
-const StorageProvider = require('uttori-storage-provider-json-file');
+const StorageProvider = require('uttori-storage-provider-json-memory');
 
 const SearchProvider = require('./__stubs/SearchProvider.js');
 const UttoriWiki = require('../src');
 
-const { serverSetup, cleanup } = require('./_helpers/server.js');
-
-test.before(() => {
-  cleanup();
-});
-
-test.after(() => {
-  cleanup();
-});
+const { serverSetup } = require('./_helpers/server.js');
 
 test('validateConfig(config): throws when missing StorageProvider', (t) => {
   t.throws(() => {
@@ -38,7 +30,6 @@ test('validateConfig(config): throws when missing theme_dir', (t) => {
     const _uttori = new UttoriWiki({
       SearchProvider,
       StorageProvider,
-      sitemap_url_filter: [],
     }, server);
   }, { message: 'No theme_dir provided.' });
 });
@@ -49,7 +40,6 @@ test('validateConfig(config): throws when missing public_dir', (t) => {
     const _uttori = new UttoriWiki({
       SearchProvider,
       StorageProvider,
-      sitemap_url_filter: [],
       theme_dir: 'test',
     }, server);
   }, { message: 'No public_dir provided.' });
