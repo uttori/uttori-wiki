@@ -20,6 +20,10 @@ Please see `src/config.default.js` for all options. Below is an example configur
 const StorageProvider = require('uttori-storage-provider-json-file');
 const SearchProvider = require('uttori-search-provider-lunr');
 
+const MarkdownItRenderer = require('uttori-plugin-renderer-markdown-it');
+const MulterUpload = require('uttori-plugin-upload-multer');
+const SitemapGenerator = require('uttori-plugin-generator-sitemap');
+
 const config = {
   // Specify the theme to use, no trailing slash
   theme_dir: `${__dirname}/themes`,
@@ -52,7 +56,66 @@ const config = {
   },
 
   // Plugins
-  ...
+  plugins: [
+    MarkdownItRenderer,
+    MulterUpload,
+    SitemapGenerator,
+  ],
+
+  // Plugin: Markdown rendering with MarkdownIt
+  [MarkdownItRenderer.configKey]: {
+    events: {
+      renderContent: ['render-content'],
+      renderCollection: ['render-search-results'],
+      validateConfig: ['validate-config'],
+    },
+  },
+
+  // Plugin: Multer Upload
+  [MulterUpload.configKey]: {
+    events: {
+      bindRoutes: ['bind-routes'],
+      validateConfig: ['validate-config'],
+    },
+
+    // Directory files will be uploaded to
+    directory: `${__dirname}/uploads`,
+
+    // URL to POST files to
+    route: '/upload',
+  },
+
+  // Plugin: Sitemap Generator
+  [SitemapGenerator.configKey]: {
+    events: {
+      callback: ['document-save', 'document-delete'],
+      validateConfig: ['validate-config'],
+    },
+
+    // Sitemap URL (ie https://wiki.domain.tld)
+    base_url: 'https://wiki.domain.tld',
+
+    // Location where the XML sitemap will be written to.
+    directory: `${__dirname}/themes/default/public`,
+
+    urls: [
+      {
+        url: '/',
+        lastmod: new Date().toISOString(),
+        priority: '1.00',
+      },
+      {
+        url: '/tags',
+        lastmod: new Date().toISOString(),
+        priority: '0.90',
+      },
+      {
+        url: '/new',
+        lastmod: new Date().toISOString(),
+        priority: '0.70',
+      },
+    ],
+  },
 };
 
 module.exports = config;
