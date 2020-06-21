@@ -92,6 +92,9 @@ const config = {
       validateConfig: ['validate-config'],
     },
 
+    // Sitemap URL (ie https://wiki.domain.tld)
+    base_url: 'https://wiki.domain.tld',
+
     // Location where the XML sitemap will be written to.
     directory: `${__dirname}/themes/default/public`,
 
