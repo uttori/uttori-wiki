@@ -1,3 +1,4 @@
+// @ts-nocheck
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
@@ -6,7 +7,7 @@ const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
 
-const response = { set: () => {}, render: () => {}, render: () => {} };
+const response = { set: () => {}, render: () => {}, redirect: () => {} };
 
 test('renders the requested slug', async (t) => {
   t.plan(2);

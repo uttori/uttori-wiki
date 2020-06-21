@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* eslint-disable ramda/prefer-ramda-boolean */
 const test = require('ava');
 const request = require('supertest');
@@ -130,7 +131,7 @@ test('falls through to next when missing slug (params)', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  await uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, null, next);
+  await uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, undefined, next);
   t.true(next.calledOnce);
 });
 
@@ -141,6 +142,6 @@ test('falls through to next when missing body', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  await uttori.save({ params: { slug: 'test-old' }, body: {} }, null, next);
+  await uttori.save({ params: { slug: 'test-old' }, body: {} }, undefined, next);
   t.true(next.calledOnce);
 });

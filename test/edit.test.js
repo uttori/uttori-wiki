@@ -1,3 +1,4 @@
+// @ts-nocheck
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
@@ -26,7 +27,7 @@ test('falls through to next when slug is missing', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  await uttori.edit({ params: { slug: '' } }, null, next);
+  await uttori.edit({ params: { slug: '' } }, undefined, next);
   t.true(next.calledOnce);
 });
 
@@ -37,6 +38,6 @@ test('falls through to next when document is missing', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  await uttori.edit({ params: { slug: 'missing-document' } }, null, next);
+  await uttori.edit({ params: { slug: 'missing-document' } }, undefined, next);
   t.true(next.calledOnce);
 });

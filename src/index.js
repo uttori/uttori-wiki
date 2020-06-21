@@ -1,5 +1,5 @@
 module.exports = {
   config: require('./config'),
-  Middleware: require('./middleware'),
+  wiki: require('./middleware'),
   UttoriWiki: require('./wiki'),
 };

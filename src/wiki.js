@@ -1,7 +1,7 @@
 const debug = require('debug')('Uttori.Wiki');
 const R = require('ramda');
 const Document = require('uttori-document');
-const { EventDispatcher } = require('uttori-utilities');
+const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
@@ -57,9 +57,6 @@ class UttoriWiki {
       this.server = server;
     }
 
-    // Bind routes.
-    this.bindRoutes(server);
-
     // Bind functions.
     this.registerPlugins = this.registerPlugins.bind(this);
     this.validateConfig = this.validateConfig.bind(this);
@@ -83,6 +80,9 @@ class UttoriWiki {
     this.getSiteSections = this.getSiteSections.bind(this);
     this.getTaggedDocuments = this.getTaggedDocuments.bind(this);
     this.getSearchResults = this.getSearchResults.bind(this);
+
+    // Bind routes.
+    this.bindRoutes(server);
   }
 
   /**
@@ -877,8 +877,8 @@ class UttoriWiki {
    */
   async saveValid(request, response, _next) {
     debug('saveValid');
-    debug(`Updating with params: ${JSON.stringify(request.params, null, 2)}`);
-    debug(`Updating with body: ${JSON.stringify(request.body, null, 2)}`);
+    debug(`Updating with params: ${JSON.stringify(request.params, undefined, 2)}`);
+    debug(`Updating with body: ${JSON.stringify(request.body, undefined, 2)}`);
 
     // Create document from form
     let document = new Document();

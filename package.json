@@ -21,15 +21,15 @@
     "node": ">= 12"
   },
   "dependencies": {
+    "@uttori/event-dispatcher": "^1.0.0",
     "debug": "^4.1.1",
     "ramda": "^0.27.0",
-    "uttori-document": "^1.4.1",
-    "uttori-utilities": "^2.3.0"
+    "uttori-document": "^1.4.1"
   },
   "optionalDependencies": {},
   "devDependencies": {
-    "@uttori/search-provider-lunr": "^3.2.0",
-    "@uttori/storage-provider-json-memory": "^3.2.0",
+    "@uttori/search-provider-lunr": "^3.3.0",
+    "@uttori/storage-provider-json-memory": "^3.4.0",
     "ava": "^3.9.0",
     "body-parser": "^1.19.0",
     "coveralls": "^3.1.0",
@@ -39,7 +39,7 @@
     "eslint-config-airbnb": "^18.2.0",
     "eslint-plugin-ava": "^10.3.1",
     "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-jsdoc": "^27.1.2",
+    "eslint-plugin-jsdoc": "^28.0.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-node": "^11.1.0",
@@ -52,15 +52,15 @@
     "eslint-plugin-xss": "^0.1.10",
     "express": "^4.17.1",
     "express-ejs-layouts": "^2.5.0",
-    "jsdoc-to-markdown": "^6.0.1",
     "jsdoc": "^3.6.4",
+    "jsdoc-to-markdown": "^6.0.1",
     "markdown-it": "^11.0.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
     "release-it": "^13.6.3",
     "sinon": "^9.0.2",
-    "tsd-jsdoc": "^2.5.0",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "tsd-jsdoc": "^2.5.0"
   },
   "files": [
     "src/*",
