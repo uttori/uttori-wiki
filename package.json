@@ -91,7 +91,7 @@
     "exclude": []
   },
   "scripts": {
-    "docs": "jsdoc2md --private --example-lang js --template rm.hbs src/index.js > README.md; jsdoc2md --private --example-lang js src/index.js > docs/wiki.md;",
+    "docs": "jsdoc2md --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --private --example-lang js src/wiki.js > docs/wiki.md;",
     "docs-serve": "docsify init ./docs && docsify serve ./docs",
     "lint": "eslint .",
     "make-types": "jsdoc -t node_modules/tsd-jsdoc/dist -r ./src --destination ./; mv types.d.ts types/index.d.ts",
