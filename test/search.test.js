@@ -1,8 +1,7 @@
 const test = require('ava');
 const request = require('supertest');
-const StorageProvider = require('uttori-storage-provider-json-memory');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
 
@@ -10,8 +9,8 @@ test('search(request, response, _next): renders', async (t) => {
   t.plan(3);
 
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
   const response = await request(uttori.server).get('/search?s=test');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');

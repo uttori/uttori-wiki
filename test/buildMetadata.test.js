@@ -1,6 +1,7 @@
+// @ts-nocheck
 const test = require('ava');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup } = require('./_helpers/server.js');
 

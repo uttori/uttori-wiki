@@ -29,7 +29,7 @@ const config = {
     // }
   ],
 
-  // Slug of the root `/` page
+  // Slug of the root `/` page document
   home_page: 'home-page',
 
   // Slugs to ignore in search, recent and popular items
@@ -74,11 +74,9 @@ const config = {
   site_image: '',
 
   // Plugins
-  plugins: [],
-
-  // Provider Specific Configurations
-  searchProviderConfig: {},
-  storageProviderConfig: {},
+  plugins: [
+    // Storage Plugins should come before other plugins
+  ],
 };
 
 module.exports = config;

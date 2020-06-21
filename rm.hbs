@@ -14,11 +14,11 @@ Don't want to write in Markdown? You don't need to! Don't want to store files on
 
 ## Configuration
 
-Please see `src/config.default.js` for all options. Below is an example configuration using [uttori-storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file) and [uttori-search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr):
+Please see `src/config.js` for all options. Below is an example configuration using [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file) and [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr):
 
 ```javascript
-const StorageProvider = require('uttori-storage-provider-json-file');
-const SearchProvider = require('uttori-search-provider-lunr');
+const { Plugin: StorageProvider } = require('@uttori/storage-provider-json-file');
+const { Plugin: SearchProvider } = require('@uttori/search-provider-lunr');
 
 const MarkdownItRenderer = require('uttori-plugin-renderer-markdown-it');
 const MulterUpload = require('uttori-plugin-upload-multer');
@@ -31,9 +31,17 @@ const config = {
   // Path to the static file directory for themes, no trailing slash
   public_dir: `${__dirname}/themes/default/public`,
 
+  // Plugins
+  plugins: [
+    StorageProvider,
+    SearchProvider,
+    MarkdownItRenderer,
+    MulterUpload,
+    SitemapGenerator,
+  ],
+
   // Use the JSON to Disk Storage Provider
-  StorageProvider,
-  storageProviderConfig: {
+  [StorageProvider.configKey]: {
     // Path in which to store content (markdown files, etc.)
     content_dir: `${__dirname}/content`,
 
@@ -49,18 +57,10 @@ const config = {
   },
 
   // Use the Lunr Search Provider
-  SearchProvider,
-  searchProviderConfig: {
+  [SearchProvider.configKey]: {
     // Optional Lunr locale
     lunr_locales: [],
   },
-
-  // Plugins
-  plugins: [
-    MarkdownItRenderer,
-    MulterUpload,
-    SitemapGenerator,
-  ],
 
   // Plugin: Markdown rendering with MarkdownIt
   [MarkdownItRenderer.configKey]: {
@@ -91,9 +91,6 @@ const config = {
       callback: ['document-save', 'document-delete'],
       validateConfig: ['validate-config'],
     },
-
-    // Sitemap URL (ie https://wiki.domain.tld)
-    base_url: 'https://wiki.domain.tld',
 
     // Location where the XML sitemap will be written to.
     directory: `${__dirname}/themes/default/public`,
