@@ -51,21 +51,21 @@ declare class UttoriWiki {
      * ➜   title,       // document.title ? this.config.site_title
      * ➜ }
      * @param [document = {}] - A configuration object.
-     * @param document.excerpt - The meta description to be used.
-     * @param document.content - The document content to be used as a backup meta description when excerpt is not provided.
-     * @param document.updateDate - The Unix timestamp of the last update date to the document.
-     * @param document.createDate - The Unix timestamp of the creation date of the document.
-     * @param document.title - The document title to be used in meta data.
+     * @param [document.excerpt] - The meta description to be used.
+     * @param [document.content] - The document content to be used as a backup meta description when excerpt is not provided.
+     * @param [document.updateDate] - The Unix timestamp of the last update date to the document.
+     * @param [document.createDate] - The Unix timestamp of the creation date of the document.
+     * @param [document.title] - The document title to be used in meta data.
      * @param [path = ''] - The URL path to build meta data for.
      * @param [robots = ''] - A meta robots tag value.
      * @returns Metadata object.
      */
     buildMetadata(document?: {
-        excerpt: string;
-        content: string;
-        updateDate: number;
-        createDate: number;
-        title: string;
+        excerpt?: string;
+        content?: string;
+        updateDate?: number;
+        createDate?: number;
+        title?: string;
     }, path?: string, robots?: string): Promise<object>;
     /**
      * Bind the routes to the server.
@@ -82,11 +82,11 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `render-content` - Passes in the home-page content.
      * - `filter` - `view-model-home` - Passes in the viewModel.
-     * @param _request - The Express Request object.
+     * @param request - The Express Request object.
      * @param response - The Express Response object.
      * @param next - The Express Next function.
      */
-    home(_request: Request, response: Response, next: (...params: any[]) => any): void;
+    home(request: Request, response: Response, next: (...params: any[]) => any): void;
     /**
      * Redirects to the homepage.
      * @param request - The Express Request object.
@@ -99,11 +99,11 @@ declare class UttoriWiki {
      *
      * Hooks:
      * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-     * @param _request - The Express Request object.
+     * @param request - The Express Request object.
      * @param response - The Express Response object.
      * @param _next - The Express Next function.
      */
-    tagIndex(_request: any, response: any, _next: (...params: any[]) => any): void;
+    tagIndex(request: any, response: any, _next: (...params: any[]) => any): void;
     /**
      * Renders the tag detail page with `tag` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -164,11 +164,11 @@ declare class UttoriWiki {
      *
      * Hooks:
      * - `filter` - `view-model-new` - Passes in the viewModel.
-     * @param _request - The Express Request object.
+     * @param request - The Express Request object.
      * @param response - The Express Response object.
      * @param _next - The Express Next function.
      */
-    new(_request: any, response: any, _next: (...params: any[]) => any): void;
+    new(request: any, response: any, _next: (...params: any[]) => any): void;
     /**
      * Renders the detail page using the `detail` template.
      *

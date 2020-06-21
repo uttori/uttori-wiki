@@ -19,15 +19,15 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
     * [.buildMetadata([document], [path], [robots])](#UttoriWiki+buildMetadata) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.bindRoutes(server)](#UttoriWiki+bindRoutes)
-    * [.home(_request, response, next)](#UttoriWiki+home)
+    * [.home(request, response, next)](#UttoriWiki+home)
     * [.homepageRedirect(request, response, _next)](#UttoriWiki+homepageRedirect)
-    * [.tagIndex(_request, response, _next)](#UttoriWiki+tagIndex)
+    * [.tagIndex(request, response, _next)](#UttoriWiki+tagIndex)
     * [.tag(request, response, next)](#UttoriWiki+tag)
     * [.search(request, response, _next)](#UttoriWiki+search)
     * [.edit(request, response, next)](#UttoriWiki+edit)
     * [.delete(request, response, next)](#UttoriWiki+delete)
     * [.save(request, response, next)](#UttoriWiki+save)
-    * [.new(_request, response, _next)](#UttoriWiki+new)
+    * [.new(request, response, _next)](#UttoriWiki+new)
     * [.detail(request, response, next)](#UttoriWiki+detail)
     * [.historyIndex(request, response, next)](#UttoriWiki+historyIndex)
     * [.historyDetail(request, response, next)](#UttoriWiki+historyDetail)
@@ -97,11 +97,11 @@ Hooks:
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | [document] | <code>object</code> | <code>{}</code> | A configuration object. |
-| document.excerpt | <code>string</code> |  | The meta description to be used. |
-| document.content | <code>string</code> |  | The document content to be used as a backup meta description when excerpt is not provided. |
-| document.updateDate | <code>number</code> |  | The Unix timestamp of the last update date to the document. |
-| document.createDate | <code>number</code> |  | The Unix timestamp of the creation date of the document. |
-| document.title | <code>string</code> |  | The document title to be used in meta data. |
+| [document.excerpt] | <code>string</code> |  | The meta description to be used. |
+| [document.content] | <code>string</code> |  | The document content to be used as a backup meta description when excerpt is not provided. |
+| [document.updateDate] | <code>number</code> |  | The Unix timestamp of the last update date to the document. |
+| [document.createDate] | <code>number</code> |  | The Unix timestamp of the creation date of the document. |
+| [document.title] | <code>string</code> |  | The document title to be used in meta data. |
 | [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
 | [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
 
@@ -135,7 +135,7 @@ Hooks:
 
 <a name="UttoriWiki+home"></a>
 
-### uttoriWiki.home(_request, response, next)
+### uttoriWiki.home(request, response, next)
 Renders the homepage with the `home` template.
 
 Hooks:
@@ -146,7 +146,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _request | <code>Request</code> | The Express Request object. |
+| request | <code>Request</code> | The Express Request object. |
 | response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
@@ -165,7 +165,7 @@ Redirects to the homepage.
 
 <a name="UttoriWiki+tagIndex"></a>
 
-### uttoriWiki.tagIndex(_request, response, _next)
+### uttoriWiki.tagIndex(request, response, _next)
 Renders the tag index page with the `tags` template.
 
 Hooks:
@@ -175,7 +175,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _request | <code>object</code> | The Express Request object. |
+| request | <code>object</code> | The Express Request object. |
 | response | <code>object</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
@@ -266,7 +266,7 @@ Hooks:
 
 <a name="UttoriWiki+new"></a>
 
-### uttoriWiki.new(_request, response, _next)
+### uttoriWiki.new(request, response, _next)
 Renders the new page using the `edit` template.
 
 Hooks:
@@ -276,7 +276,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _request | <code>object</code> | The Express Request object. |
+| request | <code>object</code> | The Express Request object. |
 | response | <code>object</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 

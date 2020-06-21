@@ -145,11 +145,11 @@ class UttoriWiki {
    *
    * @async
    * @param {object} [document={}] - A configuration object.
-   * @param {string} document.excerpt - The meta description to be used.
-   * @param {string} document.content - The document content to be used as a backup meta description when excerpt is not provided.
-   * @param {number} document.updateDate - The Unix timestamp of the last update date to the document.
-   * @param {number} document.createDate - The Unix timestamp of the creation date of the document.
-   * @param {string} document.title - The document title to be used in meta data.
+   * @param {string} [document.excerpt] - The meta description to be used.
+   * @param {string} [document.content] - The document content to be used as a backup meta description when excerpt is not provided.
+   * @param {number} [document.updateDate] - The Unix timestamp of the last update date to the document.
+   * @param {number} [document.createDate] - The Unix timestamp of the creation date of the document.
+   * @param {string} [document.title] - The document title to be used in meta data.
    * @param {string} [path=''] - The URL path to build meta data for.
    * @param {string} [robots=''] - A meta robots tag value.
    * @example
@@ -250,11 +250,11 @@ class UttoriWiki {
    * - `filter` - `view-model-home` - Passes in the viewModel.
    *
    * @async
-   * @param {Request} _request - The Express Request object.
+   * @param {Request} request - The Express Request object.
    * @param {Response} response - The Express Response object.
    * @param {Function} next - The Express Next function.
    */
-  async home(_request, response, next) {
+  async home(request, response, next) {
     debug('Home Route');
     let homeDocument;
     try {
@@ -282,6 +282,7 @@ class UttoriWiki {
       siteSections,
       homeDocument,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
     response.render('home', viewModel);
@@ -306,11 +307,11 @@ class UttoriWiki {
    * - `filter` - `view-model-tag-index` - Passes in the viewModel.
    *
    * @async
-   * @param {object} _request - The Express Request object.
+   * @param {object} request - The Express Request object.
    * @param {object} response - The Express Response object.
    * @param {Function} _next - The Express Next function.
    */
-  async tagIndex(_request, response, _next) {
+  async tagIndex(request, response, _next) {
     debug('Tag Index Route');
     const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
     const query = `SELECT tags FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY updateDate DESC LIMIT -1`;
@@ -345,6 +346,7 @@ class UttoriWiki {
       taggedDocuments,
       siteSections,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
 
@@ -381,6 +383,7 @@ class UttoriWiki {
       section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
       siteSections: this.config.site_sections,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
 
@@ -407,6 +410,7 @@ class UttoriWiki {
       config: this.config,
       searchTerm: '',
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
@@ -471,6 +475,7 @@ class UttoriWiki {
       document,
       config: this.config,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
 
@@ -569,11 +574,11 @@ class UttoriWiki {
    * - `filter` - `view-model-new` - Passes in the viewModel.
    *
    * @async
-   * @param {object} _request - The Express Request object.
+   * @param {object} request - The Express Request object.
    * @param {object} response - The Express Response object.
    * @param {Function} _next - The Express Next function.
    */
-  async new(_request, response, _next) {
+  async new(request, response, _next) {
     debug('New Route');
     const document = new Document();
     document.slug = '';
@@ -585,6 +590,7 @@ class UttoriWiki {
       title: document.title,
       config: this.config,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
 
@@ -634,6 +640,7 @@ class UttoriWiki {
       config: this.config,
       document,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
 
@@ -710,6 +717,7 @@ class UttoriWiki {
       historyByDay,
       config: this.config,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
@@ -771,6 +779,7 @@ class UttoriWiki {
       document,
       revision: request.params.revision,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
@@ -829,6 +838,7 @@ class UttoriWiki {
       revision: request.params.revision,
       config: this.config,
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
@@ -857,6 +867,7 @@ class UttoriWiki {
       config: this.config,
       slug: request.params.slug || '404',
       meta,
+      basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 
