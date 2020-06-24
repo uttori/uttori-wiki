@@ -1,7 +1,6 @@
 const test = require('ava');
-const StorageProvider = require('uttori-storage-provider-json-memory');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
 
@@ -10,8 +9,8 @@ test('getTaggedDocuments(tag): returns documents with the given tag', async (t) 
 
   let documents;
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
   documents = await uttori.getTaggedDocuments('Cool');
   t.is(documents.length, 2);
   t.is(documents[0].slug, 'demo-title');

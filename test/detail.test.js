@@ -1,20 +1,23 @@
+// @ts-nocheck
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
+
+const response = { set: () => {}, render: () => {}, redirect: () => {} };
 
 test('renders the requested slug', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
-  const response = await request(uttori.server).get('/example-title');
-  t.is(response.status, 200);
-  const title = response.text.match(/<title>(.*?)<\/title>/i);
+  await seed(uttori);
+  const express_response = await request(uttori.server).get('/example-title');
+  t.is(express_response.status, 200);
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'Example Title | Wiki');
 });
 
@@ -24,8 +27,8 @@ test('falls throught to next() when there is no slug', async (t) => {
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
-  await uttori.detail({ params: { slug: '' } }, null, next);
+  await seed(uttori);
+  await uttori.detail({ params: { slug: '' } }, response, next);
   t.true(next.calledOnce);
 });
 
@@ -35,7 +38,7 @@ test('falls throught to next() when there is no document found', async (t) => {
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
-  await uttori.detail({ params: { slug: 'fake' } }, null, next);
+  await seed(uttori);
+  await uttori.detail({ params: { slug: 'missing' } }, response, next);
   t.true(next.calledOnce);
 });

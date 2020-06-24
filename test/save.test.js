@@ -1,9 +1,10 @@
+// @ts-nocheck
 /* eslint-disable ramda/prefer-ramda-boolean */
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
 
@@ -12,7 +13,7 @@ test('redirects to the article after saving without changing slug', async (t) =>
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/test-old/save').send('slug=test-old&body=test');
 
   t.is(response.status, 302);
@@ -24,7 +25,7 @@ test('redirects to the article after saving without changing slug or providing o
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/test-old/save').send('title=Title&body=test');
 
   t.is(response.status, 302);
@@ -36,7 +37,7 @@ test('redirects to the article after saving with case transforms', async (t) => 
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/test-old/save').send('slug=Test-OLD&body=test');
 
   t.is(response.status, 302);
@@ -48,7 +49,7 @@ test('redirects after spliting tags correctly', async (t) => {
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/test-old/save')
     .send('tags=tag-1,tag-2&body=test');
 
@@ -61,7 +62,7 @@ test('redirects to the article after saving with new slug', async (t) => {
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/test-new/save')
     .send('original-slug=test-old&body=test');
 
@@ -74,7 +75,7 @@ test('redirects to the article after saving with new slug with case transforms',
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   const response = await request(uttori.server).post('/Test-NEW/save').send('original-slug=test-old&body=test');
 
   t.is(response.status, 302);
@@ -95,7 +96,7 @@ test('redirects to the article after saving with invalid content', async (t) => 
   };
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, plugins: [validate] }, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   await request(uttori.server).post('/test-validate-invalid/save').send('body=test');
 
   t.false(valid.called);
@@ -116,7 +117,7 @@ test('redirects to the article after saving with valid content', async (t) => {
   };
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, plugins: [validate] }, server);
-  seed(uttori.storageProvider);
+  await seed(uttori);
   await request(uttori.server).post('/test-validate-valid/save').send('body=test');
 
   t.false(invalid.called);
@@ -129,8 +130,8 @@ test('falls through to next when missing slug (params)', async (t) => {
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
-  await uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, null, next);
+  await seed(uttori);
+  await uttori.save({ params: { slug: '' }, body: { title: 'Title' } }, undefined, next);
   t.true(next.calledOnce);
 });
 
@@ -140,7 +141,7 @@ test('falls through to next when missing body', async (t) => {
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  seed(uttori.storageProvider);
-  await uttori.save({ params: { slug: 'test-old' }, body: {} }, null, next);
+  await seed(uttori);
+  await uttori.save({ params: { slug: 'test-old' }, body: {} }, undefined, next);
   t.true(next.calledOnce);
 });

@@ -1,22 +1,24 @@
+// @ts-nocheck
 const test = require('ava');
 const request = require('supertest');
 const sinon = require('sinon');
-const StorageProvider = require('uttori-storage-provider-json-memory');
 
-const UttoriWiki = require('../src');
+const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server.js');
+
+const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
 test('renders the requested slug and revision', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
-  const history = uttori.storageProvider.getHistory('demo-title')[0];
-  const response = await request(uttori.server).get(`/demo-title/history/${history}`);
-  t.is(response.status, 200);
-  const title = response.text.match(/<title>(.*?)<\/title>/i);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
+  const express_response = await request(uttori.server).get(`/demo-title/history/${history[0]}`);
+  t.is(express_response.status, 200);
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
   t.true(title[1].startsWith('Demo Title Beta Revision 1'));
 });
 
@@ -25,9 +27,9 @@ test('falls through to next when slug is missing', async (t) => {
 
   const next = sinon.spy();
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
-  await uttori.historyDetail({ params: { slug: '' } }, null, next);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  await uttori.historyDetail({ params: { slug: '' } }, response, next);
   t.true(next.calledOnce);
 });
 
@@ -36,9 +38,9 @@ test('falls through to next when revision is missing', async (t) => {
 
   const next = sinon.spy();
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
-  await uttori.historyDetail({ params: { slug: 'demo-title', revision: '' } }, null, next);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  await uttori.historyDetail({ params: { slug: 'demo-title', revision: '' } }, response, next);
   t.true(next.calledOnce);
 });
 
@@ -47,8 +49,8 @@ test('falls through to next when no revision is found', async (t) => {
 
   const next = sinon.spy();
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, StorageProvider }, server);
-  seed(uttori.storageProvider);
-  await uttori.historyDetail({ params: { slug: 'demo-title', revision: '1' } }, null, next);
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  await uttori.historyDetail({ params: { slug: 'demo-title', revision: '1' } }, response, next);
   t.true(next.calledOnce);
 });
