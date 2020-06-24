@@ -18,6 +18,7 @@ module.exports = function middleware(config) {
   app.engine('html', ejs.renderFile);
   app.use(express.static(config.public_dir));
 
+  // TODO This could be much cleaner
   const _wiki = new UttoriWiki(config, app);
 
   return app;

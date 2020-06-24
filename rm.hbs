@@ -20,9 +20,9 @@ Please see `src/config.js` for all options. Below is an example configuration us
 const { Plugin: StorageProvider } = require('@uttori/storage-provider-json-file');
 const { Plugin: SearchProvider } = require('@uttori/search-provider-lunr');
 
-const MarkdownItRenderer = require('uttori-plugin-renderer-markdown-it');
-const MulterUpload = require('uttori-plugin-upload-multer');
-const SitemapGenerator = require('uttori-plugin-generator-sitemap');
+const MarkdownItRenderer = require('@uttori/plugin-renderer-markdown-it');
+const MulterUpload = require('@uttori/plugin-upload-multer');
+const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
 
 const config = {
   // Specify the theme to use, no trailing slash
