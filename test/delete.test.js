@@ -57,7 +57,7 @@ test('falls to 404 when miss matched key', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   const express_response = await request(uttori.server).get('/missing/delete/bad-key');
-  t.is(express_response.status, 200);
+  t.is(express_response.status, 404);
   t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], '404 Not Found | Wiki');

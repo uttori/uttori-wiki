@@ -16,7 +16,12 @@ module.exports = function middleware(config) {
   app.set('view engine', 'html');
   app.enable('view cache');
   app.engine('html', ejs.renderFile);
-  app.use(express.static(config.public_dir));
+  // https://expressjs.com/en/4x/api.html#express.static
+  // https://webhint.io/docs/user-guide/hints/hint-http-cache/#examples-that-pass-the-hint
+  app.use(express.static(config.public_dir, {
+    immutable: true,
+    maxAge: 31536000,
+  }));
 
   // TODO This could be much cleaner
   const _wiki = new UttoriWiki(config, app);

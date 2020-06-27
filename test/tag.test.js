@@ -31,14 +31,14 @@ test('tag(request, response, next): renders that tag page for a given tag', asyn
   t.is(title[1], 'Cool | Wiki');
 });
 
-test('tag(request, response, next): falls through to next when tag is missing', async (t) => {
+test('tag(request, response, next): falls through to 404 when tag is missing', async (t) => {
   t.plan(3);
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
   const response = await request(uttori.server).get('/tags/_');
-  t.is(response.status, 200);
+  t.is(response.status, 404);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], '404 Not Found | Wiki');

@@ -871,8 +871,23 @@ class UttoriWiki {
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 
+    response.status(404);
     response.set('X-Robots-Tag', 'noindex');
-    response.render('404', viewModel);
+
+    /* istanbul ignore else */
+    if (request.accepts('html')) {
+      response.render('404', viewModel);
+      return;
+    }
+
+    /* istanbul ignore next */
+    if (request.accepts('json')) {
+      response.send({ error: 'Not found' });
+      return;
+    }
+
+    /* istanbul ignore next */
+    response.type('txt').send('Not found');
   }
 
   /**
