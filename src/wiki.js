@@ -6,7 +6,7 @@ const defaultConfig = require('./config');
 
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
 const cache_one_year = 60 * 60 * 24 * 365;
-const cache_one_hour = 60 * 60;
+const cache_short = 60 * 3;
 
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
@@ -287,7 +287,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
+    response.set('Cache-control', `public, max-age=${cache_short}`);
     response.render('home', viewModel);
   }
 
@@ -352,7 +352,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
+    response.set('Cache-control', `public, max-age=${cache_short}`);
     response.render('tags', viewModel);
   }
 
@@ -389,7 +389,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
+    response.set('Cache-control', `public, max-age=${cache_short}`);
     response.render('tag', viewModel);
   }
 
@@ -649,7 +649,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
+    response.set('Cache-control', `public, max-age=${cache_short}`);
     response.render('detail', viewModel);
   }
 
@@ -728,7 +728,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
+    response.set('Cache-control', `public, max-age=${cache_short}`);
     response.render('history_index', viewModel);
   }
 
