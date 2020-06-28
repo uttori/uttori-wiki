@@ -5,6 +5,8 @@ const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
+const cache_one_year = 60 * 60 * 24 * 365;
+const cache_one_hour = 60 * 60;
 
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
@@ -285,6 +287,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
+    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
     response.render('home', viewModel);
   }
 
@@ -349,7 +352,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
-
+    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
     response.render('tags', viewModel);
   }
 
@@ -386,7 +389,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
-
+    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
     response.render('tag', viewModel);
   }
 
@@ -433,6 +436,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-search', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', 'no-store, no-cache, max-age=0');
     response.render('search', viewModel);
   }
 
@@ -478,7 +482,8 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
-
+    response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', 'no-store, no-cache, max-age=0');
     response.render('edit', viewModel);
   }
 
@@ -593,7 +598,8 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
-
+    response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', 'no-store, no-cache, max-age=0');
     response.render('edit', viewModel);
   }
 
@@ -643,7 +649,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
-
+    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
     response.render('detail', viewModel);
   }
 
@@ -722,6 +728,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', `public, max-age=${cache_one_hour}`);
     response.render('history_index', viewModel);
   }
 
@@ -784,6 +791,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', `public, max-age=${cache_one_year}`);
     response.render('detail', viewModel);
   }
 
@@ -843,6 +851,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
+    response.set('Cache-control', `public, max-age=${cache_one_year}`);
     response.render('edit', viewModel);
   }
 

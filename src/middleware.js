@@ -9,6 +9,7 @@ const UttoriWiki = require('./wiki');
 module.exports = function middleware(config) {
   const app = express();
 
+  app.disable('x-powered-by');
   app.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
   app.use(layouts);
   app.set('layout extractScripts', true);
@@ -19,8 +20,10 @@ module.exports = function middleware(config) {
   // https://expressjs.com/en/4x/api.html#express.static
   // https://webhint.io/docs/user-guide/hints/hint-http-cache/#examples-that-pass-the-hint
   app.use(express.static(config.public_dir, {
+    etag: true, // Just being explicit about the default.
+    lastModified: true, // Just being explicit about the default.
     immutable: true,
-    maxAge: 31536000,
+    maxAge: '1y',
   }));
 
   // TODO This could be much cleaner
