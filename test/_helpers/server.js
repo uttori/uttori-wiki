@@ -58,7 +58,12 @@ const serverSetup = () => {
   }
 
   // Is this a require()?
+  // In the future use `if (import.meta.main) {`
+  // Or alternatively the below:
+  // import url from 'url';
+  // if (url.fileURLToPath(import.meta.url) === process.argv[1]) {
   if (require.main === module) {
+    // No, this is a CLI tool.
     // eslint-disable-next-line no-console
     console.log('Starting test server...');
     server.listen(server.get('port'), server.get('ip'));
@@ -67,9 +72,9 @@ const serverSetup = () => {
   return server;
 };
 
+const next = function next() {};
 const seed = async (uttori) => {
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
-  const next = function next() {};
   const demoTitle = {
     title: 'Demo Title Beta',
     slug: 'demo-title',
