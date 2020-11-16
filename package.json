@@ -21,7 +21,7 @@
     "node": ">= 12"
   },
   "dependencies": {
-    "@uttori/event-dispatcher": "^1.0.2",
+    "@uttori/event-dispatcher": "^1.0.3",
     "debug": "^4.2.0",
     "ejs": "^3.1.5",
     "express-ejs-layouts": "^2.5.0",
@@ -30,8 +30,8 @@
   },
   "optionalDependencies": {},
   "devDependencies": {
-    "@uttori/search-provider-lunr": "^3.3.2",
-    "@uttori/storage-provider-json-memory": "^3.4.1",
+    "@uttori/search-provider-lunr": "^3.3.3",
+    "@uttori/storage-provider-json-memory": "^3.4.2",
     "ava": "^3.13.0",
     "body-parser": "^1.19.0",
     "coveralls": "^3.1.0",
@@ -40,7 +40,7 @@
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsdoc": "^30.7.7",
+    "eslint-plugin-jsdoc": "^30.7.8",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-node": "^11.1.0",
@@ -59,7 +59,6 @@
     "release-it": "^14.2.1",
     "sinon": "^9.2.1",
     "supertest": "^6.0.1",
-    "tsd-jsdoc": "^2.5.0",
     "typescript": "^4.0.5"
   },
   "files": [
