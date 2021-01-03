@@ -29,6 +29,11 @@ const config = {
     StorageProviderJSON,
     SearchProviderLunr,
   ],
+  middleware: [
+    ['disable', 'x-powered-by'],
+    ['enable', 'view cache'],
+    ['fake', 'fake'],
+  ],
 };
 
 const serverSetup = () => {

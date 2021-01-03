@@ -1,3 +1,5 @@
+const path = require('path');
+
 const config = {
   // Your site title (format: page_title | site_title)
   site_title: 'Wiki',
@@ -76,6 +78,14 @@ const config = {
   // Plugins
   plugins: [
     // Storage Plugins should come before other plugins
+  ],
+
+  // Middleware Configuration
+  middleware: [
+    ['disable', 'x-powered-by'],
+    ['enable', 'view cache'],
+    ['set', 'views', path.join(`${__dirname}/themes/`, 'default', 'templates')],
+    ['set', 'view engine', 'html'],
   ],
 };
 

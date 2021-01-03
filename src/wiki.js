@@ -1,4 +1,6 @@
-const debug = require('debug')('Uttori.Wiki');
+/* eslint-disable unicorn/no-array-callback-reference */
+/* eslint-disable unicorn/no-array-reduce */
+let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
 const R = require('ramda');
 const Document = require('uttori-document');
 const { EventDispatcher } = require('@uttori/event-dispatcher');
@@ -79,9 +81,7 @@ class UttoriWiki {
     this.historyRestore = this.historyRestore.bind(this);
     this.notFound = this.notFound.bind(this);
     this.saveValid = this.saveValid.bind(this);
-    this.getSiteSections = this.getSiteSections.bind(this);
     this.getTaggedDocuments = this.getTaggedDocuments.bind(this);
-    this.getSearchResults = this.getSearchResults.bind(this);
 
     // Bind routes.
     this.bindRoutes(server);
@@ -270,12 +270,24 @@ class UttoriWiki {
       next();
       return;
     }
-    /* istanbul ignore else */
-    if (homeDocument) {
-      homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
+    homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
+
+    let siteSections = [];
+    try {
+      siteSections = await Promise.all(this.config.site_sections.map(async (section) => {
+        // TODO we really just want the document count here.
+        const documents = await this.getTaggedDocuments(section.tag);
+        const documentCount = documents.length;
+        return {
+          ...section,
+          documentCount,
+        };
+      }));
+    } catch (error) {
+      /* istanbul ignore next */
+      debug('Error getting site_sections:', error);
     }
 
-    const siteSections = await this.getSiteSections();
     const meta = await this.buildMetadata(homeDocument, '');
 
     let viewModel = {
@@ -340,14 +352,12 @@ class UttoriWiki {
       taggedDocuments[tag] = await this.getTaggedDocuments(tag);
     }));
 
-    const siteSections = await this.getSiteSections();
     const meta = await this.buildMetadata({}, '/tags');
 
     let viewModel = {
       title: 'Tags',
       config: this.config,
       taggedDocuments,
-      siteSections,
       meta,
       basePath: request.proxyUrl || request.baseUrl,
     };
@@ -384,7 +394,6 @@ class UttoriWiki {
       config: this.config,
       taggedDocuments,
       section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
-      siteSections: this.config.site_sections,
       meta,
       basePath: request.proxyUrl || request.baseUrl,
     };
@@ -417,10 +426,18 @@ class UttoriWiki {
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
-      const term = decodeURIComponent(request.query.s);
+      const query = decodeURIComponent(request.query.s);
       viewModel.title = `Search results for "${request.query.s}"`;
-      viewModel.searchTerm = term;
-      const searchResults = await this.getSearchResults(term, 10);
+      viewModel.searchTerm = query;
+
+      let searchResults = [];
+      try {
+        [searchResults] = await this.hooks.fetch('search-query', { query, limit: 50 }, this);
+      } catch (error) {
+        /* istanbul ignore next */
+        debug('Error fetching "search-query":', error);
+      }
+
       /* istanbul ignore next */
       viewModel.searchResults = searchResults.map((document) => {
         let excerpt = document && document.excerpt ? document.excerpt.slice(0, this.config.excerpt_length) : '';
@@ -507,12 +524,10 @@ class UttoriWiki {
       return;
     }
     /* istanbul ignore else */
-    if (this.config.use_delete_key) {
-      if (!request.params.key || request.params.key !== this.config.delete_key) {
-        debug('delete: Missing delete key, or a delete key mismatch!');
-        next();
-        return;
-      }
+    if (this.config.use_delete_key && (!request.params.key || request.params.key !== this.config.delete_key)) {
+      debug('delete: Missing delete key, or a delete key mismatch!');
+      next();
+      return;
     }
 
     const { slug } = request.params;
@@ -900,7 +915,7 @@ class UttoriWiki {
   }
 
   /**
-   * Handles saving documents, and changing the slug of documents, the redirecting to the document.
+   * Handles saving documents, and changing the slug of documents, then redirecting to the document.
    *
    * Hooks:
    * - `filter` - `document-save` - Passes in the document.
@@ -947,27 +962,6 @@ class UttoriWiki {
   }
 
   /**
-   * Returns the site sections from the configuration with their tagged document count.
-   *
-   * @async
-   * @example
-   * wiki.getSiteSections();
-   * ➜ [{ title: 'Example', description: 'Example description text.', tag: 'example', documentCount: 10 }]
-   * @returns {Promise<Array>} Promise object that resolves to the array of site sections.
-   */
-  async getSiteSections() {
-    debug('getSiteSections');
-    return Promise.all(this.config.site_sections.map(async (section) => {
-      const documents = await this.getTaggedDocuments(section.tag);
-      const documentCount = documents.length;
-      return {
-        ...section,
-        documentCount,
-      };
-    }));
-  }
-
-  /**
    * Returns the documents with the provided tag, up to the provided limit.
    * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
    *
@@ -989,30 +983,6 @@ class UttoriWiki {
     } catch (error) {
       /* istanbul ignore next */
       debug('getTaggedDocuments Error:', error);
-    }
-    return R.reject(R.isNil, results);
-  }
-
-  /**
-   * Returns the documents that match the provided query string, up to the provided limit.
-   * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
-   *
-   * @async
-   * @param {string} query - The query to look for in documents.
-   * @param {number} limit - The maximum number of documents to be returned.
-   * @example
-   * wiki.getSearchResults('needle', 10);
-   * ➜ [{ slug: 'example', title: 'Example', content: 'Haystack neelde haystack.', tags: ['example'] }]
-   * @returns {Promise<Array>} Promise object that resolves to the array of the documents.
-   */
-  async getSearchResults(query, limit) {
-    debug('getSearchResults:', query, limit);
-    let results = [];
-    try {
-      [results] = await this.hooks.fetch('search-query', { query, limit }, this);
-    } catch (error) {
-      /* istanbul ignore next */
-      debug('getSearchResults Error:', error);
     }
     return R.reject(R.isNil, results);
   }

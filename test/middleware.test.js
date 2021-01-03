@@ -23,10 +23,26 @@ test('wiki can run', (t) => {
     use_delete_key: true,
     delete_key: 'test-key',
     plugins: [],
+    middleware: [
+      ['disable', 'x-powered-by'],
+      ['enable', 'view cache'],
+      ['fake', 'fake'],
+    ],
   };
 
   t.notThrows(() => {
     const app = express();
+    app.use('/', wiki(config));
+  });
+
+  t.notThrows(() => {
+    const app = express();
+    app.use('/', wiki({ ...config, middleware: {} }));
+  });
+
+  t.notThrows(() => {
+    const app = express();
+    delete config.middleware;
     app.use('/', wiki(config));
   });
 });
