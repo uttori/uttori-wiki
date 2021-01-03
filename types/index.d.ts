@@ -19,6 +19,7 @@ declare module "config" {
     export const site_twitter_creator: string;
     export const site_image: string;
     export const plugins: any[];
+    export const middleware: string[][];
 }
 declare module "wiki" {
     export = UttoriWiki;
@@ -57,9 +58,7 @@ declare module "wiki" {
         historyRestore(request: object, response: object, next: Function): Promise<void>;
         notFound(request: object, response: object, _next: Function): Promise<void>;
         saveValid(request: object, response: object, _next: Function): Promise<void>;
-        getSiteSections(): Promise<any[]>;
         getTaggedDocuments(tag: string, limit?: number): Promise<any[]>;
-        getSearchResults(query: string, limit: number): Promise<any[]>;
     }
 }
 declare module "middleware" {
@@ -88,6 +87,7 @@ declare module "index" {
         site_twitter_creator: string;
         site_image: string;
         plugins: any[];
+        middleware: string[][];
     };
     export const wiki: (config: any) => any;
     export const UttoriWiki: typeof import("wiki");

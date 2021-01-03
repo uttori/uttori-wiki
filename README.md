@@ -1,8 +1,12 @@
-[![view on npm](https://img.shields.io/npm/v/@uttori/wiki.svg)](https://www.npmjs.org/package/@uttori/wiki)
-[![npm module downloads](https://img.shields.io/npm/dt/@uttori/wiki.svg)](https://www.npmjs.org/package/@uttori/wiki)
+[![view on npm](https://img.shields.io/npm/v/@uttori/wiki.svg)](https://www.npmjs.com/package/@uttori/wiki)
+[![npm module downloads](https://img.shields.io/npm/dt/@uttori/wiki.svg)](https://www.npmjs.com/package/@uttori/wiki)
 [![Build Status](https://travis-ci.com/uttori/uttori-wiki.svg?branch=master)](https://travis-ci.com/uttori/uttori-wiki)
 [![Dependency Status](https://david-dm.org/uttori/uttori-wiki.svg)](https://david-dm.org/uttori/uttori-wiki)
-[![Coverage Status](https://coveralls.io/repos/uttori/uttori-wiki/badge.svg?branch=master)](https://coveralls.io/r/uttori/uttori-wiki?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/uttori/uttori-wiki/badge.svg?branch=master)](https://coveralls.io/github/uttori/uttori-wiki?branch=master)
+[![Tree-Shaking Support](https://badgen.net/bundlephobia/tree-shaking/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
+[![Dependency Count](https://badgen.net/bundlephobia/dependency-count/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
+[![Minified + GZip](https://badgen.net/bundlephobia/minzip/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
+[![Minified](https://badgen.net/bundlephobia/min/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
 
 # Uttori Wiki
 
@@ -12,15 +16,27 @@ UttoriWiki is plugin based. Search and Storage engines are fully configurable. T
 
 Nothing is prescribed. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage engine! Already running a bunch of external dependencies and want to plug into those? You can _most likely_ do it!
 
+Rendering happens in a pipeline so if you want to render to Markdown, then filter words out and replace text with emojis, you can do that by ordering the rendering plugins in that order.
+
 ## Configuration
 
-Please see `src/config.js` for all options. Below is an example configuration using [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file) and [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr) and more:
+Please see `src/config.js` for all options. Below is an example configuration using some plugins:
+
+- [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file)
+- [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr)
+- [@uttori/plugin-renderer-replacer](https://github.com/uttori/uttori-plugin-renderer-replacer)
+- [@uttori/plugin-renderer-markdown-it](https://github.com/uttori/uttori-plugin-renderer-markdown-it)
+- [@uttori/plugin-upload-multer](https://github.com/uttori/uttori-plugin-upload-multer)
+- [@uttori/plugin-generator-sitemap](https://github.com/uttori/uttori-plugin-generator-sitemap)
+- [@uttori/plugin-analytics-json-file](https://github.com/uttori/uttori-plugin-analytics-json-file)
 
 ```javascript
 const { Plugin: StorageProvider } = require('@uttori/storage-provider-json-file');
 const { Plugin: SearchProvider } = require('@uttori/search-provider-lunr');
 
+const AnalyticsPlugin = require('@uttori/plugin-analytics-json-file');
 const MarkdownItRenderer = require('@uttori/plugin-renderer-markdown-it');
+const ReplacerRenderer = require('@uttori/plugin-renderer-replacer');
 const MulterUpload = require('@uttori/plugin-upload-multer');
 const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
 
@@ -35,7 +51,9 @@ const config = {
   plugins: [
     StorageProvider,
     SearchProvider,
+    AnalyticsPlugin,
     MarkdownItRenderer,
+    ReplacerRenderer,
     MulterUpload,
     SitemapGenerator,
   ],
@@ -62,6 +80,24 @@ const config = {
     lunr_locales: [],
   },
 
+  // Plugin: Analytics with JSON Files
+  [AnalyticsPlugin.configKey]: {
+    events: {
+      getPopularDocuments: ['popular-documents'],
+      updateDocument: ['document-save', 'document-delete'],
+      validateConfig: ['validate-config'],
+    },
+
+    // Directory files will be uploaded to.
+    directory: `${__dirname}/data`,
+
+    // Name of the JSON file.
+    name: 'visits',
+
+    // File extension to use for the JSON file.
+    extension: 'json',
+  },
+
   // Plugin: Markdown rendering with MarkdownIt
   [MarkdownItRenderer.configKey]: {
     events: {
@@ -69,6 +105,52 @@ const config = {
       renderCollection: ['render-search-results'],
       validateConfig: ['validate-config'],
     },
+
+
+    // Uttori Specific Configuration
+    uttori: {
+      // Prefix for relative URLs, useful when the Express app is not at root.
+      baseUrl: '',
+
+      // Safe List, if a domain is not in this list, it is set to 'external nofollow noreferrer'.
+      allowedExternalDomains: [
+        'my-site.org',
+      ],
+
+      // Open external domains in a new window.
+      openNewWindow: true,
+
+      // Table of Contents
+      toc: {
+        // The opening DOM tag for the TOC container.
+        openingTag: '<nav class="table-of-contents">',
+
+        // The closing DOM tag for the TOC container.
+        closingTag: '</nav>',
+
+        // Slugify options for convering content to anchor links.
+        slugify: {
+          lower: true,
+        },
+      },
+    },
+  },
+
+  // Plugin: Replace text
+  [ReplacerRenderer.configKey]: {
+    events: {
+      renderContent: ['render-content'],
+      renderCollection: ['render-search-results'],
+      validateConfig: ['validate-config'],
+    },
+
+    // Rules for text replace
+    rules: [
+      {
+        test: /bunny|rabbit/gm,
+        output: '🐰',
+      },
+    ],
   },
 
   // Plugin: Multer Upload
@@ -83,6 +165,9 @@ const config = {
 
     // URL to POST files to
     route: '/upload',
+
+    // URL to GET uploads from
+    publicRoute: '/uploads',
   },
 
   // Plugin: Sitemap Generator
@@ -116,6 +201,23 @@ const config = {
       },
     ],
   },
+
+  // Middleware Configuration in the form of ['function', 'param1', 'param2', ...]
+  middleware: [
+    ['disable', 'x-powered-by'],
+    ['enable', 'view cache'],
+    ['set', 'views', path.join(`${__dirname}/themes/`, 'default', 'templates')],
+
+    // EJS Specific Setup
+    ['use', layouts],
+    ['set', 'layout extractScripts', true],
+    ['set', 'layout extractStyles', true],
+    // If you use the `.ejs` extension use the below:
+    // ['set', 'view engine', 'ejs'],
+    // I prefer using `.html` templates:
+    ['set', 'view engine', 'html'],
+    ['engine', 'html', ejs.renderFile],
+  ],
 };
 
 module.exports = config;
@@ -162,7 +264,7 @@ The following events are avaliable to hook into through plugins and are used in 
 | `bind-routes`                | `dispatch` |                           | Called after the default routes are bound to the server. |
 | `document-delete`            | `dispatch` |                           | Called when a document is about to be deleted. |
 | `document-save`              | `filter`   | Uttori Document           | Called when a document is about to be saved. |
-| `render-content`             | `filter`   | HTML Content              | Called anytime content is being prepared to be shown. |
+| `render-content`             | `filter`   | HTML Content              | Called when content is being prepared to be shown. |
 | `render-search-results`      | `filter`   | Array of Uttori Documents | Called when search results have been collected and is being prepared to be shown. |
 | `validate-config`            | `dispatch` |                           | Called after initial configuration validation. |
 | `validate-invalid`           | `dispatch` |                           | Called when a document is found invalid (spam?). |
@@ -190,7 +292,7 @@ The following events are avaliable to hook into through plugins and are used in 
 ## UttoriWiki
 UttoriWiki is a fast, simple, wiki knowledge base.
 
-**Kind**: global class
+**Kind**: global class  
 **Properties**
 
 | Name | Type | Description |
@@ -221,9 +323,7 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
     * [.notFound(request, response, _next)](#UttoriWiki+notFound)
     * [.saveValid(request, response, _next)](#UttoriWiki+saveValid)
-    * [.getSiteSections()](#UttoriWiki+getSiteSections) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.getTaggedDocuments(tag, limit)](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
-    * [.getSearchResults(query, limit)](#UttoriWiki+getSearchResults) ⇒ <code>Promise.&lt;Array&gt;</code>
 
 <a name="new_UttoriWiki_new"></a>
 
@@ -236,7 +336,7 @@ Creates an instance of UttoriWiki.
 | config | <code>object</code> | A configuration object. |
 | server | <code>object</code> | The Express server instance. |
 
-**Example** *(Init UttoriWiki)*
+**Example** *(Init UttoriWiki)*  
 ```js
 const server = express();
 const wiki = new UttoriWiki(config, server);
@@ -247,7 +347,7 @@ server.listen(server.get('port'), server.get('ip'), () => { ... });
 ### uttoriWiki.registerPlugins(config)
 Registers plugins with the Event Dispatcher.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -262,7 +362,7 @@ Validates the config.
 Hooks:
 - `dispatch` - `validate-config` - Passes in the config object.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -278,8 +378,8 @@ Builds the metadata for the view model.
 Hooks:
 - `filter` - `render-content` - Passes in the meta description.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
-**Returns**: <code>Promise.&lt;object&gt;</code> - Metadata object.
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Returns**: <code>Promise.&lt;object&gt;</code> - Metadata object.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -292,7 +392,7 @@ Hooks:
 | [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
 | [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
 
-**Example**
+**Example**  
 ```js
 const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
 ➜ {
@@ -314,7 +414,7 @@ Routes are bound in the order of Home, Tags, Search, Not Found Placeholder, Docu
 Hooks:
 - `dispatch` - `bind-routes` - Passes in the server instance.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -329,7 +429,7 @@ Hooks:
 - `filter` - `render-content` - Passes in the home-page content.
 - `filter` - `view-model-home` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -342,7 +442,7 @@ Hooks:
 ### uttoriWiki.homepageRedirect(request, response, _next)
 Redirects to the homepage.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -358,7 +458,7 @@ Renders the tag index page with the `tags` template.
 Hooks:
 - `filter` - `view-model-tag-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -375,7 +475,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-tag` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -392,7 +492,7 @@ Hooks:
 - `filter` - `render-search-results` - Passes in the search results.
 - `filter` - `view-model-search` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -408,7 +508,7 @@ Renders the edit page using the `edit` template.
 Hooks:
 - `filter` - `view-model-edit` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -425,7 +525,7 @@ If the config `use_delete_key` value is true, the key is verified before deletin
 Hooks:
 - `dispatch` - `document-delete` - Passes in the document beind deleted.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -443,7 +543,7 @@ Hooks:
 - `dispatch` - `validate-invalid` - Passes in the request.
 - `dispatch` - `validate-valid` - Passes in the request.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -459,7 +559,7 @@ Renders the new page using the `edit` template.
 Hooks:
 - `filter` - `view-model-new` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -476,7 +576,7 @@ Hooks:
 - `render-content` - `render-content` - Passes in the document content.
 - `filter` - `view-model-detail` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -493,7 +593,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-history-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -511,7 +611,7 @@ Hooks:
 - `render-content` - `render-content` - Passes in the document content.
 - `filter` - `view-model-history-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -528,7 +628,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-history-restore` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -545,7 +645,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-error-404` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -556,12 +656,12 @@ Hooks:
 <a name="UttoriWiki+saveValid"></a>
 
 ### uttoriWiki.saveValid(request, response, _next)
-Handles saving documents, and changing the slug of documents, the redirecting to the document.
+Handles saving documents, and changing the slug of documents, then redirecting to the document.
 
 Hooks:
 - `filter` - `document-save` - Passes in the document.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -569,55 +669,24 @@ Hooks:
 | response | <code>object</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
-<a name="UttoriWiki+getSiteSections"></a>
-
-### uttoriWiki.getSiteSections() ⇒ <code>Promise.&lt;Array&gt;</code>
-Returns the site sections from the configuration with their tagged document count.
-
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of site sections.
-**Example**
-```js
-wiki.getSiteSections();
-➜ [{ title: 'Example', description: 'Example description text.', tag: 'example', documentCount: 10 }]
-```
 <a name="UttoriWiki+getTaggedDocuments"></a>
 
 ### uttoriWiki.getTaggedDocuments(tag, limit) ⇒ <code>Promise.&lt;Array&gt;</code>
 Returns the documents with the provided tag, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignore_slugs` array.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | tag | <code>string</code> |  | The tag to look for in documents. |
 | limit | <code>number</code> | <code>1024</code> | The maximum number of documents to be returned. |
 
-**Example**
+**Example**  
 ```js
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-```
-<a name="UttoriWiki+getSearchResults"></a>
-
-### uttoriWiki.getSearchResults(query, limit) ⇒ <code>Promise.&lt;Array&gt;</code>
-Returns the documents that match the provided query string, up to the provided limit.
-This will exclude any documents that have slugs in the `config.ignore_slugs` array.
-
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.
-
-| Param | Type | Description |
-| --- | --- | --- |
-| query | <code>string</code> | The query to look for in documents. |
-| limit | <code>number</code> | The maximum number of documents to be returned. |
-
-**Example**
-```js
-wiki.getSearchResults('needle', 10);
-➜ [{ slug: 'example', title: 'Example', content: 'Haystack neelde haystack.', tags: ['example'] }]
 ```
 
 * * *

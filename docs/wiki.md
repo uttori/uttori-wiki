@@ -34,9 +34,7 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
     * [.notFound(request, response, _next)](#UttoriWiki+notFound)
     * [.saveValid(request, response, _next)](#UttoriWiki+saveValid)
-    * [.getSiteSections()](#UttoriWiki+getSiteSections) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.getTaggedDocuments(tag, limit)](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
-    * [.getSearchResults(query, limit)](#UttoriWiki+getSearchResults) ⇒ <code>Promise.&lt;Array&gt;</code>
 
 <a name="new_UttoriWiki_new"></a>
 
@@ -369,7 +367,7 @@ Hooks:
 <a name="UttoriWiki+saveValid"></a>
 
 ### uttoriWiki.saveValid(request, response, _next)
-Handles saving documents, and changing the slug of documents, the redirecting to the document.
+Handles saving documents, and changing the slug of documents, then redirecting to the document.
 
 Hooks:
 - `filter` - `document-save` - Passes in the document.
@@ -382,18 +380,6 @@ Hooks:
 | response | <code>object</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
-<a name="UttoriWiki+getSiteSections"></a>
-
-### uttoriWiki.getSiteSections() ⇒ <code>Promise.&lt;Array&gt;</code>
-Returns the site sections from the configuration with their tagged document count.
-
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of site sections.  
-**Example**  
-```js
-wiki.getSiteSections();
-➜ [{ title: 'Example', description: 'Example description text.', tag: 'example', documentCount: 10 }]
-```
 <a name="UttoriWiki+getTaggedDocuments"></a>
 
 ### uttoriWiki.getTaggedDocuments(tag, limit) ⇒ <code>Promise.&lt;Array&gt;</code>
@@ -412,23 +398,4 @@ This will exclude any documents that have slugs in the `config.ignore_slugs` arr
 ```js
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-```
-<a name="UttoriWiki+getSearchResults"></a>
-
-### uttoriWiki.getSearchResults(query, limit) ⇒ <code>Promise.&lt;Array&gt;</code>
-Returns the documents that match the provided query string, up to the provided limit.
-This will exclude any documents that have slugs in the `config.ignore_slugs` array.
-
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| query | <code>string</code> | The query to look for in documents. |
-| limit | <code>number</code> | The maximum number of documents to be returned. |
-
-**Example**  
-```js
-wiki.getSearchResults('needle', 10);
-➜ [{ slug: 'example', title: 'Example', content: 'Haystack neelde haystack.', tags: ['example'] }]
 ```
