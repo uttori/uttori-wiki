@@ -44,7 +44,7 @@
       "error", {
         "devDependencies": ["**/*.test.js", "**/test/**/*.js"],
         "optionalDependencies": true,
-        "peerDependencies": false
+        "peerDependencies": true
       }
     ],
     "max-len": 0,

@@ -1,6 +1,6 @@
 [![view on npm](https://img.shields.io/npm/v/@uttori/wiki.svg)](https://www.npmjs.org/package/@uttori/wiki)
 [![npm module downloads](https://img.shields.io/npm/dt/@uttori/wiki.svg)](https://www.npmjs.org/package/@uttori/wiki)
-[![Build Status](https://travis-ci.org/uttori/uttori-wiki.svg?branch=master)](https://travis-ci.org/uttori/uttori-wiki)
+[![Build Status](https://travis-ci.com/uttori/uttori-wiki.svg?branch=master)](https://travis-ci.com/uttori/uttori-wiki)
 [![Dependency Status](https://david-dm.org/uttori/uttori-wiki.svg)](https://david-dm.org/uttori/uttori-wiki)
 [![Coverage Status](https://coveralls.io/repos/uttori/uttori-wiki/badge.svg?branch=master)](https://coveralls.io/r/uttori/uttori-wiki?branch=master)
 
@@ -190,7 +190,7 @@ The following events are avaliable to hook into through plugins and are used in 
 ## UttoriWiki
 UttoriWiki is a fast, simple, wiki knowledge base.
 
-**Kind**: global class  
+**Kind**: global class
 **Properties**
 
 | Name | Type | Description |
@@ -236,7 +236,7 @@ Creates an instance of UttoriWiki.
 | config | <code>object</code> | A configuration object. |
 | server | <code>object</code> | The Express server instance. |
 
-**Example** *(Init UttoriWiki)*  
+**Example** *(Init UttoriWiki)*
 ```js
 const server = express();
 const wiki = new UttoriWiki(config, server);
@@ -247,7 +247,7 @@ server.listen(server.get('port'), server.get('ip'), () => { ... });
 ### uttoriWiki.registerPlugins(config)
 Registers plugins with the Event Dispatcher.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -262,7 +262,7 @@ Validates the config.
 Hooks:
 - `dispatch` - `validate-config` - Passes in the config object.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -278,8 +278,8 @@ Builds the metadata for the view model.
 Hooks:
 - `filter` - `render-content` - Passes in the meta description.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;object&gt;</code> - Metadata object.  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Returns**: <code>Promise.&lt;object&gt;</code> - Metadata object.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -292,7 +292,7 @@ Hooks:
 | [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
 | [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
 
-**Example**  
+**Example**
 ```js
 const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
 ➜ {
@@ -314,7 +314,7 @@ Routes are bound in the order of Home, Tags, Search, Not Found Placeholder, Docu
 Hooks:
 - `dispatch` - `bind-routes` - Passes in the server instance.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -329,7 +329,7 @@ Hooks:
 - `filter` - `render-content` - Passes in the home-page content.
 - `filter` - `view-model-home` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -342,7 +342,7 @@ Hooks:
 ### uttoriWiki.homepageRedirect(request, response, _next)
 Redirects to the homepage.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -358,7 +358,7 @@ Renders the tag index page with the `tags` template.
 Hooks:
 - `filter` - `view-model-tag-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -375,7 +375,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-tag` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -392,7 +392,7 @@ Hooks:
 - `filter` - `render-search-results` - Passes in the search results.
 - `filter` - `view-model-search` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -408,7 +408,7 @@ Renders the edit page using the `edit` template.
 Hooks:
 - `filter` - `view-model-edit` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -425,7 +425,7 @@ If the config `use_delete_key` value is true, the key is verified before deletin
 Hooks:
 - `dispatch` - `document-delete` - Passes in the document beind deleted.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -443,7 +443,7 @@ Hooks:
 - `dispatch` - `validate-invalid` - Passes in the request.
 - `dispatch` - `validate-valid` - Passes in the request.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -459,7 +459,7 @@ Renders the new page using the `edit` template.
 Hooks:
 - `filter` - `view-model-new` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -476,7 +476,7 @@ Hooks:
 - `render-content` - `render-content` - Passes in the document content.
 - `filter` - `view-model-detail` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -493,7 +493,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-history-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -511,7 +511,7 @@ Hooks:
 - `render-content` - `render-content` - Passes in the document content.
 - `filter` - `view-model-history-index` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -528,7 +528,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-history-restore` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -545,7 +545,7 @@ Sets the `X-Robots-Tag` header to `noindex`.
 Hooks:
 - `filter` - `view-model-error-404` - Passes in the viewModel.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -561,7 +561,7 @@ Handles saving documents, and changing the slug of documents, the redirecting to
 Hooks:
 - `filter` - `document-save` - Passes in the document.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -574,9 +574,9 @@ Hooks:
 ### uttoriWiki.getSiteSections() ⇒ <code>Promise.&lt;Array&gt;</code>
 Returns the site sections from the configuration with their tagged document count.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of site sections.  
-**Example**  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of site sections.
+**Example**
 ```js
 wiki.getSiteSections();
 ➜ [{ title: 'Example', description: 'Example description text.', tag: 'example', documentCount: 10 }]
@@ -587,15 +587,15 @@ wiki.getSiteSections();
 Returns the documents with the provided tag, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignore_slugs` array.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | tag | <code>string</code> |  | The tag to look for in documents. |
 | limit | <code>number</code> | <code>1024</code> | The maximum number of documents to be returned. |
 
-**Example**  
+**Example**
 ```js
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
@@ -606,15 +606,15 @@ wiki.getTaggedDocuments('example', 10);
 Returns the documents that match the provided query string, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignore_slugs` array.
 
-**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)
+**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.
 
 | Param | Type | Description |
 | --- | --- | --- |
 | query | <code>string</code> | The query to look for in documents. |
 | limit | <code>number</code> | The maximum number of documents to be returned. |
 
-**Example**  
+**Example**
 ```js
 wiki.getSearchResults('needle', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Haystack neelde haystack.', tags: ['example'] }]
