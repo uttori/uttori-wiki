@@ -10,9 +10,11 @@ const config = {
   // Used as the footer text of your site.
   site_footer: 'Wiki',
 
-  // Your site sections for homepage. For each section below, the home page
-  // will display a section box that lists the document count for documents
-  // that have a matching tag. Clicking the section link will list the documents.
+  // Your site sections for homepage & tag pages.
+  // For each section below, the home page will display a section box that lists the document count for documents that have a matching tag.
+  // This information is also presented on individual tag pages.
+  // Clicking the section link will list the tagged documents.
+  // This should be an empty array when unused.
   site_sections: [
     // {
     //     'title': 'Example',

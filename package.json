@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@uttori/event-dispatcher": "^1.0.4",
-    "ramda": "^0.27.1",
     "uttori-document": "^1.4.2"
   },
   "optionalDependencies": {

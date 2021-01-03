@@ -51,7 +51,7 @@ test('redirects after spliting tags correctly', async (t) => {
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
   const response = await request(uttori.server).post('/test-old/save')
-    .send('tags=tag-1,tag-2&body=test');
+    .send('tags=tag-1,tag-2,tag-1&body=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');

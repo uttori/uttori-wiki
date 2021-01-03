@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 - 🎁 Update dev dependencies
 - 🧰 Remove EJS dependencies
+- 🧰 Remove Ramda dependencies
 - 🧹 Clean up some methods to be inline
 - 🛠 Express Middleware configuration is now in the config
 

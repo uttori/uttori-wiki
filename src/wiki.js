@@ -1,7 +1,6 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 /* eslint-disable unicorn/no-array-reduce */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
-const R = require('ramda');
 const Document = require('uttori-document');
 const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
@@ -333,19 +332,11 @@ class UttoriWiki {
     let tags = [];
     try {
       [tags] = await this.hooks.fetch('storage-query', query, this);
+      tags = [...new Set(tags.map((t) => t.tags).flat())].filter(Boolean).sort((a, b) => a.localeCompare(b));
     } catch (error) {
       /* istanbul ignore next */
       debug('Error loading tags:', error);
     }
-
-    tags = R.pipe(
-      R.pluck('tags'),
-      R.flatten,
-      R.map(R.trim),
-      R.uniq,
-      R.filter(R.identity),
-      R.sort((a, b) => a.localeCompare(b)),
-    )(tags);
 
     const taggedDocuments = {};
     Promise.all(tags.map(async (tag) => {
@@ -388,12 +379,13 @@ class UttoriWiki {
     }
 
     const meta = await this.buildMetadata({}, `/tags/${request.params.tag}`);
+    const section = this.config.site_sections.find((s) => s.tag === request.params.tag) || {};
 
     let viewModel = {
       title: request.params.tag,
       config: this.config,
       taggedDocuments,
-      section: R.find(R.propEq('tag', request.params.tag))(this.config.site_sections) || {},
+      section,
       meta,
       basePath: request.proxyUrl || request.baseUrl,
     };
@@ -938,18 +930,13 @@ class UttoriWiki {
 
     // Normalize tags before save
     let tags = request.body.tags ? request.body.tags.split(',') : [];
-    tags = R.pipe(
-      R.map(R.trim),
-      R.uniq,
-      R.filter(R.identity),
-      R.sort((a, b) => a.localeCompare(b)),
-    )(tags);
+    tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
     document.tags = tags;
 
     document.slug = request.body.slug || request.params.slug;
     document.slug = document.slug.toLowerCase();
     /* istanbul ignore next */
-    document.customData = R.isEmpty(request.body.customData) ? {} : request.body.customData;
+    document.customData = request.body.customData && Object.keys(request.body.customData).length === 0 && request.body.customData.constructor === Object ? {} : request.body.customData;
 
     document = await this.hooks.filter('document-save', document, this);
 
@@ -984,7 +971,7 @@ class UttoriWiki {
       /* istanbul ignore next */
       debug('getTaggedDocuments Error:', error);
     }
-    return R.reject(R.isNil, results);
+    return results.filter(Boolean);
   }
 }
 
