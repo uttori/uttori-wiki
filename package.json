@@ -21,45 +21,49 @@
     "node": ">= 12"
   },
   "dependencies": {
-    "@uttori/event-dispatcher": "^1.0.3",
-    "debug": "^4.2.0",
-    "ejs": "^3.1.5",
-    "express-ejs-layouts": "^2.5.0",
+    "@uttori/event-dispatcher": "^1.0.4",
     "ramda": "^0.27.1",
-    "uttori-document": "^1.4.1"
+    "uttori-document": "^1.4.2"
   },
-  "optionalDependencies": {},
+  "optionalDependencies": {
+    "debug": "^4.3.1"
+  },
+  "peerDependencies": {
+    "express": "^4.17.1"
+  },
   "devDependencies": {
-    "@uttori/search-provider-lunr": "^3.3.3",
-    "@uttori/storage-provider-json-memory": "^3.4.2",
-    "ava": "^3.13.0",
+    "@uttori/search-provider-lunr": "^3.3.4",
+    "@uttori/storage-provider-json-memory": "^3.4.3",
+    "ava": "^3.15.0",
     "body-parser": "^1.19.0",
     "coveralls": "^3.1.0",
-    "docsify-cli": "^4.4.1",
-    "eslint": "^7.13.0",
+    "docsify-cli": "^4.4.2",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-ejs-layouts": "^2.5.0",
+    "eslint": "^7.17.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-ava": "^11.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsdoc": "^30.7.8",
+    "eslint-plugin-jsdoc": "^30.7.11",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-optimize-regex": "^1.2.0",
     "eslint-plugin-ramda": "^2.5.1",
-    "eslint-plugin-react": "^7.21.5",
+    "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "eslint-plugin-security": "^1.4.0",
-    "eslint-plugin-unicorn": "^23.0.0",
+    "eslint-plugin-unicorn": "^25.0.1",
     "eslint-plugin-xss": "^0.1.10",
-    "express": "^4.17.1",
     "jsdoc": "^3.6.6",
     "jsdoc-to-markdown": "^6.0.1",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
-    "release-it": "^14.2.1",
-    "sinon": "^9.2.1",
+    "release-it": "^14.2.2",
+    "sinon": "^9.2.2",
     "supertest": "^6.0.1",
-    "typescript": "^4.0.5"
+    "typescript": "^4.1.3"
   },
   "files": [
     "src/*",
