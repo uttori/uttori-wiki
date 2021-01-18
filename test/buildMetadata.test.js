@@ -13,12 +13,11 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
 
   t.deepEqual(await uttori.buildMetadata(), {
     canonical: `${config.site_url}/`,
+    robots: '',
+    title: '',
     description: '',
-    image: '',
     modified: '',
     published: '',
-    robots: '',
-    title: config.site_title,
   });
 });
 
@@ -37,7 +36,6 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
   }, 'path', 'robots'), {
     canonical: `${config.site_url}/path`,
     description: 'Test',
-    image: '',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',
     robots: 'robots',
@@ -60,7 +58,6 @@ test('buildMetadata(document, path, robots): can build metadata without an excer
   }, 'path', 'robots'), {
     canonical: `${config.site_url}/path`,
     description: '# Test',
-    image: '',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',
     robots: 'robots',

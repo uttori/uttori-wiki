@@ -2,19 +2,26 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [4.0.0](https://github.com/uttori/uttori-wiki/compare/v3.4.2...v4.0.0) - 2020-01-03
+## [4.0.0](https://github.com/uttori/uttori-wiki/compare/v3.4.2...v4.0.0) - 2020-01-17
 
-- 🎁 Update dev dependencies
+- 🧰 Add ESM Support
+- 🧰 Add explicit exports
 - 🧰 Remove EJS dependencies
 - 🧰 Remove Ramda dependencies
+- 🧰 Add support for `edit_key` and `public_history` configuration for a blog like use case
+- 🧰 Add support for only saving defiend keys with `allowedDocumentKeys`
+- 🧰 Move cache times to config
 - 🧹 Clean up some methods to be inline
+- 🧹 Many small cleanup tasks around not using the root as the URL
 - 🛠 Express Middleware configuration is now in the config
+- 🛠 Use `COUNT(*)` for counts rather than fetches
+- 🎁 Update dev dependencies
 
 ## [3.4.2](https://github.com/uttori/uttori-wiki/compare/v3.4.1...v3.4.2) - 2020-12-31
 
-- 🎁 Update dev dependencies
 - 🧰 ESLint cleanup
 - 🧰 Make `debug` an optional package
+- 🎁 Update dev dependencies
 
 ## [3.4.1](https://github.com/uttori/uttori-wiki/compare/v3.4.0...v3.4.1) - 2020-11-15
 

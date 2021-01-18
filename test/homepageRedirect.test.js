@@ -10,7 +10,7 @@ test('redirects to root', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/home-page');
+  const response = await request(server).get(`/${config.home_page}`);
   t.is(response.status, 301);
-  t.is(response.text, 'Moved Permanently. Redirecting to http://127.0.0.1/');
+  t.is(response.text, 'Moved Permanently. Redirecting to https://fake.test');
 });

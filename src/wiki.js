@@ -1,20 +1,30 @@
 /* eslint-disable unicorn/no-array-callback-reference */
 /* eslint-disable unicorn/no-array-reduce */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
-const Document = require('uttori-document');
 const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
+const { UttoriWikiConfig } = require('./config');
 
+// Used in `bindRoutes`
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
-const cache_one_year = 60 * 60 * 24 * 365;
-const cache_short = 60 * 3;
+
+/**
+ * @typedef UttoriWikiDocument
+ * @type {object}
+ * @property {string} slug The document slug to be used in the URL and as a unique ID.
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {string} excerpt A succinct deescription of the document, think meta description.
+ * @property {string} content All text content for the doucment.
+ * @property {number} createDate The Unix timestamp of the creation date of the document.
+ * @property {number} updateDate The Unix timestamp of the last update date to the document.
+ * @property {string[]} [redicrects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ */
 
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
  *
- * @property {object} config - The configuration object.
+ * @property {UttoriWikiConfig} config - The configuration object.
  * @property {EventDispatcher} hooks - The hook / event dispatching object.
- * @property {object} server - The Express server instance (only exposed when testing).
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
@@ -25,7 +35,7 @@ class UttoriWiki {
 /**
  * Creates an instance of UttoriWiki.
  *
- * @param {object} config - A configuration object.
+ * @param {UttoriWikiConfig} config - A configuration object.
  * @param {object} server - The Express server instance.
  * @class
  */
@@ -54,62 +64,32 @@ class UttoriWiki {
     // Validate the configuration and allow plugins to validate their own configruation.
     this.validateConfig(this.config);
 
-    // Expose server to tests.
-    /* istanbul ignore next */
-    if (process.env.NODE_ENV === 'test') {
-      this.server = server;
-    }
-
-    // Bind functions.
-    this.registerPlugins = this.registerPlugins.bind(this);
-    this.validateConfig = this.validateConfig.bind(this);
-    this.buildMetadata = this.buildMetadata.bind(this);
-    this.bindRoutes = this.bindRoutes.bind(this);
-    this.home = this.home.bind(this);
-    this.homepageRedirect = this.homepageRedirect.bind(this);
-    this.tagIndex = this.tagIndex.bind(this);
-    this.tag = this.tag.bind(this);
-    this.search = this.search.bind(this);
-    this.edit = this.edit.bind(this);
-    this.delete = this.delete.bind(this);
-    this.save = this.save.bind(this);
-    this.new = this.new.bind(this);
-    this.detail = this.detail.bind(this);
-    this.historyIndex = this.historyIndex.bind(this);
-    this.historyDetail = this.historyDetail.bind(this);
-    this.historyRestore = this.historyRestore.bind(this);
-    this.notFound = this.notFound.bind(this);
-    this.saveValid = this.saveValid.bind(this);
-    this.getTaggedDocuments = this.getTaggedDocuments.bind(this);
-
-    // Bind routes.
+    // Bind Express routes.
     this.bindRoutes(server);
   }
 
   /**
    * Registers plugins with the Event Dispatcher.
    *
-   * @param {object} config - A configuration object.
+   * @param {UttoriWikiConfig} config - A configuration object.
    * @param {object[]} config.plugins - A collection of plugins to register.
    */
   registerPlugins(config) {
-    if (!config.plugins || !Array.isArray(config.plugins)) {
+    if (!config.plugins || !Array.isArray(config.plugins) || config.plugins.length <= 0) {
       debug('No plugins configuration provided or plugins is not an Array, skipping.');
       return;
     }
-    if (config.plugins.length > 0) {
-      debug('Registering Plugins: ', config.plugins.length);
-      config.plugins.forEach(async (plugin) => {
-        /* istanbul ignore next */
-        try {
-          plugin.register(this);
-        } catch (error) {
-          debug('Plugin Error:', plugin);
-          debug('Plugin Error:', error);
-        }
-      });
-      debug('Registered Plugins');
-    }
+    debug('Registering Plugins: ', config.plugins.length);
+    config.plugins.forEach(async (plugin) => {
+      /* istanbul ignore next */
+      try {
+        plugin.register(this);
+      } catch (error) {
+        debug('Plugin:', plugin);
+        debug('Plugin Error:', error);
+      }
+    });
+    debug('Registered Plugins');
   }
 
   /**
@@ -118,19 +98,23 @@ class UttoriWiki {
    * Hooks:
    * - `dispatch` - `validate-config` - Passes in the config object.
    *
-   * @param {object} config - A configuration object.
-   * @param {string} config.theme_dir - The path to the theme directory.
-   * @param {string} config.public_dir - The path to the public facing directory.
+   * @param {UttoriWikiConfig} config A configuration object.
+   * @param {string} config.theme_dir The path to the theme directory.
+   * @param {string} config.public_dir The path to the public facing directory.
    */
   validateConfig(config) {
     debug('Validating config...');
-    if (!config.theme_dir) {
-      debug('Config Error: No theme_dir provided.');
-      throw new Error('No theme_dir provided.');
+    if (typeof config.theme_dir !== 'string') {
+      throw new TypeError('No theme_dir provided.');
     }
-    if (!config.public_dir) {
-      debug('Config Error: No public_dir provided.');
-      throw new Error('No public_dir provided.');
+    if (typeof config.public_dir !== 'string') {
+      throw new TypeError('No public_dir provided.');
+    }
+    if (config.use_delete_key && !config.delete_key) {
+      throw new TypeError('Using use_delete_key verification but no delete_key value set.');
+    }
+    if (config.use_edit_key && !config.edit_key) {
+      throw new TypeError('Using use_edit_key verification but no edit_key value set.');
     }
 
     this.hooks.dispatch('validate-config', config, this);
@@ -145,50 +129,51 @@ class UttoriWiki {
    * - `filter` - `render-content` - Passes in the meta description.
    *
    * @async
-   * @param {object} [document={}] - A configuration object.
-   * @param {string} [document.excerpt] - The meta description to be used.
-   * @param {string} [document.content] - The document content to be used as a backup meta description when excerpt is not provided.
-   * @param {number} [document.updateDate] - The Unix timestamp of the last update date to the document.
-   * @param {number} [document.createDate] - The Unix timestamp of the creation date of the document.
-   * @param {string} [document.title] - The document title to be used in meta data.
-   * @param {string} [path=''] - The URL path to build meta data for.
-   * @param {string} [robots=''] - A meta robots tag value.
+   * @param {UttoriWikiDocument} document A UttoriWikiDocument.
+   * @param {string} [path=''] The URL path to build meta data for.
+   * @param {string} [robots=''] A meta robots tag value.
+   * @returns {Promise<object>} Metadata object.
    * @example
    * const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
    * ➜ {
    * ➜   canonical,   // `${this.config.site_url}/private-document-path`
-   * ➜   description, // document.excerpt ? `${document.content.slice(0, 160)}`
-   * ➜   image,       // '' unless augmented via Plugin
+   * ➜   robots,      // 'no-index'
+   * ➜   title,       // document.title
+   * ➜   description, // document.excerpt || document.content.slice(0, 160)
    * ➜   modified,    // new Date(document.updateDate).toISOString()
    * ➜   published,   // new Date(document.createDate).toISOString()
-   * ➜   robots,      // 'no-index'
-   * ➜   title,       // document.title ? this.config.site_title
    * ➜ }
-   * @returns {Promise<object>} Metadata object.
    */
-  async buildMetadata(document = {}, path = '', robots = '') {
+  async buildMetadata(document, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
+    if (!document) {
+      return {
+        canonical,
+        robots: '',
+        title: '',
+        description: '',
+        modified: '',
+        published: '',
+      };
+    }
 
     let description = document && document.excerpt ? document.excerpt : '';
-    if (document && document.content && !description) {
-      /* istanbul ignore next */
-      description = document && document.content ? `${document.content.slice(0, 160)}` : '';
+    if (document.content && !description) {
+      description = document.content.slice(0, 160);
       description = await this.hooks.filter('render-content', description, this);
     }
 
-    const image = '';
-    const modified = document && document.updateDate ? new Date(document.updateDate).toISOString() : '';
-    const published = document && document.createDate ? new Date(document.createDate).toISOString() : '';
-    const title = document && document.title ? document.title : this.config.site_title;
+    const modified = document.updateDate ? new Date(document.updateDate).toISOString() : '';
+    const published = document.createDate ? new Date(document.createDate).toISOString() : '';
+    const title = document.title ? document.title : '';
 
     let metadata = {
       canonical,
-      description,
-      image,
-      modified,
-      published,
       robots,
       title,
+      description,
+      modified,
+      published,
     };
     metadata = await this.hooks.filter('view-model-metadata', metadata, this);
 
@@ -202,7 +187,7 @@ class UttoriWiki {
    * Hooks:
    * - `dispatch` - `bind-routes` - Passes in the server instance.
    *
-   * @param {object} server - The Express server instance.
+   * @param {object} server The Express server instance.
    */
   bindRoutes(server) {
     debug('Binding routes...');
@@ -226,12 +211,21 @@ class UttoriWiki {
     server.post('/404', asyncHandler(this.notFound.bind(this)));
 
     // Document
+    server.get('/new/:key', asyncHandler(this.new.bind(this)));
     server.get('/new', asyncHandler(this.new.bind(this)));
+    server.get('/:slug/edit/:key', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
-    server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
-    server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
-    server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
+    server.get('/:slug/delete', asyncHandler(this.delete.bind(this)));
+
+    // Document History
+    if (this.config.public_history) {
+      server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
+      server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
+      server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
+    }
+
+    server.post('/:slug/save/:key', asyncHandler(this.save.bind(this)));
     server.post('/:slug/save', asyncHandler(this.save.bind(this)));
     server.get('/:slug', asyncHandler(this.detail.bind(this)));
 
@@ -251,32 +245,40 @@ class UttoriWiki {
    * - `filter` - `view-model-home` - Passes in the viewModel.
    *
    * @async
-   * @param {Request} request - The Express Request object.
-   * @param {Response} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async home(request, response, next) {
     debug('Home Route');
-    let homeDocument;
+    /** @type {UttoriWikiDocument} */
+    let document;
     try {
-      [homeDocument] = await this.hooks.fetch('storage-get', this.config.home_page, this);
+      [document] = await this.hooks.fetch('storage-get', this.config.home_page, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading home document:', error);
+      debug('Error fetching home document:', error);
     }
-    if (!homeDocument) {
+    if (!document) {
       debug('Missing home document');
       next();
       return;
     }
-    homeDocument.html = await this.hooks.filter('render-content', homeDocument.content, this);
+    document.html = await this.hooks.filter('render-content', document.content, this);
 
     let siteSections = [];
     try {
       siteSections = await Promise.all(this.config.site_sections.map(async (section) => {
-        // TODO we really just want the document count here.
-        const documents = await this.getTaggedDocuments(section.tag);
-        const documentCount = documents.length;
+        let documentCount = 0;
+        try {
+          const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+          const query = `SELECT COUNT(*) FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES "${section.tag}" ORDER BY RANDOM LIMIT -1`;
+          [documentCount] = await this.hooks.fetch('storage-query', query, this);
+        } catch (error) {
+          /* istanbul ignore next */
+          debug('Error counting tags:', error);
+        }
+
         return {
           ...section,
           documentCount,
@@ -287,31 +289,31 @@ class UttoriWiki {
       debug('Error getting site_sections:', error);
     }
 
-    const meta = await this.buildMetadata(homeDocument, '');
+    const meta = await this.buildMetadata(document, '');
 
     let viewModel = {
-      title: 'Home',
+      title: document.title,
       config: this.config,
       siteSections,
-      homeDocument,
+      document,
       meta,
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_short}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
     response.render('home', viewModel);
   }
 
   /**
    * Redirects to the homepage.
    *
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} _next The Express Next function.
    */
   homepageRedirect(request, response, _next) {
     debug('homepageRedirect:', this.config.home_page);
-    response.redirect(301, `${request.protocol}://${request.hostname}/`);
+    response.redirect(301, this.config.site_url);
   }
 
   /**
@@ -321,9 +323,9 @@ class UttoriWiki {
    * - `filter` - `view-model-tag-index` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} _next The Express Next function.
    */
   async tagIndex(request, response, _next) {
     debug('Tag Index Route');
@@ -335,7 +337,7 @@ class UttoriWiki {
       tags = [...new Set(tags.map((t) => t.tags).flat())].filter(Boolean).sort((a, b) => a.localeCompare(b));
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading tags:', error);
+      debug('Error fetching tags:', error);
     }
 
     const taggedDocuments = {};
@@ -353,21 +355,22 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_short}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
     response.render('tags', viewModel);
   }
 
   /**
    * Renders the tag detail page with `tag` template.
    * Sets the `X-Robots-Tag` header to `noindex`.
+   * Attempts to pull in the relevant site section for the tag if defined in the config site sections.
    *
    * Hooks:
    * - `filter` - `view-model-tag` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async tag(request, response, next) {
     debug('Tag Route');
@@ -390,7 +393,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_short}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
     response.render('tag', viewModel);
   }
 
@@ -402,9 +405,9 @@ class UttoriWiki {
    * - `filter` - `view-model-search` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} _next The Express Next function.
    */
   async search(request, response, _next) {
     debug('Search Route');
@@ -456,12 +459,18 @@ class UttoriWiki {
    * - `filter` - `view-model-edit` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async edit(request, response, next) {
     debug('Edit Route');
+    if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
+      debug('edit: Missing edit key, or a edit key mismatch!');
+      next();
+      return;
+    }
+
     if (!request.params.slug) {
       debug('Missing slug!');
       next();
@@ -473,7 +482,7 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
 
     if (!document) {
@@ -504,20 +513,20 @@ class UttoriWiki {
    * - `dispatch` - `document-delete` - Passes in the document beind deleted.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async delete(request, response, next) {
     debug('Delete Route');
-    if (!request.params.slug) {
-      debug('delete: Missing slug!');
+    if (this.config.use_delete_key && (!request.params.key || request.params.key !== this.config.delete_key)) {
+      debug('delete: Missing delete key, or a delete key mismatch!');
       next();
       return;
     }
-    /* istanbul ignore else */
-    if (this.config.use_delete_key && (!request.params.key || request.params.key !== this.config.delete_key)) {
-      debug('delete: Missing delete key, or a delete key mismatch!');
+
+    if (!request.params.slug) {
+      debug('delete: Missing slug!');
       next();
       return;
     }
@@ -528,7 +537,7 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get', slug, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
     if (document) {
       this.hooks.dispatch('document-delete', document, this);
@@ -551,18 +560,18 @@ class UttoriWiki {
    * - `dispatch` - `validate-valid` - Passes in the request.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async save(request, response, next) {
     debug('Save Route');
-    if (!request.params.slug && !request.body.slug) {
-      debug('Missing slug!');
+    if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
+      debug('save: Missing edit key, or a edit key mismatch!');
       next();
       return;
     }
-    if (!request.body || Object.keys(request.body).length === 0) {
+    if (!request.body || (request.body && Object.keys(request.body).length === 0)) {
       debug('Missing body!');
       next();
       return;
@@ -572,7 +581,7 @@ class UttoriWiki {
     if (invalid) {
       debug('Invalid:', request.params.slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
-      response.redirect(request.header('Referer') || '/');
+      response.redirect(request.header('Referer') || this.config.site_url);
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
@@ -586,22 +595,30 @@ class UttoriWiki {
    * - `filter` - `view-model-new` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
-  async new(request, response, _next) {
+  async new(request, response, next) {
     debug('New Route');
-    const document = new Document();
-    document.slug = '';
-    document.title = 'New Document';
+    if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
+      debug('edit: Missing edit key, or a edit key mismatch!');
+      next();
+      return;
+    }
+
+    const title = 'New Document';
+    const document = {
+      slug: '',
+      title,
+    };
 
     const meta = await this.buildMetadata(document, '/new');
     let viewModel = {
       document,
-      title: document.title,
-      config: this.config,
+      title,
       meta,
+      config: this.config,
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
@@ -618,9 +635,9 @@ class UttoriWiki {
    * - `filter` - `view-model-detail` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async detail(request, response, next) {
     debug('Detail Route');
@@ -635,7 +652,7 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
 
     if (!document) {
@@ -656,7 +673,7 @@ class UttoriWiki {
       basePath: request.proxyUrl || request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
-    response.set('Cache-control', `public, max-age=${cache_short}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
     response.render('detail', viewModel);
   }
 
@@ -668,9 +685,9 @@ class UttoriWiki {
    * - `filter` - `view-model-history-index` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async historyIndex(request, response, next) {
     debug('History Index Route');
@@ -684,7 +701,7 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
 
     if (!document) {
@@ -698,7 +715,7 @@ class UttoriWiki {
       [history] = await this.hooks.fetch('storage-get-history', request.params.slug, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading history:', error);
+      debug('Error fetching history:', error);
     }
 
     /* istanbul ignore next */
@@ -735,7 +752,7 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${cache_short}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
     response.render('history_index', viewModel);
   }
 
@@ -748,9 +765,9 @@ class UttoriWiki {
    * - `filter` - `view-model-history-index` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async historyDetail(request, response, next) {
     debug('History Detail Route');
@@ -771,11 +788,11 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get-revision', { slug, revision }, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
 
     if (!document) {
-      debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
+      debug('No revision found for given slug & revision pair:', slug, revision);
       next();
       return;
     }
@@ -784,21 +801,22 @@ class UttoriWiki {
 
     const meta = await this.buildMetadata({
       ...document,
-      title: `${document.title} Revision ${request.params.revision}`,
-    }, `/${request.params.slug}/history/${request.params.revision}`, 'noindex');
+      title: `${document.title} Revision ${revision}`,
+    }, `/${slug}/history/${revision}`, 'noindex');
 
     let viewModel = {
-      title: `${document.title} Revision ${request.params.revision}`,
-      config: this.config,
-      document,
-      revision: request.params.revision,
-      meta,
       basePath: request.proxyUrl || request.baseUrl,
+      config: this.config,
+      title: `${document.title} Revision ${revision}`,
+      document,
+      meta,
+      revision,
+      slug,
     };
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${cache_one_year}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
     response.render('detail', viewModel);
   }
 
@@ -810,9 +828,9 @@ class UttoriWiki {
    * - `filter` - `view-model-history-restore` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
    */
   async historyRestore(request, response, next) {
     debug('History Restore Route');
@@ -833,32 +851,33 @@ class UttoriWiki {
       [document] = await this.hooks.fetch('storage-get-revision', { slug, revision }, this);
     } catch (error) {
       /* istanbul ignore next */
-      debug('Error loading document:', error);
+      debug('Error fetching document:', error);
     }
 
     if (!document) {
-      debug('No revision found for given slug & revision pair:', request.params.slug, request.params.revision);
+      debug('No revision found for given slug & revision pair:', slug, revision);
       next();
       return;
     }
 
     const meta = await this.buildMetadata({
       ...document,
-      title: `Editing ${document.title} from Revision ${request.params.revision}`,
-    }, `/${request.params.slug}/history/${request.params.revision}/restore`, 'noindex');
+      title: `Editing ${document.title} from Revision ${revision}`,
+    }, `/${slug}/history/${revision}/restore`, 'noindex');
 
     let viewModel = {
-      title: `Editing ${document.title} from Revision ${request.params.revision}`,
-      document,
-      revision: request.params.revision,
-      config: this.config,
-      meta,
       basePath: request.proxyUrl || request.baseUrl,
+      config: this.config,
+      title: `Editing ${document.title} from Revision ${revision}`,
+      document,
+      meta,
+      revision,
+      slug,
     };
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${cache_one_year}`);
+    response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
     response.render('edit', viewModel);
   }
 
@@ -870,9 +889,9 @@ class UttoriWiki {
    * - `filter` - `view-model-error-404` - Passes in the viewModel.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} _next The Express Next function.
    */
   async notFound(request, response, _next) {
     debug('404 Not Found Route');
@@ -909,35 +928,48 @@ class UttoriWiki {
   /**
    * Handles saving documents, and changing the slug of documents, then redirecting to the document.
    *
+   * `title`, `excerpt`, and `content` will default to a blank string
+   * `tags` is expected to be a comma delimited string in the request body, "tag-1,tag-2"
+   * `slug` will be converted to lowercase and will use `request.body.slug` and fall back to `request.params.slug`.
+   *
    * Hooks:
    * - `filter` - `document-save` - Passes in the document.
    *
    * @async
-   * @param {object} request - The Express Request object.
-   * @param {object} response - The Express Response object.
-   * @param {Function} _next - The Express Next function.
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} _next The Express Next function.
    */
   async saveValid(request, response, _next) {
     debug('saveValid');
     debug(`Updating with params: ${JSON.stringify(request.params, undefined, 2)}`);
     debug(`Updating with body: ${JSON.stringify(request.body, undefined, 2)}`);
 
-    // Create document from form
-    let document = new Document();
-    document.title = request.body.title;
-    document.excerpt = request.body.excerpt;
-    document.content = request.body.content;
+    const { title = '', excerpt = '', content = '' } = request.body;
+
+    // Filter out any unwanted keys
+    const custom = this.config.allowedDocumentKeys.reduce((output, key) => {
+      if (request.body[key]) {
+        output[key] = request.body[key];
+      }
+      return output;
+    }, {});
 
     // Normalize tags before save
-    let tags = request.body.tags ? request.body.tags.split(',') : [];
+    let tags = typeof request.body.tags === 'string' ? request.body.tags.split(',') : [];
     tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
-    document.tags = tags;
 
-    document.slug = request.body.slug || request.params.slug;
-    document.slug = document.slug.toLowerCase();
-    /* istanbul ignore next */
-    document.customData = request.body.customData && Object.keys(request.body.customData).length === 0 && request.body.customData.constructor === Object ? {} : request.body.customData;
+    let slug = request.body.slug || request.params.slug;
+    slug = slug.toLowerCase();
 
+    let document = {
+      ...custom,
+      title,
+      excerpt,
+      content,
+      tags,
+      slug,
+    };
     document = await this.hooks.filter('document-save', document, this);
 
     // Save document
@@ -945,7 +977,7 @@ class UttoriWiki {
     await this.hooks.fetch('storage-update', { document, originalSlug }, this);
     this.hooks.dispatch('search-update', [{ document, originalSlug }], this);
 
-    response.redirect(`${this.config.site_url}/${document.slug}`);
+    response.redirect(`${this.config.site_url}/${slug}`);
   }
 
   /**
@@ -953,12 +985,12 @@ class UttoriWiki {
    * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
    *
    * @async
-   * @param {string} tag - The tag to look for in documents.
-   * @param {number} limit - The maximum number of documents to be returned.
+   * @param {string} tag The tag to look for in documents.
+   * @param {number} [limit=1024] The maximum number of documents to be returned.
+   * @returns {Promise<Array>} Promise object that resolves to the array of the documents.
    * @example
    * wiki.getTaggedDocuments('example', 10);
    * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-   * @returns {Promise<Array>} Promise object that resolves to the array of the documents.
    */
   async getTaggedDocuments(tag, limit = 1024) {
     debug('getTaggedDocuments:', tag, limit);

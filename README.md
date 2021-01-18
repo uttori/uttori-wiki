@@ -10,17 +10,21 @@
 
 # Uttori Wiki
 
-UttoriWiki is a fast, simple, wiki / knowledge base for Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or updated to fit specific needs.
+UttoriWiki is a fast, simple, wiki / knowledge base built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or swapped out to fit specific needs.
 
-UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
+Why yet another knowledge management / note taking app? I wanted to have something that functioned as a Wiki or Blog or similar small app that I could reuse components for and keep extensible.
+
+Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
 
 Nothing is prescribed. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage engine! Already running a bunch of external dependencies and want to plug into those? You can _most likely_ do it!
 
-Rendering happens in a pipeline so if you want to render to Markdown, then filter words out and replace text with emojis, you can do that by ordering the rendering plugins in that order.
+Rendering happens in a pipeline making it easy to render to Markdown, then filter words out and replace text with emojis.
+
+If you want to test it out, check out [the demo repo](https://github.com/uttori/uttori-wiki-demo-site) to get up and going in a minutes.
 
 ## Configuration
 
-Please see `src/config.js` for all options. Below is an example configuration using some plugins:
+Please see `src/config.js` or [the config doc](https://github.com/uttori/uttori-wiki/blob/master/docs/config.md) for all options. Below is an example configuration using some plugins:
 
 - [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file)
 - [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr)
@@ -41,11 +45,43 @@ const MulterUpload = require('@uttori/plugin-upload-multer');
 const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
 
 const config = {
-  // Specify the theme to use, no trailing slash
-  theme_dir: `${__dirname}/themes`,
-
-  // Path to the static file directory for themes, no trailing slash
-  public_dir: `${__dirname}/themes/default/public`,
+  site_title: 'Uttori Wiki Demo',
+  site_header: 'Uttori Wiki Demo',
+  site_footer: 'Uttori Wiki Demo | ✨',
+  site_sections: [
+    {
+      title: 'Section One',
+      description: 'An example section.',
+      tag: 'examples',
+    },
+    {
+      title: 'Section Two',
+      description: 'A section with something already in it.',
+      tag: 'reference',
+    },
+    {
+      title: 'Section Three',
+      description: 'A third example section.',
+      tag: 'tutorial',
+    },
+  ],
+  home_page: 'home-page',
+  ignore_slugs: ['home-page'],
+  excerpt_length: 400,
+  site_url: 'http://127.0.0.1:8000/wiki',
+  theme_dir: path.join(__dirname, 'theme'),
+  public_dir: path.join(__dirname, 'theme', 'public'),
+  use_delete_key: false,
+  delete_key: process.env.DELETE_KEY || '',
+  use_edit_key: false,
+  edit_key: process.env.EDIT_KEY || '',
+  public_history: true,
+  allowedDocumentKeys: [],
+  use_meta_data: true,
+  site_description: 'An example Wiki using the Uttori Wiki library.',
+  site_locale: 'en_US',
+  site_twitter_site: '@twitter',
+  site_twitter_creator: '@twitter',
 
   // Plugins
   plugins: [
@@ -78,6 +114,9 @@ const config = {
   [SearchProvider.configKey]: {
     // Optional Lunr locale
     lunr_locales: [],
+
+    // Ignore Slugs
+    ignore_slugs: ['home-page'],
   },
 
   // Plugin: Analytics with JSON Files
@@ -287,6 +326,21 @@ The following events are avaliable to hook into through plugins and are used in 
 
 ## API Reference
 
+## Classes
+
+<dl>
+<dt><a href="#UttoriWiki">UttoriWiki</a></dt>
+<dd><p>UttoriWiki is a fast, simple, wiki knowledge base.</p>
+</dd>
+</dl>
+
+## Typedefs
+
+<dl>
+<dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code>object</code></dt>
+<dd></dd>
+</dl>
+
 <a name="UttoriWiki"></a>
 
 ## UttoriWiki
@@ -297,16 +351,15 @@ UttoriWiki is a fast, simple, wiki knowledge base.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| config | <code>object</code> | The configuration object. |
+| config | <code>UttoriWikiConfig</code> | The configuration object. |
 | hooks | <code>EventDispatcher</code> | The hook / event dispatching object. |
-| server | <code>object</code> | The Express server instance (only exposed when testing). |
 
 
 * [UttoriWiki](#UttoriWiki)
     * [new UttoriWiki(config, server)](#new_UttoriWiki_new)
     * [.registerPlugins(config)](#UttoriWiki+registerPlugins)
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
-    * [.buildMetadata([document], [path], [robots])](#UttoriWiki+buildMetadata) ⇒ <code>Promise.&lt;object&gt;</code>
+    * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.bindRoutes(server)](#UttoriWiki+bindRoutes)
     * [.home(request, response, next)](#UttoriWiki+home)
     * [.homepageRedirect(request, response, _next)](#UttoriWiki+homepageRedirect)
@@ -316,14 +369,14 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.edit(request, response, next)](#UttoriWiki+edit)
     * [.delete(request, response, next)](#UttoriWiki+delete)
     * [.save(request, response, next)](#UttoriWiki+save)
-    * [.new(request, response, _next)](#UttoriWiki+new)
+    * [.new(request, response, next)](#UttoriWiki+new)
     * [.detail(request, response, next)](#UttoriWiki+detail)
     * [.historyIndex(request, response, next)](#UttoriWiki+historyIndex)
     * [.historyDetail(request, response, next)](#UttoriWiki+historyDetail)
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
     * [.notFound(request, response, _next)](#UttoriWiki+notFound)
     * [.saveValid(request, response, _next)](#UttoriWiki+saveValid)
-    * [.getTaggedDocuments(tag, limit)](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.getTaggedDocuments(tag, [limit])](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
 
 <a name="new_UttoriWiki_new"></a>
 
@@ -333,7 +386,7 @@ Creates an instance of UttoriWiki.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>object</code> | A configuration object. |
+| config | <code>UttoriWikiConfig</code> | A configuration object. |
 | server | <code>object</code> | The Express server instance. |
 
 **Example** *(Init UttoriWiki)*  
@@ -351,7 +404,7 @@ Registers plugins with the Event Dispatcher.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>object</code> | A configuration object. |
+| config | <code>UttoriWikiConfig</code> | A configuration object. |
 | config.plugins | <code>Array.&lt;object&gt;</code> | A collection of plugins to register. |
 
 <a name="UttoriWiki+validateConfig"></a>
@@ -366,13 +419,13 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>object</code> | A configuration object. |
+| config | <code>UttoriWikiConfig</code> | A configuration object. |
 | config.theme_dir | <code>string</code> | The path to the theme directory. |
 | config.public_dir | <code>string</code> | The path to the public facing directory. |
 
 <a name="UttoriWiki+buildMetadata"></a>
 
-### uttoriWiki.buildMetadata([document], [path], [robots]) ⇒ <code>Promise.&lt;object&gt;</code>
+### uttoriWiki.buildMetadata(document, [path], [robots]) ⇒ <code>Promise.&lt;object&gt;</code>
 Builds the metadata for the view model.
 
 Hooks:
@@ -383,12 +436,7 @@ Hooks:
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| [document] | <code>object</code> | <code>{}</code> | A configuration object. |
-| [document.excerpt] | <code>string</code> |  | The meta description to be used. |
-| [document.content] | <code>string</code> |  | The document content to be used as a backup meta description when excerpt is not provided. |
-| [document.updateDate] | <code>number</code> |  | The Unix timestamp of the last update date to the document. |
-| [document.createDate] | <code>number</code> |  | The Unix timestamp of the creation date of the document. |
-| [document.title] | <code>string</code> |  | The document title to be used in meta data. |
+| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) |  | A UttoriWikiDocument. |
 | [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
 | [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
 
@@ -397,12 +445,11 @@ Hooks:
 const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
 ➜ {
 ➜   canonical,   // `${this.config.site_url}/private-document-path`
-➜   description, // document.excerpt ? `${document.content.slice(0, 160)}`
-➜   image,       // '' unless augmented via Plugin
+➜   robots,      // 'no-index'
+➜   title,       // document.title
+➜   description, // document.excerpt || document.content.slice(0, 160)
 ➜   modified,    // new Date(document.updateDate).toISOString()
 ➜   published,   // new Date(document.createDate).toISOString()
-➜   robots,      // 'no-index'
-➜   title,       // document.title ? this.config.site_title
 ➜ }
 ```
 <a name="UttoriWiki+bindRoutes"></a>
@@ -446,8 +493,8 @@ Redirects to the homepage.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+tagIndex"></a>
@@ -462,8 +509,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+tag"></a>
@@ -471,6 +518,7 @@ Hooks:
 ### uttoriWiki.tag(request, response, next)
 Renders the tag detail page with `tag` template.
 Sets the `X-Robots-Tag` header to `noindex`.
+Attempts to pull in the relevant site section for the tag if defined in the config site sections.
 
 Hooks:
 - `filter` - `view-model-tag` - Passes in the viewModel.
@@ -479,8 +527,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+search"></a>
@@ -496,8 +544,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+edit"></a>
@@ -512,8 +560,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+delete"></a>
@@ -529,8 +577,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+save"></a>
@@ -547,13 +595,13 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+new"></a>
 
-### uttoriWiki.new(request, response, _next)
+### uttoriWiki.new(request, response, next)
 Renders the new page using the `edit` template.
 
 Hooks:
@@ -563,9 +611,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
+| next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+detail"></a>
 
@@ -580,8 +628,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyIndex"></a>
@@ -597,8 +645,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyDetail"></a>
@@ -615,8 +663,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyRestore"></a>
@@ -632,8 +680,8 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+notFound"></a>
@@ -649,14 +697,18 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+saveValid"></a>
 
 ### uttoriWiki.saveValid(request, response, _next)
 Handles saving documents, and changing the slug of documents, then redirecting to the document.
+
+`title`, `excerpt`, and `content` will default to a blank string
+`tags` is expected to be a comma delimited string in the request body, "tag-1,tag-2"
+`slug` will be converted to lowercase and will use `request.body.slug` and fall back to `request.params.slug`.
 
 Hooks:
 - `filter` - `document-save` - Passes in the document.
@@ -665,13 +717,13 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>object</code> | The Express Request object. |
-| response | <code>object</code> | The Express Response object. |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
 | _next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+getTaggedDocuments"></a>
 
-### uttoriWiki.getTaggedDocuments(tag, limit) ⇒ <code>Promise.&lt;Array&gt;</code>
+### uttoriWiki.getTaggedDocuments(tag, [limit]) ⇒ <code>Promise.&lt;Array&gt;</code>
 Returns the documents with the provided tag, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignore_slugs` array.
 
@@ -681,13 +733,29 @@ This will exclude any documents that have slugs in the `config.ignore_slugs` arr
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | tag | <code>string</code> |  | The tag to look for in documents. |
-| limit | <code>number</code> | <code>1024</code> | The maximum number of documents to be returned. |
+| [limit] | <code>number</code> | <code>1024</code> | The maximum number of documents to be returned. |
 
 **Example**  
 ```js
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
 ```
+<a name="UttoriWikiDocument"></a>
+
+## UttoriWikiDocument : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| slug | <code>string</code> | The document slug to be used in the URL and as a unique ID. |
+| title | <code>string</code> | The document title to be used anywhere a title may be needed. |
+| excerpt | <code>string</code> | A succinct deescription of the document, think meta description. |
+| content | <code>string</code> | All text content for the doucment. |
+| createDate | <code>number</code> | The Unix timestamp of the creation date of the document. |
+| updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
+| [redicrects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
+
 
 * * *
 

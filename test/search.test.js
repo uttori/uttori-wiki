@@ -11,7 +11,7 @@ test('search(request, response, _next): renders', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/search?s=test');
+  const response = await request(server).get('/search?s=test');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);

@@ -16,10 +16,21 @@ test('renders the requested slug and revision', async (t) => {
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
   const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
-  const express_response = await request(uttori.server).get(`/demo-title/history/${history[0]}`);
+  const express_response = await request(server).get(`/demo-title/history/${history[0]}`);
   t.is(express_response.status, 200);
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
   t.true(title[1].startsWith('Demo Title Beta Revision 1'));
+});
+
+test('falls through to next when public_history is false', async (t) => {
+  t.plan(1);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, public_history: false }, server);
+  await seed(uttori);
+  const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
+  const express_response = await request(server).get(`/demo-title/history/${history[0]}`);
+  t.is(express_response.status, 404);
 });
 
 test('falls through to next when slug is missing', async (t) => {

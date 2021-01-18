@@ -11,7 +11,7 @@ test('notFound(request, response, next): renders a 404 page', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/404');
+  const response = await request(server).get('/404');
   t.is(response.status, 404);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);

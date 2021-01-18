@@ -10,17 +10,21 @@
 
 # Uttori Wiki
 
-UttoriWiki is a fast, simple, wiki / knowledge base for Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or updated to fit specific needs.
+UttoriWiki is a fast, simple, wiki / knowledge base built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or swapped out to fit specific needs.
 
-UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
+Why yet another knowledge management / note taking app? I wanted to have something that functioned as a Wiki or Blog or similar small app that I could reuse components for and keep extensible.
+
+Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
 
 Nothing is prescribed. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage engine! Already running a bunch of external dependencies and want to plug into those? You can _most likely_ do it!
 
-Rendering happens in a pipeline so if you want to render to Markdown, then filter words out and replace text with emojis, you can do that by ordering the rendering plugins in that order.
+Rendering happens in a pipeline making it easy to render to Markdown, then filter words out and replace text with emojis.
+
+If you want to test it out, check out [the demo repo](https://github.com/uttori/uttori-wiki-demo-site) to get up and going in a minutes.
 
 ## Configuration
 
-Please see `src/config.js` for all options. Below is an example configuration using some plugins:
+Please see `src/config.js` or [the config doc](https://github.com/uttori/uttori-wiki/blob/master/docs/config.md) for all options. Below is an example configuration using some plugins:
 
 - [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file)
 - [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr)
@@ -41,11 +45,43 @@ const MulterUpload = require('@uttori/plugin-upload-multer');
 const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
 
 const config = {
-  // Specify the theme to use, no trailing slash
-  theme_dir: `${__dirname}/themes`,
-
-  // Path to the static file directory for themes, no trailing slash
-  public_dir: `${__dirname}/themes/default/public`,
+  site_title: 'Uttori Wiki Demo',
+  site_header: 'Uttori Wiki Demo',
+  site_footer: 'Uttori Wiki Demo | ✨',
+  site_sections: [
+    {
+      title: 'Section One',
+      description: 'An example section.',
+      tag: 'examples',
+    },
+    {
+      title: 'Section Two',
+      description: 'A section with something already in it.',
+      tag: 'reference',
+    },
+    {
+      title: 'Section Three',
+      description: 'A third example section.',
+      tag: 'tutorial',
+    },
+  ],
+  home_page: 'home-page',
+  ignore_slugs: ['home-page'],
+  excerpt_length: 400,
+  site_url: 'http://127.0.0.1:8000/wiki',
+  theme_dir: path.join(__dirname, 'theme'),
+  public_dir: path.join(__dirname, 'theme', 'public'),
+  use_delete_key: false,
+  delete_key: process.env.DELETE_KEY || '',
+  use_edit_key: false,
+  edit_key: process.env.EDIT_KEY || '',
+  public_history: true,
+  allowedDocumentKeys: [],
+  use_meta_data: true,
+  site_description: 'An example Wiki using the Uttori Wiki library.',
+  site_locale: 'en_US',
+  site_twitter_site: '@twitter',
+  site_twitter_creator: '@twitter',
 
   // Plugins
   plugins: [
@@ -78,6 +114,9 @@ const config = {
   [SearchProvider.configKey]: {
     // Optional Lunr locale
     lunr_locales: [],
+
+    // Ignore Slugs
+    ignore_slugs: ['home-page'],
   },
 
   // Plugin: Analytics with JSON Files

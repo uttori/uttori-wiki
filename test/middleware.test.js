@@ -17,9 +17,8 @@ test('wiki can run', (t) => {
     home_page: 'home-page',
     site_url: 'https://fake.test',
     // Specify the theme to use
-    theme_dir: 'test/site/themes',
-    theme_name: 'default',
-    public_dir: 'test/site/themes/default/public',
+    theme_dir: 'test/site/theme',
+    public_dir: 'test/site/theme/public',
     use_delete_key: true,
     delete_key: 'test-key',
     plugins: [],

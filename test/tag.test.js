@@ -11,7 +11,7 @@ test('tagsIndex(request, response, next): renders that tag index page', async (t
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/tags');
+  const response = await request(server).get('/tags');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
@@ -24,7 +24,7 @@ test('tag(request, response, next): renders that tag page for a given tag', asyn
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/tags/Cool');
+  const response = await request(server).get('/tags/Cool');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
@@ -37,7 +37,7 @@ test('tag(request, response, next): falls through to 404 when tag is missing', a
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(uttori.server).get('/tags/_');
+  const response = await request(server).get('/tags/_');
   t.is(response.status, 404);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);

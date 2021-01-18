@@ -20,11 +20,13 @@ const config = {
   home_page: 'home-page',
   site_url: 'https://fake.test',
   // Specify the theme to use
-  theme_dir: 'test/site/themes',
-  theme_name: 'default',
-  public_dir: 'test/site/themes/default/public',
+  theme_dir: 'test/site/theme',
+  public_dir: 'test/site/theme/public',
   use_delete_key: true,
   delete_key: 'test-key',
+  use_edit_key: true,
+  edit_key: 'test-key',
+  allowedDocumentKeys: ['author'],
   plugins: [
     StorageProviderJSON,
     SearchProviderLunr,
@@ -32,7 +34,6 @@ const config = {
   middleware: [
     ['disable', 'x-powered-by'],
     ['enable', 'view cache'],
-    ['fake', 'fake'],
   ],
 };
 
@@ -42,7 +43,7 @@ const serverSetup = () => {
   server.set('port', process.env.PORT || 8123);
   server.set('ip', process.env.IP || '127.0.0.1');
 
-  server.set('views', path.join(config.theme_dir, config.theme_name, 'templates'));
+  server.set('views', path.join(config.theme_dir, 'templates'));
   server.use(layouts);
   server.set('layout extractScripts', true);
   server.set('layout extractStyles', true);
@@ -78,13 +79,13 @@ const serverSetup = () => {
 };
 
 const next = function next() {};
+// Seed some example documents as requests to be saved
 const seed = async (uttori) => {
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const demoTitle = {
     title: 'Demo Title Beta',
     slug: 'demo-title',
     content: '## Demo Title Beta',
-    html: '',
     updateDate: 1459310452002,
     createDate: 1459310452002,
     tags: 'Demo Tag,Cool',
@@ -97,7 +98,6 @@ const seed = async (uttori) => {
     title: 'Demo Title',
     slug: 'demo-title',
     content: '## Demo Title',
-    html: '',
     updateDate: 1500000000000,
     createDate: 1500000000000,
     tags: 'Demo Tag,Cool',
@@ -110,7 +110,6 @@ const seed = async (uttori) => {
     title: 'Example Title',
     slug: 'example-title',
     content: '## Example Title',
-    html: '',
     updateDate: 1459310452001,
     createDate: 1459310452001,
     tags: 'Example Tag,example',
@@ -123,7 +122,6 @@ const seed = async (uttori) => {
     title: 'Fake Title',
     slug: 'fake-title',
     content: '## Fake Title',
-    html: '',
     updateDate: 1459310452000,
     createDate: 1459310452000,
     tags: 'Fake Tag,Cool',
@@ -135,9 +133,7 @@ const seed = async (uttori) => {
   const homePage = {
     content: '## Home Page',
     createDate: undefined,
-    html: '',
     slug: 'home-page',
-    tags: '',
     title: 'Home Page',
     updateDate: 1512921841841,
   };
