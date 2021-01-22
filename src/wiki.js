@@ -1,11 +1,13 @@
-/* eslint-disable unicorn/no-array-callback-reference */
-/* eslint-disable unicorn/no-array-reduce */
-let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
+const { Application, Request, Response } = require('express');
 const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 const { UttoriWikiConfig } = require('./config');
 
+/** @type {Function} */
+let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
+
 // Used in `bindRoutes`
+/** @type {Function} */
 const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
 
 /**
@@ -15,9 +17,10 @@ const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(req
  * @property {string} title The document title to be used anywhere a title may be needed.
  * @property {string} excerpt A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
+ * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
  * @property {number} createDate The Unix timestamp of the creation date of the document.
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
- * @property {string[]} [redicrects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  */
 
 /**
@@ -36,7 +39,7 @@ class UttoriWiki {
  * Creates an instance of UttoriWiki.
  *
  * @param {UttoriWikiConfig} config - A configuration object.
- * @param {object} server - The Express server instance.
+ * @param {Application} server - The Express server instance.
  * @class
  */
   constructor(config, server) {
@@ -72,7 +75,6 @@ class UttoriWiki {
    * Registers plugins with the Event Dispatcher.
    *
    * @param {UttoriWikiConfig} config - A configuration object.
-   * @param {object[]} config.plugins - A collection of plugins to register.
    */
   registerPlugins(config) {
     if (!config.plugins || !Array.isArray(config.plugins) || config.plugins.length <= 0) {
@@ -99,8 +101,6 @@ class UttoriWiki {
    * - `dispatch` - `validate-config` - Passes in the config object.
    *
    * @param {UttoriWikiConfig} config A configuration object.
-   * @param {string} config.theme_dir The path to the theme directory.
-   * @param {string} config.public_dir The path to the public facing directory.
    */
   validateConfig(config) {
     debug('Validating config...');
@@ -129,43 +129,38 @@ class UttoriWiki {
    * - `filter` - `render-content` - Passes in the meta description.
    *
    * @async
-   * @param {UttoriWikiDocument} document A UttoriWikiDocument.
+   * @param {UttoriWikiDocument|object} document A UttoriWikiDocument.
    * @param {string} [path=''] The URL path to build meta data for.
    * @param {string} [robots=''] A meta robots tag value.
    * @returns {Promise<object>} Metadata object.
    * @example
    * const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
    * ➜ {
-   * ➜   canonical,   // `${this.config.site_url}/private-document-path`
-   * ➜   robots,      // 'no-index'
-   * ➜   title,       // document.title
-   * ➜   description, // document.excerpt || document.content.slice(0, 160)
-   * ➜   modified,    // new Date(document.updateDate).toISOString()
-   * ➜   published,   // new Date(document.createDate).toISOString()
-   * ➜ }
+   *   canonical,   // `${this.config.site_url}/private-document-path`
+   *   robots,      // 'no-index'
+   *   title,       // document.title
+   *   description, // document.excerpt || document.content.slice(0, 160)
+   *   modified,    // new Date(document.updateDate).toISOString()
+   *   published,   // new Date(document.createDate).toISOString()
+   * }
    */
   async buildMetadata(document, path = '', robots = '') {
     const canonical = `${this.config.site_url}/${path.trim()}`;
-    if (!document) {
-      return {
-        canonical,
-        robots: '',
-        title: '',
-        description: '',
-        modified: '',
-        published: '',
-      };
-    }
+    let title = '';
+    let description = '';
+    let modified = '';
+    let published = '';
 
-    let description = document && document.excerpt ? document.excerpt : '';
-    if (document.content && !description) {
-      description = document.content.slice(0, 160);
-      description = await this.hooks.filter('render-content', description, this);
+    if (document) {
+      description = document && document.excerpt ? document.excerpt : '';
+      if (document.content && !description) {
+        description = document.content.slice(0, 160);
+        description = await this.hooks.filter('render-content', description, this);
+      }
+      modified = document.updateDate ? new Date(document.updateDate).toISOString() : '';
+      published = document.createDate ? new Date(document.createDate).toISOString() : '';
+      title = document.title ? document.title : '';
     }
-
-    const modified = document.updateDate ? new Date(document.updateDate).toISOString() : '';
-    const published = document.createDate ? new Date(document.createDate).toISOString() : '';
-    const title = document.title ? document.title : '';
 
     let metadata = {
       canonical,
@@ -187,7 +182,7 @@ class UttoriWiki {
    * Hooks:
    * - `dispatch` - `bind-routes` - Passes in the server instance.
    *
-   * @param {object} server The Express server instance.
+   * @param {Application} server The Express server instance.
    */
   bindRoutes(server) {
     debug('Binding routes...');
@@ -297,7 +292,7 @@ class UttoriWiki {
       siteSections,
       document,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
     response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
@@ -352,7 +347,7 @@ class UttoriWiki {
       config: this.config,
       taggedDocuments,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
     response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
@@ -390,7 +385,7 @@ class UttoriWiki {
       taggedDocuments,
       section,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
     response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
@@ -417,11 +412,11 @@ class UttoriWiki {
       config: this.config,
       searchTerm: '',
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
-      const query = decodeURIComponent(request.query.s);
+      const query = decodeURIComponent(String(request.query.s));
       viewModel.title = `Search results for "${request.query.s}"`;
       viewModel.searchTerm = query;
 
@@ -497,7 +492,7 @@ class UttoriWiki {
       document,
       config: this.config,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
@@ -619,7 +614,7 @@ class UttoriWiki {
       title,
       meta,
       config: this.config,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
@@ -670,7 +665,7 @@ class UttoriWiki {
       config: this.config,
       document,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
     response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
@@ -747,7 +742,7 @@ class UttoriWiki {
       historyByDay,
       config: this.config,
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
@@ -805,7 +800,7 @@ class UttoriWiki {
     }, `/${slug}/history/${revision}`, 'noindex');
 
     let viewModel = {
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
       config: this.config,
       title: `${document.title} Revision ${revision}`,
       document,
@@ -866,7 +861,7 @@ class UttoriWiki {
     }, `/${slug}/history/${revision}/restore`, 'noindex');
 
     let viewModel = {
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
       config: this.config,
       title: `Editing ${document.title} from Revision ${revision}`,
       document,
@@ -902,7 +897,7 @@ class UttoriWiki {
       config: this.config,
       slug: request.params.slug || '404',
       meta,
-      basePath: request.proxyUrl || request.baseUrl,
+      basePath: request.baseUrl,
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 

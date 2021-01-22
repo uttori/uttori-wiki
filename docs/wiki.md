@@ -6,6 +6,15 @@
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#debug">debug()</a> : <code>function</code></dt>
+<dd></dd>
+<dt><a href="#asyncHandler">asyncHandler()</a> : <code>function</code></dt>
+<dd></dd>
+</dl>
+
 ## Typedefs
 
 <dl>
@@ -59,7 +68,7 @@ Creates an instance of UttoriWiki.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>UttoriWikiConfig</code> | A configuration object. |
-| server | <code>object</code> | The Express server instance. |
+| server | <code>Application</code> | The Express server instance. |
 
 **Example** *(Init UttoriWiki)*  
 ```js
@@ -77,7 +86,6 @@ Registers plugins with the Event Dispatcher.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>UttoriWikiConfig</code> | A configuration object. |
-| config.plugins | <code>Array.&lt;object&gt;</code> | A collection of plugins to register. |
 
 <a name="UttoriWiki+validateConfig"></a>
 
@@ -92,8 +100,6 @@ Hooks:
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>UttoriWikiConfig</code> | A configuration object. |
-| config.theme_dir | <code>string</code> | The path to the theme directory. |
-| config.public_dir | <code>string</code> | The path to the public facing directory. |
 
 <a name="UttoriWiki+buildMetadata"></a>
 
@@ -108,7 +114,7 @@ Hooks:
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) |  | A UttoriWikiDocument. |
+| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) \| <code>object</code> |  | A UttoriWikiDocument. |
 | [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
 | [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
 
@@ -116,13 +122,13 @@ Hooks:
 ```js
 const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
 ➜ {
-➜   canonical,   // `${this.config.site_url}/private-document-path`
-➜   robots,      // 'no-index'
-➜   title,       // document.title
-➜   description, // document.excerpt || document.content.slice(0, 160)
-➜   modified,    // new Date(document.updateDate).toISOString()
-➜   published,   // new Date(document.createDate).toISOString()
-➜ }
+  canonical,   // `${this.config.site_url}/private-document-path`
+  robots,      // 'no-index'
+  title,       // document.title
+  description, // document.excerpt || document.content.slice(0, 160)
+  modified,    // new Date(document.updateDate).toISOString()
+  published,   // new Date(document.createDate).toISOString()
+}
 ```
 <a name="UttoriWiki+bindRoutes"></a>
 
@@ -137,7 +143,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| server | <code>object</code> | The Express server instance. |
+| server | <code>Application</code> | The Express server instance. |
 
 <a name="UttoriWiki+home"></a>
 
@@ -412,6 +418,14 @@ This will exclude any documents that have slugs in the `config.ignore_slugs` arr
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
 ```
+<a name="debug"></a>
+
+## debug() : <code>function</code>
+**Kind**: global function  
+<a name="asyncHandler"></a>
+
+## asyncHandler() : <code>function</code>
+**Kind**: global function  
 <a name="UttoriWikiDocument"></a>
 
 ## UttoriWikiDocument : <code>object</code>
@@ -424,7 +438,8 @@ wiki.getTaggedDocuments('example', 10);
 | title | <code>string</code> | The document title to be used anywhere a title may be needed. |
 | excerpt | <code>string</code> | A succinct deescription of the document, think meta description. |
 | content | <code>string</code> | All text content for the doucment. |
+| [html] | <code>string</code> | All rendered HTML content for the doucment that will be presented to the user. |
 | createDate | <code>number</code> | The Unix timestamp of the creation date of the document. |
 | updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
-| [redicrects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
+| [redirects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
 

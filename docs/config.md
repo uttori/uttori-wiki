@@ -42,7 +42,7 @@
 | [use_edit_key] | <code>boolean</code> | <code>false</code> | Enable hiding document modification behind a private key. |
 | edit_key | <code>string</code> |  | Key used for verifying document modification. |
 | [public_history] | <code>boolean</code> | <code>true</code> | Allow access to history URLs. |
-| [allowedDocumentKey] | <code>Array.&lt;string&gt;</code> |  | List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed. |
+| [allowedDocumentKeys] | <code>Array.&lt;string&gt;</code> |  | List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed. |
 | [use_meta_data] | <code>boolean</code> | <code>true</code> | Theme specific, use OpenGraph and neta data. |
 | [site_locale] | <code>string</code> | <code>&quot;&#x27;en_US&#x27;&quot;</code> | Theme specific, Open Graph: Locale |
 | [site_twitter_site] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Open Graph: Twitter Site Handle |

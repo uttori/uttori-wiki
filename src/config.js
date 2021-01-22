@@ -19,7 +19,7 @@
  * @property {boolean} [use_edit_key=false] Enable hiding document modification behind a private key.
  * @property {string} edit_key Key used for verifying document modification.
  * @property {boolean} [public_history=true] Allow access to history URLs.
- * @property {string[]} [allowedDocumentKey] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
+ * @property {string[]} [allowedDocumentKeys] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
  * @property {boolean} [use_meta_data=true] Theme specific, use OpenGraph and neta data.
  * @property {string} [site_locale='en_US'] Theme specific, Open Graph: Locale
  * @property {string} [site_twitter_site=''] Theme specific, Open Graph: Twitter Site Handle
