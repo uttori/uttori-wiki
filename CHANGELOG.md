@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [4.0.0](https://github.com/uttori/uttori-wiki/compare/v3.4.2...v4.0.0) - 2020-01-17
+## [4.1.0](https://github.com/uttori/uttori-wiki/compare/v4.0.0...v4.1.0) - 2021-01-21
+
+- 🛠 Metadata was not being filtered without a document.
+- 🛠 Remove unused proxy check.
+
+## [4.0.0](https://github.com/uttori/uttori-wiki/compare/v3.4.2...v4.0.0) - 2021-01-17
 
 - 🧰 Add ESM Support
 - 🧰 Add explicit exports
