@@ -411,6 +411,7 @@ class UttoriWiki {
       title: 'Search',
       config: this.config,
       searchTerm: '',
+      searchResults: [],
       meta,
       basePath: request.baseUrl,
     };
@@ -437,6 +438,7 @@ class UttoriWiki {
         document.html = excerpt;
         return document;
       });
+
       viewModel.meta = await this.buildMetadata({ title: `Search results for "${request.query.s}"` }, `/search/${request.query.s}`, 'noindex');
       viewModel.searchResults = await this.hooks.filter('render-search-results', viewModel.searchResults, this);
     }

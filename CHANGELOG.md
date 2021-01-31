@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.1.1](https://github.com/uttori/uttori-wiki/compare/v4.1.0...v4.1.1) - 2021-01-30
+
+- 🛠 Empty searches were missing the `searchResults` view model key rather than the expected array.
+
 ## [4.1.0](https://github.com/uttori/uttori-wiki/compare/v4.0.0...v4.1.0) - 2021-01-21
 
 - 🛠 Metadata was not being filtered without a document.
