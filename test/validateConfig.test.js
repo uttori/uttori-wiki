@@ -1,7 +1,7 @@
 const test = require('ava');
 const { UttoriWiki } = require('../src');
 
-const { serverSetup } = require('./_helpers/server.js');
+const { serverSetup } = require('./_helpers/server');
 
 test('validateConfig(config): throws when missing theme_dir', (t) => {
   t.throws(() => {

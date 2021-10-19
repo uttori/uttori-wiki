@@ -3,6 +3,8 @@ const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 const { UttoriWikiConfig } = require('./config');
 
+// TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
+
 /** @type {Function} */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
 
@@ -329,7 +331,7 @@ class UttoriWiki {
     let tags = [];
     try {
       [tags] = await this.hooks.fetch('storage-query', query, this);
-      tags = [...new Set(tags.map((t) => t.tags).flat())].filter(Boolean).sort((a, b) => a.localeCompare(b));
+      tags = [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
     } catch (error) {
       /* istanbul ignore next */
       debug('Error fetching tags:', error);
@@ -578,7 +580,7 @@ class UttoriWiki {
     if (invalid) {
       debug('Invalid:', request.params.slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
-      response.redirect(request.header('Referer') || this.config.site_url);
+      response.redirect('back');
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);

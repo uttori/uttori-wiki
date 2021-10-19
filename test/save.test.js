@@ -6,7 +6,7 @@ const sinon = require('sinon');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup } = require('./_helpers/server.js');
+const { config, serverSetup } = require('./_helpers/server');
 
 test('redirects to the document after saving without using an edit_key when use_edit_key is false', async (t) => {
   t.plan(2);

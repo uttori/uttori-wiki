@@ -1,5 +1,6 @@
 {
   "include": [
+    "node_modules/@uttori/**/src/*",
     "src/**/*"
   ],
   "exclude": [
@@ -8,14 +9,16 @@
   ],
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "declaration": true,
+    "downlevelIteration": true,
     "emitDeclarationOnly": true,
     "extendedDiagnostics": true,
     "moduleResolution": "node",
     "noEmit": false,
     "outFile": "types/index.d.ts",
     "removeComments": true,
+    "sourceMap": true,
     "strict": false,
     "target": "esnext",
     "skipLibCheck": true

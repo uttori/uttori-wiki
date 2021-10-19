@@ -94,6 +94,7 @@ declare module "wiki" {
     namespace UttoriWiki {
         export { UttoriWikiDocument };
     }
+    import { UttoriWikiConfig } from "config";
     type UttoriWikiDocument = {
         slug: string;
         title: string;

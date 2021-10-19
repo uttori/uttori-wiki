@@ -2,7 +2,7 @@ const test = require('ava');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup, seed } = require('./_helpers/server.js');
+const { config, serverSetup, seed } = require('./_helpers/server');
 
 test('getTaggedDocuments(tag): returns documents with the given tag', async (t) => {
   t.plan(4);

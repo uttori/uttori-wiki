@@ -3,7 +3,7 @@ const request = require('supertest');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup, seed } = require('./_helpers/server.js');
+const { config, serverSetup, seed } = require('./_helpers/server');
 
 test('search(request, response, _next): renders', async (t) => {
   t.plan(3);
