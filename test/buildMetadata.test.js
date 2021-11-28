@@ -18,6 +18,7 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
     description: '',
     modified: '',
     published: '',
+    image: '',
   });
 });
 
@@ -33,9 +34,11 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
     updateDate: 1553915818665,
     createDate: 1553915818665,
     title: 'Title',
+    image: 'test.png',
   }, 'path', 'robots'), {
     canonical: `${config.site_url}/path`,
     description: 'Test',
+    image: 'test.png',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',
     robots: 'robots',
@@ -43,11 +46,11 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata without an excerpt', async (t) => {
+test('buildMetadata(document, path, robots): can build metadata without an excerpt & site_image', async (t) => {
   t.plan(1);
 
   const server = serverSetup();
-  const uttori = new UttoriWiki(config, server);
+  const uttori = new UttoriWiki({ ...config, site_image: 'test.gif' }, server);
 
   t.deepEqual(await uttori.buildMetadata({
     excerpt: '',
@@ -58,6 +61,7 @@ test('buildMetadata(document, path, robots): can build metadata without an excer
   }, 'path', 'robots'), {
     canonical: `${config.site_url}/path`,
     description: '# Test',
+    image: 'test.gif',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',
     robots: 'robots',

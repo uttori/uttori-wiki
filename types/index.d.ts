@@ -31,6 +31,7 @@ declare module "config" {
         site_locale?: string;
         site_twitter_site?: string;
         site_twitter_creator?: string;
+        site_image?: string;
         plugins: any[];
         middleware?: any[];
         cache_short?: number;
@@ -66,6 +67,7 @@ declare module "wiki" {
             site_locale?: string;
             site_twitter_site?: string;
             site_twitter_creator?: string;
+            site_image?: string;
             plugins: any[];
             middleware?: any[];
             cache_short?: number;
@@ -101,6 +103,7 @@ declare module "wiki" {
     type UttoriWikiDocument = {
         slug: string;
         title: string;
+        image?: string;
         excerpt: string;
         content: string;
         html?: string;

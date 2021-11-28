@@ -24,6 +24,7 @@
  * @property {string} [site_locale='en_US'] Theme specific, Open Graph: Locale
  * @property {string} [site_twitter_site=''] Theme specific, Open Graph: Twitter Site Handle
  * @property {string} [site_twitter_creator=''] Theme specific, Open Graph: Twitter Creator Handle
+ * @property {string} [site_image=''] Theme specific, Used as Open Graph: Image
  * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  * @property {number} [cache_short=(60 * 24)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index

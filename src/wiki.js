@@ -17,6 +17,7 @@ const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(req
  * @type {object}
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {string} [image] An image to represent the document in Open Graph or elsewhere.
  * @property {string} excerpt A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
@@ -152,6 +153,7 @@ class UttoriWiki {
     let description = '';
     let modified = '';
     let published = '';
+    let image = '';
 
     if (document) {
       description = document && document.excerpt ? document.excerpt : '';
@@ -162,6 +164,7 @@ class UttoriWiki {
       modified = document.updateDate ? new Date(document.updateDate).toISOString() : '';
       published = document.createDate ? new Date(document.createDate).toISOString() : '';
       title = document.title ? document.title : '';
+      image = document.image ? document.image : this.config.site_image;
     }
 
     let metadata = {
@@ -171,6 +174,7 @@ class UttoriWiki {
       description,
       modified,
       published,
+      image,
     };
     metadata = await this.hooks.filter('view-model-metadata', metadata, this);
 
