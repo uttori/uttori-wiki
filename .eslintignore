@@ -3,3 +3,4 @@ coverage
 site/themes/*
 convert
 node_modules
+types/*

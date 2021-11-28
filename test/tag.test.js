@@ -3,7 +3,7 @@ const request = require('supertest');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup, seed } = require('./_helpers/server.js');
+const { config, serverSetup, seed } = require('./_helpers/server');
 
 test('tagsIndex(request, response, next): renders that tag index page', async (t) => {
   t.plan(3);

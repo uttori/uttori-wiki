@@ -3,6 +3,8 @@ const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 const { UttoriWikiConfig } = require('./config');
 
+// TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
+
 /** @type {Function} */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
 
@@ -208,6 +210,7 @@ class UttoriWiki {
     // Document
     server.get('/new/:key', asyncHandler(this.new.bind(this)));
     server.get('/new', asyncHandler(this.new.bind(this)));
+    server.post('/preview', asyncHandler(this.preview.bind(this)));
     server.get('/:slug/edit/:key', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
@@ -329,7 +332,7 @@ class UttoriWiki {
     let tags = [];
     try {
       [tags] = await this.hooks.fetch('storage-query', query, this);
-      tags = [...new Set(tags.map((t) => t.tags).flat())].filter(Boolean).sort((a, b) => a.localeCompare(b));
+      tags = [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
     } catch (error) {
       /* istanbul ignore next */
       debug('Error fetching tags:', error);
@@ -578,7 +581,7 @@ class UttoriWiki {
     if (invalid) {
       debug('Invalid:', request.params.slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
-      response.redirect(request.header('Referer') || this.config.site_url);
+      response.redirect('back');
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
@@ -675,6 +678,32 @@ class UttoriWiki {
   }
 
   /**
+   * Renders the a preview of the passed in content.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `render-content` - `render-content` - Passes in the request body content.
+   *
+   * @async
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
+   */
+  async preview(request, response, next) {
+    debug('Preview Route');
+    response.setHeader('X-Robots-Tag', 'noindex');
+    if (!request.body) {
+      debug('Missing body!');
+      next();
+      return;
+    }
+
+    const html = await this.hooks.filter('render-content', request.body, this);
+    response.setHeader('Content-Type', 'text/html');
+    response.send(html);
+  }
+
+  /**
    * Renders the history index page using the `history_index` template.
    * Sets the `X-Robots-Tag` header to `noindex`.
    *
@@ -721,7 +750,6 @@ class UttoriWiki {
       next();
       return;
     }
-
     const historyByDay = history.reduce((acc, value) => {
       /* istanbul ignore next */
       value = value.includes('-') ? value.split('-')[0] : value;

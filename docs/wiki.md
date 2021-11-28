@@ -52,6 +52,7 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.save(request, response, next)](#UttoriWiki+save)
     * [.new(request, response, next)](#UttoriWiki+new)
     * [.detail(request, response, next)](#UttoriWiki+detail)
+    * [.preview(request, response, next)](#UttoriWiki+preview)
     * [.historyIndex(request, response, next)](#UttoriWiki+historyIndex)
     * [.historyDetail(request, response, next)](#UttoriWiki+historyDetail)
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
@@ -301,6 +302,23 @@ Renders the detail page using the `detail` template.
 Hooks:
 - `render-content` - `render-content` - Passes in the document content.
 - `filter` - `view-model-detail` - Passes in the viewModel.
+
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
+| next | <code>function</code> | The Express Next function. |
+
+<a name="UttoriWiki+preview"></a>
+
+### uttoriWiki.preview(request, response, next)
+Renders the a preview of the passed in content.
+Sets the `X-Robots-Tag` header to `noindex`.
+
+Hooks:
+- `render-content` - `render-content` - Passes in the request body content.
 
 **Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 

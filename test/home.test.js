@@ -5,7 +5,7 @@ const sinon = require('sinon');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup, seed } = require('./_helpers/server.js');
+const { config, serverSetup, seed } = require('./_helpers/server');
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 

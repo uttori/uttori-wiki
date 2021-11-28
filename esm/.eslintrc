@@ -1,0 +1,10 @@
+{
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "settings": {
+    "jsdoc": {
+      "mode": "typescript"
+    }
+  }
+}

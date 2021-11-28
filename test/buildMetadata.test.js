@@ -3,7 +3,7 @@ const test = require('ava');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup } = require('./_helpers/server.js');
+const { config, serverSetup } = require('./_helpers/server');
 
 test('buildMetadata(document, path, robots): can build metadata with empty object', async (t) => {
   t.plan(1);

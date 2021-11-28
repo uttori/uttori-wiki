@@ -2,7 +2,7 @@ const test = require('ava');
 
 const { UttoriWiki } = require('../src');
 
-const { config, serverSetup } = require('./_helpers/server.js');
+const { config, serverSetup } = require('./_helpers/server');
 
 test('throws when missing config', (t) => {
   t.throws(() => {

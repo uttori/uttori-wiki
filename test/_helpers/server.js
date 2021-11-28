@@ -1,8 +1,8 @@
 const express = require('express');
 const ejs = require('ejs');
 const layouts = require('express-ejs-layouts');
-const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 
 const { Plugin: StorageProviderJSON } = require('@uttori/storage-provider-json-memory');
 const { Plugin: SearchProviderLunr } = require('@uttori/search-provider-lunr');
@@ -53,8 +53,13 @@ const serverSetup = () => {
 
   // Setup Express
   server.use(express.static(config.public_dir));
-  server.use(bodyParser.json({ limit: '50mb' }));
-  server.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
+  server.use(express.json({ limit: '5mb' }));
+  server.use(express.text({ limit: '5mb' }));
+  server.use(express.urlencoded({ limit: '5mb', extended: true }));
+  server.use(cors({
+    origin: ['*'],
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
+  }));
 
   if (process.argv[2] && process.argv[2] !== 'undefined') {
     // eslint-disable-next-line no-console
