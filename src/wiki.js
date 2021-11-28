@@ -23,6 +23,7 @@ const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(req
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
  * @property {number} createDate The Unix timestamp of the creation date of the document.
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
+ * @property {string[]} tags A collection of tags that represent the document.
  * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  */
 
@@ -428,6 +429,7 @@ class UttoriWiki {
       viewModel.title = `Search results for "${request.query.s}"`;
       viewModel.searchTerm = query;
 
+      /** @type {UttoriWikiDocument[]} */
       let searchResults = [];
       try {
         [searchResults] = await this.hooks.fetch('search-query', { query, limit: 50 }, this);
@@ -536,6 +538,7 @@ class UttoriWiki {
     }
 
     const { slug } = request.params;
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', slug, this);
@@ -651,6 +654,7 @@ class UttoriWiki {
       return;
     }
 
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
@@ -812,6 +816,7 @@ class UttoriWiki {
     }
 
     const { slug, revision } = request.params;
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get-revision', { slug, revision }, this);
@@ -875,6 +880,7 @@ class UttoriWiki {
     }
 
     const { slug, revision } = request.params;
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get-revision', { slug, revision }, this);
@@ -974,7 +980,7 @@ class UttoriWiki {
     debug(`Updating with params: ${JSON.stringify(request.params, undefined, 2)}`);
     debug(`Updating with body: ${JSON.stringify(request.body, undefined, 2)}`);
 
-    const { title = '', excerpt = '', content = '' } = request.body;
+    const { title = '', excerpt = '', content = '', image = '' } = request.body;
 
     // Filter out any unwanted keys
     const custom = this.config.allowedDocumentKeys.reduce((output, key) => {
@@ -991,9 +997,11 @@ class UttoriWiki {
     let slug = request.body.slug || request.params.slug;
     slug = slug.toLowerCase();
 
+    /** @type {UttoriWikiDocument} */
     let document = {
       ...custom,
       title,
+      image,
       excerpt,
       content,
       tags,

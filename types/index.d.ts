@@ -109,6 +109,7 @@ declare module "wiki" {
         html?: string;
         createDate: number;
         updateDate: number;
+        tags: string[];
         redirects?: string[];
     };
 }

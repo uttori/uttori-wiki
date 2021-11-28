@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.2](https://github.com/uttori/uttori-wiki/compare/v4.2.1...v4.2.2) - 2021-11-28
+
+- 🧰 Add Support for Open Graph images on documents
+
 ## [4.2.1](https://github.com/uttori/uttori-wiki/compare/v4.2.0...v4.2.1) - 2021-11-28
 
 - 🧰 Add Support for Open Graph images
