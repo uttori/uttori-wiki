@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [4.2.0](https://github.com/uttori/uttori-wiki/compare/v4.1.1...v4.2.0) - 2021-11-27
+
+- 🧰 Add Support for previewing content
+- 🛠 Use `cors` to help prevent spam
+- 🛠 Use `flatMap` rather than `.map().flat()`
+- 🎁 Update dev dependencies
+
 ## [4.1.1](https://github.com/uttori/uttori-wiki/compare/v4.1.0...v4.1.1) - 2021-01-30
 
 - 🛠 Empty searches were missing the `searchResults` view model key rather than the expected array.

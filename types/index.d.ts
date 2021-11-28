@@ -1,3 +1,5 @@
+declare module '@uttori/wiki';
+
 declare module "config" {
     export = config;
     const config: UttoriWikiConfig;
@@ -38,7 +40,7 @@ declare module "config" {
 declare module "wiki" {
     export = UttoriWiki;
     class UttoriWiki {
-        constructor(config: UttoriWikiConfig, server: any);
+        constructor(config: UttoriWikiConfig, server: Application);
         config: {
             site_title?: string;
             site_header?: string;
@@ -73,22 +75,23 @@ declare module "wiki" {
         registerPlugins(config: UttoriWikiConfig): void;
         validateConfig(config: UttoriWikiConfig): void;
         buildMetadata(document: UttoriWikiDocument | object, path?: string, robots?: string): Promise<object>;
-        bindRoutes(server: any): void;
-        home(request: any, response: any, next: Function): Promise<void>;
-        homepageRedirect(request: any, response: any, _next: Function): void;
-        tagIndex(request: any, response: any, _next: Function): Promise<void>;
-        tag(request: any, response: any, next: Function): Promise<void>;
-        search(request: any, response: any, _next: Function): Promise<void>;
-        edit(request: any, response: any, next: Function): Promise<void>;
-        delete(request: any, response: any, next: Function): Promise<void>;
-        save(request: any, response: any, next: Function): Promise<void>;
-        new(request: any, response: any, next: Function): Promise<void>;
-        detail(request: any, response: any, next: Function): Promise<void>;
-        historyIndex(request: any, response: any, next: Function): Promise<void>;
-        historyDetail(request: any, response: any, next: Function): Promise<void>;
-        historyRestore(request: any, response: any, next: Function): Promise<void>;
-        notFound(request: any, response: any, _next: Function): Promise<void>;
-        saveValid(request: any, response: any, _next: Function): Promise<void>;
+        bindRoutes(server: Application): void;
+        home(request: Request, response: Response, next: Function): Promise<void>;
+        homepageRedirect(request: Request, response: Response, _next: Function): void;
+        tagIndex(request: Request, response: Response, _next: Function): Promise<void>;
+        tag(request: Request, response: Response, next: Function): Promise<void>;
+        search(request: Request, response: Response, _next: Function): Promise<void>;
+        edit(request: Request, response: Response, next: Function): Promise<void>;
+        delete(request: Request, response: Response, next: Function): Promise<void>;
+        save(request: Request, response: Response, next: Function): Promise<void>;
+        new(request: Request, response: Response, next: Function): Promise<void>;
+        detail(request: Request, response: Response, next: Function): Promise<void>;
+        preview(request: Request, response: Response, next: Function): Promise<void>;
+        historyIndex(request: Request, response: Response, next: Function): Promise<void>;
+        historyDetail(request: Request, response: Response, next: Function): Promise<void>;
+        historyRestore(request: Request, response: Response, next: Function): Promise<void>;
+        notFound(request: Request, response: Response, _next: Function): Promise<void>;
+        saveValid(request: Request, response: Response, _next: Function): Promise<void>;
         getTaggedDocuments(tag: string, limit?: number): Promise<any[]>;
     }
     namespace UttoriWiki {

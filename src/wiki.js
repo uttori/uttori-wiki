@@ -210,6 +210,7 @@ class UttoriWiki {
     // Document
     server.get('/new/:key', asyncHandler(this.new.bind(this)));
     server.get('/new', asyncHandler(this.new.bind(this)));
+    server.post('/preview', asyncHandler(this.preview.bind(this)));
     server.get('/:slug/edit/:key', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
@@ -677,6 +678,32 @@ class UttoriWiki {
   }
 
   /**
+   * Renders the a preview of the passed in content.
+   * Sets the `X-Robots-Tag` header to `noindex`.
+   *
+   * Hooks:
+   * - `render-content` - `render-content` - Passes in the request body content.
+   *
+   * @async
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
+   */
+  async preview(request, response, next) {
+    debug('Preview Route');
+    response.setHeader('X-Robots-Tag', 'noindex');
+    if (!request.body) {
+      debug('Missing body!');
+      next();
+      return;
+    }
+
+    const html = await this.hooks.filter('render-content', request.body, this);
+    response.setHeader('Content-Type', 'text/html');
+    response.send(html);
+  }
+
+  /**
    * Renders the history index page using the `history_index` template.
    * Sets the `X-Robots-Tag` header to `noindex`.
    *
@@ -723,7 +750,6 @@ class UttoriWiki {
       next();
       return;
     }
-
     const historyByDay = history.reduce((acc, value) => {
       /* istanbul ignore next */
       value = value.includes('-') ? value.split('-')[0] : value;
