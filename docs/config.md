@@ -42,13 +42,16 @@
 | [use_edit_key] | <code>boolean</code> | <code>false</code> | Enable hiding document modification behind a private key. |
 | edit_key | <code>string</code> |  | Key used for verifying document modification. |
 | [public_history] | <code>boolean</code> | <code>true</code> | Allow access to history URLs. |
+| [handle_not_found] | <code>boolean</code> | <code>true</code> | Allows the middleware to capture fall through routes as a `404 not found` handler when enabled. |
 | [allowedDocumentKeys] | <code>Array.&lt;string&gt;</code> |  | List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed. |
 | [use_meta_data] | <code>boolean</code> | <code>true</code> | Theme specific, use OpenGraph and neta data. |
 | [site_locale] | <code>string</code> | <code>&quot;&#x27;en_US&#x27;&quot;</code> | Theme specific, Open Graph: Locale |
 | [site_twitter_site] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Open Graph: Twitter Site Handle |
 | [site_twitter_creator] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Open Graph: Twitter Creator Handle |
+| [site_image] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Used as Open Graph: Image |
 | plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
 | [middleware] | <code>Array</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
-| [cache_short] | <code>number</code> | <code>(60 * 24)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
-| [cache_long] | <code>number</code> | <code>(60 * 60 * 24 * 365)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |
+| [use_cache] | <code>boolean</code> | <code>true</code> | Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes. |
+| [cache_short] | <code>number</code> | <code>(60 * 60)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
+| [cache_long] | <code>number</code> | <code>(60 * 60 * 24)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |
 

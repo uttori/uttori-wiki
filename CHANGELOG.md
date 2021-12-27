@@ -2,9 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [4.x](https://github.com/uttori/uttori-wiki/compare/v4.2.2...master) - 2021-12-04
+## [5.0.0](https://github.com/uttori/uttori-wiki/compare/v4.2.2...v5.0.0) - 2021-12-26
 
-- 🎁 Update dev dependencies
+- 🧰 Change `POST` / `PUT` routes to seperate routes to seperate creation from modification.
+- 🧰 Add flash message support when used with Express Session through `request.wikiFlash(key, value)`.
+- 🧰 Added `redirects` document option. Allows adding URLs to redirect to the current page.
+- 🛠 Added `use_cache` configuration option. Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is always disabled on the `/edit` and `/new` routes. Defaults to `true`.
+- 🛠 Added `handle_not_found` configuration option. Allows the middleware to capture fall through routes as a `404 not found` handler when enabled. Defaults to `true`.
+- 🎁 Update dependencies
 
 ## [4.2.2](https://github.com/uttori/uttori-wiki/compare/v4.2.1...v4.2.2) - 2021-11-28
 

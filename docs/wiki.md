@@ -38,6 +38,8 @@ UttoriWiki is a fast, simple, wiki knowledge base.
 
 * [UttoriWiki](#UttoriWiki)
     * [new UttoriWiki(config, server)](#new_UttoriWiki_new)
+    * [.config](#UttoriWiki+config) : <code>UttoriWikiConfig</code>
+    * [.hooks](#UttoriWiki+hooks) : <code>EventDispatcher</code>
     * [.registerPlugins(config)](#UttoriWiki+registerPlugins)
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
     * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ <code>Promise.&lt;object&gt;</code>
@@ -50,7 +52,8 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.edit(request, response, next)](#UttoriWiki+edit)
     * [.delete(request, response, next)](#UttoriWiki+delete)
     * [.save(request, response, next)](#UttoriWiki+save)
-    * [.new(request, response, next)](#UttoriWiki+new)
+    * [.saveNew(request, response, next)](#UttoriWiki+saveNew)
+    * [.create(request, response, next)](#UttoriWiki+create)
     * [.detail(request, response, next)](#UttoriWiki+detail)
     * [.preview(request, response, next)](#UttoriWiki+preview)
     * [.historyIndex(request, response, next)](#UttoriWiki+historyIndex)
@@ -77,6 +80,14 @@ const server = express();
 const wiki = new UttoriWiki(config, server);
 server.listen(server.get('port'), server.get('ip'), () => { ... });
 ```
+<a name="UttoriWiki+config"></a>
+
+### uttoriWiki.config : <code>UttoriWikiConfig</code>
+**Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
+<a name="UttoriWiki+hooks"></a>
+
+### uttoriWiki.hooks : <code>EventDispatcher</code>
+**Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
 <a name="UttoriWiki+registerPlugins"></a>
 
 ### uttoriWiki.registerPlugins(config)
@@ -263,7 +274,7 @@ Hooks:
 <a name="UttoriWiki+save"></a>
 
 ### uttoriWiki.save(request, response, next)
-Attempts to save the document and redirects to the detail view of that document when successful.
+Attempts to update an existing document and redirects to the detail view of that document when successful.
 
 Hooks:
 - `validate` - `validate-save` - Passes in the request.
@@ -278,10 +289,28 @@ Hooks:
 | response | <code>Response</code> | The Express Response object. |
 | next | <code>function</code> | The Express Next function. |
 
-<a name="UttoriWiki+new"></a>
+<a name="UttoriWiki+saveNew"></a>
 
-### uttoriWiki.new(request, response, next)
-Renders the new page using the `edit` template.
+### uttoriWiki.saveNew(request, response, next)
+Attempts to save a new document and redirects to the detail view of that document when successful.
+
+Hooks:
+- `validate` - `validate-save` - Passes in the request.
+- `dispatch` - `validate-invalid` - Passes in the request.
+- `dispatch` - `validate-valid` - Passes in the request.
+
+**Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request | <code>Request</code> | The Express Request object. |
+| response | <code>Response</code> | The Express Response object. |
+| next | <code>function</code> | The Express Next function. |
+
+<a name="UttoriWiki+create"></a>
+
+### uttoriWiki.create(request, response, next)
+Renders the creation page using the `edit` template.
 
 Hooks:
 - `filter` - `view-model-new` - Passes in the viewModel.
@@ -300,7 +329,8 @@ Hooks:
 Renders the detail page using the `detail` template.
 
 Hooks:
-- `render-content` - `render-content` - Passes in the document content.
+- `fetch` - `storage-get` - Get the requested content from the storage.
+- `filter` - `render-content` - Passes in the document content.
 - `filter` - `view-model-detail` - Passes in the viewModel.
 
 **Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
@@ -423,6 +453,9 @@ Hooks:
 Returns the documents with the provided tag, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignore_slugs` array.
 
+Hooks:
+- `fetch` - `storage-query` - Searched for the tagged documents.
+
 **Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
 **Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
 
@@ -454,10 +487,12 @@ wiki.getTaggedDocuments('example', 10);
 | --- | --- | --- |
 | slug | <code>string</code> | The document slug to be used in the URL and as a unique ID. |
 | title | <code>string</code> | The document title to be used anywhere a title may be needed. |
+| [image] | <code>string</code> | An image to represent the document in Open Graph or elsewhere. |
 | excerpt | <code>string</code> | A succinct deescription of the document, think meta description. |
 | content | <code>string</code> | All text content for the doucment. |
 | [html] | <code>string</code> | All rendered HTML content for the doucment that will be presented to the user. |
 | createDate | <code>number</code> | The Unix timestamp of the creation date of the document. |
 | updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
+| tags | <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
 

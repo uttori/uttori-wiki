@@ -7,8 +7,6 @@ const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server');
 
-const response = { set: () => {}, render: () => {}, redirect: () => {} };
-
 test('renders the requested slug', async (t) => {
   t.plan(2);
 
@@ -21,9 +19,21 @@ test('renders the requested slug', async (t) => {
   t.is(title[1], 'Example Title | Wiki');
 });
 
+test('redirects to the actual document when found in the `redirects` array', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  const response = await request(server).get('/example-titlez');
+  t.is(response.status, 301);
+  t.is(response.text, 'Moved Permanently. Redirecting to https://fake.test/example-title');
+});
+
 test('falls throught to next() when there is no slug', async (t) => {
   t.plan(1);
 
+  const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -35,6 +45,7 @@ test('falls throught to next() when there is no slug', async (t) => {
 test('falls throught to next() when there is no document found', async (t) => {
   t.plan(1);
 
+  const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const next = sinon.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
