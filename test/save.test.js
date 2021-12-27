@@ -13,7 +13,7 @@ test('redirects to the document after saving without using an edit_key when use_
 
   const server = serverSetup();
   const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
-  const response = await request(server).post('/test-old/save').send('slug=test-old');
+  const response = await request(server).put('/test-old/save').send('slug=test-old');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -24,7 +24,7 @@ test('redirects to the document after saving with no custom fields allowed', asy
 
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, allowedDocumentKeys: [] }, server);
-  const response = await request(server).post('/test-old/save/test-key').send('slug=test-old&content=test&author=✨');
+  const response = await request(server).put('/test-old/save/test-key').send('slug=test-old&content=test&author=✨');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -38,7 +38,7 @@ test('redirects to the document after saving with custom fields allowed', async 
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-old/save/test-key').send('slug=test-old&content=test&author=✨');
+  const response = await request(server).put('/test-old/save/test-key').send('slug=test-old&content=test&author=✨');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -52,7 +52,7 @@ test('redirects to the document after saving without changing slug', async (t) =
 
   const server = serverSetup();
   const _uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-old/save/test-key').send('slug=test-old&content=test');
+  const response = await request(server).put('/test-old/save/test-key').send('slug=test-old&content=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -63,7 +63,7 @@ test('redirects to the document after saving without changing slug or providing 
 
   const server = serverSetup();
   const _uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-old/save/test-key').send('title=Title&content=test');
+  const response = await request(server).put('/test-old/save/test-key').send('title=Title&content=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -74,7 +74,7 @@ test('redirects to the document after saving with case transforms', async (t) =>
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-old/save/test-key').send('slug=Test-OLD&content=test');
+  const response = await request(server).put('/test-old/save/test-key').send('slug=Test-OLD&content=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -88,7 +88,7 @@ test('redirects after spliting tags correctly', async (t) => {
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-old/save/test-key')
+  const response = await request(server).put('/test-old/save/test-key')
     .send('tags=tag-1,tag-2,tag-1&content=test');
 
   t.is(response.status, 302);
@@ -103,7 +103,7 @@ test('redirects to the document after saving with new slug', async (t) => {
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/test-new/save/test-key')
+  const response = await request(server).put('/test-new/save/test-key')
     .send('original-slug=test-old&content=test');
 
   t.is(response.status, 302);
@@ -118,7 +118,7 @@ test('redirects to the document after saving with new slug with case transforms'
 
   const server = serverSetup();
   const _uttori = new UttoriWiki(config, server);
-  const response = await request(server).post('/Test-NEW/save/test-key').send('original-slug=test-old&content=test');
+  const response = await request(server).put('/Test-NEW/save/test-key').send('original-slug=test-old&content=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-new');
@@ -138,7 +138,7 @@ test('redirects to the document after saving with invalid content', async (t) =>
   };
   const server = serverSetup();
   const _uttori = new UttoriWiki({ ...config, plugins: [validate] }, server);
-  await request(server).post('/test-validate-invalid/save/test-key').send('content=test');
+  await request(server).put('/test-validate-invalid/save/test-key').send('content=test');
 
   t.false(valid.called);
   t.true(invalid.called);
@@ -154,11 +154,12 @@ test('redirects to the document after saving with valid content', async (t) => {
       context.hooks.on('validate-save', () => Promise.resolve(false));
       context.hooks.on('validate-invalid', invalid);
       context.hooks.on('validate-valid', valid);
+      context.hooks.on('storage-query', () => [0]);
     },
   };
   const server = serverSetup();
   const _uttori = new UttoriWiki({ ...config, plugins: [validate] }, server);
-  await request(server).post('/test-validate-valid/save/test-key').send('content=test');
+  await request(server).put('/test-validate-valid/save/test-key').send('content=test');
 
   t.false(invalid.called);
   t.true(valid.called);
@@ -169,7 +170,7 @@ test('redirects to the document after saving with a full payload', async (t) => 
 
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  await request(server).post('/test-old/save/test-key').send('title=Title&excerpt=Short&content=Markdown&tags=tag-1,tag-2&author=Name&slug=test-new');
+  await request(server).put('/test-old/save/test-key').send('title=Title&excerpt=Short&content=Markdown&tags=tag-1,tag-2&author=Name&slug=test-new');
 
   const [document] = await uttori.hooks.fetch('storage-get', 'test-new', this);
   t.is(document.author, 'Name');

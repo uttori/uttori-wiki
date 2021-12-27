@@ -1,11 +1,15 @@
-/* eslint-disable import/no-extraneous-dependencies */
+/** @type {Function} */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki'); } catch {}
 const express = require('express');
 
 const UttoriWiki = require('./wiki');
+const { middleware: flash } = require('./wiki-flash');
 
 module.exports = function middleware(config) {
   const app = express();
+
+  // Add flash messages if Express Session is avaliable.
+  app.use(flash);
 
   // Apply middleware configuration
   if (config.middleware && Array.isArray(config.middleware)) {

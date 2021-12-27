@@ -26,6 +26,7 @@ declare module "config" {
         use_edit_key?: boolean;
         edit_key: string;
         public_history?: boolean;
+        handle_not_found?: boolean;
         allowedDocumentKeys?: string[];
         use_meta_data?: boolean;
         site_locale?: string;
@@ -34,6 +35,7 @@ declare module "config" {
         site_image?: string;
         plugins: any[];
         middleware?: any[];
+        use_cache?: boolean;
         cache_short?: number;
         cache_long?: number;
     };
@@ -42,37 +44,7 @@ declare module "wiki" {
     export = UttoriWiki;
     class UttoriWiki {
         constructor(config: UttoriWikiConfig, server: Application);
-        config: {
-            site_title?: string;
-            site_header?: string;
-            site_footer?: string;
-            site_sections?: {
-                title: string;
-                description: string;
-                tag: string;
-            }[];
-            home_page?: string;
-            ignore_slugs?: string[];
-            excerpt_length?: number;
-            site_url?: string;
-            theme_dir?: string;
-            public_dir?: string;
-            use_delete_key?: boolean;
-            delete_key: string;
-            use_edit_key?: boolean;
-            edit_key: string;
-            public_history?: boolean;
-            allowedDocumentKeys?: string[];
-            use_meta_data?: boolean;
-            site_locale?: string;
-            site_twitter_site?: string;
-            site_twitter_creator?: string;
-            site_image?: string;
-            plugins: any[];
-            middleware?: any[];
-            cache_short?: number;
-            cache_long?: number;
-        };
+        config: UttoriWikiConfig;
         hooks: any;
         registerPlugins(config: UttoriWikiConfig): void;
         validateConfig(config: UttoriWikiConfig): void;
@@ -86,7 +58,8 @@ declare module "wiki" {
         edit(request: Request, response: Response, next: Function): Promise<void>;
         delete(request: Request, response: Response, next: Function): Promise<void>;
         save(request: Request, response: Response, next: Function): Promise<void>;
-        new(request: Request, response: Response, next: Function): Promise<void>;
+        saveNew(request: Request, response: Response, next: Function): Promise<void>;
+        create(request: Request, response: Response, next: Function): Promise<void>;
         detail(request: Request, response: Response, next: Function): Promise<void>;
         preview(request: Request, response: Response, next: Function): Promise<void>;
         historyIndex(request: Request, response: Response, next: Function): Promise<void>;
@@ -112,6 +85,10 @@ declare module "wiki" {
         tags: string[];
         redirects?: string[];
     };
+}
+declare module "wiki-flash" {
+    export function wikiFlash(key: string, value: any): object | any[] | boolean;
+    export function middleware(request: Request, _response: Response, next: Function): void;
 }
 declare module "middleware" {
     function _exports(config: any): any;

@@ -19,6 +19,7 @@
  * @property {boolean} [use_edit_key=false] Enable hiding document modification behind a private key.
  * @property {string} edit_key Key used for verifying document modification.
  * @property {boolean} [public_history=true] Allow access to history URLs.
+ * @property {boolean} [handle_not_found=true] Allows the middleware to capture fall through routes as a `404 not found` handler when enabled.
  * @property {string[]} [allowedDocumentKeys] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
  * @property {boolean} [use_meta_data=true] Theme specific, use OpenGraph and neta data.
  * @property {string} [site_locale='en_US'] Theme specific, Open Graph: Locale
@@ -27,8 +28,9 @@
  * @property {string} [site_image=''] Theme specific, Used as Open Graph: Image
  * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
- * @property {number} [cache_short=(60 * 24)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
- * @property {number} [cache_long=(60 * 60 * 24 * 365)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
+ * @property {boolean} [use_cache=true] Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
+ * @property {number} [cache_short=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
+ * @property {number} [cache_long=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
  */
 
 /** @type {UttoriWikiConfig} */
@@ -48,6 +50,7 @@ const config = {
   use_edit_key: false,
   edit_key: undefined,
   public_history: true,
+  handle_not_found: true,
   allowedDocumentKeys: [],
   use_meta_data: true,
   site_locale: 'en_US',
@@ -56,8 +59,9 @@ const config = {
   site_image: '',
   plugins: [],
   middleware: [],
-  cache_short: 60 * 24,
-  cache_long: 60 * 60 * 24 * 365,
+  use_cache: true,
+  cache_short: 60 * 60,
+  cache_long: 60 * 60 * 24,
 };
 
 module.exports = config;

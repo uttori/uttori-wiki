@@ -5,7 +5,7 @@ const { UttoriWiki } = require('../src');
 
 const { config, serverSetup, seed } = require('./_helpers/server');
 
-test('new(request, response, _next): renders', async (t) => {
+test('create(request, response, _next): renders', async (t) => {
   t.plan(3);
 
   const server = serverSetup();

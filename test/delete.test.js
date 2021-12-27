@@ -22,8 +22,8 @@ test('deletes the document and redirects to the home page', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  // uttori.storageProvider.add(testDelete);
-  await uttori.saveValid({ params: {}, body: testDelete }, response, () => {});
+  const wikiFlash = sinon.spy();
+  await uttori.saveValid({ params: {}, body: testDelete, wikiFlash }, response, () => {});
   const express_response = await request(server).get('/test-delete/delete/test-key');
   t.is(express_response.status, 302);
   t.is(express_response.text, 'Found. Redirecting to https://fake.test');

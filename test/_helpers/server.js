@@ -7,6 +7,7 @@ const cors = require('cors');
 const { Plugin: StorageProviderJSON } = require('@uttori/storage-provider-json-memory');
 const { Plugin: SearchProviderLunr } = require('@uttori/search-provider-lunr');
 const defaultConfig = require('../../src/config');
+const { middleware: flash } = require('../../src/wiki-flash');
 
 const config = {
   ...defaultConfig,
@@ -35,6 +36,7 @@ const config = {
     ['disable', 'x-powered-by'],
     ['enable', 'view cache'],
   ],
+  use_cache: true,
 };
 
 const serverSetup = () => {
@@ -60,6 +62,9 @@ const serverSetup = () => {
     origin: ['*'],
     methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
   }));
+
+  // Setup wikiFlash
+  server.use(flash);
 
   if (process.argv[2] && process.argv[2] !== 'undefined') {
     // eslint-disable-next-line no-console
@@ -95,8 +100,6 @@ const seed = async (uttori) => {
     createDate: 1459310452002,
     tags: 'Demo Tag,Cool',
   };
-  // await uttori.hooks.dispatch('storage-add', demoTitle, uttori);
-  // await uttori.hooks.dispatch('search-add', [demoTitle], uttori);
   await uttori.saveValid({ params: {}, body: demoTitle }, response, next);
 
   const demoTitleHistory = {
@@ -106,9 +109,8 @@ const seed = async (uttori) => {
     updateDate: 1500000000000,
     createDate: 1500000000000,
     tags: 'Demo Tag,Cool',
+    redirects: [],
   };
-  // await uttori.hooks.dispatch('storage-update', { document: demoTitleHistory, originalSlug: 'demo-title' }, uttori);
-  // await uttori.hooks.dispatch('search-update', [{ document: demoTitleHistory, originalSlug: 'demo-title' }], uttori);
   await uttori.saveValid({ params: {}, body: demoTitleHistory }, response, next);
 
   const exampleTitle = {
@@ -118,9 +120,8 @@ const seed = async (uttori) => {
     updateDate: 1459310452001,
     createDate: 1459310452001,
     tags: 'Example Tag,example',
+    redirects: ['example-titlez'],
   };
-  // await uttori.hooks.dispatch('storage-add', exampleTitle, uttori);
-  // await uttori.hooks.dispatch('search-add', [exampleTitle], uttori);
   await uttori.saveValid({ params: {}, body: exampleTitle }, response, next);
 
   const fakeTitle = {
@@ -130,9 +131,8 @@ const seed = async (uttori) => {
     updateDate: 1459310452000,
     createDate: 1459310452000,
     tags: 'Fake Tag,Cool',
+    redirects: [],
   };
-  // await uttori.hooks.dispatch('storage-add', fakeTitle, uttori);
-  // await uttori.hooks.dispatch('search-add', [fakeTitle], uttori);
   await uttori.saveValid({ params: {}, body: fakeTitle }, response, next);
 
   const homePage = {
@@ -142,8 +142,6 @@ const seed = async (uttori) => {
     title: 'Home Page',
     updateDate: 1512921841841,
   };
-  // await uttori.hooks.dispatch('storage-add', homePage, uttori);
-  // await uttori.hooks.dispatch('search-add', [homePage], uttori);
   await uttori.saveValid({ params: {}, body: homePage }, response, next);
 };
 

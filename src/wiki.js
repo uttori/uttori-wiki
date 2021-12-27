@@ -60,9 +60,11 @@ class UttoriWiki {
     }
 
     // Initialize configuration with defaults applied and overwritten with passed in custom values.
+    /** @type {UttoriWikiConfig} */
     this.config = { ...defaultConfig, ...config };
 
     // Instantiate the event bus / event dispatcher / hooks systems, as we will need it for every other step.
+    /** @type {EventDispatcher} */
     this.hooks = new EventDispatcher();
 
     // Register any plugins found in the configuration.
@@ -213,8 +215,13 @@ class UttoriWiki {
     server.post('/404', asyncHandler(this.notFound.bind(this)));
 
     // Document
-    server.get('/new/:key', asyncHandler(this.new.bind(this)));
-    server.get('/new', asyncHandler(this.new.bind(this)));
+    server.get('/new/:key', asyncHandler(this.create.bind(this)));
+    server.get('/new', asyncHandler(this.create.bind(this)));
+
+    // Document Create
+    server.post('/new/:key', asyncHandler(this.saveNew.bind(this)));
+    server.post('/new', asyncHandler(this.saveNew.bind(this)));
+
     server.post('/preview', asyncHandler(this.preview.bind(this)));
     server.get('/:slug/edit/:key', asyncHandler(this.edit.bind(this)));
     server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
@@ -228,14 +235,20 @@ class UttoriWiki {
       server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
     }
 
+    // Document Update
     server.post('/:slug/save/:key', asyncHandler(this.save.bind(this)));
     server.post('/:slug/save', asyncHandler(this.save.bind(this)));
+    server.put('/:slug/save/:key', asyncHandler(this.save.bind(this)));
+    server.put('/:slug/save', asyncHandler(this.save.bind(this)));
     server.get('/:slug', asyncHandler(this.detail.bind(this)));
 
     this.hooks.dispatch('bind-routes', server, this);
 
     // Not Found - Catch All
-    server.get('/*', asyncHandler(this.notFound.bind(this)));
+    /* istanbul ignore next */
+    if (this.config.handle_not_found) {
+      server.get('/*', asyncHandler(this.notFound.bind(this)));
+    }
 
     debug('Bound routes.');
   }
@@ -301,9 +314,14 @@ class UttoriWiki {
       document,
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
+
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
-    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    }
     response.render('home', viewModel);
   }
 
@@ -356,9 +374,13 @@ class UttoriWiki {
       taggedDocuments,
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
-    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    }
     response.render('tags', viewModel);
   }
 
@@ -394,9 +416,13 @@ class UttoriWiki {
       section,
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
-    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    }
     response.render('tag', viewModel);
   }
 
@@ -422,6 +448,7 @@ class UttoriWiki {
       searchResults: [],
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
     /* istanbul ignore else */
     if (request.query && request.query.s) {
@@ -454,7 +481,10 @@ class UttoriWiki {
     viewModel = await this.hooks.filter('view-model-search', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', 'no-store, no-cache, max-age=0');
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', 'no-store, no-cache, max-age=0');
+    }
     response.render('search', viewModel);
   }
 
@@ -504,6 +534,8 @@ class UttoriWiki {
       config: this.config,
       meta,
       basePath: request.baseUrl,
+      action: `${request.baseUrl || ''}/${document.slug}/save`,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
@@ -551,6 +583,7 @@ class UttoriWiki {
       debug('Deleting document', document);
       await this.hooks.fetch('storage-delete', slug, this);
       this.hooks.dispatch('search-delete', document, this);
+      request.wikiFlash('success', `Deleted '${slug}' successfully.`);
       response.redirect(this.config.site_url);
     } else {
       debug('Nothing found to delete, next.');
@@ -559,7 +592,7 @@ class UttoriWiki {
   }
 
   /**
-   * Attempts to save the document and redirects to the detail view of that document when successful.
+   * Attempts to update an existing document and redirects to the detail view of that document when successful.
    *
    * Hooks:
    * - `validate` - `validate-save` - Passes in the request.
@@ -572,7 +605,7 @@ class UttoriWiki {
    * @param {Function} next The Express Next function.
    */
   async save(request, response, next) {
-    debug('Save Route');
+    debug('Save Edit Route');
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('save: Missing edit key, or a edit key mismatch!');
       next();
@@ -592,11 +625,62 @@ class UttoriWiki {
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
+    request.wikiFlash('success', `Updated '${request.params.slug}' successfully.`);
     await this.saveValid(request, response, next);
   }
 
   /**
-   * Renders the new page using the `edit` template.
+   * Attempts to save a new document and redirects to the detail view of that document when successful.
+   *
+   * Hooks:
+   * - `validate` - `validate-save` - Passes in the request.
+   * - `dispatch` - `validate-invalid` - Passes in the request.
+   * - `dispatch` - `validate-valid` - Passes in the request.
+   *
+   * @async
+   * @param {Request} request The Express Request object.
+   * @param {Response} response The Express Response object.
+   * @param {Function} next The Express Next function.
+   */
+  async saveNew(request, response, next) {
+    debug('Save New Route');
+    if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
+      debug('save: Missing edit key, or a edit key mismatch!');
+      response.redirect('back');
+      return;
+    }
+    if (!request.body || (request.body && Object.keys(request.body).length === 0)) {
+      debug('Missing body!');
+      response.redirect('back');
+      return;
+    }
+    // Ensure the slug is unique and the redirects do not point to active URLs.
+    const query = `SELECT COUNT(*) FROM documents WHERE slug = "${request.params.slug}" OR redirects INCLUDES ("${request.params.slug}") ORDER BY slug ASC LIMIT -1`;
+    let [count] = await this.hooks.fetch('storage-query', query, this);
+    if (Array.isArray(count)) {
+      const temp = count[0];
+      count = temp;
+    }
+    if (count !== 0) {
+      debug(`${count} existing Document or Redirect with the slug:`, request.params.slug, JSON.stringify(request.body));
+      response.redirect('back');
+      return;
+    }
+    // Check for spam or otherwise veryify, redirect back if true, continue to update if false.
+    const invalid = await this.hooks.validate('validate-save', request, this);
+    if (invalid) {
+      debug('Invalid:', request.params.slug, JSON.stringify(request.body));
+      this.hooks.dispatch('validate-invalid', request, this);
+      response.redirect('back');
+      return;
+    }
+    this.hooks.dispatch('validate-valid', request, this);
+    request.wikiFlash('success', `Created '${request.params.slug}' successfully.`);
+    await this.saveValid(request, response, next);
+  }
+
+  /**
+   * Renders the creation page using the `edit` template.
    *
    * Hooks:
    * - `filter` - `view-model-new` - Passes in the viewModel.
@@ -606,7 +690,7 @@ class UttoriWiki {
    * @param {Response} response The Express Response object.
    * @param {Function} next The Express Next function.
    */
-  async new(request, response, next) {
+  async create(request, response, next) {
     debug('New Route');
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('edit: Missing edit key, or a edit key mismatch!');
@@ -627,7 +711,10 @@ class UttoriWiki {
       meta,
       config: this.config,
       basePath: request.baseUrl,
+      action: `${request.baseUrl || ''}/new`,
+      flash: request.wikiFlash(),
     };
+
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
     response.set('Cache-control', 'no-store, no-cache, max-age=0');
@@ -638,7 +725,8 @@ class UttoriWiki {
    * Renders the detail page using the `detail` template.
    *
    * Hooks:
-   * - `render-content` - `render-content` - Passes in the document content.
+   * - `fetch` - `storage-get` - Get the requested content from the storage.
+   * - `filter` - `render-content` - Passes in the document content.
    * - `filter` - `view-model-detail` - Passes in the viewModel.
    *
    * @async
@@ -648,7 +736,8 @@ class UttoriWiki {
    */
   async detail(request, response, next) {
     debug('Detail Route');
-    if (!request.params.slug) {
+    const slug = request.params.slug.trim();
+    if (!slug) {
       debug('Missing slug.');
       next();
       return;
@@ -657,15 +746,27 @@ class UttoriWiki {
     /** @type {UttoriWikiDocument} */
     let document;
     try {
-      [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
+      // [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
+      const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
+      const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND (slug = "${slug}" OR redirects INCLUDES ("${slug}")) ORDER BY slug ASC LIMIT 1`;
+      document = await this.hooks.fetch('storage-query', query, this);
+      // eslint-disable-next-line prefer-destructuring
+      document = document[0][0];
     } catch (error) {
       /* istanbul ignore next */
       debug('Error fetching document:', error);
     }
 
+    // If we don't have anyhting it is likely a 404, fall through to the next handler.
     if (!document) {
       debug('No document found for given slug:', request.params.slug);
       next();
+      return;
+    }
+
+    // Check for redirects and handle the 301 redirect to the actual slug.
+    if (document.slug !== slug) {
+      response.redirect(301, `${this.config.site_url}/${document.slug}`);
       return;
     }
 
@@ -679,9 +780,14 @@ class UttoriWiki {
       document,
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
+
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
-    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    }
     response.render('detail', viewModel);
   }
 
@@ -781,11 +887,15 @@ class UttoriWiki {
       config: this.config,
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_short}`);
+    }
     response.render('history_index', viewModel);
   }
 
@@ -846,11 +956,15 @@ class UttoriWiki {
       meta,
       revision,
       slug,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
+    }
     response.render('detail', viewModel);
   }
 
@@ -908,11 +1022,15 @@ class UttoriWiki {
       meta,
       revision,
       slug,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
     response.set('X-Robots-Tag', 'noindex');
-    response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
+    /* istanbul ignore else */
+    if (this.config.use_cache) {
+      response.set('Cache-control', `public, max-age=${this.config.cache_long}`);
+    }
     response.render('edit', viewModel);
   }
 
@@ -938,6 +1056,7 @@ class UttoriWiki {
       slug: request.params.slug || '404',
       meta,
       basePath: request.baseUrl,
+      flash: request.wikiFlash(),
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 
@@ -977,8 +1096,8 @@ class UttoriWiki {
    */
   async saveValid(request, response, _next) {
     debug('saveValid');
-    debug(`Updating with params: ${JSON.stringify(request.params, undefined, 2)}`);
-    debug(`Updating with body: ${JSON.stringify(request.body, undefined, 2)}`);
+    debug(`Saving with params: ${JSON.stringify(request.params, undefined, 2)}`);
+    debug(`Saving with body: ${JSON.stringify(request.body, undefined, 2)}`);
 
     const { title = '', excerpt = '', content = '', image = '' } = request.body;
 
@@ -991,10 +1110,30 @@ class UttoriWiki {
     }, {});
 
     // Normalize tags before save
-    let tags = typeof request.body.tags === 'string' ? request.body.tags.split(',') : [];
+    let tags = [];
+    if (Array.isArray(request.body.tags)) {
+      tags = request.body.tags;
+    } else if (typeof request.body.tags === 'string') {
+      tags = request.body.tags.split(',');
+    }
     tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
+    // Normalize redirects before save
+    let redirects = [];
+    if (Array.isArray(request.body.redirects)) {
+      redirects = request.body.redirects;
+    } else if (typeof request.body.redirects === 'string') {
+      redirects = request.body.redirects.split(',');
+    }
+    redirects = [...new Set(redirects.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+
+    /** @type {string} */
     let slug = request.body.slug || request.params.slug;
+    if (!slug) {
+      request.wikiFlash('error', 'Missing slug.');
+      response.redirect('back');
+      return;
+    }
     slug = slug.toLowerCase();
 
     /** @type {UttoriWikiDocument} */
@@ -1005,6 +1144,7 @@ class UttoriWiki {
       excerpt,
       content,
       tags,
+      redirects,
       slug,
     };
     document = await this.hooks.filter('document-save', document, this);
@@ -1020,6 +1160,9 @@ class UttoriWiki {
   /**
    * Returns the documents with the provided tag, up to the provided limit.
    * This will exclude any documents that have slugs in the `config.ignore_slugs` array.
+   *
+   * Hooks:
+   * - `fetch` - `storage-query` - Searched for the tagged documents.
    *
    * @async
    * @param {string} tag The tag to look for in documents.
