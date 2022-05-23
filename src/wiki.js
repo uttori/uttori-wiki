@@ -1123,7 +1123,7 @@ class UttoriWiki {
     if (Array.isArray(request.body.redirects)) {
       redirects = request.body.redirects;
     } else if (typeof request.body.redirects === 'string') {
-      redirects = request.body.redirects.split(',');
+      redirects = request.body.redirects.split(/[\n,]/);
     }
     redirects = [...new Set(redirects.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 

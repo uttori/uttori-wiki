@@ -2,9 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.1](https://github.com/uttori/uttori-wiki/compare/v5.0.0...v5.0.1) - 2022-05-22
+
+- 🛠 Redirects will correctly handle line breaks when submitting form a form.
+- 🎁 Update dependencies
+
 ## [5.0.0](https://github.com/uttori/uttori-wiki/compare/v4.2.2...v5.0.0) - 2021-12-26
 
-- 🧰 Change `POST` / `PUT` routes to seperate routes to seperate creation from modification.
+- 🧰 Change `POST` / `PUT` routes to separate routes to separate creation from modification.
 - 🧰 Add flash message support when used with Express Session through `request.wikiFlash(key, value)`.
 - 🧰 Added `redirects` document option. Allows adding URLs to redirect to the current page.
 - 🛠 Added `use_cache` configuration option. Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is always disabled on the `/edit` and `/new` routes. Defaults to `true`.

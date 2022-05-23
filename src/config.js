@@ -26,11 +26,11 @@
  * @property {string} [site_twitter_site=''] Theme specific, Open Graph: Twitter Site Handle
  * @property {string} [site_twitter_creator=''] Theme specific, Open Graph: Twitter Creator Handle
  * @property {string} [site_image=''] Theme specific, Used as Open Graph: Image
- * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
- * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  * @property {boolean} [use_cache=true] Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
  * @property {number} [cache_short=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
  * @property {number} [cache_long=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
+ * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
+ * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  */
 
 /** @type {UttoriWikiConfig} */
@@ -57,11 +57,11 @@ const config = {
   site_twitter_site: '',
   site_twitter_creator: '',
   site_image: '',
-  plugins: [],
-  middleware: [],
   use_cache: true,
   cache_short: 60 * 60,
   cache_long: 60 * 60 * 24,
+  plugins: [],
+  middleware: [],
 };
 
 module.exports = config;

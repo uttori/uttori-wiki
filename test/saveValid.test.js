@@ -66,13 +66,13 @@ test('saveValid: parses redirects as a string', async (t) => {
       updateDate: 1412921841841,
       createDate: undefined,
       tags: [],
-      redirects: 'old-url,older-url,oldest-url',
+      redirects: 'old-url,older-url,oldest-url\n\rsomehow-older',
     },
     wikiFlash }, response, () => {});
 
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
-  t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url']);
+  t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url', 'somehow-older']);
 });
 
 test('saveValid: parses redirects as an array', async (t) => {
