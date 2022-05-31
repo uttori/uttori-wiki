@@ -864,14 +864,14 @@ class UttoriWiki {
       next();
       return;
     }
-    const historyByDay = history.reduce((acc, value) => {
+    const historyByDay = history.reduce((output, value) => {
       /* istanbul ignore next */
       value = value.includes('-') ? value.split('-')[0] : value;
       const d = new Date(Number.parseInt(value, 10));
       const key = d.toISOString().split('T')[0];
-      acc[key] = acc[key] || [];
-      acc[key].push(value);
-      return acc;
+      output[key] = output[key] || [];
+      output[key].push(value);
+      return output;
     }, {});
 
     const meta = await this.buildMetadata({
@@ -1018,6 +1018,7 @@ class UttoriWiki {
       basePath: request.baseUrl,
       config: this.config,
       title: `Editing ${document.title} from Revision ${revision}`,
+      action: `${request.baseUrl || ''}/${document.slug}/save`,
       document,
       meta,
       revision,

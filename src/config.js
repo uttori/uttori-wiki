@@ -1,6 +1,7 @@
 /**
  * @typedef UttoriWikiConfig
  * @type {object}
+ * @property {boolean} [production=false] Useful for development environments.
  * @property {string} [site_title='Wiki'] The website title, HTML <title> format: page_title | site_title
  * @property {string} [site_header='Wiki'] Used in the navbar as your site title.
  * @property {string} [site_footer='Wiki'] Used as the footer text of your site.
@@ -35,6 +36,7 @@
 
 /** @type {UttoriWikiConfig} */
 const config = {
+  production: false,
   site_title: 'Wiki',
   site_header: 'Wiki',
   site_footer: 'Wiki',

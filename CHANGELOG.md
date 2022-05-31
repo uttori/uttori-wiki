@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.0.2](https://github.com/uttori/uttori-wiki/compare/v5.0.1...v5.0.2) - 2022-05-30
+
+- 🧰 Add `production` configuration object, useful for development.
+- 🛠 Restoring history correctly renders the edit page.
+- 🎁 Update dependencies
+
 ## [5.0.1](https://github.com/uttori/uttori-wiki/compare/v5.0.0...v5.0.1) - 2022-05-22
 
 - 🛠 Redirects will correctly handle line breaks when submitting form a form.

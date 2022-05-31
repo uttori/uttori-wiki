@@ -24,6 +24,7 @@
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
+| [production] | <code>boolean</code> | <code>false</code> | Useful for development environments. |
 | [site_title] | <code>string</code> | <code>&quot;&#x27;Wiki&#x27;&quot;</code> | The website title, HTML <title> format: page_title | site_title |
 | [site_header] | <code>string</code> | <code>&quot;&#x27;Wiki&#x27;&quot;</code> | Used in the navbar as your site title. |
 | [site_footer] | <code>string</code> | <code>&quot;&#x27;Wiki&#x27;&quot;</code> | Used as the footer text of your site. |
@@ -49,9 +50,9 @@
 | [site_twitter_site] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Open Graph: Twitter Site Handle |
 | [site_twitter_creator] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Open Graph: Twitter Creator Handle |
 | [site_image] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Theme specific, Used as Open Graph: Image |
-| plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
-| [middleware] | <code>Array</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
 | [use_cache] | <code>boolean</code> | <code>true</code> | Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes. |
 | [cache_short] | <code>number</code> | <code>(60 * 60)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
 | [cache_long] | <code>number</code> | <code>(60 * 60 * 24)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |
+| plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
+| [middleware] | <code>Array</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
 
