@@ -654,28 +654,29 @@ class UttoriWiki {
       response.redirect('back');
       return;
     }
+    const { slug } = request.body;
     // Ensure the slug is unique and the redirects do not point to active URLs.
-    const query = `SELECT COUNT(*) FROM documents WHERE slug = "${request.params.slug}" OR redirects INCLUDES ("${request.params.slug}") ORDER BY slug ASC LIMIT -1`;
+    const query = `SELECT COUNT(*) FROM documents WHERE slug = "${slug}" OR redirects INCLUDES ("${slug}") ORDER BY slug ASC LIMIT -1`;
     let [count] = await this.hooks.fetch('storage-query', query, this);
     if (Array.isArray(count)) {
       const temp = count[0];
       count = temp;
     }
     if (count !== 0) {
-      debug(`${count} existing Document or Redirect with the slug:`, request.params.slug, JSON.stringify(request.body));
+      debug(`${count} existing Document or Redirect with the slug:`, slug, JSON.stringify(request.body));
       response.redirect('back');
       return;
     }
     // Check for spam or otherwise veryify, redirect back if true, continue to update if false.
     const invalid = await this.hooks.validate('validate-save', request, this);
     if (invalid) {
-      debug('Invalid:', request.params.slug, JSON.stringify(request.body));
+      debug('Invalid:', slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
       response.redirect('back');
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
-    request.wikiFlash('success', `Created '${request.params.slug}' successfully.`);
+    request.wikiFlash('success', `Created '${slug}' successfully.`);
     await this.saveValid(request, response, next);
   }
 

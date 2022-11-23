@@ -10,24 +10,24 @@ declare module "config" {
         site_title?: string;
         site_header?: string;
         site_footer?: string;
-        site_sections?: {
+        site_sections: {
             title: string;
             description: string;
             tag: string;
         };
         home_page?: string;
-        ignore_slugs?: string[];
+        ignore_slugs: string[];
         excerpt_length?: number;
-        site_url?: string;
+        site_url: string;
         theme_dir?: string;
         public_dir?: string;
         use_delete_key?: boolean;
-        delete_key: string;
+        delete_key: string | undefined;
         use_edit_key?: boolean;
-        edit_key: string;
+        edit_key: string | undefined;
         public_history?: boolean;
         handle_not_found?: boolean;
-        allowedDocumentKeys?: string[];
+        allowedDocumentKeys: string[];
         use_meta_data?: boolean;
         site_locale?: string;
         site_twitter_site?: string;
@@ -80,8 +80,8 @@ declare module "wiki" {
         excerpt: string;
         content: string;
         html?: string;
-        createDate: number;
-        updateDate: number;
+        createDate?: number;
+        updateDate?: number;
         tags: string[];
         redirects?: string[];
     };
