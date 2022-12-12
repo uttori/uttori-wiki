@@ -2,7 +2,6 @@
 /* eslint-disable ramda/prefer-ramda-boolean */
 const test = require('ava');
 const request = require('supertest');
-const sinon = require('sinon');
 
 const { UttoriWiki } = require('../src');
 
@@ -19,12 +18,13 @@ test('can preview content', async (t) => {
   t.is(response.text, '{"# Hello":""}');
 });
 
-test('falls through to next when missing body', async (t) => {
-  t.plan(1);
+test('returns an empty JSON response body when missing POST body', async (t) => {
+  t.plan(2);
 
-  const next = sinon.spy();
   const server = serverSetup();
-  const uttori = new UttoriWiki(config, server);
-  await uttori.preview({ params: {}, body: undefined }, { setHeader: () => {} }, next);
-  t.true(next.calledOnce);
+  const _uttori = new UttoriWiki(config, server);
+  // const response = await uttori.preview({ params: {}, body: undefined }, { setHeader: () => {}, send }, () => {});
+  const response = await request(server).post('/preview').send('');
+  t.is(response.status, 200);
+  t.is(response.text, '{}');
 });

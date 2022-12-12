@@ -267,6 +267,14 @@ class UttoriWiki {
    */
   async home(request, response, next) {
     debug('Home Route');
+
+    // Check for custom home function, and use it if it exists
+    if (this.config.homeRoute) {
+      debug('Custom Home Route');
+      this.config.homeRoute.call(this, request, response, next);
+      return;
+    }
+
     /** @type {UttoriWikiDocument} */
     let document;
     try {
@@ -346,10 +354,18 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} _next The Express Next function.
+   * @param {Function} next The Express Next function.
    */
-  async tagIndex(request, response, _next) {
+  async tagIndex(request, response, next) {
     debug('Tag Index Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.tagIndexRoute) {
+      debug('Custom Tag Index Route');
+      this.config.tagIndexRoute.call(this, request, response, next);
+      return;
+    }
+
     const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
     const query = `SELECT tags FROM documents WHERE slug NOT_IN (${ignore_slugs}) ORDER BY updateDate DESC LIMIT -1`;
     let tags = [];
@@ -399,6 +415,14 @@ class UttoriWiki {
    */
   async tag(request, response, next) {
     debug('Tag Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.tagRoute) {
+      debug('Custom Tag Route');
+      this.config.tagRoute.call(this, request, response, next);
+      return;
+    }
+
     const taggedDocuments = await this.getTaggedDocuments(request.params.tag);
     if (taggedDocuments.length === 0) {
       debug('No documents for tag!');
@@ -436,10 +460,18 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} _next The Express Next function.
+   * @param {Function} next The Express Next function.
    */
-  async search(request, response, _next) {
+  async search(request, response, next) {
     debug('Search Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.searchRoute) {
+      debug('Custom Search Route');
+      this.config.searchRoute.call(this, request, response, next);
+      return;
+    }
+
     const meta = await this.buildMetadata({ title: 'Search' }, '/search');
     let viewModel = {
       title: 'Search',
@@ -501,6 +533,14 @@ class UttoriWiki {
    */
   async edit(request, response, next) {
     debug('Edit Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.editRoute) {
+      debug('Custom Edit Route');
+      this.config.editRoute.call(this, request, response, next);
+      return;
+    }
+
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('edit: Missing edit key, or a edit key mismatch!');
       next();
@@ -557,6 +597,14 @@ class UttoriWiki {
    */
   async delete(request, response, next) {
     debug('Delete Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.deleteRoute) {
+      debug('Custom Delete Route');
+      this.config.deleteRoute.call(this, request, response, next);
+      return;
+    }
+
     if (this.config.use_delete_key && (!request.params.key || request.params.key !== this.config.delete_key)) {
       debug('delete: Missing delete key, or a delete key mismatch!');
       next();
@@ -606,6 +654,14 @@ class UttoriWiki {
    */
   async save(request, response, next) {
     debug('Save Edit Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.saveRoute) {
+      debug('Custom Save Edit Route');
+      this.config.saveRoute.call(this, request, response, next);
+      return;
+    }
+
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('save: Missing edit key, or a edit key mismatch!');
       next();
@@ -644,6 +700,14 @@ class UttoriWiki {
    */
   async saveNew(request, response, next) {
     debug('Save New Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.saveNewRoute) {
+      debug('Custom Save New Route');
+      this.config.saveNewRoute.call(this, request, response, next);
+      return;
+    }
+
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('save: Missing edit key, or a edit key mismatch!');
       response.redirect('back');
@@ -693,6 +757,14 @@ class UttoriWiki {
    */
   async create(request, response, next) {
     debug('New Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.newRoute) {
+      debug('Custom New Route');
+      this.config.newRoute.call(this, request, response, next);
+      return;
+    }
+
     if (this.config.use_edit_key && (!request.params.key || request.params.key !== this.config.edit_key)) {
       debug('edit: Missing edit key, or a edit key mismatch!');
       next();
@@ -737,6 +809,14 @@ class UttoriWiki {
    */
   async detail(request, response, next) {
     debug('Detail Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.detailRoute) {
+      debug('Custom Detail Route');
+      this.config.detailRoute.call(this, request, response, next);
+      return;
+    }
+
     const slug = request.params.slug.trim();
     if (!slug) {
       debug('Missing slug.');
@@ -806,10 +886,19 @@ class UttoriWiki {
    */
   async preview(request, response, next) {
     debug('Preview Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.previewRoute) {
+      debug('Custom Preview Route');
+      this.config.previewRoute.call(this, request, response, next);
+      return;
+    }
+
     response.setHeader('X-Robots-Tag', 'noindex');
     if (!request.body) {
       debug('Missing body!');
-      next();
+      response.setHeader('Content-Type', 'text/html');
+      response.send('');
       return;
     }
 
@@ -832,6 +921,14 @@ class UttoriWiki {
    */
   async historyIndex(request, response, next) {
     debug('History Index Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.historyIndexRoute) {
+      debug('Custom History Index Route');
+      this.config.historyIndexRoute.call(this, request, response, next);
+      return;
+    }
+
     if (!request.params.slug) {
       debug('Missing slug.');
       next();
@@ -915,6 +1012,14 @@ class UttoriWiki {
    */
   async historyDetail(request, response, next) {
     debug('History Detail Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.historyDetailRoute) {
+      debug('Custom History Detail Route');
+      this.config.historyDetailRoute.call(this, request, response, next);
+      return;
+    }
+
     if (!request.params.slug) {
       debug('Missing slug.');
       next();
@@ -983,6 +1088,14 @@ class UttoriWiki {
    */
   async historyRestore(request, response, next) {
     debug('History Restore Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.historyRestoreRoute) {
+      debug('Custom History Restore Route');
+      this.config.historyRestoreRoute.call(this, request, response, next);
+      return;
+    }
+
     if (!request.params.slug) {
       debug('Missing slug!');
       next();
@@ -1046,10 +1159,17 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} _next The Express Next function.
+   * @param {Function} next The Express Next function.
    */
-  async notFound(request, response, _next) {
+  async notFound(request, response, next) {
     debug('404 Not Found Route');
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.notFoundRoute) {
+      debug('Custom 404 Not Found Route');
+      this.config.notFoundRoute.call(this, request, response, next);
+      return;
+    }
 
     const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
     let viewModel = {
@@ -1094,12 +1214,19 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} _next The Express Next function.
+   * @param {Function} next The Express Next function.
    */
-  async saveValid(request, response, _next) {
-    debug('saveValid');
+  async saveValid(request, response, next) {
+    debug('Save Valid');
     debug(`Saving with params: ${JSON.stringify(request.params, undefined, 2)}`);
     debug(`Saving with body: ${JSON.stringify(request.body, undefined, 2)}`);
+
+    // Check for custom route function, and use it if it exists.
+    if (this.config.saveValidRoute) {
+      debug('Custom Save Valid Route');
+      this.config.saveValidRoute.call(this, request, response, next);
+      return;
+    }
 
     const { title = '', excerpt = '', content = '', image = '' } = request.body;
 
@@ -1179,7 +1306,7 @@ class UttoriWiki {
     let results = [];
     try {
       const ignore_slugs = `"${this.config.ignore_slugs.join('", "')}"`;
-      const query = `SELECT 'slug', 'title', 'tags', 'updateDate' FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES "${tag}" ORDER BY title ASC LIMIT ${limit}`;
+      const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignore_slugs}) AND tags INCLUDES "${tag}" ORDER BY title ASC LIMIT ${limit}`;
       [results] = await this.hooks.fetch('storage-query', query, this);
     } catch (error) {
       /* istanbul ignore next */
