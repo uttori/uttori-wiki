@@ -14,6 +14,6 @@ test('search(request, response, _next): renders', async (t) => {
   const response = await request(server).get('/search?s=test');
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
-  const title = response.text.match(/<title>(.*?)<\/title>/i);
+  const title = response.text.match(/<title>(.*?)<\/title>/i) || '';
   t.is(title[1], 'Search results for &#34;test&#34; | Wiki');
 });
