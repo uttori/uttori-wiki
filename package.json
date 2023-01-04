@@ -34,13 +34,13 @@
     "express": "^4"
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "^5.46.1",
+    "@typescript-eslint/parser": "^5.48.0",
     "@uttori/search-provider-lunr": "^3.4.0",
     "@uttori/storage-provider-json-memory": "^4.1.2",
     "ava": "^5.1.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.8",
-    "eslint": "^8.30.0",
+    "eslint": "^8.31.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-plugin-anti-trojan-source": "^1.1.0",
     "eslint-plugin-ava": "^13.2.0",
@@ -61,7 +61,7 @@
     "jsdoc-to-markdown": "^8.0.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",
-    "release-it": "^15.5.1",
+    "release-it": "^15.6.0",
     "sinon": "^15.0.1",
     "supertest": "^6.3.3",
     "typescript": "^4.9.4"
