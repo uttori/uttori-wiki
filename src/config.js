@@ -12,7 +12,7 @@
  * @property {string} [home_page='home-page'] Slug of the root `/` page document.
  * @property {string[]} ignore_slugs Slugs to ignore in search & filtered documents, default is 'home-page';
  * @property {number} [excerpt_length=400] Excerpt length, used in search result previews.
- * @property {string} site_url='' Application base URL. Used for canonical URLs and Open Graph, no trailing slash.
+ * @property {string} [site_url=''] Application base URL. Used for canonical URLs and Open Graph, no trailing slash.
  * @property {string} [theme_dir=''] Specify the path to the theme directory, no trailing slash.
  * @property {string} [public_dir=''] Path to the static file directory for themes, no trailing slash
  * @property {boolean} [use_delete_key=false] Enable hiding document deletion behind a private key.
