@@ -30,6 +30,20 @@ test('saveValid: parses tags as a string', async (t) => {
   t.deepEqual(document.tags, ['tag-1', 'tag-2', 'tag-3']);
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const saveValidRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, saveValidRoute }, server);
+  await uttori.saveValid({ params: {}, body: {} }, response, () => {});
+  t.is(spy.called, true);
+});
+
 test('saveValid: parses tags as an array', async (t) => {
   t.plan(2);
   const slug = 'test-parse-tags-array';

@@ -18,6 +18,20 @@ test('redirects to the document after saving without using an edit_key when use_
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const saveNewRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, saveNewRoute }, server);
+  await request(server).post('/new').send('slug=test-old');
+  t.is(spy.called, true);
+});
+
 test('redirects to the document after saving', async (t) => {
   t.plan(2);
 

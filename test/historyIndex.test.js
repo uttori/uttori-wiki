@@ -21,6 +21,20 @@ test('renders the requested slug history', async (t) => {
   t.is(title[1], 'Demo Title Revision History | Wiki');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const historyIndexRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, historyIndexRoute }, server);
+  await request(server).get('/demo-title/history');
+  t.is(spy.called, true);
+});
+
 test('falls through to next when public_history is false', async (t) => {
   t.plan(1);
 

@@ -23,6 +23,20 @@ test('renders the edit page for a given slug', async (t) => {
   t.true(title[1].startsWith('Editing Demo Title Beta from Revision 1'));
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const historyRestoreRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, historyRestoreRoute }, server);
+  await request(server).get('/demo-title/history/test/restore');
+  t.is(spy.called, true);
+});
+
 test('falls through to next when public_history is false', async (t) => {
   t.plan(1);
 

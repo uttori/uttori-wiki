@@ -29,6 +29,20 @@ test('deletes the document and redirects to the home page', async (t) => {
   t.is(express_response.text, 'Found. Redirecting to https://fake.test');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const deleteRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, deleteRoute }, server);
+  await uttori.delete({ params: { key: 'test-key' } }, response, () => {});
+  t.is(spy.called, true);
+});
+
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 

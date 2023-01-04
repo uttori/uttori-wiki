@@ -22,6 +22,20 @@ test('renders', async (t) => {
   t.is(title[1], 'Home Page | Wiki');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const homeRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, homeRoute }, server);
+  await request(server).get('/');
+  t.is(spy.called, true);
+});
+
 test('falls through to next when home document is missing', async (t) => {
   t.plan(1);
 

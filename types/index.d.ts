@@ -38,6 +38,22 @@ declare module "config" {
         use_cache?: boolean;
         cache_short?: number;
         cache_long?: number;
+        homeRoute?: Function;
+        tagIndexRoute?: Function;
+        tagRoute?: Function;
+        searchRoute?: Function;
+        editRoute?: Function;
+        deleteRoute?: Function;
+        saveRoute?: Function;
+        saveNewRoute?: Function;
+        newRoute?: Function;
+        detailRoute?: Function;
+        previewRoute?: Function;
+        historyIndexRoute?: Function;
+        historyDetailRoute?: Function;
+        historyRestoreRoute?: Function;
+        notFoundRoute?: Function;
+        saveValidRoute?: Function;
     };
 }
 declare module "wiki" {

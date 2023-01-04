@@ -22,6 +22,20 @@ test('renders the requested slug and revision', async (t) => {
   t.true(title[1].startsWith('Demo Title Beta Revision 1'));
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const historyDetailRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, historyDetailRoute }, server);
+  await request(server).get('/demo-title/history/test');
+  t.is(spy.called, true);
+});
+
 test('falls through to next when public_history is false', async (t) => {
   t.plan(1);
 

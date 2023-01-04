@@ -19,6 +19,20 @@ test('renders the requested slug', async (t) => {
   t.is(title[1], 'Example Title | Wiki');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const detailRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, detailRoute }, server);
+  await request(server).get('/example-titlez');
+  t.is(spy.called, true);
+});
+
 test('redirects to the actual document when found in the `redirects` array', async (t) => {
   t.plan(2);
 

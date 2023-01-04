@@ -30,8 +30,6 @@
  * @property {boolean} [use_cache=true] Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
  * @property {number} [cache_short=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
  * @property {number} [cache_long=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
- * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
- * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  * @property {Function} [homeRoute] A replacement route handler for the home route.
  * @property {Function} [tagIndexRoute] A replacement route handler for the tag inded route.
  * @property {Function} [tagRoute] A replacement route handler for the tag show route.
@@ -48,6 +46,8 @@
  * @property {Function} [historyRestoreRoute] A replacement route handler for the history restore route.
  * @property {Function} [notFoundRoute] A replacement route handler for the 404 not found route.
  * @property {Function} [saveValidRoute] A replacement route handler for the save valid route.
+ * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
+ * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  */
 
 /** @type {UttoriWikiConfig} */

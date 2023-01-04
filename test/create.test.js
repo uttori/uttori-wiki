@@ -1,4 +1,5 @@
 const test = require('ava');
+const sinon = require('sinon');
 const request = require('supertest');
 
 const { UttoriWiki } = require('../src');
@@ -16,6 +17,20 @@ test('create(request, response, _next): renders', async (t) => {
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
   t.is(title[1], 'New Document | Wiki');
+});
+
+test('create(request, response, _next): can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const newRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, newRoute }, server);
+  await request(server).get('/new/test-key');
+  t.is(spy.called, true);
 });
 
 test('falls to 404 when miss matched key', async (t) => {

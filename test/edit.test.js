@@ -20,6 +20,20 @@ test('renders the edit page for a given slug', async (t) => {
   t.is(title[1], 'Editing Demo Title | Wiki');
 });
 
+test('can be replaced', async (t) => {
+  t.plan(1);
+
+  const spy = sinon.spy();
+  const editRoute = (_request, _response, next) => {
+    spy();
+    next();
+  };
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, editRoute }, server);
+  await request(server).get('/demo-title/edit/test-key');
+  t.is(spy.called, true);
+});
+
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
