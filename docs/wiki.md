@@ -46,9 +46,9 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.bindRoutes(server)](#UttoriWiki+bindRoutes)
     * [.home(request, response, next)](#UttoriWiki+home)
     * [.homepageRedirect(request, response, _next)](#UttoriWiki+homepageRedirect)
-    * [.tagIndex(request, response, _next)](#UttoriWiki+tagIndex)
+    * [.tagIndex(request, response, next)](#UttoriWiki+tagIndex)
     * [.tag(request, response, next)](#UttoriWiki+tag)
-    * [.search(request, response, _next)](#UttoriWiki+search)
+    * [.search(request, response, next)](#UttoriWiki+search)
     * [.edit(request, response, next)](#UttoriWiki+edit)
     * [.delete(request, response, next)](#UttoriWiki+delete)
     * [.save(request, response, next)](#UttoriWiki+save)
@@ -59,8 +59,8 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.historyIndex(request, response, next)](#UttoriWiki+historyIndex)
     * [.historyDetail(request, response, next)](#UttoriWiki+historyDetail)
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
-    * [.notFound(request, response, _next)](#UttoriWiki+notFound)
-    * [.saveValid(request, response, _next)](#UttoriWiki+saveValid)
+    * [.notFound(request, response, next)](#UttoriWiki+notFound)
+    * [.saveValid(request, response, next)](#UttoriWiki+saveValid)
     * [.getTaggedDocuments(tag, [limit])](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
 
 <a name="new_UttoriWiki_new"></a>
@@ -189,7 +189,7 @@ Redirects to the homepage.
 
 <a name="UttoriWiki+tagIndex"></a>
 
-### uttoriWiki.tagIndex(request, response, _next)
+### uttoriWiki.tagIndex(request, response, next)
 Renders the tag index page with the `tags` template.
 
 Hooks:
@@ -201,7 +201,7 @@ Hooks:
 | --- | --- | --- |
 | request | <code>Request</code> | The Express Request object. |
 | response | <code>Response</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+tag"></a>
 
@@ -223,7 +223,7 @@ Hooks:
 
 <a name="UttoriWiki+search"></a>
 
-### uttoriWiki.search(request, response, _next)
+### uttoriWiki.search(request, response, next)
 Renders the search page using the `search` template.
 
 Hooks:
@@ -236,7 +236,7 @@ Hooks:
 | --- | --- | --- |
 | request | <code>Request</code> | The Express Request object. |
 | response | <code>Response</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+edit"></a>
 
@@ -412,7 +412,7 @@ Hooks:
 
 <a name="UttoriWiki+notFound"></a>
 
-### uttoriWiki.notFound(request, response, _next)
+### uttoriWiki.notFound(request, response, next)
 Renders the 404 Not Found page using the `404` template.
 Sets the `X-Robots-Tag` header to `noindex`.
 
@@ -425,11 +425,11 @@ Hooks:
 | --- | --- | --- |
 | request | <code>Request</code> | The Express Request object. |
 | response | <code>Response</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+saveValid"></a>
 
-### uttoriWiki.saveValid(request, response, _next)
+### uttoriWiki.saveValid(request, response, next)
 Handles saving documents, and changing the slug of documents, then redirecting to the document.
 
 `title`, `excerpt`, and `content` will default to a blank string
@@ -445,7 +445,7 @@ Hooks:
 | --- | --- | --- |
 | request | <code>Request</code> | The Express Request object. |
 | response | <code>Response</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| next | <code>function</code> | The Express Next function. |
 
 <a name="UttoriWiki+getTaggedDocuments"></a>
 

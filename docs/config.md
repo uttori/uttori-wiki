@@ -35,7 +35,7 @@
 | [home_page] | <code>string</code> | <code>&quot;&#x27;home-page&#x27;&quot;</code> | Slug of the root `/` page document. |
 | ignore_slugs | <code>Array.&lt;string&gt;</code> |  | Slugs to ignore in search & filtered documents, default is 'home-page'; |
 | [excerpt_length] | <code>number</code> | <code>400</code> | Excerpt length, used in search result previews. |
-| site_url | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Application base URL. Used for canonical URLs and Open Graph, no trailing slash. |
+| [site_url] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Application base URL. Used for canonical URLs and Open Graph, no trailing slash. |
 | [theme_dir] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Specify the path to the theme directory, no trailing slash. |
 | [public_dir] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Path to the static file directory for themes, no trailing slash |
 | [use_delete_key] | <code>boolean</code> | <code>false</code> | Enable hiding document deletion behind a private key. |
@@ -53,6 +53,22 @@
 | [use_cache] | <code>boolean</code> | <code>true</code> | Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes. |
 | [cache_short] | <code>number</code> | <code>(60 * 60)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
 | [cache_long] | <code>number</code> | <code>(60 * 60 * 24)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |
+| [homeRoute] | <code>function</code> |  | A replacement route handler for the home route. |
+| [tagIndexRoute] | <code>function</code> |  | A replacement route handler for the tag inded route. |
+| [tagRoute] | <code>function</code> |  | A replacement route handler for the tag show route. |
+| [searchRoute] | <code>function</code> |  | A replacement route handler for the search route. |
+| [editRoute] | <code>function</code> |  | A replacement route handler for the edit route. |
+| [deleteRoute] | <code>function</code> |  | A replacement route handler for the delete route. |
+| [saveRoute] | <code>function</code> |  | A replacement route handler for the save route. |
+| [saveNewRoute] | <code>function</code> |  | A replacement route handler for the save new handler. |
+| [newRoute] | <code>function</code> |  | A replacement route handler for the create route. |
+| [detailRoute] | <code>function</code> |  | A replacement route handler for the detail route. |
+| [previewRoute] | <code>function</code> |  | A replacement route handler for the preview route. |
+| [historyIndexRoute] | <code>function</code> |  | A replacement route handler for the history index route. |
+| [historyDetailRoute] | <code>function</code> |  | A replacement route handler for the history detail route. |
+| [historyRestoreRoute] | <code>function</code> |  | A replacement route handler for the history restore route. |
+| [notFoundRoute] | <code>function</code> |  | A replacement route handler for the 404 not found route. |
+| [saveValidRoute] | <code>function</code> |  | A replacement route handler for the save valid route. |
 | plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
 | [middleware] | <code>Array</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
 

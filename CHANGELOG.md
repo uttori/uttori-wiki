@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.1.0](https://github.com/uttori/uttori-wiki/compare/v5.0.3...v5.1.0) - 2023-04-05
+
+- 🧰 Add support for overriding route handlers.
+- 🧰 Do not allow saving without content.
+- 🧰 Expose session data to view models.
+- 🎁 Update dependencies
+
 ## [5.0.3](https://github.com/uttori/uttori-wiki/compare/v5.0.2...v5.0.3) - 2022-11-22
 
 - 🪲 Creating new documents was not correctly checking for existing documents and showing an `undefined` flash message.

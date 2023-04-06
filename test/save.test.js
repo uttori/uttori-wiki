@@ -8,12 +8,22 @@ const { UttoriWiki } = require('../src');
 
 const { config, serverSetup } = require('./_helpers/server');
 
+test('redirects to 404 with no content', async (t) => {
+  t.plan(1);
+
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
+  const response = await request(server).put('/test-old/save').send('slug=test-old');
+
+  t.is(response.status, 404);
+});
+
 test('redirects to the document after saving without using an edit_key when use_edit_key is false', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
   const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
-  const response = await request(server).put('/test-old/save').send('slug=test-old');
+  const response = await request(server).put('/test-old/save').send('slug=test-old&content=test');
 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
@@ -29,7 +39,7 @@ test('can be replaced', async (t) => {
   };
   const server = serverSetup();
   const _uttori = new UttoriWiki({ ...config, saveRoute }, server);
-  await request(server).put('/test-old/save').send('slug=test-old');
+  await request(server).put('/test-old/save').send('slug=test-old&content=test');
   t.is(spy.called, true);
 });
 

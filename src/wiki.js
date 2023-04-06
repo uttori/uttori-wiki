@@ -318,6 +318,7 @@ class UttoriWiki {
     let viewModel = {
       title: document.title,
       config: this.config,
+      session: request.session || {},
       siteSections,
       document,
       meta,
@@ -387,6 +388,7 @@ class UttoriWiki {
     let viewModel = {
       title: 'Tags',
       config: this.config,
+      session: request.session || {},
       taggedDocuments,
       meta,
       basePath: request.baseUrl,
@@ -436,6 +438,7 @@ class UttoriWiki {
     let viewModel = {
       title: request.params.tag,
       config: this.config,
+      session: request.session || {},
       taggedDocuments,
       section,
       meta,
@@ -476,6 +479,7 @@ class UttoriWiki {
     let viewModel = {
       title: 'Search',
       config: this.config,
+      session: request.session || {},
       searchTerm: '',
       searchResults: [],
       meta,
@@ -572,6 +576,7 @@ class UttoriWiki {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
+      session: request.session || {},
       meta,
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
@@ -669,6 +674,11 @@ class UttoriWiki {
     }
     if (!request.body || (request.body && Object.keys(request.body).length === 0)) {
       debug('Missing body!');
+      next();
+      return;
+    }
+    if (!request.body.content) {
+      debug('Missing content!');
       next();
       return;
     }
@@ -783,6 +793,7 @@ class UttoriWiki {
       title,
       meta,
       config: this.config,
+      session: request.session || {},
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/new`,
       flash: request.wikiFlash(),
@@ -858,6 +869,7 @@ class UttoriWiki {
     let viewModel = {
       title: document.title,
       config: this.config,
+      session: request.session || {},
       document,
       meta,
       basePath: request.baseUrl,
@@ -983,6 +995,7 @@ class UttoriWiki {
       document,
       historyByDay,
       config: this.config,
+      session: request.session || {},
       meta,
       basePath: request.baseUrl,
       flash: request.wikiFlash(),
@@ -1057,6 +1070,7 @@ class UttoriWiki {
     let viewModel = {
       basePath: request.baseUrl,
       config: this.config,
+      session: request.session || {},
       title: `${document.title} Revision ${revision}`,
       document,
       meta,
@@ -1131,6 +1145,7 @@ class UttoriWiki {
     let viewModel = {
       basePath: request.baseUrl,
       config: this.config,
+      session: request.session || {},
       title: `Editing ${document.title} from Revision ${revision}`,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
       document,
@@ -1175,6 +1190,7 @@ class UttoriWiki {
     let viewModel = {
       title: '404 Not Found',
       config: this.config,
+      session: request.session || {},
       slug: request.params.slug || '404',
       meta,
       basePath: request.baseUrl,

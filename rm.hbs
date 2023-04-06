@@ -1,12 +1,7 @@
 [![view on npm](https://img.shields.io/npm/v/@uttori/wiki.svg)](https://www.npmjs.com/package/@uttori/wiki)
 [![npm module downloads](https://img.shields.io/npm/dt/@uttori/wiki.svg)](https://www.npmjs.com/package/@uttori/wiki)
 [![Build Status](https://travis-ci.com/uttori/uttori-wiki.svg?branch=master)](https://travis-ci.com/uttori/uttori-wiki)
-[![Dependency Status](https://david-dm.org/uttori/uttori-wiki.svg)](https://david-dm.org/uttori/uttori-wiki)
 [![Coverage Status](https://coveralls.io/repos/github/uttori/uttori-wiki/badge.svg?branch=master)](https://coveralls.io/github/uttori/uttori-wiki?branch=master)
-[![Tree-Shaking Support](https://badgen.net/bundlephobia/tree-shaking/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
-[![Dependency Count](https://badgen.net/bundlephobia/dependency-count/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
-[![Minified + GZip](https://badgen.net/bundlephobia/minzip/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
-[![Minified](https://badgen.net/bundlephobia/min/@uttori/wiki)](https://bundlephobia.com/result?p=@uttori/wiki)
 
 # Uttori Wiki
 
@@ -257,6 +252,24 @@ const config = {
     ['set', 'view engine', 'html'],
     ['engine', 'html', ejs.renderFile],
   ],
+
+  // Override route handlers
+  homeRoute: (request, response, next) => { ... },
+  tagIndexRoute: (request, response, next) => { ... },
+  tagRoute: (request, response, next) => { ... },
+  searchRoute: (request, response, next) => { ... },
+  editRoute: (request, response, next) => { ... },
+  deleteRoute: (request, response, next) => { ... },
+  saveRoute: (request, response, next) => { ... },
+  saveNewRoute: (request, response, next) => { ... },
+  newRoute: (request, response, next) => { ... },
+  detailRoute: (request, response, next) => { ... },
+  previewRoute: (request, response, next) => { ... },
+  historyIndexRoute: (request, response, next) => { ... },
+  historyDetailRoute: (request, response, next) => { ... },
+  historyRestoreRoute: (request, response, next) => { ... },
+  notFoundRoute: (request, response, next) => { ... },
+  saveValidRoute: (request, response, next) => { ... },
 };
 
 module.exports = config;
