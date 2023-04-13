@@ -196,51 +196,51 @@ class UttoriWiki {
   bindRoutes(server) {
     debug('Binding routes...');
     // Home
-    server.get('/', asyncHandler(this.home.bind(this)));
+    server.get('/', ...[this.config.routeMiddleware.home], asyncHandler(this.home.bind(this)));
     server.get(`/${this.config.home_page}`, asyncHandler(this.homepageRedirect.bind(this)));
 
     // Tags
-    server.get('/tags', asyncHandler(this.tagIndex.bind(this)));
-    server.get('/tags/:tag/', asyncHandler(this.tag.bind(this)));
+    server.get('/tags', ...[this.config.routeMiddleware.tagIndex], asyncHandler(this.tagIndex.bind(this)));
+    server.get('/tags/:tag/', ...[this.config.routeMiddleware.tag], asyncHandler(this.tag.bind(this)));
 
     // Search
-    server.get('/search', asyncHandler(this.search.bind(this)));
+    server.get('/search', ...[this.config.routeMiddleware.search], asyncHandler(this.search.bind(this)));
 
     // Not Found Placeholder
-    server.head('/404', asyncHandler(this.notFound.bind(this)));
-    server.get('/404', asyncHandler(this.notFound.bind(this)));
-    server.delete('/404', asyncHandler(this.notFound.bind(this)));
-    server.patch('/404', asyncHandler(this.notFound.bind(this)));
-    server.put('/404', asyncHandler(this.notFound.bind(this)));
-    server.post('/404', asyncHandler(this.notFound.bind(this)));
+    server.head('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
+    server.get('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
+    server.delete('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
+    server.patch('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
+    server.put('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
+    server.post('/404', ...[this.config.routeMiddleware.notFound], asyncHandler(this.notFound.bind(this)));
 
     // Document
-    server.get('/new/:key', asyncHandler(this.create.bind(this)));
-    server.get('/new', asyncHandler(this.create.bind(this)));
+    server.get('/new/:key', ...[this.config.routeMiddleware.create], asyncHandler(this.create.bind(this)));
+    server.get('/new', ...[this.config.routeMiddleware.create], asyncHandler(this.create.bind(this)));
 
     // Document Create
-    server.post('/new/:key', asyncHandler(this.saveNew.bind(this)));
-    server.post('/new', asyncHandler(this.saveNew.bind(this)));
+    server.post('/new/:key', ...[this.config.routeMiddleware.saveNew], asyncHandler(this.saveNew.bind(this)));
+    server.post('/new', ...[this.config.routeMiddleware.saveNew], asyncHandler(this.saveNew.bind(this)));
 
-    server.post('/preview', asyncHandler(this.preview.bind(this)));
-    server.get('/:slug/edit/:key', asyncHandler(this.edit.bind(this)));
-    server.get('/:slug/edit', asyncHandler(this.edit.bind(this)));
-    server.get('/:slug/delete/:key', asyncHandler(this.delete.bind(this)));
-    server.get('/:slug/delete', asyncHandler(this.delete.bind(this)));
+    server.post('/preview', ...[this.config.routeMiddleware.preview], asyncHandler(this.preview.bind(this)));
+    server.get('/:slug/edit/:key', ...[this.config.routeMiddleware.edit], asyncHandler(this.edit.bind(this)));
+    server.get('/:slug/edit', ...[this.config.routeMiddleware.edit], asyncHandler(this.edit.bind(this)));
+    server.get('/:slug/delete/:key', ...[this.config.routeMiddleware.delete], asyncHandler(this.delete.bind(this)));
+    server.get('/:slug/delete', ...[this.config.routeMiddleware.delete], asyncHandler(this.delete.bind(this)));
 
     // Document History
     if (this.config.public_history) {
-      server.get('/:slug/history', asyncHandler(this.historyIndex.bind(this)));
-      server.get('/:slug/history/:revision', asyncHandler(this.historyDetail.bind(this)));
-      server.get('/:slug/history/:revision/restore', asyncHandler(this.historyRestore.bind(this)));
+      server.get('/:slug/history', ...[this.config.routeMiddleware.historyIndex], asyncHandler(this.historyIndex.bind(this)));
+      server.get('/:slug/history/:revision', ...[this.config.routeMiddleware.historyDetail], asyncHandler(this.historyDetail.bind(this)));
+      server.get('/:slug/history/:revision/restore', ...[this.config.routeMiddleware.historyRestore], asyncHandler(this.historyRestore.bind(this)));
     }
 
     // Document Update
-    server.post('/:slug/save/:key', asyncHandler(this.save.bind(this)));
-    server.post('/:slug/save', asyncHandler(this.save.bind(this)));
-    server.put('/:slug/save/:key', asyncHandler(this.save.bind(this)));
-    server.put('/:slug/save', asyncHandler(this.save.bind(this)));
-    server.get('/:slug', asyncHandler(this.detail.bind(this)));
+    server.post('/:slug/save/:key', ...[this.config.routeMiddleware.save], asyncHandler(this.save.bind(this)));
+    server.post('/:slug/save', ...[this.config.routeMiddleware.save], asyncHandler(this.save.bind(this)));
+    server.put('/:slug/save/:key', ...[this.config.routeMiddleware.save], asyncHandler(this.save.bind(this)));
+    server.put('/:slug/save', ...[this.config.routeMiddleware.save], asyncHandler(this.save.bind(this)));
+    server.get('/:slug', ...[this.config.routeMiddleware.detail], asyncHandler(this.detail.bind(this)));
 
     this.hooks.dispatch('bind-routes', server, this);
 

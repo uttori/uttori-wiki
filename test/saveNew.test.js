@@ -18,6 +18,26 @@ test('redirects to the document after saving without using an edit_key when use_
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
+test('can have middleware set and used', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({
+    ...config,
+    routeMiddleware: {
+      ...config.routeMiddleware,
+      saveNew: [
+        (req, res, _next) => {
+          res.status(500).json({});
+        },
+      ],
+    },
+  }, server);
+  const express_response = await request(server).post('/new').send('slug=test-old');
+  t.is(express_response.status, 500);
+  t.is(express_response.text, '{}');
+});
+
 test('can be replaced', async (t) => {
   t.plan(1);
 

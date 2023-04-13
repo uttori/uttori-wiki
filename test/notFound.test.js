@@ -19,6 +19,27 @@ test('notFound(request, response, next): renders a 404 page', async (t) => {
   t.is(title[1], '404 Not Found | Wiki');
 });
 
+test('can have middleware set and used', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki({
+    ...config,
+    routeMiddleware: {
+      ...config.routeMiddleware,
+      notFound: [
+        (req, res, _next) => {
+          res.status(500).json({});
+        },
+      ],
+    },
+  }, server);
+  await seed(uttori);
+  const express_response = await request(server).get('/404');
+  t.is(express_response.status, 500);
+  t.is(express_response.text, '{}');
+});
+
 test('can be replaced', async (t) => {
   t.plan(1);
 

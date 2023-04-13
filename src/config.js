@@ -46,6 +46,7 @@
  * @property {Function} [historyRestoreRoute] A replacement route handler for the history restore route.
  * @property {Function} [notFoundRoute] A replacement route handler for the 404 not found route.
  * @property {Function} [saveValidRoute] A replacement route handler for the save valid route.
+ * @property {object} [routeMiddleware] A collection of middleware for each route.
  * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  */
@@ -78,6 +79,23 @@ const config = {
   use_cache: true,
   cache_short: 60 * 60,
   cache_long: 60 * 60 * 24,
+  routeMiddleware: {
+    home: [],
+    tagIndex: [],
+    tag: [],
+    search: [],
+    notFound: [],
+    create: [],
+    saveNew: [],
+    preview: [],
+    edit: [],
+    delete: [],
+    historyIndex: [],
+    historyDetail: [],
+    historyRestore: [],
+    save: [],
+    detail: [],
+  },
   plugins: [],
   middleware: [],
 };

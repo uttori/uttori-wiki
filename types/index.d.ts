@@ -33,8 +33,6 @@ declare module "config" {
         site_twitter_site?: string;
         site_twitter_creator?: string;
         site_image?: string;
-        plugins: any[];
-        middleware?: any[];
         use_cache?: boolean;
         cache_short?: number;
         cache_long?: number;
@@ -54,6 +52,25 @@ declare module "config" {
         historyRestoreRoute?: Function;
         notFoundRoute?: Function;
         saveValidRoute?: Function;
+        routeMiddleware: {
+            home: Function[];
+            tagIndex: Function[];
+            tag: Function[];
+            search: Function[];
+            notFound: Function[];
+            create: Function[];
+            saveNew: Function[];
+            preview: Function[];
+            edit: Function[];
+            delete: Function[];
+            historyIndex: Function[];
+            historyDetail: Function[];
+            historyRestore: Function[];
+            save: Function[];
+            detail: Function[];
+        };
+        plugins: any[];
+        middleware?: any[];
     };
 }
 declare module "wiki" {

@@ -18,6 +18,26 @@ test('can preview content', async (t) => {
   t.is(response.text, '# Hello');
 });
 
+test('can have middleware set and used', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const _uttori = new UttoriWiki({
+    ...config,
+    routeMiddleware: {
+      ...config.routeMiddleware,
+      preview: [
+        (req, res, _next) => {
+          res.status(500).json({});
+        },
+      ],
+    },
+  }, server);
+  const express_response = await request(server).post('/preview').set('Content-type', 'text/plain').send('# Hello');
+  t.is(express_response.status, 500);
+  t.is(express_response.text, '{}');
+});
+
 test('can handle an empty body', async (t) => {
   t.plan(2);
 

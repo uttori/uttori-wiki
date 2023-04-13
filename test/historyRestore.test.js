@@ -16,11 +16,33 @@ test('renders the edit page for a given slug', async (t) => {
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
   const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
-  const espress_response = await request(server).get(`/demo-title/history/${history[0]}/restore`);
-  t.is(espress_response.status, 200);
-  t.is(espress_response.text.slice(0, 15), '<!DOCTYPE html>');
-  const title = espress_response.text.match(/<title>(.*?)<\/title>/i);
+  const express_response = await request(server).get(`/demo-title/history/${history[0]}/restore`);
+  t.is(express_response.status, 200);
+  t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
   t.true(title[1].startsWith('Editing Demo Title Beta from Revision 1'));
+});
+
+test('can have middleware set and used', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki({
+    ...config,
+    routeMiddleware: {
+      ...config.routeMiddleware,
+      historyRestore: [
+        (req, res, _next) => {
+          res.status(500).json({});
+        },
+      ],
+    },
+  }, server);
+  await seed(uttori);
+  const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
+  const express_response = await request(server).get(`/demo-title/history/${history[0]}/restore`);
+  t.is(express_response.status, 500);
+  t.is(express_response.text, '{}');
 });
 
 test('can be replaced', async (t) => {
