@@ -270,6 +270,25 @@ const config = {
   historyRestoreRoute: (request, response, next) => { ... },
   notFoundRoute: (request, response, next) => { ... },
   saveValidRoute: (request, response, next) => { ... },
+
+  // Custom per route middleware, in the order they should be used
+  routeMiddleware: {
+    home: [],
+    tagIndex: [],
+    tag: [],
+    search: [],
+    notFound: [],
+    create: [],
+    saveNew: [],
+    preview: [],
+    edit: [],
+    delete: [],
+    historyIndex: [],
+    historyDetail: [],
+    historyRestore: [],
+    save: [],
+    detail: [],
+  },
 };
 
 module.exports = config;

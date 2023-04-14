@@ -88,7 +88,7 @@ const serverSetup = () => {
   return server;
 };
 
-const next = function next() {};
+const next = () => {};
 // Seed some example documents as requests to be saved
 const seed = async (uttori) => {
   const response = { set: () => {}, render: () => {}, redirect: () => {} };

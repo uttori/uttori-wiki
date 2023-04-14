@@ -69,6 +69,7 @@
 | [historyRestoreRoute] | <code>function</code> |  | A replacement route handler for the history restore route. |
 | [notFoundRoute] | <code>function</code> |  | A replacement route handler for the 404 not found route. |
 | [saveValidRoute] | <code>function</code> |  | A replacement route handler for the save valid route. |
+| [routeMiddleware] | <code>object</code> |  | A collection of middleware for each route. |
 | plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
 | [middleware] | <code>Array</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
 

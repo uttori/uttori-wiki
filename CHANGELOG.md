@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.2.1](https://github.com/uttori/uttori-wiki/compare/v5.2.0...v5.2.1) - 2023-04-13
+
+- 🧹 Regenerate docs and readme with new updates.
+- 🛠 Clean up some types that were outdated.
+- 🛠 Clean up a `forEach` use that should have been `for of`.
+- 🛠 Clean up an uneeded check of `document`.
+
 ## [5.2.0](https://github.com/uttori/uttori-wiki/compare/v5.1.0...v5.2.0) - 2023-04-12
 
 - 🧰 Add support for per route middleware through the configuration.

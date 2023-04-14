@@ -14,13 +14,13 @@ module.exports = function middleware(config) {
   // Apply middleware configuration
   if (config.middleware && Array.isArray(config.middleware)) {
     // console.log('config.middleware', config.middleware);
-    config.middleware.forEach((item) => {
+    for (const item of config.middleware) {
       const fn = item.shift();
       if (fn && app[fn] && typeof app[fn] === 'function') {
         debug(`app.${fn}(${JSON.stringify(item)})`);
         app[fn].call(app, ...item);
       }
-    });
+    }
   }
 
   // https://expressjs.com/en/4x/api.html#express.static

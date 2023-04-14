@@ -1,5 +1,3 @@
-// @ts-nocheck
-/* eslint-disable ramda/prefer-ramda-boolean */
 const test = require('ava');
 const sinon = require('sinon');
 const request = require('supertest');

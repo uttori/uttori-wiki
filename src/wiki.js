@@ -159,7 +159,7 @@ class UttoriWiki {
     let image = '';
 
     if (document) {
-      description = document && document.excerpt ? document.excerpt : '';
+      description = document.excerpt ? document.excerpt : '';
       if (document.content && !description) {
         description = document.content.slice(0, 160);
         description = await this.hooks.filter('render-content', description, this);
