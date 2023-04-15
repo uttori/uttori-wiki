@@ -1,135 +1,140 @@
-declare module '@uttori/wiki';
+import express = require('express');
 
-declare module "config" {
-    export = config;
-    const config: UttoriWikiConfig;
-    namespace config {
-        export { UttoriWikiConfig };
-    }
-    type UttoriWikiConfig = {
-        production?: boolean;
-        site_title?: string;
-        site_header?: string;
-        site_footer?: string;
-        site_sections: {
-            title: string;
-            description: string;
-            tag: string;
-        };
-        home_page?: string;
-        ignore_slugs: string[];
-        excerpt_length?: number;
-        site_url?: string;
-        theme_dir?: string;
-        public_dir?: string;
-        use_delete_key?: boolean;
-        delete_key: string | undefined;
-        use_edit_key?: boolean;
-        edit_key: string | undefined;
-        public_history?: boolean;
-        handle_not_found?: boolean;
-        allowedDocumentKeys: string[];
-        use_meta_data?: boolean;
-        site_locale?: string;
-        site_twitter_site?: string;
-        site_twitter_creator?: string;
-        site_image?: string;
-        use_cache?: boolean;
-        cache_short?: number;
-        cache_long?: number;
-        homeRoute?: Function;
-        tagIndexRoute?: Function;
-        tagRoute?: Function;
-        searchRoute?: Function;
-        editRoute?: Function;
-        deleteRoute?: Function;
-        saveRoute?: Function;
-        saveNewRoute?: Function;
-        newRoute?: Function;
-        detailRoute?: Function;
-        previewRoute?: Function;
-        historyIndexRoute?: Function;
-        historyDetailRoute?: Function;
-        historyRestoreRoute?: Function;
-        notFoundRoute?: Function;
-        saveValidRoute?: Function;
-        routeMiddleware?: {
-            home: Function[];
-            tagIndex: Function[];
-            tag: Function[];
-            search: Function[];
-            notFound: Function[];
-            create: Function[];
-            saveNew: Function[];
-            preview: Function[];
-            edit: Function[];
-            delete: Function[];
-            historyIndex: Function[];
-            historyDetail: Function[];
-            historyRestore: Function[];
-            save: Function[];
-            detail: Function[];
-        };
-        plugins: any[];
-        middleware?: any[];
-    };
+export type UttoriWikiSiteSection = {
+    /** Site section header text. */
+    title: string;
+    /** Site section description text. */
+    description: string;
+    /** Site section related tag. */
+    tag: string;
 }
-declare module "wiki" {
-    export = UttoriWiki;
-    class UttoriWiki {
-        constructor(config: UttoriWikiConfig, server: Application);
-        config: UttoriWikiConfig;
-        hooks: any;
-        registerPlugins(config: UttoriWikiConfig): void;
-        validateConfig(config: UttoriWikiConfig): void;
-        buildMetadata(document: UttoriWikiDocument | object, path?: string, robots?: string): Promise<object>;
-        bindRoutes(server: Application): void;
-        home(request: Request, response: Response, next: Function): Promise<void>;
-        homepageRedirect(request: Request, response: Response, _next: Function): void;
-        tagIndex(request: Request, response: Response, next: Function): Promise<void>;
-        tag(request: Request, response: Response, next: Function): Promise<void>;
-        search(request: Request, response: Response, next: Function): Promise<void>;
-        edit(request: Request, response: Response, next: Function): Promise<void>;
-        delete(request: Request, response: Response, next: Function): Promise<void>;
-        save(request: Request, response: Response, next: Function): Promise<void>;
-        saveNew(request: Request, response: Response, next: Function): Promise<void>;
-        create(request: Request, response: Response, next: Function): Promise<void>;
-        detail(request: Request, response: Response, next: Function): Promise<void>;
-        preview(request: Request, response: Response, next: Function): Promise<void>;
-        historyIndex(request: Request, response: Response, next: Function): Promise<void>;
-        historyDetail(request: Request, response: Response, next: Function): Promise<void>;
-        historyRestore(request: Request, response: Response, next: Function): Promise<void>;
-        notFound(request: Request, response: Response, next: Function): Promise<void>;
-        saveValid(request: Request, response: Response, next: Function): Promise<void>;
-        getTaggedDocuments(tag: string, limit?: number): Promise<any[]>;
-    }
-    namespace UttoriWiki {
-        export { UttoriWikiDocument };
-    }
-    import { UttoriWikiConfig } from "config";
-    type UttoriWikiDocument = {
-        slug: string;
-        title: string;
-        image?: string;
-        excerpt: string;
-        content: string;
-        html?: string;
-        createDate: number;
-        updateDate: number;
-        tags: string[];
-        redirects?: string[];
+
+export type UttoriWikiConfig = {
+    production?: boolean;
+    site_title?: string;
+    site_header?: string;
+    site_footer?: string;
+    site_sections: UttoriWikiSiteSection[];
+    home_page?: string;
+    ignore_slugs: string[];
+    excerpt_length?: number;
+    site_url?: string;
+    theme_dir?: string;
+    public_dir?: string;
+    use_delete_key?: boolean;
+    delete_key: string | undefined;
+    use_edit_key?: boolean;
+    edit_key?: string | undefined;
+    public_history?: boolean;
+    handle_not_found?: boolean;
+    allowedDocumentKeys: string[];
+    use_meta_data?: boolean;
+    site_locale?: string;
+    site_twitter_site?: string;
+    site_twitter_creator?: string;
+    site_image?: string;
+    use_cache?: boolean;
+    cache_short?: number;
+    cache_long?: number;
+    homeRoute?: Function;
+    tagIndexRoute?: Function;
+    tagRoute?: Function;
+    searchRoute?: Function;
+    editRoute?: Function;
+    deleteRoute?: Function;
+    saveRoute?: Function;
+    saveNewRoute?: Function;
+    newRoute?: Function;
+    detailRoute?: Function;
+    previewRoute?: Function;
+    historyIndexRoute?: Function;
+    historyDetailRoute?: Function;
+    historyRestoreRoute?: Function;
+    notFoundRoute?: Function;
+    saveValidRoute?: Function;
+    routeMiddleware?: {
+        home: express.RequestHandler[];
+        tagIndex: express.RequestHandler[];
+        tag: express.RequestHandler[];
+        search: express.RequestHandler[];
+        notFound: express.RequestHandler[];
+        create: express.RequestHandler[];
+        saveNew: express.RequestHandler[];
+        preview: express.RequestHandler[];
+        edit: express.RequestHandler[];
+        delete: express.RequestHandler[];
+        historyIndex: express.RequestHandler[];
+        historyDetail: express.RequestHandler[];
+        historyRestore: express.RequestHandler[];
+        save: express.RequestHandler[];
+        detail: express.RequestHandler[];
     };
+    plugins: any[];
+    middleware?: any[];
+};
+
+export class UttoriWiki {
+    constructor(config: UttoriWikiConfig, server: express.Application);
+    config: UttoriWikiConfig;
+    hooks: any;
+    registerPlugins(config: UttoriWikiConfig): void;
+    validateConfig(config: UttoriWikiConfig): void;
+    buildMetadata(document: UttoriWikiDocument | object, path?: string, robots?: string): Promise<object>;
+    bindRoutes(server: express.Application): void;
+    home(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    homepageRedirect(request: express.Request, response: express.Response, _next: express.NextFunction): express.RequestHandler;
+    tagIndex(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    tag(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    search(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    edit(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    delete(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    save(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    saveNew(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    create(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    detail(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    preview(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    historyIndex(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    historyDetail(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    historyRestore(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    notFound(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    saveValid(request: express.Request, response: express.Response, next: express.NextFunction): Promise<express.RequestHandler>;
+    getTaggedDocuments(tag: string, limit?: number): Promise<any[]>;
 }
+
+export type UttoriWikiDocument = {
+    slug: string;
+    title: string;
+    image?: string;
+    excerpt: string;
+    content: string;
+    html?: string;
+    createDate: number;
+    updateDate: number;
+    tags: string[];
+    redirects?: string[];
+};
+
 declare module "wiki-flash" {
-    export function wikiFlash(key: string, value: any): object | any[] | boolean;
-    export function middleware(request: Request, _response: Response, next: Function): void;
+    export function wikiFlash(key?: string, value?: any): object | any[] | boolean;
+    export function middleware(request: express.Request, _response: express.Response, next: express.NextFunction): void;
 }
+
+/** Add wikiFlash to the Request type. */
+declare global {
+    namespace Express {
+        export interface Request {
+            wikiFlash(key?: string, value?: any): object | any[] | boolean;
+        }
+    }
+}
+
 declare module "middleware" {
-    function _exports(config: any): any;
+    function _exports(config: UttoriWikiConfig): express.Application;
     export = _exports;
 }
-declare module "index" {
-    export const config: import("config").UttoriWikiConfig;
-    export const wiki: (config: any) => any;
-    export const UttoriWiki: typeof import("wiki");
+
+declare module '@uttori/wiki' {
+    export const config: UttoriWikiConfig;
+    export const wiki: (config: UttoriWikiConfig) => express.Application;
+    export const UttoriWiki: UttoriWiki;
 }

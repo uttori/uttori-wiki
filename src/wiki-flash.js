@@ -1,10 +1,12 @@
+const express = require('express');
+
 /** @type {Function} */
 let debug = () => {}; try { debug = require('debug')('Uttori.Wiki.WikiFlash'); } catch {}
 
 /**
  * @function
- * @param {string} key The key to get or set flash data under.
- * @param {*} value The value to store as flash data.
+ * @param {string} [key] The key to get or set flash data under.
+ * @param {*} [value] The value to store as flash data.
  * @returns {object|Array|boolean} Returns
  */
 function wikiFlash(key, value) {
@@ -38,9 +40,10 @@ function wikiFlash(key, value) {
 /**
  * Return the middleware that adds `wikiFlash`.
  *
- * @param {Request} request The Express Request object.
- * @param {Response} _response The Express Response object.
- * @param {Function} next The Express Next function.
+ * @type {express.RequestHandler}
+ * @param {express.Request} request The Express Request object.
+ * @param {express.Response} _response The Express Response object.
+ * @param {express.NextFunction} next The Express Next function.
  */
 function middleware(request, _response, next) {
   /* istanbul ignore else */

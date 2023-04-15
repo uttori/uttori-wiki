@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [5.2.2](https://github.com/uttori/uttori-wiki/compare/v5.2.1...v5.2.2) - 2023-04-14
+
+- 🛠 Overhaul types and fix some type related warnings.
+
 ## [5.2.1](https://github.com/uttori/uttori-wiki/compare/v5.2.0...v5.2.1) - 2023-04-13
 
 - 🧹 Regenerate docs and readme with new updates.

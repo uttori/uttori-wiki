@@ -4,7 +4,13 @@ const express = require('express');
 
 const UttoriWiki = require('./wiki');
 const { middleware: flash } = require('./wiki-flash');
+const { UttoriWikiConfig } = require('./config');
 
+/**
+ *
+ * @param {UttoriWikiConfig} config The UttoriWikiConfig to use.
+ * @returns {express.Application} The Express server setup with UttoriWiki.
+ */
 module.exports = function middleware(config) {
   const app = express();
 

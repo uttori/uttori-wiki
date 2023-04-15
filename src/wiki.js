@@ -1,4 +1,4 @@
-const { Application, Request, Response } = require('express');
+const { Application, Request, Response, NextFunction } = require('express');
 const { EventDispatcher } = require('@uttori/event-dispatcher');
 const defaultConfig = require('./config');
 const { UttoriWikiConfig } = require('./config');
@@ -263,7 +263,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async home(request, response, next) {
     debug('Home Route');
@@ -339,11 +339,11 @@ class UttoriWiki {
    *
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} _next The Express Next function.
+   * @param {NextFunction} _next The Express Next function.
    */
   homepageRedirect(request, response, _next) {
     debug('homepageRedirect:', this.config.home_page);
-    response.redirect(301, this.config.site_url);
+    response.redirect(301, this.config.site_url || '/');
   }
 
   /**
@@ -355,7 +355,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async tagIndex(request, response, next) {
     debug('Tag Index Route');
@@ -413,7 +413,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async tag(request, response, next) {
     debug('Tag Route');
@@ -463,7 +463,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async search(request, response, next) {
     debug('Search Route');
@@ -533,7 +533,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async edit(request, response, next) {
     debug('Edit Route');
@@ -598,7 +598,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async delete(request, response, next) {
     debug('Delete Route');
@@ -637,7 +637,7 @@ class UttoriWiki {
       await this.hooks.fetch('storage-delete', slug, this);
       this.hooks.dispatch('search-delete', document, this);
       request.wikiFlash('success', `Deleted '${slug}' successfully.`);
-      response.redirect(this.config.site_url);
+      response.redirect(this.config.site_url || '/');
     } else {
       debug('Nothing found to delete, next.');
       next();
@@ -655,7 +655,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async save(request, response, next) {
     debug('Save Edit Route');
@@ -706,7 +706,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async saveNew(request, response, next) {
     debug('Save New Route');
@@ -763,7 +763,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async create(request, response, next) {
     debug('New Route');
@@ -816,7 +816,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async detail(request, response, next) {
     debug('Detail Route');
@@ -894,7 +894,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async preview(request, response, next) {
     debug('Preview Route');
@@ -929,7 +929,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async historyIndex(request, response, next) {
     debug('History Index Route');
@@ -1021,7 +1021,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async historyDetail(request, response, next) {
     debug('History Detail Route');
@@ -1098,7 +1098,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async historyRestore(request, response, next) {
     debug('History Restore Route');
@@ -1174,7 +1174,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async notFound(request, response, next) {
     debug('404 Not Found Route');
@@ -1230,7 +1230,7 @@ class UttoriWiki {
    * @async
    * @param {Request} request The Express Request object.
    * @param {Response} response The Express Response object.
-   * @param {Function} next The Express Next function.
+   * @param {NextFunction} next The Express Next function.
    */
   async saveValid(request, response, next) {
     debug('Save Valid');

@@ -1,3 +1,14 @@
+// eslint-disable-next-line no-unused-vars
+const express = require('express');
+
+/**
+ * @typedef UttoriWikiSiteSection
+ * @type {object}
+ * @property {string} title Your site section header text.
+ * @property {string} description Your site section description text.
+ * @property {string} tag Your site section related tag.
+ */
+
 /**
  * @typedef UttoriWikiConfig
  * @type {object}
@@ -5,10 +16,7 @@
  * @property {string} [site_title='Wiki'] The website title, HTML <title> format: page_title | site_title
  * @property {string} [site_header='Wiki'] Used in the navbar as your site title.
  * @property {string} [site_footer='Wiki'] Used as the footer text of your site.
- * @property {object[]} site_sections=[] Your site sections for homepage & tag pages. For each section, the home page & tag pages will display a section box that lists the document count for documents that have a matching tag. Clicking the section link will list the tagged documents.
- * @property {string} site_sections.title Your site section header text.
- * @property {string} site_sections.description Your site section description text.
- * @property {string} site_sections.tag Your site section related tag.
+ * @property {UttoriWikiSiteSection[]} site_sections=[] Your site sections for homepage & tag pages. For each section, the home page & tag pages will display a section box that lists the document count for documents that have a matching tag. Clicking the section link will list the tagged documents.
  * @property {string} [home_page='home-page'] Slug of the root `/` page document.
  * @property {string[]} ignore_slugs Slugs to ignore in search & filtered documents, default is 'home-page';
  * @property {number} [excerpt_length=400] Excerpt length, used in search result previews.
@@ -18,7 +26,7 @@
  * @property {boolean} [use_delete_key=false] Enable hiding document deletion behind a private key.
  * @property {string|undefined} delete_key Key used for verifying document deletion.
  * @property {boolean} [use_edit_key=false] Enable hiding document modification behind a private key.
- * @property {string|undefined} edit_key Key used for verifying document modification.
+ * @property {string|undefined} [edit_key] Key used for verifying document modification.
  * @property {boolean} [public_history=true] Allow access to history URLs.
  * @property {boolean} [handle_not_found=true] Allows the middleware to capture fall through routes as a `404 not found` handler when enabled.
  * @property {string[]} allowedDocumentKeys=[] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
@@ -30,22 +38,22 @@
  * @property {boolean} [use_cache=true] Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
  * @property {number} [cache_short=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
  * @property {number} [cache_long=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
- * @property {Function} [homeRoute] A replacement route handler for the home route.
- * @property {Function} [tagIndexRoute] A replacement route handler for the tag inded route.
- * @property {Function} [tagRoute] A replacement route handler for the tag show route.
- * @property {Function} [searchRoute] A replacement route handler for the search route.
- * @property {Function} [editRoute] A replacement route handler for the edit route.
- * @property {Function} [deleteRoute] A replacement route handler for the delete route.
- * @property {Function} [saveRoute] A replacement route handler for the save route.
- * @property {Function} [saveNewRoute] A replacement route handler for the save new handler.
- * @property {Function} [newRoute] A replacement route handler for the create route.
- * @property {Function} [detailRoute] A replacement route handler for the detail route.
- * @property {Function} [previewRoute] A replacement route handler for the preview route.
- * @property {Function} [historyIndexRoute] A replacement route handler for the history index route.
- * @property {Function} [historyDetailRoute] A replacement route handler for the history detail route.
- * @property {Function} [historyRestoreRoute] A replacement route handler for the history restore route.
- * @property {Function} [notFoundRoute] A replacement route handler for the 404 not found route.
- * @property {Function} [saveValidRoute] A replacement route handler for the save valid route.
+ * @property {express.RequestHandler} [homeRoute] A replacement route handler for the home route.
+ * @property {express.RequestHandler} [tagIndexRoute] A replacement route handler for the tag inded route.
+ * @property {express.RequestHandler} [tagRoute] A replacement route handler for the tag show route.
+ * @property {express.RequestHandler} [searchRoute] A replacement route handler for the search route.
+ * @property {express.RequestHandler} [editRoute] A replacement route handler for the edit route.
+ * @property {express.RequestHandler} [deleteRoute] A replacement route handler for the delete route.
+ * @property {express.RequestHandler} [saveRoute] A replacement route handler for the save route.
+ * @property {express.RequestHandler} [saveNewRoute] A replacement route handler for the save new handler.
+ * @property {express.RequestHandler} [newRoute] A replacement route handler for the create route.
+ * @property {express.RequestHandler} [detailRoute] A replacement route handler for the detail route.
+ * @property {express.RequestHandler} [previewRoute] A replacement route handler for the preview route.
+ * @property {express.RequestHandler} [historyIndexRoute] A replacement route handler for the history index route.
+ * @property {express.RequestHandler} [historyDetailRoute] A replacement route handler for the history detail route.
+ * @property {express.RequestHandler} [historyRestoreRoute] A replacement route handler for the history restore route.
+ * @property {express.RequestHandler} [notFoundRoute] A replacement route handler for the 404 not found route.
+ * @property {express.RequestHandler} [saveValidRoute] A replacement route handler for the save valid route.
  * @property {object} [routeMiddleware] A collection of middleware for each route.
  * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {Array} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
