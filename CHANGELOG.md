@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This projec
 ## [5.2.2](https://github.com/uttori/uttori-wiki/compare/v5.2.1...v5.2.2) - 2023-04-14
 
 - 🛠 Overhaul types and fix some type related warnings.
+- 🎁 Update dependencies
 
 ## [5.2.1](https://github.com/uttori/uttori-wiki/compare/v5.2.0...v5.2.1) - 2023-04-13
 
