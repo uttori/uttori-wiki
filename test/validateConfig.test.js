@@ -1,61 +1,61 @@
-const test = require('ava');
-const { UttoriWiki } = require('../src');
+import test from 'ava';
+import { UttoriWiki } from '../src/index.js';
 
-const { serverSetup } = require('./_helpers/server');
+import { serverSetup } from './_helpers/server.js';
 
-test('validateConfig(config): throws when missing theme_dir', (t) => {
+test('validateConfig(config): throws when missing themePath', (t) => {
   t.throws(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: undefined,
+      themePath: undefined,
     }, server);
-  }, { message: 'No theme_dir provided.' });
+  }, { message: 'No themePath provided.' });
 });
 
-test('validateConfig(config): throws when missing public_dir', (t) => {
+test('validateConfig(config): throws when missing publicPath', (t) => {
   t.throws(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: 'test',
-      public_dir: undefined,
+      themePath: 'test',
+      publicPath: undefined,
     }, server);
-  }, { message: 'No public_dir provided.' });
+  }, { message: 'No publicPath provided.' });
 });
 
-test('validateConfig(config): throws when use_delete_key is true but delete_key is not set', (t) => {
+test('validateConfig(config): throws when useDeleteKey is true but deleteKey is not set', (t) => {
   t.throws(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: 'test',
-      public_dir: 'test',
-      use_delete_key: true,
+      themePath: 'test',
+      publicPath: 'test',
+      useDeleteKey: true,
     }, server);
-  }, { message: 'Using use_delete_key verification but no delete_key value set.' });
+  }, { message: 'Using useDeleteKey verification but no deleteKey value set.' });
 });
 
-test('validateConfig(config): throws when use_edit_key is true but edit_key is not set', (t) => {
+test('validateConfig(config): throws when useEditKey is true but editKey is not set', (t) => {
   t.throws(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: 'test',
-      public_dir: 'test',
-      use_delete_key: true,
-      delete_key: 'test-key',
-      use_edit_key: true,
+      themePath: 'test',
+      publicPath: 'test',
+      useDeleteKey: true,
+      deleteKey: 'test-key',
+      useEditKey: true,
     }, server);
-  }, { message: 'Using use_edit_key verification but no edit_key value set.' });
+  }, { message: 'Using useEditKey verification but no editKey value set.' });
 });
 
 test('validateConfig(config): can validate', (t) => {
   t.notThrows(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: 'test',
-      public_dir: 'test',
-      use_delete_key: true,
-      delete_key: 'test-key',
-      use_edit_key: true,
-      edit_key: 'test-key',
+      themePath: 'test',
+      publicPath: 'test',
+      useDeleteKey: true,
+      deleteKey: 'test-key',
+      useEditKey: true,
+      editKey: 'test-key',
     }, server);
   });
 });

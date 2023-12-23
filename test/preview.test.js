@@ -1,16 +1,16 @@
-const test = require('ava');
-const sinon = require('sinon');
-const request = require('supertest');
+import test from 'ava';
+import sinon from 'sinon';
+import request from 'supertest';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup } = require('./_helpers/server');
+import { config, serverSetup } from './_helpers/server.js';
 
 test('can preview content', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
-  const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
+  const _uttori = new UttoriWiki({ ...config, useEditKey: false }, server);
   const response = await request(server).post('/preview').set('Content-type', 'text/plain').send('# Hello');
   t.is(response.status, 200);
   t.is(response.text, '# Hello');
@@ -40,7 +40,7 @@ test('can handle an empty body', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
-  const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
+  const _uttori = new UttoriWiki({ ...config, useEditKey: false }, server);
   const response = await request(server).post('/preview').set('Content-type', 'text/plain').send('');
 
   t.is(response.status, 200);

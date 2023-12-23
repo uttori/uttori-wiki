@@ -1,11 +1,10 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 test('renders the edit page for a given slug', async (t) => {
   t.plan(3);
@@ -17,7 +16,7 @@ test('renders the edit page for a given slug', async (t) => {
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Editing Demo Title | Wiki');
+  t.is(title[1], 'Editing Demo Title');
 });
 
 test('can have middleware set and used', async (t) => {
@@ -86,5 +85,5 @@ test('falls to 404 when miss matched key', async (t) => {
   t.is(express_response.status, 404);
   t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], '404 Not Found | Wiki');
+  t.is(title[1], '404 Not Found');
 });

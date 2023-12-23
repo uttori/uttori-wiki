@@ -1,26 +1,26 @@
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup } = require('./_helpers/server');
+import { config, serverSetup } from './_helpers/server.js';
 
 test('redirects to 404 with no content', async (t) => {
   t.plan(1);
 
   const server = serverSetup();
-  const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
+  const _uttori = new UttoriWiki({ ...config, useEditKey: false }, server);
   const response = await request(server).put('/test-old/save').send('slug=test-old');
 
   t.is(response.status, 404);
 });
 
-test('redirects to the document after saving without using an edit_key when use_edit_key is false', async (t) => {
+test('redirects to the document after saving without using an editKey when useEditKey is false', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
-  const _uttori = new UttoriWiki({ ...config, use_edit_key: false }, server);
+  const _uttori = new UttoriWiki({ ...config, useEditKey: false }, server);
   const response = await request(server).put('/test-old/save').send('slug=test-old&content=test');
 
   t.is(response.status, 302);
@@ -243,7 +243,7 @@ test('falls through to next when missing body', async (t) => {
   t.true(next.calledOnce);
 });
 
-test('falls through to next when use_edit_key is set but no edit_key is provided', async (t) => {
+test('falls through to next when useEditKey is set but no editKey is provided', async (t) => {
   t.plan(1);
 
   const next = sinon.spy();

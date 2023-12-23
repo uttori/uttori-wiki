@@ -1,9 +1,9 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const express = require('express');
-const session = require('express-session');
-const { middleware } = require('../src/wiki-flash');
+import test from 'ava';
+import request from 'supertest';
+import express from 'express';
+
+import session from 'express-session';
+import { middleware } from '../src/wiki-flash.js';
 
 test('middleware: returns with no session', (t) => {
   t.notThrows(() => {
@@ -33,7 +33,7 @@ test('middleware: can setup with a session', async (t) => {
     response.json({ flash: requestz.wikiFlash('success'), other: requestz.wikiFlash() });
   });
 
-  app.listen(3000);
+  const listener = app.listen(3000);
 
   let response = await request(app).get('/flash');
   t.deepEqual(response.body, {
@@ -53,4 +53,5 @@ test('middleware: can setup with a session', async (t) => {
     other: {},
   });
   t.is(response.status, 200);
+  listener.close();
 });

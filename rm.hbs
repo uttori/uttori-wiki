@@ -30,53 +30,29 @@ Please see `src/config.js` or [the config doc](https://github.com/uttori/uttori-
 - [@uttori/plugin-analytics-json-file](https://github.com/uttori/uttori-plugin-analytics-json-file)
 
 ```javascript
-const { Plugin: StorageProvider } = require('@uttori/storage-provider-json-file');
-const { Plugin: SearchProvider } = require('@uttori/search-provider-lunr');
+import { Plugin: StorageProvider } from '@uttori/storage-provider-json-file';
+import { Plugin: SearchProvider } from '@uttori/search-provider-lunr';
 
-const AnalyticsPlugin = require('@uttori/plugin-analytics-json-file');
-const MarkdownItRenderer = require('@uttori/plugin-renderer-markdown-it');
-const ReplacerRenderer = require('@uttori/plugin-renderer-replacer');
-const MulterUpload = require('@uttori/plugin-upload-multer');
-const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
+import AnalyticsPlugin from '@uttori/plugin-analytics-json-file';
+import MarkdownItRenderer from '@uttori/plugin-renderer-markdown-it';
+import ReplacerRenderer from '@uttori/plugin-renderer-replacer';
+import MulterUpload from '@uttori/plugin-upload-multer';
+import SitemapGenerator from '@uttori/plugin-generator-sitemap';
+import { AddQueryOutputToViewModel } from '@uttori/wiki';
 
 const config = {
-  site_title: 'Uttori Wiki Demo',
-  site_header: 'Uttori Wiki Demo',
-  site_footer: 'Uttori Wiki Demo | ✨',
-  site_sections: [
-    {
-      title: 'Section One',
-      description: 'An example section.',
-      tag: 'examples',
-    },
-    {
-      title: 'Section Two',
-      description: 'A section with something already in it.',
-      tag: 'reference',
-    },
-    {
-      title: 'Section Three',
-      description: 'A third example section.',
-      tag: 'tutorial',
-    },
-  ],
-  home_page: 'home-page',
-  ignore_slugs: ['home-page'],
-  excerpt_length: 400,
-  site_url: 'http://127.0.0.1:8000/wiki',
-  theme_dir: path.join(__dirname, 'theme'),
-  public_dir: path.join(__dirname, 'theme', 'public'),
-  use_delete_key: false,
-  delete_key: process.env.DELETE_KEY || '',
-  use_edit_key: false,
-  edit_key: process.env.EDIT_KEY || '',
-  public_history: true,
+  homePage: 'home-page',
+  ignoreSlugs: ['home-page'],
+  excerptLength: 400,
+  publicUrl: 'http://127.0.0.1:8000/wiki',
+  themePath: path.join(__dirname, 'theme'),
+  publicPath: path.join(__dirname, 'public'),
+  useDeleteKey: false,
+  deleteKey: process.env.DELETE_KEY || '',
+  useEditKey: false,
+  editKey: process.env.EDIT_KEY || '',
+  publicHistory: true,
   allowedDocumentKeys: [],
-  use_meta_data: true,
-  site_description: 'An example Wiki using the Uttori Wiki library.',
-  site_locale: 'en_US',
-  site_twitter_site: '@twitter',
-  site_twitter_creator: '@twitter',
 
   // Plugins
   plugins: [
@@ -92,17 +68,13 @@ const config = {
   // Use the JSON to Disk Storage Provider
   [StorageProvider.configKey]: {
     // Path in which to store content (markdown files, etc.)
-    content_dir: `${__dirname}/content`,
+    contentDirectory: `${__dirname}/content`,
 
     // Path in which to store content history (markdown files, etc.)
-    history_dir: `${__dirname}/content/history`,
+    historyDirectory: `${__dirname}/content/history`,
 
     // File Extension
     extension: 'json',
-
-    // JSON stringify parameter for formatting output
-    spaces_article: 2,
-    spaces_history: 2,
   },
 
   // Use the Lunr Search Provider
@@ -111,7 +83,7 @@ const config = {
     lunr_locales: [],
 
     // Ignore Slugs
-    ignore_slugs: ['home-page'],
+    ignoreSlugs: ['home-page'],
   },
 
   // Plugin: Analytics with JSON Files
@@ -236,6 +208,50 @@ const config = {
     ],
   },
 
+  // Plugin: View Model Related Documents
+  [AddQueryOutputToViewModel.configKey]: {
+    events: {
+      callback: [
+        'view-model-home',
+        'view-model-edit',
+        'view-model-new',
+        'view-model-search',
+        'view-model-tag',
+        'view-model-tag-index',
+        'view-model-detail',
+      ],
+    },
+    queries: {
+      'view-model-home' : [
+        {
+          key: 'tags',
+          query: `SELECT tags FROM documents WHERE slug NOT_IN ("${ignoreSlugs.join('", "')}") ORDER BY id ASC LIMIT -1`,
+          format: (tags) => [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+          fallback: [],
+        },
+        {
+          key: 'documents',
+          query: `SELECT * FROM documents WHERE slug NOT_IN ("${ignoreSlugs.join('", "')}") ORDER BY id ASC LIMIT -1`,
+          fallback: [],
+        },
+        {
+          query: 'query',
+          key: 'key',
+          fallback: [],
+          format: (results) => results.map((result) => result.slug),
+          queryFunction: async (target, context) => {
+            const ignoreSlugs = ['home-page'];
+            const [popular] = await context.hooks.fetch('popular-documents', { limit: 5 }, context);
+            const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
+            const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
+            const [results] = await context.hooks.fetch('storage-query', query);
+            return [results];
+          },
+        }
+      ],
+    },
+  },
+
   // Middleware Configuration in the form of ['function', 'param1', 'param2', ...]
   middleware: [
     ['disable', 'x-powered-by'],
@@ -291,20 +307,20 @@ const config = {
   },
 };
 
-module.exports = config;
+export default config;
 ```
 
 Use in an example Express.js app:
 
 ```javascript
 // Server
-const express = require('express');
+import express from 'express';
 
 // Reference the Uttori Wiki middleware
-const { wiki } = require('@uttori/wiki');
+import { wiki as middleware } from '@uttori/wiki';
 
 // Pull in our custom config, example above
-const config = require('./config.js');
+import config from './config.js';
 
 // Initilize Your app
 const app = express();
@@ -318,7 +334,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Setup the wiki, could also mount under a sub directory path with other applications
-app.use('/', wiki(config));
+app.use('/', middleware(config));
 
 // Listen for connections
 app.listen(app.get('port'), app.get('ip'), () => {

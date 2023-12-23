@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.0](https://github.com/uttori/uttori-wiki/compare/v5.2.2...v6.0.0) - 2023-12-22
+
+- 🧰 Add support for setting the paths for `tags` and `search`, as well as their titles.
+- 🧰 Remove support for CommonJS, now requires ESM support.
+- 🎁 Update dependencies
+
 ## [5.2.2](https://github.com/uttori/uttori-wiki/compare/v5.2.1...v5.2.2) - 2023-04-14
 
 - 🛠 Overhaul types and fix some type related warnings.
@@ -48,8 +54,8 @@ All notable changes to this project will be documented in this file. This projec
 - 🧰 Change `POST` / `PUT` routes to separate routes to separate creation from modification.
 - 🧰 Add flash message support when used with Express Session through `request.wikiFlash(key, value)`.
 - 🧰 Added `redirects` document option. Allows adding URLs to redirect to the current page.
-- 🛠 Added `use_cache` configuration option. Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is always disabled on the `/edit` and `/new` routes. Defaults to `true`.
-- 🛠 Added `handle_not_found` configuration option. Allows the middleware to capture fall through routes as a `404 not found` handler when enabled. Defaults to `true`.
+- 🛠 Added `useCache` configuration option. Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is always disabled on the `/edit` and `/new` routes. Defaults to `true`.
+- 🛠 Added `handleNotFound` configuration option. Allows the middleware to capture fall through routes as a `404 not found` handler when enabled. Defaults to `true`.
 - 🎁 Update dependencies
 
 ## [4.2.2](https://github.com/uttori/uttori-wiki/compare/v4.2.1...v4.2.2) - 2021-11-28
@@ -82,7 +88,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🧰 Add explicit exports
 - 🧰 Remove EJS dependencies
 - 🧰 Remove Ramda dependencies
-- 🧰 Add support for `edit_key` and `public_history` configuration for a blog like use case
+- 🧰 Add support for `editKey` and `publicHistory` configuration for a blog like use case
 - 🧰 Add support for only saving defiend keys with `allowedDocumentKeys`
 - 🧰 Move cache times to config
 - 🧹 Clean up some methods to be inline

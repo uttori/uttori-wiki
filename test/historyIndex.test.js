@@ -1,11 +1,10 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
@@ -18,7 +17,7 @@ test('renders the requested slug history', async (t) => {
   const express_response = await request(server).get('/demo-title/history');
   t.is(express_response.status, 200);
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Demo Title Revision History | Wiki');
+  t.is(title[1], 'Demo Title Revision History');
 });
 
 test('can have middleware set and used', async (t) => {
@@ -56,11 +55,11 @@ test('can be replaced', async (t) => {
   t.is(spy.called, true);
 });
 
-test('falls through to next when public_history is false', async (t) => {
+test('falls through to next when publicHistory is false', async (t) => {
   t.plan(1);
 
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, public_history: false }, server);
+  const uttori = new UttoriWiki({ ...config, publicHistory: false }, server);
   await seed(uttori);
   const express_response = await request(server).get('/demo-title/history');
   t.is(express_response.status, 404);

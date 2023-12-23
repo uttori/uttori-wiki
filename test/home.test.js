@@ -1,13 +1,10 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
-
-const response = { set: () => {}, redirect: () => {}, render: () => {} };
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 test('renders', async (t) => {
   t.plan(3);
@@ -19,7 +16,7 @@ test('renders', async (t) => {
   t.is(express_response.status, 200);
   t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Home Page | Wiki');
+  t.is(title[1], 'Home Page');
 });
 
 test('can be replaced', async (t) => {
@@ -57,13 +54,31 @@ test('can have middleware set and used', async (t) => {
   t.is(express_response.text, '{}');
 });
 
-test('falls through to next when home document is missing', async (t) => {
-  t.plan(1);
+test('falls through to 404 when home document is missing', async (t) => {
+  t.plan(3);
 
-  const next = sinon.spy();
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, home_page: '' }, server);
+  const uttori = new UttoriWiki({ ...config, homePage: '' }, server);
   await seed(uttori);
-  await uttori.home({ params: { slug: '' } }, response, next);
-  t.true(next.calledOnce);
+  const express_response = await request(server).get('/');
+  t.is(express_response.status, 404);
+  t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
+  t.is(title[1], '404 Not Found');
+});
+
+test('falls through to 404 when this.hooks.fetch throws an error fetching the home document', async (t) => {
+  t.plan(3);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  uttori.hooks.fetch = () => {
+    throw new Error('test');
+  };
+  const express_response = await request(server).get('/');
+  t.is(express_response.status, 404);
+  t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
+  t.is(title[1], '404 Not Found');
 });

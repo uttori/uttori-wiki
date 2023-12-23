@@ -5,22 +5,22 @@
     "plugin:import/recommended",
     "plugin:jsdoc/recommended",
     "plugin:jsx-a11y/recommended",
-    "plugin:node/recommended",
+    "plugin:n/recommended",
     "plugin:optimize-regex/all",
-    "plugin:ramda/recommended",
-    "plugin:security/recommended",
-    "plugin:sonarjs/recommended"
+    "plugin:security/recommended-legacy",
+    "plugin:sonarjs/recommended",
+    "plugin:@typescript-eslint/recommended-type-checked"
   ],
   "plugins": [
+    "@typescript-eslint",
     "anti-trojan-source",
     "ava",
     "import",
     "jsdoc",
     "jsx-a11y",
     "no-inferred-method-name",
-    "node",
+    "n",
     "optimize-regex",
-    "ramda",
     "security",
     "sonarjs",
     "xss"
@@ -33,17 +33,23 @@
     "sinon": false,
     "expect": true
   },
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2022,
-    "requireConfigFile": false
+    "ecmaVersion": "latest",
+    "project": "./tsconfig.json",
+    "requireConfigFile": false,
+    "sourceType": "module"
   },
   "rules": {
+    "@typescript-eslint/no-unsafe-argument": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-return": "warn",
     "anti-trojan-source/no-bidi": "error",
+    "ava/no-only-test": "warn",
     "camelcase": 0,
     "consistent-return": ["warn", { "treatUndefinedAsUnspecified": false }],
-    "eslint-comments/no-use": 0,
-    "filenames/match-regex": 0,
-    "global-require": 0,
     "import/no-commonjs": 0,
     "import/no-dynamic-require": 0,
     "import/no-extraneous-dependencies": [
@@ -53,10 +59,10 @@
         "peerDependencies": true
       }
     ],
+    "import/extensions": ["warn", "ignorePackages"],
     "import/no-unresolved": 0,
     "max-len": 0,
     "no-empty": ["error", { "allowEmptyCatch": true }],
-    "no-inferred-method-name/no-inferred-method-name": "error",
     "no-param-reassign": 0,
     "no-plusplus": 0,
     "no-restricted-syntax": [
@@ -75,18 +81,28 @@
       }
     ],
     "no-underscore-dangle": 0,
-    "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
-    "node/no-missing-require": 0,
-    "node/no-unpublished-require": 0,
+    "no-unused-vars": 0,
+    "@typescript-eslint/no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
     "object-curly-newline": 0,
     "optimize-regex/optimize-regex": "warn",
-    "prettier/prettier": 0,
     "security/detect-non-literal-fs-filename": 0,
     "security/detect-non-literal-require": 0,
     "security/detect-object-injection": 0,
     "sonarjs/cognitive-complexity": 0,
     "sonarjs/no-duplicate-string": 0
   },
+  "overrides": [
+    {
+      "files": ["**/*.{spec,test}.*", "test/_helpers/*.*"],
+      "rules": {
+        "@typescript-eslint/no-unsafe-argument": 0,
+        "@typescript-eslint/no-unsafe-assignment": 0,
+        "@typescript-eslint/no-unsafe-call": 0,
+        "@typescript-eslint/no-unsafe-member-access": 0,
+        "@typescript-eslint/no-unsafe-return": 0
+      }
+    }
+  ],
   "settings": {
     "jsdoc": {
       "mode": "typescript"

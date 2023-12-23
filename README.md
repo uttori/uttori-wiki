@@ -30,53 +30,29 @@ Please see `src/config.js` or [the config doc](https://github.com/uttori/uttori-
 - [@uttori/plugin-analytics-json-file](https://github.com/uttori/uttori-plugin-analytics-json-file)
 
 ```javascript
-const { Plugin: StorageProvider } = require('@uttori/storage-provider-json-file');
-const { Plugin: SearchProvider } = require('@uttori/search-provider-lunr');
+import { Plugin: StorageProvider } from '@uttori/storage-provider-json-file';
+import { Plugin: SearchProvider } from '@uttori/search-provider-lunr';
 
-const AnalyticsPlugin = require('@uttori/plugin-analytics-json-file');
-const MarkdownItRenderer = require('@uttori/plugin-renderer-markdown-it');
-const ReplacerRenderer = require('@uttori/plugin-renderer-replacer');
-const MulterUpload = require('@uttori/plugin-upload-multer');
-const SitemapGenerator = require('@uttori/plugin-generator-sitemap');
+import AnalyticsPlugin from '@uttori/plugin-analytics-json-file';
+import MarkdownItRenderer from '@uttori/plugin-renderer-markdown-it';
+import ReplacerRenderer from '@uttori/plugin-renderer-replacer';
+import MulterUpload from '@uttori/plugin-upload-multer';
+import SitemapGenerator from '@uttori/plugin-generator-sitemap';
+import { AddQueryOutputToViewModel } from '@uttori/wiki';
 
 const config = {
-  site_title: 'Uttori Wiki Demo',
-  site_header: 'Uttori Wiki Demo',
-  site_footer: 'Uttori Wiki Demo | ✨',
-  site_sections: [
-    {
-      title: 'Section One',
-      description: 'An example section.',
-      tag: 'examples',
-    },
-    {
-      title: 'Section Two',
-      description: 'A section with something already in it.',
-      tag: 'reference',
-    },
-    {
-      title: 'Section Three',
-      description: 'A third example section.',
-      tag: 'tutorial',
-    },
-  ],
-  home_page: 'home-page',
-  ignore_slugs: ['home-page'],
-  excerpt_length: 400,
-  site_url: 'http://127.0.0.1:8000/wiki',
-  theme_dir: path.join(__dirname, 'theme'),
-  public_dir: path.join(__dirname, 'theme', 'public'),
-  use_delete_key: false,
-  delete_key: process.env.DELETE_KEY || '',
-  use_edit_key: false,
-  edit_key: process.env.EDIT_KEY || '',
-  public_history: true,
+  homePage: 'home-page',
+  ignoreSlugs: ['home-page'],
+  excerptLength: 400,
+  publicUrl: 'http://127.0.0.1:8000/wiki',
+  themePath: path.join(__dirname, 'theme'),
+  publicPath: path.join(__dirname, 'public'),
+  useDeleteKey: false,
+  deleteKey: process.env.DELETE_KEY || '',
+  useEditKey: false,
+  editKey: process.env.EDIT_KEY || '',
+  publicHistory: true,
   allowedDocumentKeys: [],
-  use_meta_data: true,
-  site_description: 'An example Wiki using the Uttori Wiki library.',
-  site_locale: 'en_US',
-  site_twitter_site: '@twitter',
-  site_twitter_creator: '@twitter',
 
   // Plugins
   plugins: [
@@ -92,17 +68,13 @@ const config = {
   // Use the JSON to Disk Storage Provider
   [StorageProvider.configKey]: {
     // Path in which to store content (markdown files, etc.)
-    content_dir: `${__dirname}/content`,
+    contentDirectory: `${__dirname}/content`,
 
     // Path in which to store content history (markdown files, etc.)
-    history_dir: `${__dirname}/content/history`,
+    historyDirectory: `${__dirname}/content/history`,
 
     // File Extension
     extension: 'json',
-
-    // JSON stringify parameter for formatting output
-    spaces_article: 2,
-    spaces_history: 2,
   },
 
   // Use the Lunr Search Provider
@@ -111,7 +83,7 @@ const config = {
     lunr_locales: [],
 
     // Ignore Slugs
-    ignore_slugs: ['home-page'],
+    ignoreSlugs: ['home-page'],
   },
 
   // Plugin: Analytics with JSON Files
@@ -236,6 +208,50 @@ const config = {
     ],
   },
 
+  // Plugin: View Model Related Documents
+  [AddQueryOutputToViewModel.configKey]: {
+    events: {
+      callback: [
+        'view-model-home',
+        'view-model-edit',
+        'view-model-new',
+        'view-model-search',
+        'view-model-tag',
+        'view-model-tag-index',
+        'view-model-detail',
+      ],
+    },
+    queries: {
+      'view-model-home' : [
+        {
+          key: 'tags',
+          query: `SELECT tags FROM documents WHERE slug NOT_IN ("${ignoreSlugs.join('", "')}") ORDER BY id ASC LIMIT -1`,
+          format: (tags) => [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+          fallback: [],
+        },
+        {
+          key: 'documents',
+          query: `SELECT * FROM documents WHERE slug NOT_IN ("${ignoreSlugs.join('", "')}") ORDER BY id ASC LIMIT -1`,
+          fallback: [],
+        },
+        {
+          query: 'query',
+          key: 'key',
+          fallback: [],
+          format: (results) => results.map((result) => result.slug),
+          queryFunction: async (target, context) => {
+            const ignoreSlugs = ['home-page'];
+            const [popular] = await context.hooks.fetch('popular-documents', { limit: 5 }, context);
+            const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
+            const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
+            const [results] = await context.hooks.fetch('storage-query', query);
+            return [results];
+          },
+        }
+      ],
+    },
+  },
+
   // Middleware Configuration in the form of ['function', 'param1', 'param2', ...]
   middleware: [
     ['disable', 'x-powered-by'],
@@ -291,20 +307,20 @@ const config = {
   },
 };
 
-module.exports = config;
+export default config;
 ```
 
 Use in an example Express.js app:
 
 ```javascript
 // Server
-const express = require('express');
+import express from 'express';
 
 // Reference the Uttori Wiki middleware
-const { wiki } = require('@uttori/wiki');
+import { wiki as middleware } from '@uttori/wiki';
 
 // Pull in our custom config, example above
-const config = require('./config.js');
+import config from './config.js';
 
 // Initilize Your app
 const app = express();
@@ -318,7 +334,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Setup the wiki, could also mount under a sub directory path with other applications
-app.use('/', wiki(config));
+app.use('/', middleware(config));
 
 // Listen for connections
 app.listen(app.get('port'), app.get('ip'), () => {
@@ -369,9 +385,7 @@ The following events are avaliable to hook into through plugins and are used in 
 ## Functions
 
 <dl>
-<dt><a href="#debug">debug()</a> : <code>function</code></dt>
-<dd></dd>
-<dt><a href="#asyncHandler">asyncHandler()</a> : <code>function</code></dt>
+<dt><a href="#asyncHandler">asyncHandler()</a> : <code>AsyncRequestHandler</code></dt>
 <dd></dd>
 </dl>
 
@@ -379,6 +393,8 @@ The following events are avaliable to hook into through plugins and are used in 
 
 <dl>
 <dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#UttoriWikiDocumentMetaData">UttoriWikiDocumentMetaData</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
 
@@ -402,7 +418,7 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.hooks](#UttoriWiki+hooks) : <code>EventDispatcher</code>
     * [.registerPlugins(config)](#UttoriWiki+registerPlugins)
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
-    * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ <code>Promise.&lt;object&gt;</code>
+    * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ [<code>Promise.&lt;UttoriWikiDocumentMetaData&gt;</code>](#UttoriWikiDocumentMetaData)
     * [.bindRoutes(server)](#UttoriWiki+bindRoutes)
     * [.home(request, response, next)](#UttoriWiki+home)
     * [.homepageRedirect(request, response, _next)](#UttoriWiki+homepageRedirect)
@@ -432,7 +448,7 @@ Creates an instance of UttoriWiki.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>UttoriWikiConfig</code> | A configuration object. |
-| server | <code>Application</code> | The Express server instance. |
+| server | <code>module:express~Application</code> | The Express server instance. |
 
 **Example** *(Init UttoriWiki)*  
 ```js
@@ -475,26 +491,26 @@ Hooks:
 
 <a name="UttoriWiki+buildMetadata"></a>
 
-### uttoriWiki.buildMetadata(document, [path], [robots]) ⇒ <code>Promise.&lt;object&gt;</code>
+### uttoriWiki.buildMetadata(document, [path], [robots]) ⇒ [<code>Promise.&lt;UttoriWikiDocumentMetaData&gt;</code>](#UttoriWikiDocumentMetaData)
 Builds the metadata for the view model.
 
 Hooks:
 - `filter` - `render-content` - Passes in the meta description.
 
 **Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;object&gt;</code> - Metadata object.  
+**Returns**: [<code>Promise.&lt;UttoriWikiDocumentMetaData&gt;</code>](#UttoriWikiDocumentMetaData) - Metadata object.  
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) \| <code>object</code> |  | A UttoriWikiDocument. |
-| [path] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | The URL path to build meta data for. |
-| [robots] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | A meta robots tag value. |
+| Param | Type | Description |
+| --- | --- | --- |
+| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) \| <code>object</code> | A UttoriWikiDocument. |
+| [path] | <code>string</code> | The URL path to build meta data for with leading slash. |
+| [robots] | <code>string</code> | A meta robots tag value. |
 
 **Example**  
 ```js
 const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
 ➜ {
-  canonical,   // `${this.config.site_url}/private-document-path`
+  canonical,   // `${this.config.publicUrl}/private-document-path`
   robots,      // 'no-index'
   title,       // document.title
   description, // document.excerpt || document.content.slice(0, 160)
@@ -515,7 +531,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| server | <code>Application</code> | The Express server instance. |
+| server | <code>module:express~Application</code> | The Express server instance. |
 
 <a name="UttoriWiki+home"></a>
 
@@ -530,9 +546,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+homepageRedirect"></a>
 
@@ -543,9 +559,9 @@ Redirects to the homepage.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| _next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| _next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+tagIndex"></a>
 
@@ -559,9 +575,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+tag"></a>
 
@@ -577,9 +593,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+search"></a>
 
@@ -594,9 +610,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+edit"></a>
 
@@ -610,15 +626,15 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+delete"></a>
 
 ### uttoriWiki.delete(request, response, next)
 Attempts to delete a document and redirect to the homepage.
-If the config `use_delete_key` value is true, the key is verified before deleting.
+If the config `useDeleteKey` value is true, the key is verified before deleting.
 
 Hooks:
 - `dispatch` - `document-delete` - Passes in the document beind deleted.
@@ -627,9 +643,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+save"></a>
 
@@ -645,9 +661,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+saveNew"></a>
 
@@ -663,9 +679,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+create"></a>
 
@@ -679,9 +695,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+detail"></a>
 
@@ -697,9 +713,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+preview"></a>
 
@@ -714,9 +730,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyIndex"></a>
 
@@ -731,9 +747,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyDetail"></a>
 
@@ -749,9 +765,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+historyRestore"></a>
 
@@ -766,9 +782,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+notFound"></a>
 
@@ -783,9 +799,9 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+saveValid"></a>
 
@@ -803,15 +819,15 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>Request</code> | The Express Request object. |
-| response | <code>Response</code> | The Express Response object. |
-| next | <code>function</code> | The Express Next function. |
+| request | <code>module:express~Request</code> | The Express Request object. |
+| response | <code>module:express~Response</code> | The Express Response object. |
+| next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+getTaggedDocuments"></a>
 
 ### uttoriWiki.getTaggedDocuments(tag, [limit]) ⇒ <code>Promise.&lt;Array&gt;</code>
 Returns the documents with the provided tag, up to the provided limit.
-This will exclude any documents that have slugs in the `config.ignore_slugs` array.
+This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
 
 Hooks:
 - `fetch` - `storage-query` - Searched for the tagged documents.
@@ -829,13 +845,9 @@ Hooks:
 wiki.getTaggedDocuments('example', 10);
 ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
 ```
-<a name="debug"></a>
-
-## debug() : <code>function</code>
-**Kind**: global function  
 <a name="asyncHandler"></a>
 
-## asyncHandler() : <code>function</code>
+## asyncHandler() : <code>AsyncRequestHandler</code>
 **Kind**: global function  
 <a name="UttoriWikiDocument"></a>
 
@@ -848,13 +860,29 @@ wiki.getTaggedDocuments('example', 10);
 | slug | <code>string</code> | The document slug to be used in the URL and as a unique ID. |
 | title | <code>string</code> | The document title to be used anywhere a title may be needed. |
 | [image] | <code>string</code> | An image to represent the document in Open Graph or elsewhere. |
-| excerpt | <code>string</code> | A succinct deescription of the document, think meta description. |
+| [excerpt] | <code>string</code> | A succinct deescription of the document, think meta description. |
 | content | <code>string</code> | All text content for the doucment. |
 | [html] | <code>string</code> | All rendered HTML content for the doucment that will be presented to the user. |
 | createDate | <code>number</code> | The Unix timestamp of the creation date of the document. |
 | updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
 | tags | <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
+
+<a name="UttoriWikiDocumentMetaData"></a>
+
+## UttoriWikiDocumentMetaData : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| canonical | <code>string</code> | `${this.config.publicUrl}/private-document-path` |
+| robots | <code>string</code> | 'no-index' |
+| title | <code>string</code> | document.title |
+| description | <code>string</code> | document.excerpt || document.content.slice(0, 160) |
+| modified | <code>string</code> | new Date(document.updateDate).toISOString() |
+| published | <code>string</code> | new Date(document.createDate).toISOString() |
+| image | <code>string</code> | OpenGraph Image |
 
 
 * * *

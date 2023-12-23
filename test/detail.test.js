@@ -1,11 +1,10 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 test('renders the requested slug', async (t) => {
   t.plan(2);
@@ -16,7 +15,7 @@ test('renders the requested slug', async (t) => {
   const express_response = await request(server).get('/example-title');
   t.is(express_response.status, 200);
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], 'Example Title | Wiki');
+  t.is(title[1], 'Example Title');
 });
 
 test('can have middleware set and used', async (t) => {

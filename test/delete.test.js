@@ -1,15 +1,14 @@
-// @ts-nocheck
-const test = require('ava');
-const request = require('supertest');
-const sinon = require('sinon');
+import test from 'ava';
+import request from 'supertest';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
-test('deletes the document and redirects to the home page', async (t) => {
+test('deletes the document and redirects to config.publicUrl', async (t) => {
   t.plan(2);
 
   const testDelete = {
@@ -26,7 +25,28 @@ test('deletes the document and redirects to the home page', async (t) => {
   await uttori.saveValid({ params: {}, body: testDelete, wikiFlash }, response, () => {});
   const express_response = await request(server).get('/test-delete/delete/test-key');
   t.is(express_response.status, 302);
-  t.is(express_response.text, 'Found. Redirecting to https://fake.test');
+  t.is(express_response.text, `Found. Redirecting to ${config.publicUrl}`);
+});
+
+test('deletes the document and redirects to root if there is no config.publicUrl', async (t) => {
+  t.plan(2);
+
+  const testDelete = {
+    title: 'Delete Page',
+    slug: 'test-delete',
+    content: '## Delete Page',
+    updateDate: 1412921841841,
+    createDate: undefined,
+  };
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  uttori.config.publicUrl = undefined;
+  await seed(uttori);
+  const wikiFlash = sinon.spy();
+  await uttori.saveValid({ params: {}, body: testDelete, wikiFlash }, response, () => {});
+  const express_response = await request(server).get('/test-delete/delete/test-key');
+  t.is(express_response.status, 302);
+  t.is(express_response.text, 'Found. Redirecting to /');
 });
 
 test('can have middleware set and used', async (t) => {
@@ -93,5 +113,5 @@ test('falls to 404 when miss matched key', async (t) => {
   t.is(express_response.status, 404);
   t.is(express_response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = express_response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], '404 Not Found | Wiki');
+  t.is(title[1], '404 Not Found');
 });

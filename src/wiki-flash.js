@@ -1,15 +1,15 @@
-const express = require('express');
-
 /** @type {Function} */
-let debug = () => {}; try { debug = require('debug')('Uttori.Wiki.WikiFlash'); } catch {}
+const debug = () => {}; // try { debug = require('debug')('Uttori.Wiki.WikiFlash'); } catch {}
 
 /**
- * @function
+ * Flash messages are stored in the session.
+ * First, use `wikiFlash(key, value)` to set a flash message.
+ * Then, on subsequent requests, you can retrieve the message with `wikiFlash(key)`.
  * @param {string} [key] The key to get or set flash data under.
  * @param {*} [value] The value to store as flash data.
  * @returns {object|Array|boolean} Returns
  */
-function wikiFlash(key, value) {
+export function wikiFlash(key, value) {
   if (!this.session) {
     debug('Express Session is required.');
     return () => {};
@@ -39,13 +39,12 @@ function wikiFlash(key, value) {
 
 /**
  * Return the middleware that adds `wikiFlash`.
- *
- * @type {express.RequestHandler}
- * @param {express.Request} request The Express Request object.
- * @param {express.Response} _response The Express Response object.
- * @param {express.NextFunction} next The Express Next function.
+ * @type {import('express').RequestHandler}
+ * @param {import('express').Request} request The Express Request object.
+ * @param {import('express').Response} _response The Express Response object.
+ * @param {import('express').NextFunction} next The Express Next function.
  */
-function middleware(request, _response, next) {
+export function middleware(request, _response, next) {
   /* istanbul ignore else */
   if (!request.wikiFlash) {
     request.wikiFlash = wikiFlash;
@@ -53,7 +52,7 @@ function middleware(request, _response, next) {
   next();
 }
 
-module.exports = {
+export default {
   wikiFlash,
   middleware,
 };
