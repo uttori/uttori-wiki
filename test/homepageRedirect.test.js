@@ -1,16 +1,27 @@
-const test = require('ava');
-const request = require('supertest');
+import test from 'ava';
+import request from 'supertest';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
-test('redirects to root', async (t) => {
+test('redirects to this.config.publicUrl', async (t) => {
   t.plan(2);
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const response = await request(server).get(`/${config.home_page}`);
+  const response = await request(server).get(`/${config.homePage}`);
   t.is(response.status, 301);
-  t.is(response.text, 'Moved Permanently. Redirecting to https://fake.test');
+  t.is(response.text, `Moved Permanently. Redirecting to ${config.publicUrl}`);
+});
+
+test('redirects to root with no config set', async (t) => {
+  t.plan(2);
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  uttori.config.publicUrl = undefined;
+  await seed(uttori);
+  const response = await request(server).get(`/${config.homePage}`);
+  t.is(response.status, 301);
+  t.is(response.text, 'Moved Permanently. Redirecting to /');
 });

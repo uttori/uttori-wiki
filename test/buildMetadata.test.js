@@ -1,9 +1,8 @@
-// @ts-nocheck
-const test = require('ava');
+import test from 'ava';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup } = require('./_helpers/server');
+import { config, serverSetup } from './_helpers/server.js';
 
 test('buildMetadata(document, path, robots): can build metadata with empty object', async (t) => {
   t.plan(1);
@@ -12,7 +11,7 @@ test('buildMetadata(document, path, robots): can build metadata with empty objec
   const uttori = new UttoriWiki(config, server);
 
   t.deepEqual(await uttori.buildMetadata(), {
-    canonical: `${config.site_url}/`,
+    canonical: `${config.publicUrl}`,
     robots: '',
     title: '',
     description: '',
@@ -35,8 +34,8 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
     createDate: 1553915818665,
     title: 'Title',
     image: 'test.png',
-  }, 'path', 'robots'), {
-    canonical: `${config.site_url}/path`,
+  }, '/path', 'robots'), {
+    canonical: `${config.publicUrl}/path`,
     description: 'Test',
     image: 'test.png',
     modified: '2019-03-30T03:16:58.665Z',
@@ -46,11 +45,11 @@ test('buildMetadata(document, path, robots): can build metadata with simple docu
   });
 });
 
-test('buildMetadata(document, path, robots): can build metadata without an excerpt & site_image', async (t) => {
+test('buildMetadata(document, path, robots): can build metadata without an excerpt', async (t) => {
   t.plan(1);
 
   const server = serverSetup();
-  const uttori = new UttoriWiki({ ...config, site_image: 'test.gif' }, server);
+  const uttori = new UttoriWiki({ ...config }, server);
 
   t.deepEqual(await uttori.buildMetadata({
     excerpt: '',
@@ -58,10 +57,10 @@ test('buildMetadata(document, path, robots): can build metadata without an excer
     updateDate: 1553915818665,
     createDate: 1553915818665,
     title: 'Title',
-  }, 'path', 'robots'), {
-    canonical: `${config.site_url}/path`,
+  }, '/path', 'robots'), {
+    canonical: `${config.publicUrl}/path`,
     description: '# Test',
-    image: 'test.gif',
+    image: '',
     modified: '2019-03-30T03:16:58.665Z',
     published: '2019-03-30T03:16:58.665Z',
     robots: 'robots',

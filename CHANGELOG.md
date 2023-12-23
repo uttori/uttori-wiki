@@ -2,6 +2,37 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.0](https://github.com/uttori/uttori-wiki/compare/v5.2.2...v6.0.0) - 2023-12-22
+
+- 💥 BREAKING CHANGES!
+- 💥 Rename config key: `home_page` to `homePage`
+- 💥 Rename config key: `ignore_slugs` to `ignoreSlugs`
+- 💥 Rename config key: `home_page` to `excerptLength`
+- 💥 Rename config key: `excerpt_length` to `homePage`
+- 💥 Rename config key: `site_url` to `publicUrl`
+- 💥 Rename config key: `theme_dir` to `themePath`
+- 💥 Rename config key: `public_dir` to `publicPath`
+- 💥 Rename config key: `use_delete_key` to `useDeleteKey`
+- 💥 Rename config key: `delete_key` to `deleteKey`
+- 💥 Rename config key: `use_edit_key` to `useEditKey`
+- 💥 Rename config key: `edit_key` to `editKey`
+- 💥 Rename config key: `public_history` to `publicHistory`
+- 💥 Rename config key: `handle_not_found` to `handleNotFound`
+- 💥 Rename config key: `use_cache` to `useCache`
+- 💥 Rename config key: `cache_short` to `cacheShort`
+- 💥 Rename config key: `cache_long` to `cacheLong`
+- 💥 Removed many configuration options that were not being used or items that should be theme specific: `site_title`, `site_header`, `site_footer`, `site_sections`, `site_locale`, `site_twitter_site`, `site_twitter_creator`, `site_image`
+- 🧰 Add support for setting the `routes` for search & tags
+- 🧰 Add support for setting the `titles` for search & tags
+- 🧰 Added support for `allowCRUDRoutes` to disable the CRUD routes for a read-only wiki
+- 🧰 Added support for `ignoreTags` to ignore documents with specific tags
+- 🧰 Remove support for CommonJS, now requires ESM support
+- Change the `detailRoute` route path matcher to `/:slug*?` to allow for nested routes with the use of overriding `detailRoute` and handling the `request.params.slug` value accordingly`
+- 🎁 Update dependencies
+- 🛠 Standardize types
+- 🛠 Update ESLint configuration
+- 🛠 Update documentation
+
 ## [5.2.2](https://github.com/uttori/uttori-wiki/compare/v5.2.1...v5.2.2) - 2023-04-14
 
 - 🛠 Overhaul types and fix some type related warnings.

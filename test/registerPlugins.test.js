@@ -1,16 +1,31 @@
-const test = require('ava');
+import test from 'ava';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { serverSetup } = require('./_helpers/server');
+import { serverSetup } from './_helpers/server.js';
 
 test('registerPlugins(config): does not fail when plugins is broken', (t) => {
   t.notThrows(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
-      theme_dir: '/tmp',
-      public_dir: '/tmp',
+      themePath: '/tmp',
+      publicPath: '/tmp',
       plugins: {},
+    }, server);
+  });
+});
+
+test('registerPlugins(config): does not fail when plugin.register throws an error', (t) => {
+  t.notThrows(() => {
+    const server = serverSetup();
+    const _uttori = new UttoriWiki({
+      themePath: '/tmp',
+      publicPath: '/tmp',
+      plugins: [{
+        register: () => {
+          throw new Error('test');
+        },
+      }],
     }, server);
   });
 });

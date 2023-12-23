@@ -1,8 +1,8 @@
-const test = require('ava');
+import test from 'ava';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup } = require('./_helpers/server');
+import { config, serverSetup } from './_helpers/server.js';
 
 test('throws when missing config', (t) => {
   t.throws(() => {

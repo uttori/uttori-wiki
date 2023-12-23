@@ -1,10 +1,9 @@
-// @ts-nocheck
-const test = require('ava');
-const sinon = require('sinon');
+import test from 'ava';
+import sinon from 'sinon';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup } = require('./_helpers/server');
+import { config, serverSetup } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
@@ -21,7 +20,7 @@ test('saveValid: parses tags as a string', async (t) => {
       content: '## Delete Page',
       updateDate: 1412921841841,
       createDate: undefined,
-      tags: 'tag-1,tag-2,tag-3',
+      tags: ['tag-1', 'tag-2', 'tag-3'],
     },
     wikiFlash }, response, () => {});
 
@@ -124,7 +123,7 @@ test('saveValid: redirects back when no slug is found', async (t) => {
       content: '## Delete Page',
       updateDate: 1412921841841,
       createDate: undefined,
-      tags: 'tag-1,tag-2,tag-3',
+      tags: ['tag-1', 'tag-2', 'tag-3'],
     },
     wikiFlash }, response, () => {});
 

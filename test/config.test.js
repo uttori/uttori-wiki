@@ -1,5 +1,6 @@
-const test = require('ava');
-const config = require('../src/config');
+import test from 'ava';
+
+import config from '../src/config.js';
 
 test('config can be parsed', (t) => {
   t.notThrows(() => {

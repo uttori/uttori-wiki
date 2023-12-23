@@ -1,10 +1,10 @@
-const test = require('ava');
-const sinon = require('sinon');
-const request = require('supertest');
+import test from 'ava';
+import sinon from 'sinon';
+import request from 'supertest';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 test('notFound(request, response, next): renders a 404 page', async (t) => {
   t.plan(3);
@@ -16,7 +16,7 @@ test('notFound(request, response, next): renders a 404 page', async (t) => {
   t.is(response.status, 404);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i);
-  t.is(title[1], '404 Not Found | Wiki');
+  t.is(title[1], '404 Not Found');
 });
 
 test('can have middleware set and used', async (t) => {

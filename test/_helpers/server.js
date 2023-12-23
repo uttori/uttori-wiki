@@ -1,32 +1,25 @@
-const express = require('express');
-const ejs = require('ejs');
-const layouts = require('express-ejs-layouts');
-const path = require('path');
-const cors = require('cors');
+import express from 'express';
+import ejs from 'ejs';
+import layouts from 'express-ejs-layouts';
+import path from 'path';
+import cors from 'cors';
 
-const { Plugin: StorageProviderJSON } = require('@uttori/storage-provider-json-memory');
-const { Plugin: SearchProviderLunr } = require('@uttori/search-provider-lunr');
-const defaultConfig = require('../../src/config');
-const { middleware: flash } = require('../../src/wiki-flash');
+import { Plugin as StorageProviderJSON } from '@uttori/storage-provider-json-memory';
+import { Plugin as SearchProviderLunr } from '@uttori/search-provider-lunr';
+import defaultConfig from '../../src/config.js';
+import { middleware as flash } from '../../src/wiki-flash.js';
 
-const config = {
+export const config = {
   ...defaultConfig,
-  site_sections: [
-    {
-      title: 'Example',
-      description: 'Example description text.',
-      tag: 'example',
-    },
-  ],
-  home_page: 'home-page',
-  site_url: 'https://fake.test',
+  homePage: 'home-page',
+  publicUrl: 'https://fake.test',
   // Specify the theme to use
-  theme_dir: 'test/site/theme',
-  public_dir: 'test/site/theme/public',
-  use_delete_key: true,
-  delete_key: 'test-key',
-  use_edit_key: true,
-  edit_key: 'test-key',
+  themePath: 'test/site/theme',
+  publicPath: 'test/site/public',
+  useDeleteKey: true,
+  deleteKey: 'test-key',
+  useEditKey: true,
+  editKey: 'test-key',
   allowedDocumentKeys: ['author'],
   plugins: [
     StorageProviderJSON,
@@ -36,16 +29,16 @@ const config = {
     ['disable', 'x-powered-by'],
     ['enable', 'view cache'],
   ],
-  use_cache: true,
+  useCache: true,
 };
 
-const serverSetup = () => {
+export const serverSetup = () => {
   // Server & process.title (for stopping after)
   const server = express();
   server.set('port', process.env.PORT || 8123);
   server.set('ip', process.env.IP || '127.0.0.1');
 
-  server.set('views', path.join(config.theme_dir, 'templates'));
+  server.set('views', path.join(config.themePath, 'templates'));
   server.use(layouts);
   server.set('layout extractScripts', true);
   server.set('layout extractStyles', true);
@@ -54,7 +47,7 @@ const serverSetup = () => {
   server.engine('html', ejs.renderFile);
 
   // Setup Express
-  server.use(express.static(config.public_dir));
+  server.use(express.static(config.publicPath));
   server.use(express.json({ limit: '5mb' }));
   server.use(express.text({ limit: '5mb' }));
   server.use(express.urlencoded({ limit: '5mb', extended: true }));
@@ -73,12 +66,15 @@ const serverSetup = () => {
     process.title = process.argv[2];
   }
 
+  // https://github.com/nodejs/node/issues/49440
   // Is this a require()?
+  // if (require.main === module) {
   // In the future use `if (import.meta.main) {`
   // Or alternatively the below:
   // import url from 'url';
   // if (url.fileURLToPath(import.meta.url) === process.argv[1]) {
-  if (require.main === module) {
+  // if (import.meta.main) {
+  if (import.meta.url === (`file:///${process.argv[1].replace(/\\/g, '/')}`).replace(/\/{3,}/, '///')) {
     // No, this is a CLI tool.
     // eslint-disable-next-line no-console
     console.log('Starting test server...');
@@ -90,7 +86,7 @@ const serverSetup = () => {
 
 const next = () => {};
 // Seed some example documents as requests to be saved
-const seed = async (uttori) => {
+export const seed = async (uttori) => {
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const demoTitle = {
     title: 'Demo Title Beta',
@@ -98,7 +94,7 @@ const seed = async (uttori) => {
     content: '## Demo Title Beta',
     updateDate: 1459310452002,
     createDate: 1459310452002,
-    tags: 'Demo Tag,Cool',
+    tags: ['Demo Tag', 'Cool'],
   };
   await uttori.saveValid({ params: {}, body: demoTitle }, response, next);
 
@@ -108,7 +104,7 @@ const seed = async (uttori) => {
     content: '## Demo Title',
     updateDate: 1500000000000,
     createDate: 1500000000000,
-    tags: 'Demo Tag,Cool',
+    tags: ['Demo Tag', 'Cool'],
     redirects: [],
   };
   await uttori.saveValid({ params: {}, body: demoTitleHistory }, response, next);
@@ -119,7 +115,7 @@ const seed = async (uttori) => {
     content: '## Example Title',
     updateDate: 1459310452001,
     createDate: 1459310452001,
-    tags: 'Example Tag,example',
+    tags: ['Example Tag', 'example'],
     redirects: ['example-titlez'],
   };
   await uttori.saveValid({ params: {}, body: exampleTitle }, response, next);
@@ -130,7 +126,7 @@ const seed = async (uttori) => {
     content: '## Fake Title',
     updateDate: 1459310452000,
     createDate: 1459310452000,
-    tags: 'Fake Tag,Cool',
+    tags: ['Fake Tag', 'Cool'],
     redirects: [],
   };
   await uttori.saveValid({ params: {}, body: fakeTitle }, response, next);
@@ -145,4 +141,4 @@ const seed = async (uttori) => {
   await uttori.saveValid({ params: {}, body: homePage }, response, next);
 };
 
-module.exports = { config, serverSetup, seed };
+export default { config, serverSetup, seed };

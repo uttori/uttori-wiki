@@ -1,8 +1,8 @@
-const test = require('ava');
+import test from 'ava';
 
-const { UttoriWiki } = require('../src');
+import { UttoriWiki } from '../src/index.js';
 
-const { config, serverSetup, seed } = require('./_helpers/server');
+import { config, serverSetup, seed } from './_helpers/server.js';
 
 test('getTaggedDocuments(tag): returns documents with the given tag', async (t) => {
   t.plan(4);
