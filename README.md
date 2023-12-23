@@ -235,8 +235,7 @@ const config = {
           fallback: [],
         },
         {
-          query: 'query',
-          key: 'key',
+          key: 'popularDocuments',
           fallback: [],
           format: (results) => results.map((result) => result.slug),
           queryFunction: async (target, context) => {
