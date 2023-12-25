@@ -84,12 +84,12 @@ declare class AddQueryOutputToViewModel {
     static get configKey(): string;
     /**
      * The default configuration.
-     * @returns {AddQueryOutputToViewModelConfig} The configuration.
+     * @returns {Partial<AddQueryOutputToViewModelConfig>} The configuration.
      * @example <caption>AddQueryOutputToViewModel.defaultConfig()</caption>
      * const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
      * @static
      */
-    static defaultConfig(): AddQueryOutputToViewModelConfig;
+    static defaultConfig(): Partial<AddQueryOutputToViewModelConfig>;
     /**
      * Validates the provided configuration for required entries.
      * @param {Record<string, AddQueryOutputToViewModelConfig>} config A configuration object.
@@ -127,7 +127,7 @@ declare class AddQueryOutputToViewModel {
      * @param {string} eventLabel The event label to run queries for.
      * @param {object} viewModel A Uttori view-model object.
      * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
-     * @returns {Promise<object[]>} The provided view-model document.
+     * @returns {Promise<object | object[]>} The provided view-model document.
      * @example <caption>AddQueryOutputToViewModel.callback(viewModel, context)</caption>
      * const context = {
      *   config: {
@@ -143,7 +143,7 @@ declare class AddQueryOutputToViewModel {
      * AddQueryOutputToViewModel.callback(viewModel, context);
      * @static
      */
-    static callbackCurry(eventLabel: string, viewModel: object, context: import('../../dist/custom.js').UttoriContext): Promise<object[]>;
+    static callbackCurry(eventLabel: string, viewModel: object, context: import('../../dist/custom.js').UttoriContext): Promise<object | object[]>;
     /**
      * Curry the hook function to take the current event label.
      * @param {string} eventLabel The event label to run queries for.

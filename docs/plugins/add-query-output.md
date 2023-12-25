@@ -24,10 +24,10 @@ Add tags to the view model.
 
 * [AddQueryOutputToViewModel](#AddQueryOutputToViewModel)
     * [.configKey](#AddQueryOutputToViewModel.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
+    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
     * [.validateConfig(config, _context)](#AddQueryOutputToViewModel.validateConfig)
     * [.register(context)](#AddQueryOutputToViewModel.register)
-    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code>
     * [.callback(eventLabel)](#AddQueryOutputToViewModel.callback) ⇒ <code>AddQueryOutputToViewModelCallback</code>
 
 <a name="AddQueryOutputToViewModel.configKey"></a>
@@ -43,11 +43,11 @@ const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config
 ```
 <a name="AddQueryOutputToViewModel.defaultConfig"></a>
 
-### AddQueryOutputToViewModel.defaultConfig() ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
+### AddQueryOutputToViewModel.defaultConfig() ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
 The default configuration.
 
 **Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig) - The configuration.  
+**Returns**: [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig) - The configuration.  
 **Example** *(AddQueryOutputToViewModel.defaultConfig())*  
 ```js
 const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
@@ -100,11 +100,11 @@ AddQueryOutputToViewModel.register(context);
 ```
 <a name="AddQueryOutputToViewModel.callbackCurry"></a>
 
-### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒ <code>Promise.&lt;Array.&lt;object&gt;&gt;</code>
+### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒ <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code>
 Queries for related documents based on similar tags and searches the storage provider.
 
 **Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: <code>Promise.&lt;Array.&lt;object&gt;&gt;</code> - The provided view-model document.  
+**Returns**: <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code> - The provided view-model document.  
 
 | Param | Type | Description |
 | --- | --- | --- |

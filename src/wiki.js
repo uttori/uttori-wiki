@@ -24,6 +24,7 @@ const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(req
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
  * @property {string[]} tags A collection of tags that represent the document.
  * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ * @property {string} [layout] The layout to use when rendering the document.
  */
 
 /**
@@ -857,7 +858,8 @@ class UttoriWiki {
     if (this.config.useCache) {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
-    response.render('detail', viewModel);
+    debug('layout:', document.layout ?? 'detail');
+    response.render(document.layout ?? 'detail', viewModel);
   }
 
   /**
@@ -1056,7 +1058,8 @@ class UttoriWiki {
     if (this.config.useCache) {
       response.set('Cache-control', `public, max-age=${this.config.cacheLong}`);
     }
-    response.render('detail', viewModel);
+    debug('layout:', document.layout ?? 'detail');
+    response.render(document.layout ?? 'detail', viewModel);
   }
 
   /**

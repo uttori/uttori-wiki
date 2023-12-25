@@ -3,13 +3,13 @@ import sinon from 'sinon';
 
 import AddQueryOutputToViewModel from '../../src/plugins/add-query-output.js';
 
-test('configKey should return correct key', (t) => {
+test('configKey: should return correct key', (t) => {
   t.is(AddQueryOutputToViewModel.configKey, 'custom-plugin-add-query-output-to-view-model');
 });
 
-test('defaultConfig should return correct default configuration', (t) => {
+test('defaultConfig: should return correct default configuration', (t) => {
   const defaultConfig = AddQueryOutputToViewModel.defaultConfig();
-  t.deepEqual(defaultConfig, { events: {}, queries: {} });
+  t.deepEqual(defaultConfig, { queries: {} });
 });
 
 test('validateConfig: should throw error if configKey is missing', (t) => {
@@ -47,6 +47,19 @@ test('validateConfig: should be able to validate a config', (t) => {
 
 test('register: should throw error if context or hooks are missing', (t) => {
   t.throws(() => AddQueryOutputToViewModel.register({}));
+});
+
+test('register: should throw error if events are missing', (t) => {
+  t.throws(() => AddQueryOutputToViewModel.register({
+    hooks: {
+      on: () => {},
+    },
+    config: {
+      [AddQueryOutputToViewModel.configKey]: {
+        queries: {},
+      },
+    },
+  }), { message: 'Missing events to listen to for in \'config.events\'.' });
 });
 
 test('register: should call hooks.on for each event', (t) => {
