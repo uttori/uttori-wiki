@@ -177,8 +177,8 @@ class DownloadRouter {
    * @param {object} context A Uttori-like context.
    * @param {Record<string, DownloadRouterConfig>} context.config - A provided configuration to use.
    * @returns {import('express').RequestHandler} The function to pass to Express.
-   * @example <caption>DownloadRouter.upload(context)(request, response, _next)</caption>
-   * server.post('/upload', DownloadRouter.upload);
+   * @example <caption>DownloadRouter.download(context)(request, response, _next)</caption>
+   * server.post('/upload', DownloadRouter.download);
    * @static
    */
   static download(context) {

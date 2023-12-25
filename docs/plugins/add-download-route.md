@@ -136,9 +136,9 @@ The Express route method to process the upload request and provide a response.
 | context | <code>object</code> | A Uttori-like context. |
 | context.config | <code>Record.&lt;string, DownloadRouterConfig&gt;</code> | A provided configuration to use. |
 
-**Example** *(DownloadRouter.upload(context)(request, response, _next))*  
+**Example** *(DownloadRouter.download(context)(request, response, _next))*  
 ```js
-server.post('/upload', DownloadRouter.upload);
+server.post('/upload', DownloadRouter.download);
 ```
 <a name="DownloadRouterConfig"></a>
 
