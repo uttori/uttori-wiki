@@ -60,7 +60,7 @@ class AddQueryOutputToViewModel {
 
   /**
    * The default configuration.
-   * @returns {AddQueryOutputToViewModelConfig} The configuration.
+   * @returns {Partial<AddQueryOutputToViewModelConfig>} The configuration.
    * @example <caption>AddQueryOutputToViewModel.defaultConfig()</caption>
    * const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
    * @static
@@ -69,7 +69,6 @@ class AddQueryOutputToViewModel {
     return {
       // Queries to be added to the view model.
       queries: {},
-      events: {},
     };
   }
 
@@ -127,17 +126,22 @@ class AddQueryOutputToViewModel {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
       throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
     }
-    /** @type {AddQueryOutputToViewModelConfig} */
+    /** @type {Partial<AddQueryOutputToViewModelConfig>} */
     const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
-    Object.keys(config.events).forEach((method) => {
-      config.events[method].forEach((event) => {
-        if (typeof AddQueryOutputToViewModel[method] !== 'function') {
-          debug(`Missing function "${method}" for key "${event}"`);
-          return;
+    if (!config.events) {
+      throw new Error("Missing events to listen to for in 'config.events'.");
+    }
+
+    // Bind events
+    for (const [method, eventNames] of Object.entries(config.events)) {
+      if (typeof AddQueryOutputToViewModel[method] === 'function') {
+        for (const event of eventNames) {
+          context.hooks.on(event, AddQueryOutputToViewModel[method](event));
         }
-        context.hooks.on(event, AddQueryOutputToViewModel[method](event));
-      });
-    });
+      } else {
+        debug(`Missing function "${method}"`);
+      }
+    }
   }
 
   /**
@@ -145,7 +149,7 @@ class AddQueryOutputToViewModel {
    * @param {string} eventLabel The event label to run queries for.
    * @param {object} viewModel A Uttori view-model object.
    * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
-   * @returns {Promise<object[]>} The provided view-model document.
+   * @returns {Promise<object | object[]>} The provided view-model document.
    * @example <caption>AddQueryOutputToViewModel.callback(viewModel, context)</caption>
    * const context = {
    *   config: {
@@ -163,7 +167,7 @@ class AddQueryOutputToViewModel {
    */
   static async callbackCurry(eventLabel, viewModel, context) {
     debug('callbackCurry:', { eventLabel });
-    /** @type {AddQueryOutputToViewModelConfig} */
+    /** @type {Partial<AddQueryOutputToViewModelConfig>} */
     const { queries = {} } = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
     if (!viewModel) {
       debug('Missing target to add query output to.');
@@ -176,14 +180,14 @@ class AddQueryOutputToViewModel {
       debug(`query: "${query}", key: "${key}", fallback: "${JSON.stringify(fallback)}"`);
       let results = fallback;
       try {
-        if (queryFunction) {
+        if (typeof queryFunction === 'function') {
           // eslint-disable-next-line no-await-in-loop
           [results] = await queryFunction(viewModel, context);
         } else {
           // eslint-disable-next-line no-await-in-loop
           [results] = await context.hooks.fetch('storage-query', query);
         }
-        if (format) {
+        if (typeof format === 'function') {
           results = format(results);
           debug('format:', results);
         }

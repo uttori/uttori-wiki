@@ -40,6 +40,10 @@ export type UttoriWikiDocument = {
      * An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
      */
     redirects?: string[];
+    /**
+     * The layout to use when rendering the document.
+     */
+    layout?: string;
 };
 /**
  * @typedef UttoriWikiDocument
@@ -54,6 +58,7 @@ export type UttoriWikiDocument = {
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
  * @property {string[]} tags A collection of tags that represent the document.
  * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ * @property {string} [layout] The layout to use when rendering the document.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.

@@ -491,6 +491,7 @@ wiki.getTaggedDocuments('example', 10);
 | updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
 | tags | <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
+| [layout] | <code>string</code> | The layout to use when rendering the document. |
 
 <a name="UttoriWikiDocumentMetaData"></a>
 

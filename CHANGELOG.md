@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.1](https://github.com/uttori/uttori-wiki/compare/v6.0.0...v6.0.1) - 2023-12-25
+
+- 🧰 Add support for setting the `layout` on documents to determine the layout to render with
+- 🧰 Add `EJSRenderer` plugin for rendering EJS content in posts
+- 🧰 Add `DownloadRouter` plugin for allowing downloads with `Referrer` checking
+- 🛠 Fix `AddQueryOutputToViewModel` plugin types
+
 ## [6.0.0](https://github.com/uttori/uttori-wiki/compare/v5.2.2...v6.0.0) - 2023-12-22
 
 - 💥 BREAKING CHANGES!

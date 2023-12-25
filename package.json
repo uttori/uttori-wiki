@@ -28,6 +28,7 @@
   },
   "optionalDependencies": {
     "debug": "^4.3.4",
+    "ejs": "^3.1.9",
     "express-session": "^1.17.3"
   },
   "peerDependencies": {
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
+    "@types/ejs": "^3.1.5",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.17.10",
     "@types/node": "^20.10.5",
@@ -120,7 +122,7 @@
     }
   },
   "scripts": {
-    "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-query-output.js > docs/plugins/add-query-output.md",
+    "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-query-output.js > docs/plugins/add-query-output.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-download-route.js > docs/plugins/add-download-route.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-ejs-includes.js > docs/plugins/add-ejs-includes.md",
     "lint": "eslint --ignore-pattern \"/test/\" . ",
     "make-types": "tsc --module nodenext --project ./tsconfig.json",
     "release": "release-it",

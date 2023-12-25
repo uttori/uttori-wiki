@@ -21,8 +21,12 @@ declare namespace Express {
   }
 }
 
+type UttoriPluginConfig =
+  import('./../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
+  import('./../src/plugins/add-ejs-includes.js').EJSRendererConfig |
+  import('./../src/plugins/add-download-route.js').DownloadRouterConfig
 type UttoriContext = {
-  config: Record<string, AddQueryOutputToViewModelConfig>;
+  config: Record<string, UttoriPluginConfig>;
   hooks: {
       on: Function;
       fetch: Function;
