@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.2](https://github.com/uttori/uttori-wiki/compare/v6.0.1...v6.0.2) - 2023-12-25
+
+- 🛠 Fix lack of exports of `EJSRenderer` & `DownloadRouter`
+
 ## [6.0.1](https://github.com/uttori/uttori-wiki/compare/v6.0.0...v6.0.1) - 2023-12-25
 
 - 🧰 Add support for setting the `layout` on documents to determine the layout to render with
