@@ -1227,9 +1227,9 @@ class UttoriWiki {
     // Normalize tags before save
     let tags = [];
     if (Array.isArray(request.body.tags)) {
-      tags = request.body.tags;
+      tags = request.body.tags.sort();
     } else if (typeof request.body.tags === 'string') {
-      tags = request.body.tags.split(',');
+      tags = request.body.tags.split(',').sort();
     }
     tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.0.4](https://github.com/uttori/uttori-wiki/compare/v6.0.3...v6.0.4) - 2023-12-25
+
+- 🛠 Ensure `tags` are always sorted
+
+## [6.0.3](https://github.com/uttori/uttori-wiki/compare/v6.0.2...v6.0.3) - 2023-12-25
+
+- 🛠 Fix types
+
 ## [6.0.2](https://github.com/uttori/uttori-wiki/compare/v6.0.1...v6.0.2) - 2023-12-25
 
 - 🛠 Fix lack of exports of `EJSRenderer` & `DownloadRouter`

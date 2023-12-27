@@ -17,7 +17,11 @@
     "downlevelIteration": true,
     "emitDeclarationOnly": true,
     "extendedDiagnostics": true,
-    "lib": ["esnext", "dom", "dom.iterable", "scripthost"],
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "outDir": "dist",
