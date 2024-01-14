@@ -64,4 +64,5 @@
 | routeMiddleware | <code>Record.&lt;string, Array.&lt;module:express~RequestHandler&gt;&gt;</code> |  | A collection of middleware for each route. |
 | plugins | <code>Array</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
 | [middleware] | <code>Array.&lt;UttoriMiddleware&gt;</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |
+| [redirects] | <code>Array.&lt;UttoriRedirect&gt;</code> |  | Redirect Configuration to redirect old routes to new routes. |
 

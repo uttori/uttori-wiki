@@ -41,6 +41,7 @@
  * @property {Record<string, import("express").RequestHandler[]>} routeMiddleware A collection of middleware for each route.
  * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {import("../dist/custom.js").UttoriMiddleware[]} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
+ * @property {import("../dist/custom.js").UttoriRedirect[]} [redirects] Redirect Configuration to redirect old routes to new routes.
  */
 
 /** @type {UttoriWikiConfig} */
@@ -91,6 +92,7 @@ const config = {
   },
   plugins: [],
   middleware: [],
+  redirects: [],
 };
 
 export default config;

@@ -9,6 +9,7 @@ import { Plugin as SearchProviderLunr } from '@uttori/search-provider-lunr';
 import defaultConfig from '../../src/config.js';
 import { middleware as flash } from '../../src/wiki-flash.js';
 
+/** @type {import('../../src/config.js').UttoriWikiConfig} */
 export const config = {
   ...defaultConfig,
   homePage: 'home-page',
@@ -30,6 +31,16 @@ export const config = {
     ['enable', 'view cache'],
   ],
   useCache: true,
+  redirects: [
+    {
+      route: '/2008/:slug',
+      target: '/:slug',
+    },
+    // Invalid redirect for testing
+    {
+      route: '/2009/:slug',
+    },
+  ],
 };
 
 export const serverSetup = () => {

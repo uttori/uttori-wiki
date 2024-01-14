@@ -27,7 +27,7 @@ Add tags to the view model.
     * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
     * [.validateConfig(config, _context)](#AddQueryOutputToViewModel.validateConfig)
     * [.register(context)](#AddQueryOutputToViewModel.register)
-    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code>
+    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;T&gt;</code>
     * [.callback(eventLabel)](#AddQueryOutputToViewModel.callback) ⇒ <code>AddQueryOutputToViewModelCallback</code>
 
 <a name="AddQueryOutputToViewModel.configKey"></a>
@@ -100,16 +100,16 @@ AddQueryOutputToViewModel.register(context);
 ```
 <a name="AddQueryOutputToViewModel.callbackCurry"></a>
 
-### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒ <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code>
+### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒ <code>Promise.&lt;T&gt;</code>
 Queries for related documents based on similar tags and searches the storage provider.
 
 **Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: <code>Promise.&lt;(object\|Array.&lt;object&gt;)&gt;</code> - The provided view-model document.  
+**Returns**: <code>Promise.&lt;T&gt;</code> - The provided view-model document.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | eventLabel | <code>string</code> | The event label to run queries for. |
-| viewModel | <code>object</code> | A Uttori view-model object. |
+| viewModel | <code>T</code> | A Uttori view-model object. |
 | context | <code>UttoriContext</code> | A Uttori-like context. |
 
 **Example** *(AddQueryOutputToViewModel.callback(viewModel, context))*  

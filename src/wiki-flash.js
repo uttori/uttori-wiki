@@ -6,16 +6,17 @@ const debug = () => {}; // try { debug = require('debug')('Uttori.Wiki.WikiFlash
  * First, use `wikiFlash(key, value)` to set a flash message.
  * Then, on subsequent requests, you can retrieve the message with `wikiFlash(key)`.
  * @param {string} [key] The key to get or set flash data under.
- * @param {*} [value] The value to store as flash data.
- * @returns {object|Array|boolean} Returns
+ * @param {string} [value] The value to store as flash data.
+ * @returns {Record<string, string[]>|Array|boolean} Returns the current flash data, or the data for the given key, or false if no data is found.
  */
 export function wikiFlash(key, value) {
   if (!this.session) {
     debug('Express Session is required.');
-    return () => {};
+    return {};
   }
 
   this.session.wikiFlash = this.session.wikiFlash || {};
+  /** @type {Record<string, string[]>} */
   const current = this.session.wikiFlash;
 
   // Set a value to a key.

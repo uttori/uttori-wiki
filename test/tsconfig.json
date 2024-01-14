@@ -1,10 +1,9 @@
 {
   "include": [
-    "src/**/*"
+    "*"
   ],
   "exclude": [
-    "node_modules",
-    "test/**/*"
+    "node_modules"
   ],
   "compilerOptions": {
     "allowJs": true,
@@ -12,7 +11,7 @@
     "checkJs": true,
     "declaration": true,
     "downlevelIteration": true,
-    "emitDeclarationOnly": true,
+    "emitDeclarationOnly": false,
     "extendedDiagnostics": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
@@ -22,8 +21,7 @@
     ],
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "outDir": "dist",
-    "noEmit": false,
+    "noEmit": true,
     "sourceMap": true,
     "strict": false,
     "target": "esnext",

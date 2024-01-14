@@ -42,9 +42,9 @@
   },
   "rules": {
     "@typescript-eslint/no-unsafe-argument": "warn",
-    "@typescript-eslint/no-unsafe-assignment": "warn",
-    "@typescript-eslint/no-unsafe-call": "warn",
-    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
     "@typescript-eslint/no-unsafe-return": "warn",
     "anti-trojan-source/no-bidi": "error",
     "ava/no-only-test": "warn",
@@ -62,6 +62,7 @@
     "import/extensions": ["warn", "ignorePackages"],
     "import/no-unresolved": 0,
     "max-len": 0,
+    "no-continue": 0,
     "no-empty": ["error", { "allowEmptyCatch": true }],
     "no-param-reassign": 0,
     "no-plusplus": 0,
@@ -80,6 +81,7 @@
         "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
       }
     ],
+    "no-return-await": 0,
     "no-underscore-dangle": 0,
     "no-unused-vars": 0,
     "@typescript-eslint/no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrors": "none" }],
@@ -93,13 +95,9 @@
   },
   "overrides": [
     {
-      "files": ["**/*.{spec,test}.*", "test/_helpers/*.*"],
-      "rules": {
-        "@typescript-eslint/no-unsafe-argument": 0,
-        "@typescript-eslint/no-unsafe-assignment": 0,
-        "@typescript-eslint/no-unsafe-call": 0,
-        "@typescript-eslint/no-unsafe-member-access": 0,
-        "@typescript-eslint/no-unsafe-return": 0
+      "files": ["**/*.test.js", "test/_helpers/*.*"],
+      "parserOptions": {
+        "project": "./test/tsconfig.json"
       }
     }
   ],

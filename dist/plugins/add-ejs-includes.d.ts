@@ -27,12 +27,12 @@ declare class EJSRenderer {
     static get configKey(): string;
     /**
      * The default configuration.
-     * @returns {EJSRendererConfig} The configuration.
+     * @returns {ejs.Options} The configuration.
      * @example <caption>EJSRenderer.defaultConfig()</caption>
      * const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
      * @static
      */
-    static defaultConfig(): EJSRendererConfig;
+    static defaultConfig(): ejs.Options;
     /**
      * Validates the provided configuration for required entries.
      * @param {Record<string, EJSRendererConfig>} config A provided configuration to use.
@@ -116,12 +116,13 @@ declare class EJSRenderer {
     /**
      * Render EJS content in a provided string.
      * @param {string} content - Content to be searched through to make replacements.
-     * @param {object} config - A provided configuration to use.
+     * @param {ejs.Options} config - A provided configuration to use.
      * @returns {string} The rendered content.
      * @example <caption>EJSRenderer.render(content, config)</caption>
      * const html = EJSRenderer.render(content, config);
      * @static
      */
-    static render(content: string, config: object): string;
+    static render(content: string, config: ejs.Options): string;
 }
+import ejs from 'ejs';
 //# sourceMappingURL=add-ejs-includes.d.ts.map

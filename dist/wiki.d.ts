@@ -1,3 +1,5 @@
+/** @type {import('../dist/custom.js').AsyncRequestHandler} */
+export const asyncHandler: import('../dist/custom.js').AsyncRequestHandler;
 export default UttoriWiki;
 export type UttoriWikiDocument = {
     /**
@@ -35,11 +37,11 @@ export type UttoriWikiDocument = {
     /**
      * A collection of tags that represent the document.
      */
-    tags: string[];
+    tags: string | string[];
     /**
      * An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
      */
-    redirects?: string[];
+    redirects?: string | string[];
     /**
      * The layout to use when rendering the document.
      */
@@ -56,14 +58,14 @@ export type UttoriWikiDocument = {
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
  * @property {number} createDate The Unix timestamp of the creation date of the document.
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
- * @property {string[]} tags A collection of tags that represent the document.
- * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ * @property {string|string[]} tags A collection of tags that represent the document.
+ * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
  * @property {import('./config.js').UttoriWikiConfig} config - The configuration object.
- * @property {EventDispatcher} hooks - The hook / event dispatching object.
+ * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks - The hook / event dispatching object.
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
@@ -80,8 +82,8 @@ declare class UttoriWiki {
     constructor(config: import('./config.js').UttoriWikiConfig, server: import('express').Application);
     /** @type {import('./config.js').UttoriWikiConfig} */
     config: import('./config.js').UttoriWikiConfig;
-    /** @type {EventDispatcher} */
-    hooks: EventDispatcher;
+    /** @type {import('@uttori/event-dispatcher').EventDispatcher} */
+    hooks: import('@uttori/event-dispatcher').EventDispatcher;
     /**
      * Registers plugins with the Event Dispatcher.
      * @param {import('./config.js').UttoriWikiConfig} config - A configuration object.
@@ -111,7 +113,7 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `render-content` - Passes in the meta description.
      * @async
-     * @param {UttoriWikiDocument | object} document A UttoriWikiDocument.
+     * @param {Partial<UttoriWikiDocument>} document A UttoriWikiDocument.
      * @param {string} [path] The URL path to build meta data for with leading slash.
      * @param {string} [robots] A meta robots tag value.
      * @returns {Promise<UttoriWikiDocumentMetaData>} Metadata object.
@@ -126,7 +128,7 @@ declare class UttoriWiki {
      *   published,   // new Date(document.createDate).toISOString()
      * }
      */
-    buildMetadata(document: UttoriWikiDocument | object, path?: string, robots?: string): Promise<{
+    buildMetadata(document: Partial<UttoriWikiDocument>, path?: string, robots?: string): Promise<{
         /**
          * `${this.config.publicUrl}/private-document-path`
          */
@@ -171,12 +173,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `render-content` - Passes in the home-page content.
      * - `filter` - `view-model-home` - Passes in the viewModel.
-     * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @type {import('express').RequestHandler}
      */
-    home(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    home: import('express').RequestHandler;
     /**
      * Redirects to the homepage.
      * @param {import('express').Request} request The Express Request object.
@@ -251,11 +250,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    save(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    save(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *
@@ -264,11 +263,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    saveNew(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    saveNew(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
     /**
      * Renders the creation page using the `edit` template.
      *
@@ -352,8 +351,9 @@ declare class UttoriWiki {
      * @param {import('express').Request} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
+     * @this {UttoriWiki}
      */
-    notFound(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    notFound(this: UttoriWiki, request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
     /**
      * Handles saving documents, and changing the slug of documents, then redirecting to the document.
      *
@@ -364,11 +364,11 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `document-save` - Passes in the document.
      * @async
-     * @param {import('express').Request} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    saveValid(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    saveValid(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
     /**
      * Returns the documents with the provided tag, up to the provided limit.
      * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
@@ -378,11 +378,11 @@ declare class UttoriWiki {
      * @async
      * @param {string} tag The tag to look for in documents.
      * @param {number} [limit] The maximum number of documents to be returned.
-     * @returns {Promise<Array>} Promise object that resolves to the array of the documents.
+     * @returns {Promise<UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
      * @example
      * wiki.getTaggedDocuments('example', 10);
      * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
      */
-    getTaggedDocuments(tag: string, limit?: number): Promise<any[]>;
+    getTaggedDocuments(tag: string, limit?: number): Promise<UttoriWikiDocument[]>;
 }
 //# sourceMappingURL=wiki.d.ts.map

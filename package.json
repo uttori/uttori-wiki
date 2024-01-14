@@ -24,7 +24,7 @@
     "node": ">= 20"
   },
   "dependencies": {
-    "@uttori/event-dispatcher": "^2.0.2"
+    "@uttori/event-dispatcher": "^3.0.1"
   },
   "optionalDependencies": {
     "debug": "^4.3.4",
@@ -39,14 +39,14 @@
     "@types/ejs": "^3.1.5",
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.17.10",
-    "@types/node": "^20.10.5",
-    "@types/supertest": "^6.0.1",
-    "@typescript-eslint/eslint-plugin": "^6.16.0",
-    "@typescript-eslint/parser": "^6.16.0",
-    "@uttori/search-provider-lunr": "^3.4.0",
+    "@types/node": "^20.11.0",
+    "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.18.1",
+    "@typescript-eslint/parser": "^6.18.1",
+    "@uttori/search-provider-lunr": "^4.0.0",
     "@uttori/storage-provider-json-memory": "^5",
     "ava": "^6.0.1",
-    "c8": "^8.0.1",
+    "c8": "^9.1.0",
     "cors": "^2.8.5",
     "ejs": "^3.1.9",
     "eslint": "^8.56.0",
@@ -54,12 +54,11 @@
     "eslint-plugin-anti-trojan-source": "^1.1.1",
     "eslint-plugin-ava": "^14.0.0",
     "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-jsdoc": "^46.9.1",
+    "eslint-plugin-jsdoc": "^48.0.2",
     "eslint-plugin-jsx-a11y": "^6.8.0",
-    "eslint-plugin-n": "^16.5.0",
+    "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-optimize-regex": "^1.2.1",
-    "eslint-plugin-ramda": "^2.5.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-security": "^2.1.0",
@@ -86,16 +85,40 @@
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./src/index.js"
+      "import": "./src/index.js",
+      "types": "./dist/index.d.ts"
     },
     "./config": {
-      "import": "./src/index.js"
+      "import": "./src/config.js",
+      "types": "./dist/config.d.ts"
     },
     "./middleware": {
-      "import": "./src/middleware.js"
+      "import": "./src/middleware.js",
+      "types": "./dist/middleware.d.ts"
+    },
+    "./redirect": {
+      "import": "./src/redirect.js",
+      "types": "./dist/redirect.d.ts"
+    },
+    "./wiki-flash": {
+      "import": "./src/wiki-flash.js",
+      "types": "./dist/wiki-flash.d.ts"
     },
     "./wiki": {
-      "import": "./src/wiki.js"
+      "import": "./src/wiki.js",
+      "types": "./dist/wiki.d.ts"
+    },
+    "./plugins/add-download-route": {
+      "import": "./src/plugins/add-download-route.js",
+      "types": "./dist/plugins/add-download-route.d.ts"
+    },
+    "./plugins/add-ejs-includes": {
+      "import": "./src/plugins/add-ejs-includes.js",
+      "types": "./dist/plugins/add-ejs-includes.d.ts"
+    },
+    "./plugins/add-query-output": {
+      "import": "./src/plugins/add-download-route.js",
+      "types": "./dist/plugins/add-download-route.d.ts"
     }
   },
   "ava": {

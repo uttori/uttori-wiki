@@ -3,10 +3,10 @@
  * First, use `wikiFlash(key, value)` to set a flash message.
  * Then, on subsequent requests, you can retrieve the message with `wikiFlash(key)`.
  * @param {string} [key] The key to get or set flash data under.
- * @param {*} [value] The value to store as flash data.
- * @returns {object|Array|boolean} Returns
+ * @param {string} [value] The value to store as flash data.
+ * @returns {Record<string, string[]>|Array|boolean} Returns the current flash data, or the data for the given key, or false if no data is found.
  */
-export function wikiFlash(key?: string, value?: any): object | any[] | boolean;
+export function wikiFlash(key?: string, value?: string): Record<string, string[]> | any[] | boolean;
 export function middleware(req: import("express-serve-static-core").Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: import("express-serve-static-core").Response<any, Record<string, any>, number>, next: import("express-serve-static-core").NextFunction): void;
 declare namespace _default {
     export { wikiFlash };

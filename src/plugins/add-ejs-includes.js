@@ -31,7 +31,7 @@ class EJSRenderer {
 
   /**
    * The default configuration.
-   * @returns {EJSRendererConfig} The configuration.
+   * @returns {ejs.Options} The configuration.
    * @example <caption>EJSRenderer.defaultConfig()</caption>
    * const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
    * @static
@@ -167,7 +167,7 @@ class EJSRenderer {
   /**
    * Render EJS content in a provided string.
    * @param {string} content - Content to be searched through to make replacements.
-   * @param {object} config - A provided configuration to use.
+   * @param {ejs.Options} config - A provided configuration to use.
    * @returns {string} The rendered content.
    * @example <caption>EJSRenderer.render(content, config)</caption>
    * const html = EJSRenderer.render(content, config);
@@ -180,7 +180,7 @@ class EJSRenderer {
       return '';
     }
 
-    content = ejs.render(content, {}, config);
+    content = ejs.render(content, {}, { ...config, async: false });
 
     return content;
   }

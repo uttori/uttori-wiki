@@ -1,5 +1,6 @@
 import { EventDispatcher } from '@uttori/event-dispatcher';
 import defaultConfig from './config.js';
+import { buildPath } from './redirect.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
 
@@ -9,7 +10,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
 
 /* Used in `bindRoutes` */
 /** @type {import('../dist/custom.js').AsyncRequestHandler} */
-const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
+export const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
 
 /**
  * @typedef UttoriWikiDocument
@@ -22,15 +23,15 @@ const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(req
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
  * @property {number} createDate The Unix timestamp of the creation date of the document.
  * @property {number} updateDate The Unix timestamp of the last update date to the document.
- * @property {string[]} tags A collection of tags that represent the document.
- * @property {string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
+ * @property {string|string[]} tags A collection of tags that represent the document.
+ * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
  */
 
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
  * @property {import('./config.js').UttoriWikiConfig} config - The configuration object.
- * @property {EventDispatcher} hooks - The hook / event dispatching object.
+ * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks - The hook / event dispatching object.
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
@@ -62,7 +63,7 @@ class UttoriWiki {
     this.config = { ...defaultConfig, ...config };
 
     // Instantiate the event bus / event dispatcher / hooks systems, as we will need it for every other step.
-    /** @type {EventDispatcher} */
+    /** @type {import('@uttori/event-dispatcher').EventDispatcher} */
     this.hooks = new EventDispatcher();
 
     // Register any plugins found in the configuration.
@@ -139,7 +140,7 @@ class UttoriWiki {
    * Hooks:
    * - `filter` - `render-content` - Passes in the meta description.
    * @async
-   * @param {UttoriWikiDocument | object} document A UttoriWikiDocument.
+   * @param {Partial<UttoriWikiDocument>} document A UttoriWikiDocument.
    * @param {string} [path] The URL path to build meta data for with leading slash.
    * @param {string} [robots] A meta robots tag value.
    * @returns {Promise<UttoriWikiDocumentMetaData>} Metadata object.
@@ -198,8 +199,37 @@ class UttoriWiki {
    */
   bindRoutes(server) {
     debug('Binding routes...');
+
+    // Handle Redirects
+    for (const redirect of this.config.redirects) {
+      debug('Redirect:', redirect);
+      const { route, target, status = 301, appendQueryString = true } = redirect;
+      if (!route || !target) {
+        debug('Missing route or target, skipping.');
+        continue;
+      }
+      server.all(route, (request, response, next) => {
+        // Build the new path from the route and target using the request params.
+        let path = buildPath(request.params, route, target);
+
+        // Append query string if needed
+        if (appendQueryString && request.url.includes('?')) {
+          path += request.url.slice(request.url.indexOf('?'));
+        }
+
+        // Redirect to the new path if it is different from the current path
+        if (path !== request.url) {
+          debug('Redirecting to:', path);
+          response.redirect(status, path);
+          return;
+        }
+        /* c8 ignore next */
+        next();
+      });
+    }
+
     // Home
-    server.get('/', this.config.routeMiddleware.home, asyncHandler(this.home.bind(this)));
+    server.get('/', this.config.routeMiddleware.home, asyncHandler(this.home));
     server.get(`/${this.config.homePage}`, asyncHandler(this.homepageRedirect.bind(this)));
 
     // Search
@@ -266,12 +296,9 @@ class UttoriWiki {
    * Hooks:
    * - `filter` - `render-content` - Passes in the home-page content.
    * - `filter` - `view-model-home` - Passes in the viewModel.
-   * @async
-   * @param {import('express').Request} request The Express Request object.
-   * @param {import('express').Response} response The Express Response object.
-   * @param {import('express').NextFunction} next The Express Next function.
+   * @type {import('express').RequestHandler}
    */
-  async home(request, response, next) {
+  home = async (request, response, next) => {
     debug('Home Route');
 
     // Check for custom home function, and use it if it exists
@@ -312,7 +339,7 @@ class UttoriWiki {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
     response.render('home', viewModel);
-  }
+  };
 
   /**
    * Redirects to the homepage.
@@ -348,12 +375,14 @@ class UttoriWiki {
     const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
     const ignoreTags = `"${this.config.ignoreTags.join('", "')}"`;
     const query = `SELECT tags FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND tags EXCLUDES (${ignoreTags}) ORDER BY updateDate DESC LIMIT -1`;
+    /** @type {string[]} */
     let tags = [];
     try {
       // Fetch all the used tags.
-      [tags] = await this.hooks.fetch('storage-query', query, this);
+      /** @type {UttoriWikiDocument[][]} */
+      const [results] = await this.hooks.fetch('storage-query', query, this);
       // Organize and deduplicate, and sort the tags.
-      tags = [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+      tags = [...new Set(results.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
     /* c8 ignore next 3 */
     } catch (error) {
       debug('Error fetching tags:', error);
@@ -533,6 +562,7 @@ class UttoriWiki {
       return;
     }
 
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
@@ -627,7 +657,7 @@ class UttoriWiki {
    * - `dispatch` - `validate-invalid` - Passes in the request.
    * - `dispatch` - `validate-valid` - Passes in the request.
    * @async
-   * @param {import('express').Request} request The Express Request object.
+   * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -677,7 +707,7 @@ class UttoriWiki {
    * - `dispatch` - `validate-invalid` - Passes in the request.
    * - `dispatch` - `validate-valid` - Passes in the request.
    * @async
-   * @param {import('express').Request} request The Express Request object.
+   * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -817,10 +847,10 @@ class UttoriWiki {
       // [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
       const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
       const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${slug}" OR redirects INCLUDES ("${slug}")) ORDER BY slug ASC LIMIT 1`;
-      document = await this.hooks.fetch('storage-query', query, this);
-      if (document) {
+      const results = await this.hooks.fetch('storage-query', query, this);
+      if (results) {
         // eslint-disable-next-line prefer-destructuring
-        document = document[0][0];
+        document = results[0][0];
       }
     /* c8 ignore next 3 */
     } catch (error) {
@@ -922,6 +952,7 @@ class UttoriWiki {
       next();
       return;
     }
+    /** @type {UttoriWikiDocument} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
@@ -936,6 +967,7 @@ class UttoriWiki {
       return;
     }
 
+    /** @type {string[]} */
     let history;
     try {
       [history] = await this.hooks.fetch('storage-get-history', request.params.slug, this);
@@ -950,6 +982,7 @@ class UttoriWiki {
       next();
       return;
     }
+    /** @type {Record<string, string>} */
     const historyByDay = history.reduce((output, value) => {
       /* c8 ignore next */
       value = value.includes('-') ? value.split('-')[0] : value;
@@ -1146,6 +1179,7 @@ class UttoriWiki {
    * @param {import('express').Request} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
+   * @this {UttoriWiki}
    */
   async notFound(request, response, next) {
     debug('404 Not Found Route');
@@ -1198,7 +1232,7 @@ class UttoriWiki {
    * Hooks:
    * - `filter` - `document-save` - Passes in the document.
    * @async
-   * @param {import('express').Request} request The Express Request object.
+   * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -1225,6 +1259,7 @@ class UttoriWiki {
     }, {});
 
     // Normalize tags before save
+    /** @type {string[]} */
     let tags = [];
     if (Array.isArray(request.body.tags)) {
       tags = request.body.tags.sort();
@@ -1234,6 +1269,7 @@ class UttoriWiki {
     tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
     // Normalize redirects before save
+    /** @type {string[]} */
     let redirects = [];
     if (Array.isArray(request.body.redirects)) {
       redirects = request.body.redirects;
@@ -1284,13 +1320,14 @@ class UttoriWiki {
    * @async
    * @param {string} tag The tag to look for in documents.
    * @param {number} [limit] The maximum number of documents to be returned.
-   * @returns {Promise<Array>} Promise object that resolves to the array of the documents.
+   * @returns {Promise<UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
    * @example
    * wiki.getTaggedDocuments('example', 10);
    * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
    */
   async getTaggedDocuments(tag, limit = 1024) {
     debug('getTaggedDocuments:', tag, limit);
+    /** @type {UttoriWikiDocument[]} */
     let results = [];
     try {
       const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;

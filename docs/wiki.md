@@ -6,10 +6,10 @@
 </dd>
 </dl>
 
-## Functions
+## Constants
 
 <dl>
-<dt><a href="#asyncHandler">asyncHandler()</a> : <code>AsyncRequestHandler</code></dt>
+<dt><a href="#asyncHandler">asyncHandler</a> : <code>AsyncRequestHandler</code></dt>
 <dd></dd>
 </dl>
 
@@ -33,13 +33,13 @@ UttoriWiki is a fast, simple, wiki knowledge base.
 | Name | Type | Description |
 | --- | --- | --- |
 | config | <code>UttoriWikiConfig</code> | The configuration object. |
-| hooks | <code>EventDispatcher</code> | The hook / event dispatching object. |
+| hooks | <code>module:@uttori/event-dispatcher~EventDispatcher</code> | The hook / event dispatching object. |
 
 
 * [UttoriWiki](#UttoriWiki)
     * [new UttoriWiki(config, server)](#new_UttoriWiki_new)
     * [.config](#UttoriWiki+config) : <code>UttoriWikiConfig</code>
-    * [.hooks](#UttoriWiki+hooks) : <code>EventDispatcher</code>
+    * [.hooks](#UttoriWiki+hooks) : <code>module:@uttori/event-dispatcher~EventDispatcher</code>
     * [.registerPlugins(config)](#UttoriWiki+registerPlugins)
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
     * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ [<code>Promise.&lt;UttoriWikiDocumentMetaData&gt;</code>](#UttoriWikiDocumentMetaData)
@@ -61,7 +61,7 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.historyRestore(request, response, next)](#UttoriWiki+historyRestore)
     * [.notFound(request, response, next)](#UttoriWiki+notFound)
     * [.saveValid(request, response, next)](#UttoriWiki+saveValid)
-    * [.getTaggedDocuments(tag, [limit])](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.getTaggedDocuments(tag, [limit])](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>
 
 <a name="new_UttoriWiki_new"></a>
 
@@ -86,7 +86,7 @@ server.listen(server.get('port'), server.get('ip'), () => { ... });
 **Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
 <a name="UttoriWiki+hooks"></a>
 
-### uttoriWiki.hooks : <code>EventDispatcher</code>
+### uttoriWiki.hooks : <code>module:@uttori/event-dispatcher~EventDispatcher</code>
 **Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
 <a name="UttoriWiki+registerPlugins"></a>
 
@@ -126,7 +126,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| document | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) \| <code>object</code> | A UttoriWikiDocument. |
+| document | [<code>Partial.&lt;UttoriWikiDocument&gt;</code>](#UttoriWikiDocument) | A UttoriWikiDocument. |
 | [path] | <code>string</code> | The URL path to build meta data for with leading slash. |
 | [robots] | <code>string</code> | A meta robots tag value. |
 
@@ -285,7 +285,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
+| request | <code>module:express~Request.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> | The Express Request object. |
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 
@@ -303,7 +303,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
+| request | <code>module:express~Request.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> | The Express Request object. |
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 
@@ -443,13 +443,13 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
+| request | <code>module:express~Request.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> | The Express Request object. |
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 
 <a name="UttoriWiki+getTaggedDocuments"></a>
 
-### uttoriWiki.getTaggedDocuments(tag, [limit]) ⇒ <code>Promise.&lt;Array&gt;</code>
+### uttoriWiki.getTaggedDocuments(tag, [limit]) ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>
 Returns the documents with the provided tag, up to the provided limit.
 This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
 
@@ -457,7 +457,7 @@ Hooks:
 - `fetch` - `storage-query` - Searched for the tagged documents.
 
 **Kind**: instance method of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array&gt;</code> - Promise object that resolves to the array of the documents.  
+**Returns**: <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code> - Promise object that resolves to the array of the documents.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -471,8 +471,8 @@ wiki.getTaggedDocuments('example', 10);
 ```
 <a name="asyncHandler"></a>
 
-## asyncHandler() : <code>AsyncRequestHandler</code>
-**Kind**: global function  
+## asyncHandler : <code>AsyncRequestHandler</code>
+**Kind**: global constant  
 <a name="UttoriWikiDocument"></a>
 
 ## UttoriWikiDocument : <code>object</code>

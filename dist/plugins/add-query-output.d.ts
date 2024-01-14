@@ -124,10 +124,11 @@ declare class AddQueryOutputToViewModel {
     static register(context: import('../../dist/custom.js').UttoriContext): void;
     /**
      * Queries for related documents based on similar tags and searches the storage provider.
+     * @template T The viewModel we are manipulating.
      * @param {string} eventLabel The event label to run queries for.
-     * @param {object} viewModel A Uttori view-model object.
+     * @param {T} viewModel A Uttori view-model object.
      * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
-     * @returns {Promise<object | object[]>} The provided view-model document.
+     * @returns {Promise<T>} The provided view-model document.
      * @example <caption>AddQueryOutputToViewModel.callback(viewModel, context)</caption>
      * const context = {
      *   config: {
@@ -143,7 +144,7 @@ declare class AddQueryOutputToViewModel {
      * AddQueryOutputToViewModel.callback(viewModel, context);
      * @static
      */
-    static callbackCurry(eventLabel: string, viewModel: object, context: import('../../dist/custom.js').UttoriContext): Promise<object | object[]>;
+    static callbackCurry<T>(eventLabel: string, viewModel: T, context: import('../../dist/custom.js').UttoriContext): Promise<T>;
     /**
      * Curry the hook function to take the current event label.
      * @param {string} eventLabel The event label to run queries for.

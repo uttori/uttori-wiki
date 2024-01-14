@@ -161,7 +161,7 @@ Render EJS content in a provided string.
 | Param | Type | Description |
 | --- | --- | --- |
 | content | <code>string</code> | Content to be searched through to make replacements. |
-| config | <code>object</code> | A provided configuration to use. |
+| config | <code>ejs.Options</code> | A provided configuration to use. |
 
 **Example** *(EJSRenderer.render(content, config))*  
 ```js

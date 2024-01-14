@@ -1,4 +1,5 @@
 import { Express } from 'express-serve-static-core';
+import { EventDispatcher } from '@uttori/event-dispatcher';
 
 // https://plusreturn.com/blog/how-to-extend-express-request-interface-in-typescript/
 /** Add wikiFlash to the Request type. */
@@ -21,20 +22,46 @@ declare namespace Express {
   }
 }
 
-type UttoriPluginConfig =
+export type UttoriPluginConfig =
   import('./../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
   import('./../src/plugins/add-ejs-includes.js').EJSRendererConfig |
   import('./../src/plugins/add-download-route.js').DownloadRouterConfig
-type UttoriContext = {
-  config: Record<string, UttoriPluginConfig>;
-  hooks: {
-      on: Function;
-      fetch: Function;
-  };
-}
-type UttoriMiddleware = (string | Function | boolean)[]
-type AsyncRequestHandler = (fn: import('express').RequestHandler) => (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => void
 
-type AddQueryOutputToViewModelFormatFunction = (documents:object[]) => object[]
-type AddQueryOutputToViewModelQueryFunction = (target:object, context:UttoriContext) => Promise<object[][]>
-type AddQueryOutputToViewModelCallback = (target:object, context:UttoriContext) => Promise<object[]>
+export type UttoriContext = {
+  config: Record<string, UttoriPluginConfig>;
+  hooks: EventDispatcher;
+}
+export type UttoriMiddleware = (string | Function | boolean)[]
+
+export type AsyncRequestHandler = (fn: import('express').RequestHandler) => import('express').RequestHandler
+
+export type AddQueryOutputToViewModelFormatFunction = (documents:any[]) => any[]
+export type AddQueryOutputToViewModelQueryFunction = (target:any, context:UttoriContext) => Promise<any[][]>
+export type AddQueryOutputToViewModelCallback = (target:any, context:UttoriContext) => Promise<any>
+
+export interface ParsedPathKey {
+  /** The name of the segment variable. */
+  name: string;
+  /** When true, they segment is optional. */
+  optional: boolean;
+  /** The default value, if set. */
+  def?: string;
+}
+
+export interface UttoriRedirect {
+  /** The route to redirect from. */
+  route: string;
+  /** The route to redirect to. */
+  target: string;
+  /** The HTTP status code to use. Defaults to `301` */
+  status?: number;
+  /** If true, append the query string to the target. Default to `true` */
+  appendQueryString?: boolean;
+}
+
+export interface SaveParams {
+  /** Optional edit key/ */
+  key?: string
+  /** The slug to save to. */
+  slug: string
+}
