@@ -199,42 +199,17 @@ class UttoriWiki {
   bindRoutes(server) {
     debug('Binding routes...');
 
-    // Handle Redirects
-    for (const redirect of this.config.redirects) {
-      debug('Redirect:', redirect);
-      const { route, target, status = 301, appendQueryString = true } = redirect;
-      if (!route || !target) {
-        debug('Missing route or target, skipping.');
-        continue;
-      }
-      server.all(route, (request, response, next) => {
-        // Build the new path from the route and target using the request params.
-        let path = buildPath(request.params, route, target);
-
-        // Append query string if needed
-        if (appendQueryString && request.url.includes('?')) {
-          path += request.url.slice(request.url.indexOf('?'));
-        }
-
-        // Redirect to the new path if it is different from the current path
-        if (path !== request.url) {
-          debug('Redirecting to:', path);
-          response.redirect(status, path);
-          return;
-        }
-        /* c8 ignore next */
-        next();
-      });
-    }
-
     // Home
     server.get('/', this.config.routeMiddleware.home, asyncHandler(this.home));
     server.get(`/${this.config.homePage}`, asyncHandler(this.homepageRedirect));
 
     // Search
+    debug('Binding search route:', `/${this.config.routes.search}`);
     server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, asyncHandler(this.search));
 
     // Tags
+    debug('Binding tag index route:', `/${this.config.routes.tags}`);
+    debug('Binding tag route:', `/${this.config.routes.tags}/:tag`);
     server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, asyncHandler(this.tag));
     server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, asyncHandler(this.tagIndex));
 
@@ -277,6 +252,35 @@ class UttoriWiki {
     server.put('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save));
     server.put('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save));
     server.get('/:slug*?', this.config.routeMiddleware.detail, asyncHandler(this.detail));
+
+    // Handle Redirects
+    for (const redirect of this.config.redirects) {
+      debug('Redirect:', redirect);
+      const { route, target, status = 301, appendQueryString = true } = redirect;
+      if (!route || !target) {
+        debug('Missing route or target, skipping.');
+        continue;
+      }
+      server.all(route, (request, response, next) => {
+        // Build the new path from the route and target using the request params.
+        let path = buildPath(request.params, route, target);
+        debug('Redirecting to:', path);
+
+        // Append query string if needed
+        if (appendQueryString && request.url.includes('?')) {
+          path += request.url.slice(request.url.indexOf('?'));
+        }
+
+        // Redirect to the new path if it is different from the current path
+        if (path !== request.url) {
+          debug('Redirecting to:', path);
+          response.redirect(status, path);
+          return;
+        }
+        /* c8 ignore next */
+        next();
+      });
+    }
 
     this.hooks.dispatch('bind-routes', server, this);
 
@@ -824,7 +828,7 @@ class UttoriWiki {
    * @param {import('express').NextFunction} next The Express Next function.
    */
   detail = async (request, response, next) => {
-    debug('Detail Route');
+    debug('Detail Route:', request.originalUrl);
 
     // Check for custom route function, and use it if it exists.
     if (this.config.detailRoute) {
