@@ -24,7 +24,7 @@
     "node": ">= 20"
   },
   "dependencies": {
-    "@uttori/event-dispatcher": "^3.0.1"
+    "@uttori/event-dispatcher": "^3.0.2"
   },
   "optionalDependencies": {
     "debug": "^4.3.4",

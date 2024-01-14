@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [6.1.0](https://github.com/uttori/uttori-wiki/compare/v6.0.3...v6.0.4) - 2024-01-06
 
-- 🧰 Add support for redirecting via Express route syntax to help migrate away from Jekyll
+- 🧰 Add support for redirecting via Express route syntax to help migrate away from Jekyll or other platforms
 - 🧰 Export `asyncHandler` for use in plugins or other projects
-- 🛠 Clean up some types that were still generic
+- 🛠 Remove need for `bind(this)` with class methods
+- 🛠 Clean up many types
 - 🎁 Update dev dependencies
 
 ## [6.0.4](https://github.com/uttori/uttori-wiki/compare/v6.0.3...v6.0.4) - 2023-12-25

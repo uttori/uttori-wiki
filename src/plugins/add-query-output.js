@@ -136,7 +136,9 @@ class AddQueryOutputToViewModel {
     for (const [method, eventNames] of Object.entries(config.events)) {
       if (typeof AddQueryOutputToViewModel[method] === 'function') {
         for (const event of eventNames) {
-          context.hooks.on(event, AddQueryOutputToViewModel[method](event));
+          /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
+          const callback = AddQueryOutputToViewModel[method](event);
+          context.hooks.on(event, callback);
         }
       } else {
         debug(`Missing function "${method}"`);

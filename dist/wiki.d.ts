@@ -1,5 +1,4 @@
-/** @type {import('../dist/custom.js').AsyncRequestHandler} */
-export const asyncHandler: import('../dist/custom.js').AsyncRequestHandler;
+export function asyncHandler(fn: any): (request: any, response: any, next: any) => void;
 export default UttoriWiki;
 export type UttoriWikiDocument = {
     /**
@@ -173,16 +172,17 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `render-content` - Passes in the home-page content.
      * - `filter` - `view-model-home` - Passes in the viewModel.
-     * @type {import('express').RequestHandler}
-     */
-    home: import('express').RequestHandler;
-    /**
-     * Redirects to the homepage.
+     * @async
      * @param {import('express').Request} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} _next The Express Next function.
+     * @param {import('express').NextFunction} next The Express Next function.
      */
-    homepageRedirect(request: import('express').Request, response: import('express').Response, _next: import('express').NextFunction): void;
+    home: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
+    /**
+     * Redirects to the homepage.
+     * @type {import('express').RequestHandler}
+     */
+    homepageRedirect: import('express').RequestHandler;
     /**
      * Renders the tag index page with the `tags` template.
      *
@@ -193,7 +193,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    tagIndex(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    tagIndex: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the tag detail page with `tag` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -206,7 +206,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    tag(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    tag: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the search page using the `search` template.
      *
@@ -218,7 +218,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    search(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    search: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the edit page using the `edit` template.
      *
@@ -229,7 +229,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    edit(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    edit: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Attempts to delete a document and redirect to the homepage.
      * If the config `useDeleteKey` value is true, the key is verified before deleting.
@@ -241,7 +241,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    delete(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    delete: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Attempts to update an existing document and redirects to the detail view of that document when successful.
      *
@@ -254,7 +254,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    save(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    save: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *
@@ -267,7 +267,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    saveNew(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    saveNew: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the creation page using the `edit` template.
      *
@@ -278,7 +278,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    create(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    create: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the detail page using the `detail` template.
      *
@@ -291,7 +291,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    detail(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    detail: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the a preview of the passed in content.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -303,7 +303,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    preview(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    preview: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the history index page using the `history_index` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -315,7 +315,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    historyIndex(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    historyIndex: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the history detail page using the `detail` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -328,7 +328,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    historyDetail(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    historyDetail: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the history restore page using the `edit` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -340,7 +340,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    historyRestore(request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    historyRestore: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the 404 Not Found page using the `404` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -351,9 +351,8 @@ declare class UttoriWiki {
      * @param {import('express').Request} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
-     * @this {UttoriWiki}
      */
-    notFound(this: UttoriWiki, request: import('express').Request, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    notFound: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Handles saving documents, and changing the slug of documents, then redirecting to the document.
      *
@@ -368,7 +367,7 @@ declare class UttoriWiki {
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    saveValid(request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction): Promise<void>;
+    saveValid: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Returns the documents with the provided tag, up to the provided limit.
      * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
@@ -383,6 +382,6 @@ declare class UttoriWiki {
      * wiki.getTaggedDocuments('example', 10);
      * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
      */
-    getTaggedDocuments(tag: string, limit?: number): Promise<UttoriWikiDocument[]>;
+    getTaggedDocuments: (tag: string, limit?: number) => Promise<UttoriWikiDocument[]>;
 }
 //# sourceMappingURL=wiki.d.ts.map

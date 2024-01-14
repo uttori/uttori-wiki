@@ -33,8 +33,6 @@ export type UttoriContext = {
 }
 export type UttoriMiddleware = (string | Function | boolean)[]
 
-export type AsyncRequestHandler = (fn: import('express').RequestHandler) => import('express').RequestHandler
-
 export type AddQueryOutputToViewModelFormatFunction = (documents:any[]) => any[]
 export type AddQueryOutputToViewModelQueryFunction = (target:any, context:UttoriContext) => Promise<any[][]>
 export type AddQueryOutputToViewModelCallback = (target:any, context:UttoriContext) => Promise<any>

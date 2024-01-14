@@ -8,9 +8,8 @@ let debug = (..._) => {};
 /* c8 ignore next */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
 
-/* Used in `bindRoutes` */
-/** @type {import('../dist/custom.js').AsyncRequestHandler} */
-export const asyncHandler = (fn) => (request, response, next) => Promise.resolve(fn(request, response, next)).catch(next);
+// Used in `bindRoutes`, written in an odd way to make TypeScript happy.
+export const asyncHandler = (fn) => (request, response, next) => { Promise.resolve(fn(request, response, next)).catch((error) => { next(error); }); };
 
 /**
  * @typedef UttoriWikiDocument
@@ -230,61 +229,60 @@ class UttoriWiki {
 
     // Home
     server.get('/', this.config.routeMiddleware.home, asyncHandler(this.home));
-    server.get(`/${this.config.homePage}`, asyncHandler(this.homepageRedirect.bind(this)));
+    server.get(`/${this.config.homePage}`, asyncHandler(this.homepageRedirect));
 
     // Search
-    server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, asyncHandler(this.search.bind(this)));
+    server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, asyncHandler(this.search));
 
     // Tags
-    server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, asyncHandler(this.tag.bind(this)));
-    server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, asyncHandler(this.tagIndex.bind(this)));
+    server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, asyncHandler(this.tag));
+    server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, asyncHandler(this.tagIndex));
 
     // Not Found Placeholder
-    server.head('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
-    server.get('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
-    server.delete('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
-    server.patch('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
-    server.put('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
-    server.post('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound.bind(this)));
+    server.head('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.get('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.delete('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.patch('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.put('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.post('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
 
     // Document CRUD / Admin
     if (this.config.allowCRUDRoutes) {
-      server.get('/new/:key', this.config.routeMiddleware.create, asyncHandler(this.create.bind(this)));
-      server.get('/new', this.config.routeMiddleware.create, asyncHandler(this.create.bind(this)));
-      server.post('/new/:key', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew.bind(this)));
-      server.post('/new', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew.bind(this)));
+      server.get('/new/:key', this.config.routeMiddleware.create, asyncHandler(this.create));
+      server.get('/new', this.config.routeMiddleware.create, asyncHandler(this.create));
+      server.post('/new/:key', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew));
+      server.post('/new', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew));
 
-      server.post('/preview', this.config.routeMiddleware.preview, asyncHandler(this.preview.bind(this)));
-      server.get('/:slug/edit/:key', this.config.routeMiddleware.edit, asyncHandler(this.edit.bind(this)));
-      server.get('/:slug/edit', this.config.routeMiddleware.edit, asyncHandler(this.edit.bind(this)));
-      server.get('/:slug/delete/:key', this.config.routeMiddleware.delete, asyncHandler(this.delete.bind(this)));
-      server.get('/:slug/delete', this.config.routeMiddleware.delete, asyncHandler(this.delete.bind(this)));
+      server.post('/preview', this.config.routeMiddleware.preview, asyncHandler(this.preview));
+      server.get('/:slug/edit/:key', this.config.routeMiddleware.edit, asyncHandler(this.edit));
+      server.get('/:slug/edit', this.config.routeMiddleware.edit, asyncHandler(this.edit));
+      server.get('/:slug/delete/:key', this.config.routeMiddleware.delete, asyncHandler(this.delete));
+      server.get('/:slug/delete', this.config.routeMiddleware.delete, asyncHandler(this.delete));
     }
 
     // Document History
     if (this.config.publicHistory) {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.historyIndex.bind(this)));
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.historyDetail.bind(this)));
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.historyRestore.bind(this)));
+      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.historyIndex));
+      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.historyDetail));
+      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.historyRestore));
     } else {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.notFound.bind(this)));
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.notFound.bind(this)));
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.notFound.bind(this)));
+      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.notFound));
+      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.notFound));
+      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.notFound));
     }
 
     // Document Update
-    server.post('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save.bind(this)));
-    server.post('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save.bind(this)));
-    server.put('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save.bind(this)));
-    server.put('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save.bind(this)));
-    server.get('/:slug*?', this.config.routeMiddleware.detail, asyncHandler(this.detail.bind(this)));
+    server.post('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save));
+    server.post('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save));
+    server.put('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save));
+    server.put('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save));
+    server.get('/:slug*?', this.config.routeMiddleware.detail, asyncHandler(this.detail));
 
     this.hooks.dispatch('bind-routes', server, this);
 
     // Not Found - Catch All
-    /* c8 ignore next */
     if (this.config.handleNotFound) {
-      server.get('/*', asyncHandler(this.notFound.bind(this)));
+      server.get('/*', asyncHandler(this.notFound));
     }
 
     debug('Bound routes.');
@@ -296,7 +294,10 @@ class UttoriWiki {
    * Hooks:
    * - `filter` - `render-content` - Passes in the home-page content.
    * - `filter` - `view-model-home` - Passes in the viewModel.
-   * @type {import('express').RequestHandler}
+   * @async
+   * @param {import('express').Request} request The Express Request object.
+   * @param {import('express').Response} response The Express Response object.
+   * @param {import('express').NextFunction} next The Express Next function.
    */
   home = async (request, response, next) => {
     debug('Home Route');
@@ -343,14 +344,12 @@ class UttoriWiki {
 
   /**
    * Redirects to the homepage.
-   * @param {import('express').Request} request The Express Request object.
-   * @param {import('express').Response} response The Express Response object.
-   * @param {import('express').NextFunction} _next The Express Next function.
+   * @type {import('express').RequestHandler}
    */
-  homepageRedirect(request, response, _next) {
+  homepageRedirect = (request, response, _next) => {
     debug('homepageRedirect:', this.config.homePage);
     response.redirect(301, this.config.publicUrl || '/');
-  }
+  };
 
   /**
    * Renders the tag index page with the `tags` template.
@@ -362,7 +361,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async tagIndex(request, response, next) {
+  tagIndex = async (request, response, next) => {
     debug('Tag Index Route');
 
     // Check for custom route function, and use it if it exists.
@@ -411,7 +410,7 @@ class UttoriWiki {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
     response.render('tags', viewModel);
-  }
+  };
 
   /**
    * Renders the tag detail page with `tag` template.
@@ -425,7 +424,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async tag(request, response, next) {
+  tag = async (request, response, next) => {
     debug('Tag Route');
 
     // Check for custom route function, and use it if it exists.
@@ -459,7 +458,7 @@ class UttoriWiki {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
     response.render('tag', viewModel);
-  }
+  };
 
   /**
    * Renders the search page using the `search` template.
@@ -472,7 +471,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async search(request, response, next) {
+  search = async (request, response, next) => {
     debug('Search Route');
 
     // Check for custom route function, and use it if it exists.
@@ -528,7 +527,7 @@ class UttoriWiki {
       response.set('Cache-control', 'no-store, no-cache, max-age=0');
     }
     response.render('search', viewModel);
-  }
+  };
 
   /**
    * Renders the edit page using the `edit` template.
@@ -540,7 +539,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async edit(request, response, next) {
+  edit = async (request, response, next) => {
     debug('Edit Route');
 
     // Check for custom route function, and use it if it exists.
@@ -592,7 +591,7 @@ class UttoriWiki {
     response.set('X-Robots-Tag', 'noindex');
     response.set('Cache-control', 'no-store, no-cache, max-age=0');
     response.render('edit', viewModel);
-  }
+  };
 
   /**
    * Attempts to delete a document and redirect to the homepage.
@@ -605,7 +604,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async delete(request, response, next) {
+  delete = async (request, response, next) => {
     debug('Delete Route');
 
     // Check for custom route function, and use it if it exists.
@@ -647,7 +646,7 @@ class UttoriWiki {
       debug('Nothing found to delete, next.');
       next();
     }
-  }
+  };
 
   /**
    * Attempts to update an existing document and redirects to the detail view of that document when successful.
@@ -661,7 +660,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async save(request, response, next) {
+  save = async (request, response, next) => {
     debug('Save Edit Route');
 
     // Check for custom route function, and use it if it exists.
@@ -697,7 +696,7 @@ class UttoriWiki {
     this.hooks.dispatch('validate-valid', request, this);
     request.wikiFlash('success', `Updated '${request.params.slug}' successfully.`);
     await this.saveValid(request, response, next);
-  }
+  };
 
   /**
    * Attempts to save a new document and redirects to the detail view of that document when successful.
@@ -711,7 +710,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async saveNew(request, response, next) {
+  saveNew = async (request, response, next) => {
     debug('Save New Route');
 
     // Check for custom route function, and use it if it exists.
@@ -755,7 +754,7 @@ class UttoriWiki {
     this.hooks.dispatch('validate-valid', request, this);
     request.wikiFlash('success', `Created '${slug}' successfully.`);
     await this.saveValid(request, response, next);
-  }
+  };
 
   /**
    * Renders the creation page using the `edit` template.
@@ -767,7 +766,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async create(request, response, next) {
+  create = async (request, response, next) => {
     debug('New Route');
 
     // Check for custom route function, and use it if it exists.
@@ -810,7 +809,7 @@ class UttoriWiki {
     response.set('X-Robots-Tag', 'noindex');
     response.set('Cache-control', 'no-store, no-cache, max-age=0');
     response.render('edit', viewModel);
-  }
+  };
 
   /**
    * Renders the detail page using the `detail` template.
@@ -824,7 +823,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async detail(request, response, next) {
+  detail = async (request, response, next) => {
     debug('Detail Route');
 
     // Check for custom route function, and use it if it exists.
@@ -890,7 +889,7 @@ class UttoriWiki {
     }
     debug('layout:', document.layout ?? 'detail');
     response.render(document.layout ?? 'detail', viewModel);
-  }
+  };
 
   /**
    * Renders the a preview of the passed in content.
@@ -903,7 +902,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async preview(request, response, next) {
+  preview = async (request, response, next) => {
     debug('Preview Route');
 
     // Check for custom route function, and use it if it exists.
@@ -924,7 +923,7 @@ class UttoriWiki {
     const html = await this.hooks.filter('render-content', request.body, this);
     response.setHeader('Content-Type', 'text/html');
     response.send(html);
-  }
+  };
 
   /**
    * Renders the history index page using the `history_index` template.
@@ -937,7 +936,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async historyIndex(request, response, next) {
+  historyIndex = async (request, response, next) => {
     debug('History Index Route');
 
     // Check for custom route function, and use it if it exists.
@@ -1016,7 +1015,7 @@ class UttoriWiki {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
     response.render('history_index', viewModel);
-  }
+  };
 
   /**
    * Renders the history detail page using the `detail` template.
@@ -1030,7 +1029,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async historyDetail(request, response, next) {
+  historyDetail = async (request, response, next) => {
     debug('History Detail Route');
 
     // Check for custom route function, and use it if it exists.
@@ -1093,7 +1092,7 @@ class UttoriWiki {
     }
     debug('layout:', document.layout ?? 'detail');
     response.render(document.layout ?? 'detail', viewModel);
-  }
+  };
 
   /**
    * Renders the history restore page using the `edit` template.
@@ -1106,7 +1105,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async historyRestore(request, response, next) {
+  historyRestore = async (request, response, next) => {
     debug('History Restore Route');
 
     // Check for custom route function, and use it if it exists.
@@ -1167,7 +1166,7 @@ class UttoriWiki {
       response.set('Cache-control', `public, max-age=${this.config.cacheLong}`);
     }
     response.render('edit', viewModel);
-  }
+  };
 
   /**
    * Renders the 404 Not Found page using the `404` template.
@@ -1179,9 +1178,8 @@ class UttoriWiki {
    * @param {import('express').Request} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
-   * @this {UttoriWiki}
    */
-  async notFound(request, response, next) {
+  notFound = async (request, response, next) => {
     debug('404 Not Found Route');
 
     // Check for custom route function, and use it if it exists.
@@ -1220,7 +1218,7 @@ class UttoriWiki {
 
     /* c8 ignore next */
     response.type('txt').send('Not found');
-  }
+  };
 
   /**
    * Handles saving documents, and changing the slug of documents, then redirecting to the document.
@@ -1236,7 +1234,7 @@ class UttoriWiki {
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
-  async saveValid(request, response, next) {
+  saveValid = async (request, response, next) => {
     debug('Save Valid');
     debug(`Saving with params: ${JSON.stringify(request.params, undefined, 2)}`);
     debug(`Saving with body: ${JSON.stringify(request.body, undefined, 2)}`);
@@ -1309,7 +1307,7 @@ class UttoriWiki {
     this.hooks.dispatch('search-update', [{ document, originalSlug }], this);
 
     response.redirect(`${this.config.publicUrl}/${slug}`);
-  }
+  };
 
   /**
    * Returns the documents with the provided tag, up to the provided limit.
@@ -1325,7 +1323,7 @@ class UttoriWiki {
    * wiki.getTaggedDocuments('example', 10);
    * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
    */
-  async getTaggedDocuments(tag, limit = 1024) {
+  getTaggedDocuments = async (tag, limit = 1024) => {
     debug('getTaggedDocuments:', tag, limit);
     /** @type {UttoriWikiDocument[]} */
     let results = [];
@@ -1338,7 +1336,7 @@ class UttoriWiki {
       debug('getTaggedDocuments Error:', error);
     }
     return results.filter(Boolean);
-  }
+  };
 }
 
 export default UttoriWiki;
