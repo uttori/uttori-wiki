@@ -498,8 +498,8 @@ class UttoriWiki {
     };
 
     if (request.query && request.query.s) {
-      const query = decodeURIComponent(String(request.query.s));
-      viewModel.title = `Search results for "${String(request.query.s)}"`;
+      const query = decodeURIComponent(JSON.stringify((request.query.s)));
+      viewModel.title = `Search results for "${JSON.stringify((request.query.s))}"`;
       viewModel.searchTerm = query;
 
       /** @type {UttoriWikiDocument[]} */
@@ -521,7 +521,7 @@ class UttoriWiki {
         return document;
       });
 
-      viewModel.meta = await this.buildMetadata({ title: `Search results for "${String(request.query.s)}"` }, `/search/${String(request.query.s)}`, 'noindex');
+      viewModel.meta = await this.buildMetadata({ title: `Search results for "${JSON.stringify((request.query.s))}"` }, `/search/${JSON.stringify((request.query.s))}`, 'noindex');
       viewModel.searchResults = await this.hooks.filter('render-search-results', viewModel.searchResults, this);
     }
     viewModel = await this.hooks.filter('view-model-search', viewModel, this);

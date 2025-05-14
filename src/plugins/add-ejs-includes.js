@@ -2,7 +2,6 @@ import ejs from 'ejs';
 
 let debug = (..._) => {};
 /* c8 ignore next 2 */
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Render.EJSRenderer'); } catch {}
 
 /**

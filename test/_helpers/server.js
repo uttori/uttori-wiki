@@ -55,6 +55,7 @@ export const serverSetup = () => {
   server.set('layout extractStyles', true);
   server.set('view engine', 'html');
   // server.enable('view cache');
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   server.engine('html', ejs.renderFile);
 
   // Setup Express

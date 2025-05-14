@@ -1,10 +1,8 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import antiTrojanSource from "eslint-plugin-anti-trojan-source";
 import ava from "eslint-plugin-ava";
 import _import from "eslint-plugin-import";
-import jsdoc from "eslint-plugin-jsdoc";
 import noInferredMethodName from "eslint-plugin-no-inferred-method-name";
 import n from "eslint-plugin-n";
 import optimizeRegex from "eslint-plugin-optimize-regex";
@@ -32,6 +30,7 @@ export default defineConfig([globalIgnores([
     "**/convert",
     "**/node_modules",
     "dist/*",
+    "eslint.config.js",
 ]), {
     extends: fixupConfigRules(compat.extends(
         "plugin:ava/recommended",
@@ -100,7 +99,7 @@ export default defineConfig([globalIgnores([
         "import/no-dynamic-require": 0,
 
         "import/no-extraneous-dependencies": ["error", {
-            devDependencies: ["**/*.test.js", "**/test/**/*.js"],
+            devDependencies: ["**/*.test.js", "**/test/**/*.js", "eslint.config.js"],
             optionalDependencies: true,
             peerDependencies: true,
         }],
@@ -159,6 +158,7 @@ export default defineConfig([globalIgnores([
     rules: {
         "@typescript-eslint/no-unsafe-member-access": 0,
         "@typescript-eslint/no-unsafe-return": 0,
+        "@typescript-eslint/unbound-method": 0,
         "import/no-named-as-default-member": 0,
     },
 }]);
