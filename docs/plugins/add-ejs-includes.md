@@ -21,14 +21,22 @@ Uttori Replacer Renderer
 **Kind**: global class  
 
 * [EJSRenderer](#EJSRenderer)
+    * [new EJSRenderer()](#new_EJSRenderer_new)
     * [.configKey](#EJSRenderer.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#EJSRenderer.defaultConfig) ⇒ [<code>EJSRendererConfig</code>](#EJSRendererConfig)
+    * [.defaultConfig()](#EJSRenderer.defaultConfig) ⇒ <code>ejs.Options</code>
     * [.validateConfig(config, _context)](#EJSRenderer.validateConfig)
     * [.register(context)](#EJSRenderer.register)
     * [.renderContent(content, context)](#EJSRenderer.renderContent) ⇒ <code>string</code>
     * [.renderCollection(collection, context)](#EJSRenderer.renderCollection) ⇒ <code>Array.&lt;object&gt;</code>
     * [.render(content, config)](#EJSRenderer.render) ⇒ <code>string</code>
 
+<a name="new_EJSRenderer_new"></a>
+
+### new EJSRenderer()
+**Example** *(EJSRenderer)*  
+```js
+const content = EJSRenderer.render("...");
+```
 <a name="EJSRenderer.configKey"></a>
 
 ### EJSRenderer.configKey ⇒ <code>string</code>
@@ -42,11 +50,11 @@ const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.c
 ```
 <a name="EJSRenderer.defaultConfig"></a>
 
-### EJSRenderer.defaultConfig() ⇒ [<code>EJSRendererConfig</code>](#EJSRendererConfig)
+### EJSRenderer.defaultConfig() ⇒ <code>ejs.Options</code>
 The default configuration.
 
 **Kind**: static method of [<code>EJSRenderer</code>](#EJSRenderer)  
-**Returns**: [<code>EJSRendererConfig</code>](#EJSRendererConfig) - The configuration.  
+**Returns**: <code>ejs.Options</code> - The configuration.  
 **Example** *(EJSRenderer.defaultConfig())*  
 ```js
 const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };

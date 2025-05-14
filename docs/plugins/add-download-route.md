@@ -21,6 +21,7 @@ Uttori Download Router
 **Kind**: global class  
 
 * [DownloadRouter](#DownloadRouter)
+    * [new DownloadRouter()](#new_DownloadRouter_new)
     * [.configKey](#DownloadRouter.configKey) ⇒ <code>string</code>
     * [.defaultConfig()](#DownloadRouter.defaultConfig) ⇒ [<code>DownloadRouterConfig</code>](#DownloadRouterConfig)
     * [.validateConfig(config, [_context])](#DownloadRouter.validateConfig)
@@ -28,6 +29,13 @@ Uttori Download Router
     * [.bindRoutes(server, context)](#DownloadRouter.bindRoutes)
     * [.download(context)](#DownloadRouter.download) ⇒ <code>module:express~RequestHandler</code>
 
+<a name="new_DownloadRouter_new"></a>
+
+### new DownloadRouter()
+**Example** *(DownloadRouter)*  
+```js
+const content = DownloadRouter.download(context);
+```
 <a name="DownloadRouter.configKey"></a>
 
 ### DownloadRouter.configKey ⇒ <code>string</code>

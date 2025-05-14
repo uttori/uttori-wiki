@@ -23,6 +23,7 @@ Add tags to the view model.
 **Kind**: global class  
 
 * [AddQueryOutputToViewModel](#AddQueryOutputToViewModel)
+    * [new AddQueryOutputToViewModel()](#new_AddQueryOutputToViewModel_new)
     * [.configKey](#AddQueryOutputToViewModel.configKey) ⇒ <code>string</code>
     * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
     * [.validateConfig(config, _context)](#AddQueryOutputToViewModel.validateConfig)
@@ -30,6 +31,13 @@ Add tags to the view model.
     * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;T&gt;</code>
     * [.callback(eventLabel)](#AddQueryOutputToViewModel.callback) ⇒ <code>AddQueryOutputToViewModelCallback</code>
 
+<a name="new_AddQueryOutputToViewModel_new"></a>
+
+### new AddQueryOutputToViewModel()
+**Example** *(AddQueryOutputToViewModel)*  
+```js
+const viewModel = AddQueryOutputToViewModel.callback(viewModel, context);
+```
 <a name="AddQueryOutputToViewModel.configKey"></a>
 
 ### AddQueryOutputToViewModel.configKey ⇒ <code>string</code>
