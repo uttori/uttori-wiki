@@ -184,10 +184,8 @@ class AddQueryOutputToViewModel {
       let results = fallback;
       try {
         if (typeof queryFunction === 'function') {
-          // eslint-disable-next-line no-await-in-loop
           [results] = await queryFunction(viewModel, context);
         } else {
-          // eslint-disable-next-line no-await-in-loop
           [results] = await context.hooks.fetch('storage-query', query);
         }
         if (typeof format === 'function') {

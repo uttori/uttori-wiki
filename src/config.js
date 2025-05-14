@@ -39,7 +39,7 @@
  * @property {import("express").RequestHandler} [notFoundRoute] A replacement route handler for the 404 not found route.
  * @property {import("express").RequestHandler} [saveValidRoute] A replacement route handler for the save valid route.
  * @property {Record<string, import("express").RequestHandler[]>} routeMiddleware A collection of middleware for each route.
- * @property {Array} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
+ * @property {import("../dist/custom.js").UttoriWikiPlugin[]} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {import("../dist/custom.js").UttoriMiddleware[]} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
  * @property {import("../dist/custom.js").UttoriRedirect[]} [redirects] Redirect Configuration to redirect old routes to new routes.
  */

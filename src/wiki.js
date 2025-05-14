@@ -852,7 +852,7 @@ class UttoriWiki {
       const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${slug}" OR redirects INCLUDES ("${slug}")) ORDER BY slug ASC LIMIT 1`;
       const results = await this.hooks.fetch('storage-query', query, this);
       if (results) {
-        // eslint-disable-next-line prefer-destructuring
+
         document = results[0][0];
       }
     /* c8 ignore next 3 */

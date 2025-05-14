@@ -13,7 +13,7 @@ test('saveValid: parses tags as a string', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  await uttori.saveValid({ params: { slug },
     body: {
       title: 'Delete Page',
       slug,
@@ -24,12 +24,13 @@ test('saveValid: parses tags as a string', async (t) => {
     },
     wikiFlash }, response, () => {});
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['tag-1', 'tag-2', 'tag-3']);
 });
 
-test('can be replaced', async (t) => {
+test('route can be replaced', async (t) => {
   t.plan(1);
 
   const spy = sinon.spy();
@@ -39,7 +40,7 @@ test('can be replaced', async (t) => {
   };
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, saveValidRoute }, server);
-  await uttori.saveValid({ params: {}, body: {} }, response, () => {});
+  await uttori.saveValid({ params: { slug: 'test-can-be-replaced' }, body: {} }, response, () => {});
   t.is(spy.called, true);
 });
 
@@ -60,6 +61,7 @@ test('saveValid: parses tags as an array', async (t) => {
     },
     wikiFlash }, response, () => {});
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['tag-1', 'tag-2', 'tag-3']);
@@ -82,6 +84,7 @@ test('saveValid: sorts tags', async (t) => {
     },
     wikiFlash }, response, () => {});
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['a', 'b', 'c']);
@@ -105,6 +108,7 @@ test('saveValid: parses redirects as a string', async (t) => {
     },
     wikiFlash }, response, () => {});
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url', 'somehow-older']);
@@ -128,6 +132,7 @@ test('saveValid: parses redirects as an array', async (t) => {
     },
     wikiFlash }, response, () => {});
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url']);

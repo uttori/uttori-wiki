@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [6.1.0](https://github.com/uttori/uttori-wiki/compare/v6.0.3...v6.0.4) - 2024-01-06
+## [6.1.0](https://github.com/uttori/uttori-wiki/compare/v6.0.4...v6.1.0) - 2025-05-13
 
 - 🧰 Add support for redirecting via Express route syntax to help migrate away from Jekyll or other platforms
 - 🧰 Export `asyncHandler` for use in plugins or other projects
+- 🧰 Add `FilterIPAddress` plugin for an IP blocklist for blocking saving from certain IP addresses
 - 🛠 Remove need for `bind(this)` with class methods
 - 🛠 Clean up many types
+- 🛠 Update ESLint configuration to v9
+- 🎁 Update dependencies
 - 🎁 Update dev dependencies
 
 ## [6.0.4](https://github.com/uttori/uttori-wiki/compare/v6.0.3...v6.0.4) - 2023-12-25

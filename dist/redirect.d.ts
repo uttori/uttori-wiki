@@ -3,7 +3,7 @@
  * @param {string} path The path to parse.
  * @returns {(string|import('../dist/custom.js').ParsedPathKey)[]} The parsed path segments.
  */
-export function parsePath(path: string): (string | import('../dist/custom.js').ParsedPathKey)[];
+export function parsePath(path: string): (string | import("../dist/custom.js").ParsedPathKey)[];
 /**
  * The function now iterates over the parsed segments of the target.
  * For each segment, if it's an object representing a key, it checks against the routeKeyMap to see if the key is present in the route.
@@ -13,7 +13,7 @@ export function parsePath(path: string): (string | import('../dist/custom.js').P
  * @param {string} target The target to process.
  * @returns {(string|import('../dist/custom.js').ParsedPathKey)[]} The processed segments, ready to be used for path construction.
  */
-export function prepareTarget(route: string, target: string): (string | import('../dist/custom.js').ParsedPathKey)[];
+export function prepareTarget(route: string, target: string): (string | import("../dist/custom.js").ParsedPathKey)[];
 /**
  * The buildPath function constructs the final path string.
  * It iterates over the combined segments, assembling the path segment-by-segment.

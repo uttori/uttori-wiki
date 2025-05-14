@@ -15,11 +15,11 @@ export type AddQueryOutputToViewModelQuery = {
     /**
      * An optional function to format the query output.
      */
-    format?: import('../../dist/custom.js').AddQueryOutputToViewModelFormatFunction;
+    format?: import("../../dist/custom.js").AddQueryOutputToViewModelFormatFunction;
     /**
      * An optional custom function to execut the query.
      */
-    queryFunction?: import('../../dist/custom.js').AddQueryOutputToViewModelQueryFunction;
+    queryFunction?: import("../../dist/custom.js").AddQueryOutputToViewModelQueryFunction;
 };
 export type AddQueryOutputToViewModelConfig = {
     /**
@@ -121,7 +121,7 @@ declare class AddQueryOutputToViewModel {
      * AddQueryOutputToViewModel.register(context);
      * @static
      */
-    static register(context: import('../../dist/custom.js').UttoriContext): void;
+    static register(context: import("../../dist/custom.js").UttoriContext): void;
     /**
      * Queries for related documents based on similar tags and searches the storage provider.
      * @template T The viewModel we are manipulating.
@@ -144,13 +144,13 @@ declare class AddQueryOutputToViewModel {
      * AddQueryOutputToViewModel.callback(viewModel, context);
      * @static
      */
-    static callbackCurry<T>(eventLabel: string, viewModel: T, context: import('../../dist/custom.js').UttoriContext): Promise<T>;
+    static callbackCurry<T>(eventLabel: string, viewModel: T, context: import("../../dist/custom.js").UttoriContext): Promise<T>;
     /**
      * Curry the hook function to take the current event label.
      * @param {string} eventLabel The event label to run queries for.
      * @returns {import('../../dist/custom.js').AddQueryOutputToViewModelCallback} The provided view-model document.
      * @example <caption>AddQueryOutputToViewModel.callback(eventLabel)</caption>
      */
-    static callback(eventLabel: string): import('../../dist/custom.js').AddQueryOutputToViewModelCallback;
+    static callback(eventLabel: string): import("../../dist/custom.js").AddQueryOutputToViewModelCallback;
 }
 //# sourceMappingURL=add-query-output.d.ts.map

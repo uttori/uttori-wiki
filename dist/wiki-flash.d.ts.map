@@ -1,1 +1,1 @@
-{"version":3,"file":"wiki-flash.d.ts","sourceRoot":"","sources":["../src/wiki-flash.js"],"names":[],"mappings":"AAGA;;;;;;;GAOG;AACH,gCAJW,MAAM,UACN,MAAM,GACJ,OAAO,MAAM,EAAE,MAAM,EAAE,CAAC,WAAO,OAAO,CA6BlD;AAmBW,4UAE6P"}
+{"version":3,"file":"wiki-flash.d.ts","sourceRoot":"","sources":["../src/wiki-flash.js"],"names":[],"mappings":"AAGA;;;;;;;;GAQG;AACH;aALqB;QAAE,SAAS,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,EAAE,CAAC,CAAA;KAAE;SACjD,MAAM,UACN,MAAM,GACJ,MAAM,CAAC,MAAM,EAAE,MAAM,EAAE,CAAC,WAAO,OAAO,CA6BlD"}

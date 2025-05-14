@@ -72,6 +72,7 @@ test('redirects to the document after saving with case transforms', async (t) =>
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-old', this);
   t.is(document.slug, 'test-old');
 });
@@ -97,6 +98,7 @@ test('redirects after spliting tags correctly', async (t) => {
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-tags');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-tags', this);
   t.deepEqual(document.tags, ['tag-1', 'tag-2']);
 });
@@ -111,6 +113,7 @@ test('redirects after spliting redirects correctly', async (t) => {
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-redirects');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-redirects', this);
   t.deepEqual(document.redirects, ['bad-url']);
 });
@@ -168,6 +171,7 @@ test('redirects to the document after saving with a full payload', async (t) => 
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-brand-new');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-brand-new', this);
   t.is(document.author, 'Name');
   t.is(document.content, 'Markdown');

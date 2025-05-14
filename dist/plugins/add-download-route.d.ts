@@ -19,7 +19,7 @@ export type DownloadRouterConfig = {
     /**
      * Custom Middleware for the Upload route
      */
-    middleware: import('express').RequestHandler[];
+    middleware: import("express").RequestHandler[];
 };
 /**
  * @typedef {object} DownloadRouterConfig
@@ -125,6 +125,6 @@ declare class DownloadRouter {
      */
     static download(context: {
         config: Record<string, DownloadRouterConfig>;
-    }): import('express').RequestHandler;
+    }): import("express").RequestHandler;
 }
 //# sourceMappingURL=add-download-route.d.ts.map

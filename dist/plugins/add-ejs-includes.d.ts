@@ -110,7 +110,7 @@ declare class EJSRenderer {
      * EJSRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: {
+    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: {
         config: Record<string, EJSRendererConfig>;
     }): object[];
     /**

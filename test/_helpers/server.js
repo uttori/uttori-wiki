@@ -71,9 +71,7 @@ export const serverSetup = () => {
   server.use(flash);
 
   if (process.argv[2] && process.argv[2] !== 'undefined') {
-    // eslint-disable-next-line no-console
     console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
-    // eslint-disable-next-line prefer-destructuring
     process.title = process.argv[2];
   }
 
@@ -87,7 +85,6 @@ export const serverSetup = () => {
   // if (import.meta.main) {
   if (import.meta.url === (`file:///${process.argv[1].replace(/\\/g, '/')}`).replace(/\/{3,}/, '///')) {
     // No, this is a CLI tool.
-    // eslint-disable-next-line no-console
     console.log('Starting test server...');
     server.listen(server.get('port'), server.get('ip'));
   }

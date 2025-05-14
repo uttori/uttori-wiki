@@ -71,6 +71,7 @@ test('redirects to the document after saving with no custom fields allowed', asy
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-old', this);
   t.is(document.author, undefined);
 });
@@ -121,6 +122,7 @@ test('redirects to the document after saving with case transforms', async (t) =>
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-old', this);
   t.is(document.slug, 'test-old');
 });
@@ -136,6 +138,7 @@ test('redirects after spliting tags correctly', async (t) => {
   t.is(response.status, 302);
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-old', this);
   t.deepEqual(document.tags, ['tag-1', 'tag-2']);
 });
@@ -214,6 +217,7 @@ test('redirects to the document after saving with a full payload', async (t) => 
   const uttori = new UttoriWiki(config, server);
   await request(server).put('/test-old/save/test-key').send('title=Title&excerpt=Short&content=Markdown&tags=tag-1,tag-2&author=Name&slug=test-new');
 
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', 'test-new', this);
   t.is(document.author, 'Name');
   t.is(document.content, 'Markdown');

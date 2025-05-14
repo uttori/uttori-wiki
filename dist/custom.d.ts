@@ -63,3 +63,26 @@ export interface SaveParams {
   /** The slug to save to. */
   slug: string
 }
+
+export interface UttoriWikiPlugin {
+  /** The config key the plugin will search for in the larger config object. */
+  static configKey: string
+  /** The default config for the plugin. */
+  static defaultConfig: Record<string, any>
+  /** Validates the config. */
+  static validateConfig?: (config: Record<string, object>) => boolean
+  /** Sets up any hooks the plugin needs. */
+  static register: (context: UttoriWiki) => void
+  /** If the plugin has routes to bind, this function will be called with the Express app and the context. */
+  static bindRoutes?: (app: Express, context: UttoriContext) => void
+}
+
+export * from './config'
+export * from './index'
+export * from './middleware'
+export * from './redirect'
+export * from './wiki-flash'
+export * from './wiki'
+export * from './plugins/add-download-route'
+export * from './plugins/add-ejs-includes'
+export * from './plugins/add-query-output'

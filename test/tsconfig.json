@@ -1,9 +1,10 @@
 {
   "include": [
-    "*"
+    "**/*.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "**/*.json"
   ],
   "compilerOptions": {
     "allowJs": true,
@@ -22,6 +23,7 @@
     "module": "NodeNext",
     "moduleResolution": "nodenext",
     "noEmit": true,
+    "outDir": "./test/dist",
     "sourceMap": true,
     "strict": false,
     "target": "esnext",

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import test from 'ava';
 import request from 'supertest';
 
