@@ -143,7 +143,9 @@ test('saveValid: redirects back when no slug is found', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  await uttori.saveValid({
+    get: () => {},
+    params: {},
     body: {
       title: 'Delete Page',
       slug: '',

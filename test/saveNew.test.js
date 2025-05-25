@@ -211,7 +211,11 @@ test('redirects back after attempting to saving when missing body keys', async (
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  await uttori.saveNew({ params: { key: 'test-key' }, body: {} }, response, next);
+  await uttori.saveNew({
+    get: () => {},
+    params: { key: 'test-key' },
+    body: {}
+  }, response, next);
   t.true(redirect.calledOnce);
 });
 
@@ -223,7 +227,11 @@ test('redirects back after attempting to saving when missing body', async (t) =>
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  await uttori.saveNew({ params: { key: 'test-key' }, body: undefined }, response, next);
+  await uttori.saveNew({
+    get: () => {},
+    params: { key: 'test-key' },
+    body: undefined
+  }, response, next);
   t.true(redirect.calledOnce);
 });
 
@@ -235,6 +243,10 @@ test('redirects back after attempting to saving when useEditKey is set but no ed
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  await uttori.saveNew({ params: { key: 'bad-key' }, body: { title: 'Title' } }, response, next);
+  await uttori.saveNew({
+    get: () => {},
+    params: { key: 'bad-key' },
+    body: { title: 'Title' }
+  }, response, next);
   t.true(redirect.calledOnce);
 });

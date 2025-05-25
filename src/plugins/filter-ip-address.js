@@ -1,6 +1,10 @@
 // const invalid = await this.hooks.validate('validate-save', request, this);
 import fs from 'fs';
 import path from 'path';
+import * as url from 'url';
+
+/** @type {string} The directory name of the current file. */
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 let debug = (..._) => {};
 /* c8 ignore next */
@@ -39,10 +43,10 @@ class FilterIPAddress {
   static defaultConfig() {
     return {
       events: {
-        callback: ['validate-save'],
+        validateIP: ['validate-save'],
         validateConfig: ['validate-config'],
       },
-      logPath: './logs',
+      logPath: path.join(__dirname, 'logs'),
       blocklist: [],
       trustProxy: false,
     };

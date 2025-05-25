@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [6.1.1](https://github.com/uttori/uttori-wiki/compare/v6.1.0...v6.1.1) - 2025-05-25
+
+- 🪲 `FilterIPAddress` default log directory was set incorrectly to `./logs`
+- 🪲 `FilterIPAddress` incorrect default method was set for the `validate-save` event of `callback` rather than `validateIP`
+- 🛠 Update Express v4 redirects `res.redirect('back')` to Express v5 supported redirects
+
 ## [6.1.0](https://github.com/uttori/uttori-wiki/compare/v6.0.4...v6.1.0) - 2025-05-13
 
 - 🧰 Add support for redirecting via Express route syntax to help migrate away from Jekyll or other platforms

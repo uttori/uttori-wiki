@@ -694,7 +694,7 @@ class UttoriWiki {
     if (invalid) {
       debug('Invalid:', request.params.slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
@@ -726,12 +726,12 @@ class UttoriWiki {
 
     if (this.config.useEditKey && (!request.params.key || request.params.key !== this.config.editKey)) {
       debug('save: Missing edit key, or a edit key mismatch!');
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     if (!request.body || (request.body && Object.keys(request.body).length === 0)) {
       debug('Missing body!');
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     const { slug } = request.body;
@@ -744,7 +744,7 @@ class UttoriWiki {
     }
     if (count !== 0) {
       debug(`${count} existing Document or Redirect with the slug:`, slug, JSON.stringify(request.body));
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     // Check for spam or otherwise veryify, redirect back if true, continue to update if false.
@@ -752,7 +752,7 @@ class UttoriWiki {
     if (invalid) {
       debug('Invalid:', slug, JSON.stringify(request.body));
       this.hooks.dispatch('validate-invalid', request, this);
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     this.hooks.dispatch('validate-valid', request, this);
@@ -1284,7 +1284,7 @@ class UttoriWiki {
     let slug = request.body.slug || request.params.slug;
     if (!slug) {
       request.wikiFlash('error', 'Missing slug.');
-      response.redirect('back');
+      response.redirect(request.get("Referrer") || "/");
       return;
     }
     slug = slug.toLowerCase();

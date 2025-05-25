@@ -1,8 +1,11 @@
 import test from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
-
+import * as url from 'url';
 import FilterIPAddress from '../../src/plugins/filter-ip-address.js';
+import path from 'path';
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 test('configKey: should return the correct configuration key', (t) => {
   t.is(FilterIPAddress.configKey, 'uttori-plugin-filter-ip-address');
@@ -11,10 +14,10 @@ test('configKey: should return the correct configuration key', (t) => {
 test('defaultConfig: should return the default configuration', (t) => {
   t.deepEqual(FilterIPAddress.defaultConfig(), {
     events: {
-      callback: ['validate-save'],
+      validateIP: ['validate-save'],
       validateConfig: ['validate-config'],
     },
-    logPath: './logs',
+    logPath: path.join(__dirname, 'logs').replace(/test/g, 'src'),
     blocklist: [],
     trustProxy: false,
   });
