@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🪲 `FilterIPAddress` default log directory was set incorrectly to `./logs`
 - 🪲 `FilterIPAddress` incorrect default method was set for the `validate-save` event of `callback` rather than `validateIP`
 - 🛠 Update Express v4 redirects `res.redirect('back')` to Express v5 supported redirects
+- 🎁 Update dev dependencies
 
 ## [6.1.0](https://github.com/uttori/uttori-wiki/compare/v6.0.4...v6.1.0) - 2025-05-13
 
