@@ -23,9 +23,9 @@ declare namespace Express {
 }
 
 export type UttoriPluginConfig =
-  import('./../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
-  import('./../src/plugins/add-ejs-includes.js').EJSRendererConfig |
-  import('./../src/plugins/add-download-route.js').DownloadRouterConfig
+  import('../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
+  import('../src/plugins/add-ejs-includes.js').EJSRendererConfig |
+  import('../src/plugins/add-download-route.js').DownloadRouterConfig
 
 export type UttoriContext = {
   config: Record<string, UttoriPluginConfig>;
