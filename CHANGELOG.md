@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [6.1.1](https://github.com/uttori/uttori-wiki/compare/v6.1.1...v6.1.2) - 2025-08-23
+## [6.1.3](https://github.com/uttori/uttori-wiki/compare/v6.1.2...v6.1.3) - 2025-08-25
+
+- 🛠 Export custom types
+- 🎁 Update dev dependencies
+
+## [6.1.2](https://github.com/uttori/uttori-wiki/compare/v6.1.1...v6.1.2) - 2025-08-23
 
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies

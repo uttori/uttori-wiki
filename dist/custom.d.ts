@@ -31,6 +31,21 @@ export type UttoriContext = {
   config: Record<string, UttoriPluginConfig>;
   hooks: EventDispatcher;
 }
+
+/**
+ * Extend a specific key with an extra config type.
+ * @example <caption>UttoriContextWithPluginConfig</caption>
+ * const context: UttoriContextWithPluginConfig<'my-plugin', MyPluginConfig> = {
+ *   config: {
+ *     'my-plugin': { enabled: true, foo: 1 },
+ *   },
+ * };
+ */
+export type UttoriContextWithPluginConfig<K extends string, CustomPluginConfig> =
+  Omit<UttoriContext, 'config'> & {
+    config: UttoriContext['config'] & Record<K, UttoriPluginConfig | CustomPluginConfig>;
+  };
+
 export type UttoriMiddleware = (string | Function | boolean)[]
 
 export type AddQueryOutputToViewModelFormatFunction = (documents:any[]) => any[]
