@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [6.1.3](https://github.com/uttori/uttori-wiki/compare/v6.1.2...v6.1.3) - 2025-08-25
 
+- 🪲 Search should not include quotes from JSON.stringify
+
+## [6.1.3](https://github.com/uttori/uttori-wiki/compare/v6.1.2...v6.1.3) - 2025-08-25
+
 - 🛠 Export custom types
 - 🎁 Update dev dependencies
 

@@ -16,7 +16,7 @@ test('search(request, response, _next): renders', async (t) => {
   t.is(response.status, 200);
   t.is(response.text.slice(0, 15), '<!DOCTYPE html>');
   const title = response.text.match(/<title>(.*?)<\/title>/i) || '';
-  t.is(title[1], 'Search results for &#34;&#34;test&#34;&#34;');
+  t.is(title[1], 'Search results for &#34;test&#34;');
 });
 
 test('can have middleware set and used', async (t) => {

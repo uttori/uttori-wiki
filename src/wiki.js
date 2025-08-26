@@ -471,7 +471,7 @@ class UttoriWiki {
    * - `filter` - `render-search-results` - Passes in the search results.
    * - `filter` - `view-model-search` - Passes in the viewModel.
    * @async
-   * @param {import('express').Request} request The Express Request object.
+   * @param {import('express').Request<{}, {}, {}, { s: string }>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -498,8 +498,9 @@ class UttoriWiki {
     };
 
     if (request.query && request.query.s) {
-      const query = decodeURIComponent(JSON.stringify((request.query.s)));
-      viewModel.title = `Search results for "${JSON.stringify((request.query.s))}"`;
+      debug('search query:', request.query.s);
+      const query = decodeURIComponent(String(request.query.s));
+      viewModel.title = `Search results for "${query}"`;
       viewModel.searchTerm = query;
 
       /** @type {UttoriWikiDocument[]} */
