@@ -237,6 +237,16 @@ test('falls through to next when missing body keys', async (t) => {
   t.true(next.calledOnce);
 });
 
+test('falls through to next when missing slug', async (t) => {
+  t.plan(1);
+
+  const next = sinon.spy();
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await uttori.save({ params: { slug: '', key: 'test-key' }, body: { title: 'Title' } }, undefined, next);
+  t.true(next.calledOnce);
+});
+
 test('falls through to next when missing body', async (t) => {
   t.plan(1);
 

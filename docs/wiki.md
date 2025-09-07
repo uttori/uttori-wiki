@@ -151,7 +151,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
+| request | <code>module:express~Request.&lt;{}, {}, {}, {s: string}&gt;</code> | The Express Request object. |
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 

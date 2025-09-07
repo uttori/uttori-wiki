@@ -76,7 +76,7 @@ export interface SaveParams {
   /** Optional edit key/ */
   key?: string
   /** The slug to save to. */
-  slug: string
+  slug?: string
 }
 
 export interface UttoriWikiPlugin {

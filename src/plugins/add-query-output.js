@@ -40,7 +40,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Add
  */
 
 /**
- * Add tags to the view model.
+ * Add queries output to the view model.
  * @example <caption>AddQueryOutputToViewModel</caption>
  * const viewModel = AddQueryOutputToViewModel.callback(viewModel, context);
  * @class
@@ -210,7 +210,7 @@ class AddQueryOutputToViewModel {
    */
   static callback(eventLabel) {
     debug('callback:', eventLabel);
-    return async (target, context) => AddQueryOutputToViewModel.callbackCurry(eventLabel, target, context);
+    return async (viewModel, context) => AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context);
   }
 }
 

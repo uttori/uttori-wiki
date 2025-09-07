@@ -169,7 +169,7 @@ class DownloadRouter {
     /** @type {DownloadRouterConfig} */
     const { publicRoute, middleware } = { ...DownloadRouter.defaultConfig(), ...context.config[DownloadRouter.configKey] };
     debug('bindRoutes publicRoute:', `${publicRoute}/:file`);
-    server.get(`${publicRoute}/*?`, ...middleware, DownloadRouter.download(context));
+    server.get(`${publicRoute}/*file`, ...middleware, DownloadRouter.download(context));
   }
 
   /**
@@ -187,25 +187,30 @@ class DownloadRouter {
       /** @type {DownloadRouterConfig} */
       const { basePath, allowedReferrers } = { ...DownloadRouter.defaultConfig(), ...context.config[DownloadRouter.configKey] };
 
+      debug('download: request?.params:', request?.params);
+
       /* c8 ignore next 4 */
-      if (!request?.params[0]) {
+      if (!request?.params.file) {
+        debug('download: no file parameter');
         next();
         return;
       }
 
-      let filename = path.join(basePath, request.params[0].trim());
-      debug('filename:', filename);
+      const filePath = Array.isArray(request?.params.file) ? request?.params.file.join('/') : request?.params.file;
+      let filename = path.join(basePath, filePath.trim());
+      debug('download: filename:', filename);
       // Prevent directory traversal with regex
       if (/(\.\.\/|\/\.\.\/|\/\.\.$|^\.\.$)/.test(filename)) {
+        debug('download: directory traversal');
         next();
         return;
       }
 
       // Make sure the file exists
-      debug('checking if file exists...');
+      debug('download: checking if file exists...');
       filename = path.resolve(filename);
       if (!fs.existsSync(filename)) {
-        debug('file does not exist');
+        debug('download: file does not exist');
         next();
         return;
       }

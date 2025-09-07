@@ -25,6 +25,7 @@ export const asyncHandler = (fn) => (request, response, next) => { Promise.resol
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
+ * @property {{ name: string; path: string; type: string; }[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
  */
 
 /**
@@ -200,58 +201,58 @@ class UttoriWiki {
     debug('Binding routes...');
 
     // Home
-    server.get('/', this.config.routeMiddleware.home, asyncHandler(this.home));
-    server.get(`/${this.config.homePage}`, asyncHandler(this.homepageRedirect));
+    server.get('/', this.config.routeMiddleware.home, this.home);
+    server.get(`/${this.config.homePage}`, this.config.routeMiddleware.home, this.homepageRedirect);
 
     // Search
     debug('Binding search route:', `/${this.config.routes.search}`);
-    server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, asyncHandler(this.search));
+    server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, this.search);
 
     // Tags
     debug('Binding tag index route:', `/${this.config.routes.tags}`);
     debug('Binding tag route:', `/${this.config.routes.tags}/:tag`);
-    server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, asyncHandler(this.tag));
-    server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, asyncHandler(this.tagIndex));
+    server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, this.tag);
+    server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, this.tagIndex);
 
     // Not Found Placeholder
-    server.head('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
-    server.get('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
-    server.delete('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
-    server.patch('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
-    server.put('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
-    server.post('/404', this.config.routeMiddleware.notFound, asyncHandler(this.notFound));
+    server.head('/404', this.config.routeMiddleware.notFound, this.notFound);
+    server.get('/404', this.config.routeMiddleware.notFound, this.notFound);
+    server.delete('/404', this.config.routeMiddleware.notFound, this.notFound);
+    server.patch('/404', this.config.routeMiddleware.notFound, this.notFound);
+    server.put('/404', this.config.routeMiddleware.notFound, this.notFound);
+    server.post('/404', this.config.routeMiddleware.notFound, this.notFound);
 
     // Document CRUD / Admin
     if (this.config.allowCRUDRoutes) {
-      server.get('/new/:key', this.config.routeMiddleware.create, asyncHandler(this.create));
-      server.get('/new', this.config.routeMiddleware.create, asyncHandler(this.create));
-      server.post('/new/:key', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew));
-      server.post('/new', this.config.routeMiddleware.saveNew, asyncHandler(this.saveNew));
+      server.get('/new/:key', this.config.routeMiddleware.create, this.create);
+      server.get('/new', this.config.routeMiddleware.create, this.create);
+      server.post('/new/:key', this.config.routeMiddleware.saveNew, this.saveNew);
+      server.post('/new', this.config.routeMiddleware.saveNew, this.saveNew);
 
-      server.post('/preview', this.config.routeMiddleware.preview, asyncHandler(this.preview));
-      server.get('/:slug/edit/:key', this.config.routeMiddleware.edit, asyncHandler(this.edit));
-      server.get('/:slug/edit', this.config.routeMiddleware.edit, asyncHandler(this.edit));
-      server.get('/:slug/delete/:key', this.config.routeMiddleware.delete, asyncHandler(this.delete));
-      server.get('/:slug/delete', this.config.routeMiddleware.delete, asyncHandler(this.delete));
+      server.post('/preview', this.config.routeMiddleware.preview, this.preview);
+      server.get('/:slug/edit/:key', this.config.routeMiddleware.edit, this.edit);
+      server.get('/:slug/edit', this.config.routeMiddleware.edit, this.edit);
+      server.get('/:slug/delete/:key', this.config.routeMiddleware.delete, this.delete);
+      server.get('/:slug/delete', this.config.routeMiddleware.delete, this.delete);
     }
 
     // Document History
     if (this.config.publicHistory) {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.historyIndex));
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.historyDetail));
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.historyRestore));
+      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.historyIndex);
+      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.historyDetail);
+      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.historyRestore);
     } else {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, asyncHandler(this.notFound));
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, asyncHandler(this.notFound));
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, asyncHandler(this.notFound));
+      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.notFound);
+      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.notFound);
+      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.notFound);
     }
 
     // Document Update
-    server.post('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save));
-    server.post('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save));
-    server.put('/:slug/save/:key', this.config.routeMiddleware.save, asyncHandler(this.save));
-    server.put('/:slug/save', this.config.routeMiddleware.save, asyncHandler(this.save));
-    server.get('/:slug*?', this.config.routeMiddleware.detail, asyncHandler(this.detail));
+    server.post('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+    server.post('/:slug/save', this.config.routeMiddleware.save, this.save);
+    server.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+    server.put('/:slug/save', this.config.routeMiddleware.save, this.save);
+    server.get('/:slug', this.config.routeMiddleware.detail, this.detail);
 
     // Handle Redirects
     for (const redirect of this.config.redirects) {
@@ -274,7 +275,7 @@ class UttoriWiki {
         // Redirect to the new path if it is different from the current path
         if (path !== request.url) {
           debug('Redirecting to:', path);
-          response.redirect(status, path);
+          response.status(status).redirect(path);
           return;
         }
         /* c8 ignore next */
@@ -286,7 +287,7 @@ class UttoriWiki {
 
     // Not Found - Catch All
     if (this.config.handleNotFound) {
-      server.get('/*', asyncHandler(this.notFound));
+      server.get('/*splat', this.notFound);
     }
 
     debug('Bound routes.');
@@ -353,6 +354,7 @@ class UttoriWiki {
   homepageRedirect = (request, response, _next) => {
     debug('homepageRedirect:', this.config.homePage);
     response.redirect(301, this.config.publicUrl || '/');
+    return
   };
 
   /**
@@ -661,7 +663,7 @@ class UttoriWiki {
    * - `dispatch` - `validate-invalid` - Passes in the request.
    * - `dispatch` - `validate-valid` - Passes in the request.
    * @async
-   * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
+   * @param {import('express').Request<import('../dist/custom.d.ts').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -677,6 +679,11 @@ class UttoriWiki {
 
     if (this.config.useEditKey && (!request.params.key || request.params.key !== this.config.editKey)) {
       debug('save: Missing edit key, or a edit key mismatch!');
+      next();
+      return;
+    }
+    if (!request.params.slug) {
+      debug('save: Missing slug!');
       next();
       return;
     }
@@ -851,9 +858,9 @@ class UttoriWiki {
       // [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
       const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
       const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${slug}" OR redirects INCLUDES ("${slug}")) ORDER BY slug ASC LIMIT 1`;
+      /** @type {UttoriWikiDocument[]} */
       const results = await this.hooks.fetch('storage-query', query, this);
       if (results) {
-
         document = results[0][0];
       }
     /* c8 ignore next 3 */
@@ -921,13 +928,13 @@ class UttoriWiki {
     if (!request.body) {
       debug('Missing body!');
       response.setHeader('Content-Type', 'text/html');
-      response.send('');
+      response.status(200).send('');
       return;
     }
 
     const html = await this.hooks.filter('render-content', request.body, this);
     response.setHeader('Content-Type', 'text/html');
-    response.send(html);
+    response.status(200).send(html);
   };
 
   /**
@@ -986,7 +993,6 @@ class UttoriWiki {
       next();
       return;
     }
-    /** @type {Record<string, string>} */
     const historyByDay = history.reduce((output, value) => {
       /* c8 ignore next */
       value = value.includes('-') ? value.split('-')[0] : value;
@@ -995,7 +1001,7 @@ class UttoriWiki {
       output[key] = output[key] || [];
       output[key].push(value);
       return output;
-    }, {});
+    }, /** @type {Record<string, string[]>} */ ({}));
 
     const meta = await this.buildMetadata({
       ...document,
