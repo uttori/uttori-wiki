@@ -6,6 +6,15 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('renders the requested slug', async (t) => {
   t.plan(2);
 
@@ -42,7 +51,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const detailRoute = (_request, _response, next) => {
     spy();
     next();
@@ -68,7 +77,7 @@ test('falls throught to next() when there is no slug', async (t) => {
   t.plan(1);
 
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
@@ -80,7 +89,7 @@ test('falls throught to next() when there is no document found', async (t) => {
   t.plan(1);
 
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);

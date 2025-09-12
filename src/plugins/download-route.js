@@ -189,7 +189,7 @@ class DownloadRouter {
 
       debug('download: request?.params:', request?.params);
 
-      /* c8 ignore next 4 */
+      /* c8 ignore next 5 */
       if (!request?.params.file) {
         debug('download: no file parameter');
         next();
@@ -200,6 +200,7 @@ class DownloadRouter {
       let filename = path.join(basePath, filePath.trim());
       debug('download: filename:', filename);
       // Prevent directory traversal with regex
+      /* c8 ignore next 5 */
       if (/(\.\.\/|\/\.\.\/|\/\.\.$|^\.\.$)/.test(filename)) {
         debug('download: directory traversal');
         next();

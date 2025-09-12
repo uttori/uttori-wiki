@@ -2,7 +2,7 @@
 
 <dl>
 <dt><a href="#AddQueryOutputToViewModel">AddQueryOutputToViewModel</a></dt>
-<dd><p>Add tags to the view model.</p>
+<dd><p>Add queries output to the view model.</p>
 </dd>
 </dl>
 
@@ -18,7 +18,7 @@
 <a name="AddQueryOutputToViewModel"></a>
 
 ## AddQueryOutputToViewModel
-Add tags to the view model.
+Add queries output to the view model.
 
 **Kind**: global class  
 

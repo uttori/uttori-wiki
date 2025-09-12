@@ -23,9 +23,11 @@ declare namespace Express {
 }
 
 export type UttoriPluginConfig =
-  import('../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
-  import('../src/plugins/add-ejs-includes.js').EJSRendererConfig |
-  import('../src/plugins/add-download-route.js').DownloadRouterConfig
+  import('../src/plugins/query-output.js').AddQueryOutputToViewModelConfig |
+  import('../src/plugins/ejs-includes.js').EJSRendererConfig |
+  import('../src/plugins/download-route.js').DownloadRouterConfig |
+  import('../src/plugins/import-document.js').ImportDocumentConfig |
+  import('../src/plugins/filter-ip-address.js').FilterIPAddressConfig
 
 export type UttoriContext = {
   config: Record<string, UttoriPluginConfig>;
@@ -98,6 +100,8 @@ export * from './middleware'
 export * from './redirect'
 export * from './wiki-flash'
 export * from './wiki'
-export * from './plugins/add-download-route'
-export * from './plugins/add-ejs-includes'
-export * from './plugins/add-query-output'
+export * from './plugins/download-route'
+export * from './plugins/ejs-includes'
+export * from './plugins/query-output'
+export * from './plugins/import-document'
+export * from './plugins/filter-ip-address'

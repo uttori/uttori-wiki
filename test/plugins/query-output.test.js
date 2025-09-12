@@ -1,7 +1,16 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import AddQueryOutputToViewModel from '../../src/plugins/add-query-output.js';
+import AddQueryOutputToViewModel from '../../src/plugins/query-output.js';
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
 
 test('configKey: should return correct key', (t) => {
   t.is(AddQueryOutputToViewModel.configKey, 'custom-plugin-add-query-output-to-view-model');
@@ -63,7 +72,7 @@ test('register: should throw error if events are missing', (t) => {
 });
 
 test('register: should call hooks.on for each event', (t) => {
-  const onSpy = sinon.spy();
+  const onSpy = sandbox.spy();
   const context = {
     hooks: {
       on: onSpy,
@@ -82,7 +91,7 @@ test('register: should call hooks.on for each event', (t) => {
 });
 
 test('register: can handle events with missing methods', (t) => {
-  const onSpy = sinon.spy();
+  const onSpy = sandbox.spy();
   const context = {
     hooks: {
       on: onSpy,
@@ -101,7 +110,7 @@ test('register: can handle events with missing methods', (t) => {
 });
 
 test('callbackCurry: does nothing with an invalid viewModel', async (t) => {
-  const fetchSpy = sinon.spy();
+  const fetchSpy = sandbox.spy();
   const eventLabel = 'view-model-home';
   const context = {
     config: {
@@ -134,7 +143,7 @@ test('callbackCurry: does nothing with an invalid viewModel', async (t) => {
 });
 
 test('callbackCurry: does nothing with no queries', async (t) => {
-  const fetchSpy = sinon.spy();
+  const fetchSpy = sandbox.spy();
   const eventLabel = 'view-model-home';
   const context = {
     config: {
@@ -155,7 +164,7 @@ test('callbackCurry: does nothing with no queries', async (t) => {
 });
 
 test('callbackCurry: can handle errors', async (t) => {
-  const queryFunction = sinon.stub().rejects([['result']]);
+  const queryFunction = sandbox.stub().rejects([['result']]);
   const eventLabel = 'view-model-home';
   const context = {
     config: {
@@ -181,7 +190,7 @@ test('callbackCurry: can handle errors', async (t) => {
 });
 
 test('callbackCurry: should call hooks.fetch for each query', async (t) => {
-  const fetchSpy = sinon.stub().resolves([['result']]);
+  const fetchSpy = sandbox.stub().resolves([['result']]);
   const eventLabel = 'view-model-home';
   const context = {
     config: {
@@ -214,7 +223,7 @@ test('callbackCurry: should call hooks.fetch for each query', async (t) => {
 });
 
 test('callbackCurry: should call queryFunction when set', async (t) => {
-  const queryFunction = sinon.stub().resolves([['result']]);
+  const queryFunction = sandbox.stub().resolves([['result']]);
   const eventLabel = 'view-model-home';
   const context = {
     config: {

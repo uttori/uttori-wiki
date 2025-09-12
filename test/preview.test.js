@@ -6,6 +6,16 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup } from './_helpers/server.js';
 
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('can preview content', async (t) => {
   t.plan(2);
 
@@ -50,7 +60,7 @@ test('can handle an empty body', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const previewRoute = (_request, _response, next) => {
     spy();
     next();

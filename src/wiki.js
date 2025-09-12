@@ -8,9 +8,6 @@ let debug = (..._) => {};
 /* c8 ignore next */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
 
-// Used in `bindRoutes`, written in an odd way to make TypeScript happy.
-export const asyncHandler = (fn) => (request, response, next) => { Promise.resolve(fn(request, response, next)).catch((error) => { next(error); }); };
-
 /**
  * @typedef UttoriWikiDocument
  * @type {object}
@@ -25,7 +22,15 @@ export const asyncHandler = (fn) => (request, response, next) => { Promise.resol
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
- * @property {{ name: string; path: string; type: string; }[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+ * @property {UttoriWikiDocumentAttachment[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+ */
+
+/**
+ * @typedef UttoriWikiDocumentAttachment
+ * @type {object}
+ * @property {string} name The display name of the attachment.
+ * @property {string} path The path to the attachment.
+ * @property {string} type The MIME type of the attachment.
  */
 
 /**

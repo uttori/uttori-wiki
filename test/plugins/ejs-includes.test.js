@@ -1,7 +1,17 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import EJSRenderer from '../../src/plugins/add-ejs-includes.js';
+import EJSRenderer from '../../src/plugins/ejs-includes.js';
+
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
 
 test('configKey: should return the correct configuration key', (t) => {
   t.is(EJSRenderer.configKey, 'uttori-plugin-renderer-ejs');
@@ -37,7 +47,7 @@ test('register: should throw an error if events are missing in config', (t) => {
 });
 
 test('register: should register events if they are present in config', (t) => {
-  const on = sinon.spy();
+  const on = sandbox.spy();
   const context = {
     hooks: {
       on,

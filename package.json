@@ -21,7 +21,7 @@
     "note taking"
   ],
   "engines": {
-    "node": ">= 20"
+    "node": ">= 24"
   },
   "dependencies": {
     "@types/sinon": "^17.0.4",
@@ -30,7 +30,8 @@
   "optionalDependencies": {
     "debug": "^4.4.1",
     "ejs": "^3.1.10",
-    "express-session": "^1.18.2"
+    "express-session": "^1.18.2",
+    "memorystore": "^1.6.7"
   },
   "peerDependencies": {
     "express": "^5"
@@ -45,8 +46,8 @@
     "@types/express-session": "^1.18.2",
     "@types/node": "^24.3.1",
     "@types/supertest": "^6.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.42.0",
-    "@typescript-eslint/parser": "^8.42.0",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
     "@uttori/search-provider-lunr": "^4.1.1",
     "@uttori/storage-provider-json-memory": "^5",
     "ava": "^6.4.1",
@@ -57,7 +58,7 @@
     "eslint-plugin-anti-trojan-source": "^1.1.1",
     "eslint-plugin-ava": "^15.1.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^54.5.0",
+    "eslint-plugin-jsdoc": "^55.0.3",
     "eslint-plugin-n": "^17.21.3",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-optimize-regex": "^1.2.1",
@@ -65,10 +66,12 @@
     "eslint-plugin-xss": "^0.1.12",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
+    "express-session": "^1.18.2",
     "globals": "^16.3.0",
     "jsdoc": "^4.0.4",
     "jsdoc-to-markdown": "^9.1.2",
     "jsdoc-tsimport-plugin": "^1.0.5",
+    "memorystore": "^1.6.7",
     "pre-commit": "^1.2.2",
     "release-it": "^19.0.4",
     "sinon": "^21.0.0",
@@ -108,17 +111,25 @@
       "import": "./src/wiki.js",
       "types": "./dist/wiki.d.ts"
     },
-    "./plugins/add-download-route": {
-      "import": "./src/plugins/add-download-route.js",
-      "types": "./dist/plugins/add-download-route.d.ts"
+    "./plugins/download-route": {
+      "import": "./src/plugins/download-route.js",
+      "types": "./dist/plugins/download-route.d.ts"
     },
-    "./plugins/add-ejs-includes": {
-      "import": "./src/plugins/add-ejs-includes.js",
-      "types": "./dist/plugins/add-ejs-includes.d.ts"
+    "./plugins/ejs-includes": {
+      "import": "./src/plugins/ejs-includes.js",
+      "types": "./dist/plugins/ejs-includes.d.ts"
     },
-    "./plugins/add-query-output": {
-      "import": "./src/plugins/add-download-route.js",
-      "types": "./dist/plugins/add-download-route.d.ts"
+    "./plugins/query-output": {
+      "import": "./src/plugins/query-output.js",
+      "types": "./dist/plugins/query-output.d.ts"
+    },
+    "./plugins/import-document": {
+      "import": "./src/plugins/import-document.js",
+      "types": "./dist/plugins/import-document.d.ts"
+    },
+    "./plugins/filter-ip-address": {
+      "import": "./src/plugins/filter-ip-address.js",
+      "types": "./dist/plugins/filter-ip-address.d.ts"
     }
   },
   "ava": {
@@ -145,7 +156,7 @@
     }
   },
   "scripts": {
-    "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-query-output.js > docs/plugins/add-query-output.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-download-route.js > docs/plugins/add-download-route.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/add-ejs-includes.js > docs/plugins/add-ejs-includes.md",
+    "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/query-output.js > docs/plugins/query-output.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/download-route.js > docs/plugins/download-route.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/ejs-includes.js > docs/plugins/ejs-includes.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/import-document.js > docs/plugins/import-document.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/filter-ip-address.js > docs/plugins/filter-ip-address.md",
     "lint": "eslint",
     "make-types": "tsc --module nodenext --project ./tsconfig.json",
     "release": "release-it",

@@ -6,6 +6,16 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup } from './_helpers/server.js';
 
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('redirects to the document after saving without using an editKey when useEditKey is false', async (t) => {
   t.plan(2);
 
@@ -40,7 +50,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const saveNewRoute = (_request, _response, next) => {
     spy();
     next();
@@ -121,8 +131,8 @@ test('redirects after spliting redirects correctly', async (t) => {
 test('redirects to the document after saving with invalid content', async (t) => {
   t.plan(3);
 
-  const valid = sinon.spy();
-  const invalid = sinon.spy();
+  const valid = sandbox.spy();
+  const invalid = sandbox.spy();
   const validate = {
     register: (context) => {
       context.hooks.on('validate-save', () => Promise.resolve(true));
@@ -143,8 +153,8 @@ test('redirects to the document after saving with invalid content', async (t) =>
 test('redirects to the document after saving with valid content', async (t) => {
   t.plan(2);
 
-  const valid = sinon.spy();
-  const invalid = sinon.spy();
+  const valid = sandbox.spy();
+  const invalid = sandbox.spy();
   const validate = {
     register: (context) => {
       context.hooks.on('validate-save', () => Promise.resolve(false));
@@ -184,8 +194,8 @@ test('redirects to the document after saving with a full payload', async (t) => 
 test('redirects back after attempting to saving with an existing document with a matching slug or redirect', async (t) => {
   t.plan(3);
 
-  const valid = sinon.spy();
-  const invalid = sinon.spy();
+  const valid = sandbox.spy();
+  const invalid = sandbox.spy();
   const validate = {
     register: (context) => {
       context.hooks.on('validate-save', () => Promise.resolve(false));
@@ -206,8 +216,8 @@ test('redirects back after attempting to saving with an existing document with a
 test('redirects back after attempting to saving when missing body keys', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
-  const redirect = sinon.spy();
+  const next = sandbox.spy();
+  const redirect = sandbox.spy();
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -222,8 +232,8 @@ test('redirects back after attempting to saving when missing body keys', async (
 test('redirects back after attempting to saving when missing body', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
-  const redirect = sinon.spy();
+  const next = sandbox.spy();
+  const redirect = sandbox.spy();
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -238,8 +248,8 @@ test('redirects back after attempting to saving when missing body', async (t) =>
 test('redirects back after attempting to saving when useEditKey is set but no editKey is provided', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
-  const redirect = sinon.spy();
+  const next = sandbox.spy();
+  const redirect = sandbox.spy();
   const response = { redirect };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);

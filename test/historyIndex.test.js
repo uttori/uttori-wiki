@@ -8,6 +8,15 @@ import { config, serverSetup, seed } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('renders the requested slug history', async (t) => {
   t.plan(2);
 
@@ -44,7 +53,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const historyIndexRoute = (_request, _response, next) => {
     spy();
     next();
@@ -68,7 +77,7 @@ test('falls through to next when publicHistory is false', async (t) => {
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
@@ -79,7 +88,7 @@ test('falls through to next when slug is missing', async (t) => {
 test('falls through to next when no revision is found', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);

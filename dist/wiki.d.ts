@@ -1,4 +1,3 @@
-export function asyncHandler(fn: any): (request: any, response: any, next: any) => void;
 export default UttoriWiki;
 export type UttoriWikiDocument = {
     /**
@@ -45,6 +44,24 @@ export type UttoriWikiDocument = {
      * The layout to use when rendering the document.
      */
     layout?: string;
+    /**
+     * An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+     */
+    attachments?: UttoriWikiDocumentAttachment[];
+};
+export type UttoriWikiDocumentAttachment = {
+    /**
+     * The display name of the attachment.
+     */
+    name: string;
+    /**
+     * The path to the attachment.
+     */
+    path: string;
+    /**
+     * The MIME type of the attachment.
+     */
+    type: string;
 };
 /**
  * @typedef UttoriWikiDocument
@@ -60,6 +77,14 @@ export type UttoriWikiDocument = {
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
+ * @property {UttoriWikiDocumentAttachment[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+ */
+/**
+ * @typedef UttoriWikiDocumentAttachment
+ * @type {object}
+ * @property {string} name The display name of the attachment.
+ * @property {string} path The path to the attachment.
+ * @property {string} type The MIME type of the attachment.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
@@ -214,11 +239,13 @@ declare class UttoriWiki {
      * - `filter` - `render-search-results` - Passes in the search results.
      * - `filter` - `view-model-search` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
+     * @param {import('express').Request<{}, {}, {}, { s: string }>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    search: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+    search: (request: import("express").Request<{}, {}, {}, {
+        s: string;
+    }>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Renders the edit page using the `edit` template.
      *
@@ -250,11 +277,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.d.ts').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    save: (request: import("express").Request<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+    save: (request: import("express").Request<import("../dist/custom.d.ts").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *

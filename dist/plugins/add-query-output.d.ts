@@ -67,7 +67,7 @@ export type AddQueryOutputToViewModelConfig = {
  * @property {Record<string, string[]>} events An object whose keys correspong to methods, and contents are events to listen for.
  */
 /**
- * Add tags to the view model.
+ * Add queries output to the view model.
  * @example <caption>AddQueryOutputToViewModel</caption>
  * const viewModel = AddQueryOutputToViewModel.callback(viewModel, context);
  * @class
@@ -153,4 +153,4 @@ declare class AddQueryOutputToViewModel {
      */
     static callback(eventLabel: string): import("../../dist/custom.js").AddQueryOutputToViewModelCallback;
 }
-//# sourceMappingURL=add-query-output.d.ts.map
+//# sourceMappingURL=query-output.d.ts.map

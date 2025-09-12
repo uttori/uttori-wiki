@@ -4,17 +4,15 @@
 
 # Uttori Wiki
 
-UttoriWiki is a fast, simple, wiki / knowledge base built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or swapped out to fit specific needs.
+UttoriWiki is a fast, simple, blog / wiki / knowledge base / generic website built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing specific chunks of functionality be changed or swapped out to fit specific needs.
 
-Why yet another knowledge management / note taking app? I wanted to have something that functioned as a Wiki or Blog or similar small app that I could reuse components for and keep extensible.
+Why yet another knowledge management / note taking app? I wanted to have something that functioned as a wiki or blog or similar small app that I could reuse components for and keep extensible without having to rewrite everything or learn a new framework.
 
-Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
+Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc. Markdown is the default and best supported.
 
 Nothing is prescribed. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage engine! Already running a bunch of external dependencies and want to plug into those? You can _most likely_ do it!
 
-Rendering happens in a pipeline making it easy to render to Markdown, then filter words out and replace text with emojis.
-
-If you want to test it out, check out [the demo repo](https://github.com/uttori/uttori-wiki-demo-site) to get up and going in a minutes.
+Rendering happens in a pipeline making it easy to render to Markdown, then filter content out and manipulate the content like removing tags or replacing text with emojis.
 
 ## Configuration
 
@@ -393,6 +391,8 @@ The following events are avaliable to hook into through plugins and are used in 
 
 <dl>
 <dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#UttoriWikiDocumentAttachment">UttoriWikiDocumentAttachment</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#UttoriWikiDocumentMetaData">UttoriWikiDocumentMetaData</a> : <code>object</code></dt>
 <dd></dd>
@@ -857,6 +857,19 @@ Hooks:
 | tags | <code>string</code> \| <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
 | [layout] | <code>string</code> | The layout to use when rendering the document. |
+| [attachments] | [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment) | An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc. |
+
+<a name="UttoriWikiDocumentAttachment"></a>
+
+## UttoriWikiDocumentAttachment : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The display name of the attachment. |
+| path | <code>string</code> | The path to the attachment. |
+| type | <code>string</code> | The MIME type of the attachment. |
 
 <a name="UttoriWikiDocumentMetaData"></a>
 

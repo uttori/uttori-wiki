@@ -6,6 +6,15 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('renders the edit page for a given slug', async (t) => {
   t.plan(3);
 
@@ -43,7 +52,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const editRoute = (_request, _response, next) => {
     spy();
     next();
@@ -57,7 +66,7 @@ test('can be replaced', async (t) => {
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
@@ -68,7 +77,7 @@ test('falls through to next when slug is missing', async (t) => {
 test('falls through to next when document is missing', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);

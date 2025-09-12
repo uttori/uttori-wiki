@@ -6,6 +6,15 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('notFound(request, response, next): renders a 404 page', async (t) => {
   t.plan(3);
 
@@ -43,7 +52,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const notFoundRoute = (_request, _response, next) => {
     spy();
     next();

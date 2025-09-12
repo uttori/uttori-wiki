@@ -12,7 +12,7 @@ export function wikiFlash(this: {
         wikiFlash: Record<string, string[]>;
     };
 }, key?: string, value?: string): Record<string, string[]> | any[] | boolean;
-export function middleware(req: import("express-serve-static-core").Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: import("express-serve-static-core").Response<any, Record<string, any>, number>, next: import("express-serve-static-core").NextFunction): void;
+export function middleware(req: import("express-serve-static-core").Request<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>, res: import("express-serve-static-core").Response<any, Record<string, any>, number>, next: import("express-serve-static-core").NextFunction): unknown;
 declare namespace _default {
     export { wikiFlash };
     export { middleware };

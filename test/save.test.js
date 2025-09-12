@@ -6,6 +6,16 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup } from './_helpers/server.js';
 
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('redirects to 404 with no content', async (t) => {
   t.plan(1);
 
@@ -50,7 +60,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const saveRoute = (_request, _response, next) => {
     spy();
     next();
@@ -90,7 +100,7 @@ test('redirects to the document after saving with custom fields allowed', async 
   t.is(document.author, '✨');
 });
 
-test('redirects to the document after saving without changing slug', async (t) => {
+test.serial('redirects to the document after saving without changing slug', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
@@ -101,7 +111,7 @@ test('redirects to the document after saving without changing slug', async (t) =
   t.is(response.text, 'Found. Redirecting to https://fake.test/test-old');
 });
 
-test('redirects to the document after saving without changing slug or providing one in the POST body', async (t) => {
+test.serial('redirects to the document after saving without changing slug or providing one in the POST body', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
@@ -172,8 +182,8 @@ test('redirects to the document after saving with new slug with case transforms'
 test('redirects to the document after saving with invalid content', async (t) => {
   t.plan(2);
 
-  const valid = sinon.spy();
-  const invalid = sinon.spy();
+  const valid = sandbox.spy();
+  const invalid = sandbox.spy();
   const validate = {
     register: (context) => {
       context.hooks.on('validate-save', () => Promise.resolve(true));
@@ -192,8 +202,8 @@ test('redirects to the document after saving with invalid content', async (t) =>
 test('redirects to the document after saving with valid content', async (t) => {
   t.plan(2);
 
-  const valid = sinon.spy();
-  const invalid = sinon.spy();
+  const valid = sandbox.spy();
+  const invalid = sandbox.spy();
   const validate = {
     register: (context) => {
       context.hooks.on('validate-save', () => Promise.resolve(false));
@@ -230,7 +240,7 @@ test('redirects to the document after saving with a full payload', async (t) => 
 test('falls through to next when missing body keys', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.save({ params: { slug: 'test-old', key: 'test-key' }, body: {} }, undefined, next);
@@ -240,7 +250,7 @@ test('falls through to next when missing body keys', async (t) => {
 test('falls through to next when missing slug', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.save({ params: { slug: '', key: 'test-key' }, body: { title: 'Title' } }, undefined, next);
@@ -250,7 +260,7 @@ test('falls through to next when missing slug', async (t) => {
 test('falls through to next when missing body', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.save({ params: { slug: 'test-old', key: 'test-key' }, body: undefined }, undefined, next);
@@ -260,7 +270,7 @@ test('falls through to next when missing body', async (t) => {
 test('falls through to next when useEditKey is set but no editKey is provided', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.save({ params: { slug: 'test-old', key: 'bad-key' }, body: { title: 'Title' } }, undefined, next);

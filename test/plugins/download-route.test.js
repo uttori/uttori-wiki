@@ -4,7 +4,17 @@ import fs from 'fs';
 import express from 'express';
 import request from 'supertest';
 
-import DownloadRouter from '../../src/plugins/add-download-route.js';
+import DownloadRouter from '../../src/plugins/download-route.js';
+
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
 
 test('configKey: should return the correct configuration key', (t) => {
   t.is(DownloadRouter.configKey, 'uttori-plugin-download-router');
@@ -39,7 +49,7 @@ test('validateConfig: should throw an error if basePath does not exist', (t) => 
       basePath: '/nonexistent',
     },
   };
-  sinon.stub(fs, 'existsSync').returns(false);
+  sandbox.stub(fs, 'existsSync').returns(false);
   t.throws(() => DownloadRouter.validateConfig(config), { message: 'Config Error: `basePath` should exist and be reachable.' });
   fs.existsSync.restore();
 });
@@ -106,7 +116,7 @@ test('register: should throw an error if events are missing in config', (t) => {
 });
 
 test('register: should register events if they are present in config', (t) => {
-  const on = sinon.spy()
+  const on = sandbox.spy()
   const context = {
     hooks: {
       on,
@@ -178,14 +188,14 @@ test('download: should handle file download requests', async (t) => {
   t.is(response.status, 404);
 
   // Empty Referrer
-  response = await request(server).get('/download/test/plugins/add-download-route.test.js').set('Referrer', '');
+  response = await request(server).get('/download/test/plugins/download-route.test.js').set('Referrer', '');
   t.is(response.status, 404);
 
   // Blocked Referrer
-  response = await request(server).get('/download/test/plugins/add-download-route.test.js').set('Referrer', 'fake.fake');
+  response = await request(server).get('/download/test/plugins/download-route.test.js').set('Referrer', 'fake.fake');
   t.is(response.status, 404);
 
   // Valid
-  response = await request(server).get('/download/test/plugins/add-download-route.test.js').set('Referrer', 'good.good');
+  response = await request(server).get('/download/test/plugins/download-route.test.js').set('Referrer', 'good.good');
   t.is(response.status, 200);
 });

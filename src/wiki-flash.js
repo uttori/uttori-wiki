@@ -52,6 +52,7 @@ export function middleware(request, _response, next) {
     request.wikiFlash = wikiFlash;
   }
   next();
+  return;
 }
 
 export default {

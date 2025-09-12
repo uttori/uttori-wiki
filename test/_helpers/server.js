@@ -1,8 +1,12 @@
 import express from 'express';
+import session from 'express-session';
+import createMemoryStore from 'memorystore';
 import ejs from 'ejs';
 import layouts from 'express-ejs-layouts';
 import path from 'path';
 import cors from 'cors';
+
+const MemoryStore = createMemoryStore(session);
 
 import { Plugin as StorageProviderJSON } from '@uttori/storage-provider-json-memory';
 import { Plugin as SearchProviderLunr } from '@uttori/search-provider-lunr';
@@ -49,6 +53,22 @@ export const serverSetup = () => {
   server.set('port', process.env.PORT || 8123);
   server.set('ip', process.env.IP || '127.0.0.1');
 
+  // Setup sessions.
+  server.use(session({
+    secret: 'auth-simple',
+    name: 'session',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 60000,
+      sameSite: true,
+      secure: true,
+    },
+    store: new MemoryStore({
+      checkPeriod: 3600000, // prune expired entries every hour
+    }),
+  }));
+
   server.set('views', path.join(config.themePath, 'templates'));
   server.use(layouts);
   server.set('layout extractScripts', true);
@@ -71,6 +91,7 @@ export const serverSetup = () => {
   // Setup wikiFlash
   server.use(flash);
 
+  // process.title (for stopping after)
   if (process.argv[2] && process.argv[2] !== 'undefined') {
     console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
     process.title = process.argv[2];

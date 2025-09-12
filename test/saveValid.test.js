@@ -7,12 +7,22 @@ import { config, serverSetup } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('saveValid: parses tags as a string', async (t) => {
   t.plan(2);
   const slug = 'test-parse-tags-string';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: { slug },
     body: {
       title: 'Delete Page',
@@ -33,7 +43,7 @@ test('saveValid: parses tags as a string', async (t) => {
 test('route can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const saveValidRoute = (_request, _response, next) => {
     spy();
     next();
@@ -49,7 +59,7 @@ test('saveValid: parses tags as an array', async (t) => {
   const slug = 'test-parse-tags-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {},
     body: {
       title: 'Delete Page',
@@ -72,7 +82,7 @@ test('saveValid: sorts tags', async (t) => {
   const slug = 'test-parse-tags-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {},
     body: {
       title: 'Delete Page',
@@ -95,7 +105,7 @@ test('saveValid: parses redirects as a string', async (t) => {
   const slug = 'test-parse-redirects-string';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {},
     body: {
       title: 'Delete Page',
@@ -119,7 +129,7 @@ test('saveValid: parses redirects as an array', async (t) => {
   const slug = 'test-parse-redirects-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {},
     body: {
       title: 'Delete Page',
@@ -142,7 +152,7 @@ test('saveValid: redirects back when no slug is found', async (t) => {
   t.plan(1);
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({
     get: () => {},
     params: {},

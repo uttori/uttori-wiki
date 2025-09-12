@@ -6,6 +6,16 @@ import { UttoriWiki } from '../src/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 
+
+let sandbox;
+test.beforeEach(() => {
+    sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('tagsIndex(request, response, next): renders that tag index page', async (t) => {
   t.plan(3);
 
@@ -43,7 +53,7 @@ test('tagsIndex(request, response, next): can have middleware set and used', asy
 test('tagsIndex(request, response, next): can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const tagIndexRoute = (_request, _response, next) => {
     spy();
     next();
@@ -104,7 +114,7 @@ test('tag(request, response, next): can have middleware set and used', async (t)
 test('tag(request, response, next): can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const tagRoute = (_request, _response, next) => {
     spy();
     next();
