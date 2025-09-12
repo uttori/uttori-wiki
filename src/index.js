@@ -7,3 +7,5 @@ export { default as DownloadRouter } from './plugins/download-route.js';
 export { default as EJSRenderer } from './plugins/ejs-includes.js';
 export { default as FilterIPAddress } from './plugins/filter-ip-address.js';
 export { default as ImportDocument } from './plugins/import-document.js';
+export { default as AuthSimple } from './plugins/auth-simple.js';
+

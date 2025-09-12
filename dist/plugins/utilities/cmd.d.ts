@@ -6,6 +6,11 @@
  * @param {number} [options.timeout] Timeout in milliseconds (default: 30000).
  * @returns {Promise<string>} The result of the command as a string.
  * @see {@link https://nodejs.org/api/process.html#process_signal_events}
+ * @example <caption>Cmd</caption>
+ * const result = await cmd('ls -la');
+ * console.log(result);
+ * const result2 = await cmd('`wget -O "${localImagePath}" "${imageURL}"`', { log: (data) => console.log(data) });
+ * console.log(result2);
  */
 export function cmd(command: string, { log, timeout }?: {
     log?: Function;

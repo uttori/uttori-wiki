@@ -127,4 +127,4 @@ declare class DownloadRouter {
         config: Record<string, DownloadRouterConfig>;
     }): import("express").RequestHandler;
 }
-//# sourceMappingURL=add-download-route.d.ts.map
+//# sourceMappingURL=download-route.d.ts.map

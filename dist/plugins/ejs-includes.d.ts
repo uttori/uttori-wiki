@@ -125,4 +125,4 @@ declare class EJSRenderer {
     static render(content: string, config: ejs.Options): string;
 }
 import ejs from 'ejs';
-//# sourceMappingURL=add-ejs-includes.d.ts.map
+//# sourceMappingURL=ejs-includes.d.ts.map

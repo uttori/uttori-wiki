@@ -158,7 +158,7 @@
   "scripts": {
     "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/query-output.js > docs/plugins/query-output.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/download-route.js > docs/plugins/download-route.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/ejs-includes.js > docs/plugins/ejs-includes.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/import-document.js > docs/plugins/import-document.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/filter-ip-address.js > docs/plugins/filter-ip-address.md",
     "lint": "eslint",
-    "make-types": "tsc --module nodenext --project ./tsconfig.json",
+    "make-types": "rm dist/config.d.ts; rm dist/wiki.d.ts; tsc --module nodenext --project ./tsconfig.json",
     "release": "release-it",
     "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
     "posttest": "killall -SIGINT uttori-wiki-test-server || true",

@@ -29,7 +29,8 @@ export async function cmd (command, { log = () => {}, timeout = 30000 } = {}) {
 
     const commandProcess = child_process.exec(command);
     // Special condition for tests
-    if (commandProcess === 'TEST') {
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
+    if (`${commandProcess}` === 'TEST') {
       resolve('TEST');
       return;
     }

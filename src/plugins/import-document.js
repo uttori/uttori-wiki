@@ -22,7 +22,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Imp
  * @property {import('express').RequestHandler[]} middlewareApi Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} middlewarePublic Custom Middleware for the public route.
  * @property {((options: { url: string; fileName: string; type: string }) => Promise<void>)} downloadFile A function to handle the download.
- * @property {((config: ImportDocumentConfig, slug: string, page: { url: string; name: string; type: string }) => Promise<{ content: string; attachments: import('../../dist/wiki.d.ts').UttoriWikiDocumentAttachment[] }>)} processPage A function to handle the imported page processing.
+ * @property {((config: ImportDocumentConfig, slug: string, page: { url: string; name: string; type: string }) => Promise<{ content: string; attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[] }>)} processPage A function to handle the imported page processing.
  * @example <caption>ImportDocumentConfig</caption>
  * const config = {
  *   events: {
@@ -286,7 +286,7 @@ class ImportDocument {
    * @static
    */
   static apiRequestHandler(context) {
-    /** @type {import('express').RequestHandler<{}, import('../../dist/wiki.d.ts').UttoriWikiDocument | { error: string }, { title: string; image: string; excerpt: string; pages: { url: string; name: string; type: string }[]; tags: string[]; slug: string; redirects: string[]; }>} */
+    /** @type {import('express').RequestHandler<{}, import('../../src/wiki.js').UttoriWikiDocument | { error: string }, { title: string; image: string; excerpt: string; pages: { url: string; name: string; type: string }[]; tags: string[]; slug: string; redirects: string[]; }>} */
     return async (request, response, next) => {
       debug('apiRequestHandler');
       const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
@@ -322,7 +322,7 @@ class ImportDocument {
       await fs.promises.mkdir(uploadDir, { recursive: true });
 
       let content = '';
-      /** @type {import('../../dist/wiki.d.ts').UttoriWikiDocumentAttachment[]} */
+      /** @type {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} */
       const attachments = [];
       /** @type {string | null} */
       let importedImagePath = null;
@@ -380,7 +380,7 @@ class ImportDocument {
       // Use imported image if available, otherwise use provided image.
       const documentImage = importedImagePath || image;
 
-      /** @type {import('../../dist/wiki.d.ts').UttoriWikiDocument} */
+      /** @type {import('../../src/wiki.js').UttoriWikiDocument} */
       let document = {
         title,
         image: documentImage,
@@ -468,7 +468,7 @@ class ImportDocument {
    * @param {ImportDocumentConfig} config The configuration object.
    * @param {string} slug The slug of the document.
    * @param {{ url: string; name: string; type: string }} page The page to process.
-   * @returns {Promise<{content: string, attachments: import('../../dist/wiki.d.ts').UttoriWikiDocumentAttachment[]}>} The content and attachments.
+   * @returns {Promise<{content: string, attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[]}>} The content and attachments.
    */
   static async processPage(config, slug, page) {
     debug('processPage:', page);
@@ -480,7 +480,7 @@ class ImportDocument {
     let hasContent = false;
     /** @type {string} The content of the page */
     let content = '';
-    /** @type {import('../../dist/wiki.d.ts').UttoriWikiDocumentAttachment[]} The attachments of the page */
+    /** @type {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} The attachments of the page */
     let attachments = [];
 
     // Handle local files (markdown, PDF, and images)
