@@ -3,22 +3,15 @@ let debug = (..._) => {};
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AuthSimple'); } catch {}
 
 /**
- * @typedef AuthSimpleConfigEvents
- * @type {object}
- * @property {string[]} bindRoutes The collection of events to bind to for setting up the login and logout routes.
- * @property {string[]} validateConfig The collection of events to bind to for validating the configuration.
- */
-
-/**
  * @typedef {object} AuthSimpleConfig
- * @property {AuthSimpleConfigEvents} [events] Events to bind to.
+ * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {string} [loginPath] The path to the login endpoint.
- * @property {string} [loginRedirectPath] The path to redirect to after logging in.
- * @property {Function[]} [loginMiddleware] The middleware to use on the login route.
  * @property {string} [logoutPath] The path to the logout endpoint.
+ * @property {string} [loginRedirectPath] The path to redirect to after logging in.
  * @property {string} [logoutRedirectPath] The path to redirect to after logging out.
- * @property {Function[]} [logoutMiddleware] The middleware to use on the logout route.
- * @property {((request: import('express').Request) => Promise<object | null>)} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
+ * @property {import('express').RequestHandler[]} [loginMiddleware] The middleware to use on the login route.
+ * @property {import('express').RequestHandler[]} [logoutMiddleware] The middleware to use on the logout route.
+ * @property {function(import('express').Request): Promise<object | null>} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
  */
 
 /**
@@ -49,26 +42,16 @@ class AuthSimple {
    */
   static defaultConfig() {
     return {
-      // Login Path
+      events: {
+        bindRoutes: ['bind-routes'],
+        validateConfig: ['validate-config'],
+      },
       loginPath: '/login',
-
-      // Login Redirect Path
       loginRedirectPath: '/',
-
-      // Login Route Middleware
       loginMiddleware: [],
-
-      // Logout Path
       logoutPath: '/logout',
-
-      // Logout Redirect Path
       logoutRedirectPath: '/',
-
-      // Logout Route Middleware
       logoutMiddleware: [],
-
-      // Validation function that will recieve the request body that returns an object to be used as the session payload.
-      // If the session is invalid it should return null.
       validateLogin: (_request) => Promise.resolve(null),
     };
   }
@@ -151,6 +134,7 @@ class AuthSimple {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
       throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
     }
+    /** @type {AuthSimpleConfig} */
     const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
     if (!config.events) {
       throw new Error("Missing events to listen to for in 'config.events'.");
@@ -159,7 +143,9 @@ class AuthSimple {
     for (const [method, events] of Object.entries(config.events)) {
       if (typeof AuthSimple[method] === 'function') {
         for (const event of events) {
-          context.hooks.on(event, AuthSimple[method]);
+          /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
+          const callback = AuthSimple[method];
+          context.hooks.on(event, callback);
         }
       } else {
         debug(`Missing function "${method}"`);
@@ -169,8 +155,7 @@ class AuthSimple {
 
   /**
    * Add the login & logout routes to the server object.
-   * @param {object} server An Express server instance.
-   * @param {Function} server.post Function to register route.
+   * @param {import('express').Application} server An Express server instance.
    * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>} context A Uttori-like context.
    * @example <caption>AuthSimple.bindRoutes(server, context)</caption>
    * const context = {
@@ -191,6 +176,7 @@ class AuthSimple {
    */
   static bindRoutes(server, context) {
     debug('bindRoutes');
+    /** @type {AuthSimpleConfig} */
     const { loginPath, logoutPath, loginMiddleware, logoutMiddleware } = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
     debug('bindRoutes loginPath:', loginPath);
     debug('bindRoutes logoutPath:', logoutPath);
@@ -210,6 +196,7 @@ class AuthSimple {
     /** @type {import('express').RequestHandler<{}, {}, {}, {}>} */
     return async (request, response, next) => {
       debug('login');
+      /** @type {AuthSimpleConfig} */
       const { validateLogin, loginPath, loginRedirectPath } = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
 
       if (typeof validateLogin !== 'function') {
@@ -253,7 +240,7 @@ class AuthSimple {
   /**
    * The Express route method to process the logout request and clear the session.
    * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>} context A Uttori-like context.
-   * @returns {import('express').RequestHandler<{}, {}, {}, {}>} The function to pass to Express.
+   * @returns {import('express').RequestHandler} The function to pass to Express.
    * @example <caption>AuthSimple.login(context)(request, response, _next)</caption>
    * server.post('/logout', AuthSimple.login(context));
    * @static
@@ -262,6 +249,7 @@ class AuthSimple {
     /** @type {import('express').RequestHandler<{}, {}, {}, {}>} */
     return (request, response, _next) => {
       debug('logout');
+      /** @type {AuthSimpleConfig} */
       const { logoutRedirectPath } = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
       request.session.destroy((error) => {
         debug('Destroyed session:', error);

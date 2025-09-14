@@ -30,7 +30,7 @@ test('AuthSimple.register(context): errors without event dispatcher', (t) => {
 
 test('AuthSimple.register(context): errors without events', (t) => {
   t.throws(() => {
-    AuthSimple.register({ hooks: { on: () => {} }, config: { [AuthSimple.configKey]: { } } });
+    AuthSimple.register({ hooks: { on: () => {} }, config: { [AuthSimple.configKey]: { events: undefined } } });
   }, { message: 'Missing events to listen to for in \'config.events\'.' });
 });
 

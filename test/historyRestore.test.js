@@ -81,6 +81,7 @@ test('falls through to next when publicHistory is false', async (t) => {
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -92,6 +93,7 @@ test('falls through to next when slug is missing', async (t) => {
 test('falls through to next when revision is missing', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -103,6 +105,7 @@ test('falls through to next when revision is missing', async (t) => {
 test('falls through to next when no revision is found', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);

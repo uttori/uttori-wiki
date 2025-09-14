@@ -25,7 +25,7 @@ Add queries output to the view model.
 * [AddQueryOutputToViewModel](#AddQueryOutputToViewModel)
     * [new AddQueryOutputToViewModel()](#new_AddQueryOutputToViewModel_new)
     * [.configKey](#AddQueryOutputToViewModel.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
+    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
     * [.validateConfig(config, _context)](#AddQueryOutputToViewModel.validateConfig)
     * [.register(context)](#AddQueryOutputToViewModel.register)
     * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;T&gt;</code>
@@ -51,11 +51,11 @@ const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config
 ```
 <a name="AddQueryOutputToViewModel.defaultConfig"></a>
 
-### AddQueryOutputToViewModel.defaultConfig() ⇒ [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig)
+### AddQueryOutputToViewModel.defaultConfig() ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
 The default configuration.
 
 **Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: [<code>Partial.&lt;AddQueryOutputToViewModelConfig&gt;</code>](#AddQueryOutputToViewModelConfig) - The configuration.  
+**Returns**: [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig) - The configuration.  
 **Example** *(AddQueryOutputToViewModel.defaultConfig())*  
 ```js
 const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
@@ -70,7 +70,7 @@ Validates the provided configuration for required entries.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>Record.&lt;string, AddQueryOutputToViewModelConfig&gt;</code> | A configuration object. |
-| _context | <code>object</code> | A Uttori-like context (unused). |
+| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context (unused). |
 
 **Example** *(AddQueryOutputToViewModel.validateConfig(config, _context))*  
 ```js
@@ -85,7 +85,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContext</code> | A Uttori-like context. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(AddQueryOutputToViewModel.register(context))*  
 ```js
@@ -118,7 +118,7 @@ Queries for related documents based on similar tags and searches the storage pro
 | --- | --- | --- |
 | eventLabel | <code>string</code> | The event label to run queries for. |
 | viewModel | <code>T</code> | A Uttori view-model object. |
-| context | <code>UttoriContext</code> | A Uttori-like context. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(AddQueryOutputToViewModel.callback(viewModel, context))*  
 ```js
@@ -199,5 +199,5 @@ Curry the hook function to take the current event label.
 | Name | Type | Description |
 | --- | --- | --- |
 | queries | <code>Record.&lt;string, Array.&lt;AddQueryOutputToViewModelQuery&gt;&gt;</code> | The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added. |
-| events | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspong to methods, and contents are events to listen for. |
+| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
 

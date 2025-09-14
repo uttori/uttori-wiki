@@ -77,6 +77,7 @@ test('falls throught to next() when there is no slug', async (t) => {
   t.plan(1);
 
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -89,6 +90,7 @@ test('falls throught to next() when there is no document found', async (t) => {
   t.plan(1);
 
   const response = { set: () => {}, render: () => {}, redirect: () => {} };
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);

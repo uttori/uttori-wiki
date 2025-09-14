@@ -1,11 +1,34 @@
+/* eslint-disable import/export */
 export { default as config } from './config.js';
 export { default as wiki } from './middleware.js';
 export { default as UttoriWiki } from './wiki.js';
 export { default as wikiFlash } from './wiki-flash.js';
+
 export { default as AddQueryOutputToViewModel } from './plugins/query-output.js';
+export { default as AnalyticsPlugin } from './plugins/analytics-json-file.js';
+export { default as AuthSimple } from './plugins/auth-simple.js';
 export { default as DownloadRouter } from './plugins/download-route.js';
 export { default as EJSRenderer } from './plugins/ejs-includes.js';
 export { default as FilterIPAddress } from './plugins/filter-ip-address.js';
 export { default as ImportDocument } from './plugins/import-document.js';
-export { default as AuthSimple } from './plugins/auth-simple.js';
+export { default as SitemapGenerator } from './plugins/sitemap-generator.js';
+export { default as MulterUpload } from './plugins/upload-multer.js';
+export { default as ReplacerRenderer } from './plugins/renderer-replacer.js';
 
+// Everything below is for TypeScript exports
+export * from './config.js'
+export * from './middleware.js'
+export * from './redirect.js'
+export * from './wiki-flash.js'
+export * from './wiki.js'
+
+export * from "./plugins/query-output.js"
+export * from "./plugins/analytics-json-file.js";
+export * from "./plugins/auth-simple.js";
+export * from "./plugins/download-route.js";
+export * from "./plugins/ejs-includes.js";
+export * from "./plugins/filter-ip-address.js";
+export * from "./plugins/import-document.js";
+export * from "./plugins/sitemap-generator.js";
+export * from "./plugins/upload-multer.js";
+export * from "./plugins/renderer-replacer.js";

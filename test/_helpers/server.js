@@ -3,7 +3,7 @@ import session from 'express-session';
 import createMemoryStore from 'memorystore';
 import ejs from 'ejs';
 import layouts from 'express-ejs-layouts';
-import path from 'path';
+import path from 'node:path';
 import cors from 'cors';
 
 const MemoryStore = createMemoryStore(session);
@@ -108,7 +108,7 @@ export const serverSetup = () => {
   if (import.meta.url === (`file:///${process.argv[1].replace(/\\/g, '/')}`).replace(/\/{3,}/, '///')) {
     // No, this is a CLI tool.
     console.log('Starting test server...');
-    server.listen(server.get('port'), server.get('ip'));
+    server.listen(Number(server.get('port')), String(server.get('ip')));
   }
 
   return server;

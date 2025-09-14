@@ -31,7 +31,8 @@
     "debug": "^4.4.1",
     "ejs": "^3.1.10",
     "express-session": "^1.18.2",
-    "memorystore": "^1.6.7"
+    "memorystore": "^1.6.7",
+    "multer": "^2.0.2"
   },
   "peerDependencies": {
     "express": "^5"
@@ -44,6 +45,7 @@
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
+    "@types/multer": "^2.0.0",
     "@types/node": "^24.3.1",
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/eslint-plugin": "^8.43.0",
@@ -58,16 +60,17 @@
     "eslint-plugin-anti-trojan-source": "^1.1.1",
     "eslint-plugin-ava": "^15.1.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^55.0.3",
+    "eslint-plugin-jsdoc": "^56.1.2",
     "eslint-plugin-n": "^17.21.3",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-optimize-regex": "^1.2.1",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-xss": "^0.1.12",
     "express": "^5.1.0",
+    "glob": "^11.0.0",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.2",
-    "globals": "^16.3.0",
+    "globals": "^16.4.0",
     "jsdoc": "^4.0.4",
     "jsdoc-to-markdown": "^9.1.2",
     "jsdoc-tsimport-plugin": "^1.0.5",
@@ -130,6 +133,18 @@
     "./plugins/filter-ip-address": {
       "import": "./src/plugins/filter-ip-address.js",
       "types": "./dist/plugins/filter-ip-address.d.ts"
+    },
+    "./plugins/upload-multer": {
+      "import": "./src/plugins/upload-multer.js",
+      "types": "./dist/plugins/upload-multer.d.ts"
+    },
+    "./plugins/analytics-json-file": {
+      "import": "./src/plugins/analytics-json-file.js",
+      "types": "./dist/plugins/analytics-json-file.d.ts"
+    },
+    "./plugins/sitemap-generator": {
+      "import": "./src/plugins/sitemap-generator.js",
+      "types": "./dist/plugins/sitemap-generator.d.ts"
     }
   },
   "ava": {
@@ -156,9 +171,9 @@
     }
   },
   "scripts": {
-    "docs": "jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js --template rm.hbs src/wiki.js > README.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/wiki.js > docs/wiki.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/config.js > docs/config.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/query-output.js > docs/plugins/query-output.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/download-route.js > docs/plugins/download-route.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/ejs-includes.js > docs/plugins/ejs-includes.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/import-document.js > docs/plugins/import-document.md; jsdoc2md --configure ./jsdoc.conf.json --private --example-lang js src/plugins/filter-ip-address.js > docs/plugins/filter-ip-address.md",
+    "docs": "node build/make-docs.js",
     "lint": "eslint",
-    "make-types": "rm dist/config.d.ts; rm dist/wiki.d.ts; tsc --module nodenext --project ./tsconfig.json",
+    "make-types": "node build/make-types.js",
     "release": "release-it",
     "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
     "posttest": "killall -SIGINT uttori-wiki-test-server || true",

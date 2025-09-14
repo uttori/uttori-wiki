@@ -1,79 +1,163 @@
 export default ImportDocument;
+export type ImportDocumentConfigPage = {
+    /**
+     * The URL of the page.
+     */
+    url: string;
+    /**
+     * The name of the page.
+     */
+    name: string;
+    /**
+     * The type of the page.
+     */
+    type: string;
+};
+export type ImportDocumentDownload = {
+    /**
+     * The URL of the page.
+     */
+    url: string;
+    /**
+     * The name of the file.
+     */
+    fileName: string;
+    /**
+     * The type of the page.
+     */
+    type: string;
+};
+export type ImportDocumentProcessPage = {
+    /**
+     * The content of the page.
+     */
+    content: string;
+    /**
+     * The attachments of the page.
+     */
+    attachments: import("../../src/wiki.js").UttoriWikiDocumentAttachment[];
+};
+export type ImportDocumentApiPayload = {
+    /**
+     * The title of the document.
+     */
+    title: string;
+    /**
+     * The image of the document.
+     */
+    image: string;
+    /**
+     * The excerpt of the document.
+     */
+    excerpt: string;
+    /**
+     * The pages of the document.
+     */
+    pages: ImportDocumentConfigPage[];
+    /**
+     * The tags of the document.
+     */
+    tags: string[];
+    /**
+     * The slug of the document.
+     */
+    slug: string;
+    /**
+     * The redirects of the document.
+     */
+    redirects: string[];
+};
 export type ImportDocumentConfig = {
     /**
-     * Events to bind to.
+     * An object whose keys correspond to methods, and contents are events to listen for.
      */
     events?: Record<string, string[]>;
     /**
      * The API route for importing documents.
      */
-    apiRoute: string;
+    apiRoute?: string;
     /**
      * Server route to show the import interface.
      */
-    publicRoute: string;
+    publicRoute?: string;
     /**
      * The path to reference uploaded files by.
      */
-    uploadPath: string;
+    uploadPath?: string;
     /**
      * The directory to upload files to.
      */
-    uploadDirectory: string;
+    uploadDirectory?: string;
     /**
      * When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
      */
-    allowedReferrers: string[];
+    allowedReferrers?: string[];
     /**
      * A request handler for the interface route.
      */
-    interfaceRequestHandler?: ((context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler) | undefined;
+    interfaceRequestHandler?: (arg0: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler;
     /**
      * A request handler for the API route.
      */
-    apiRequestHandler?: ((context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler) | undefined;
+    apiRequestHandler?: (arg0: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler;
     /**
      * Custom Middleware for the API route.
      */
-    middlewareApi: import("express").RequestHandler[];
+    middlewareApi?: import("express").RequestHandler[];
     /**
      * Custom Middleware for the public route.
      */
-    middlewarePublic: import("express").RequestHandler[];
+    middlewarePublic?: import("express").RequestHandler[];
     /**
      * A function to handle the download.
      */
-    downloadFile: ((options: {
-        url: string;
-        fileName: string;
-        type: string;
-    }) => Promise<void>);
+    downloadFile?: (arg0: ImportDocumentDownload) => Promise<void>;
     /**
      * A function to handle the imported page processing.
      */
-    processPage: ((config: ImportDocumentConfig, slug: string, page: {
-        url: string;
-        name: string;
-        type: string;
-    }) => Promise<{
-        content: string;
-        attachments: import("../../src/wiki.js").UttoriWikiDocumentAttachment[];
-    }>);
+    processPage?: (arg0: ImportDocumentConfig, arg1: string, arg2: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>;
 };
 /**
+ * @typedef {object} ImportDocumentConfigPage
+ * @property {string} url The URL of the page.
+ * @property {string} name The name of the page.
+ * @property {string} type The type of the page.
+ */
+/**
+ * @typedef {object} ImportDocumentDownload
+ * @property {string} url The URL of the page.
+ * @property {string} fileName The name of the file.
+ * @property {string} type The type of the page.
+ */
+/**
+ * @typedef {object} ImportDocumentProcessPage
+ * @property {string} content The content of the page.
+ * @property {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} attachments The attachments of the page.
+ */
+/**
+ * @typedef {object} ImportDocumentApiPayload
+ * @property {string} title The title of the document.
+ * @property {string} image The image of the document.
+ * @property {string} excerpt The excerpt of the document.
+ * @property {ImportDocumentConfigPage[]} pages The pages of the document.
+ * @property {string[]} tags The tags of the document.
+ * @property {string} slug The slug of the document.
+ * @property {string[]} redirects The redirects of the document.
+ */
+/**
  * @typedef {object} ImportDocumentConfig
- * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} apiRoute The API route for importing documents.
- * @property {string} publicRoute Server route to show the import interface.
- * @property {string} uploadPath The path to reference uploaded files by.
- * @property {string} uploadDirectory The directory to upload files to.
- * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
- * @property {((context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>) => import('express').RequestHandler) | undefined} [interfaceRequestHandler] A request handler for the interface route.
- * @property {((context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>) => import('express').RequestHandler) | undefined} [apiRequestHandler] A request handler for the API route.
- * @property {import('express').RequestHandler[]} middlewareApi Custom Middleware for the API route.
- * @property {import('express').RequestHandler[]} middlewarePublic Custom Middleware for the public route.
- * @property {((options: { url: string; fileName: string; type: string }) => Promise<void>)} downloadFile A function to handle the download.
- * @property {((config: ImportDocumentConfig, slug: string, page: { url: string; name: string; type: string }) => Promise<{ content: string; attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[] }>)} processPage A function to handle the imported page processing.
+ * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
+ * @property {string} [apiRoute] The API route for importing documents.
+ * @property {string} [publicRoute] Server route to show the import interface.
+ * @property {string} [uploadPath] The path to reference uploaded files by.
+ * @property {string} [uploadDirectory] The directory to upload files to.
+ * @property {string[]} [allowedReferrers] When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
+ * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route.
+ * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
+ * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
+ * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
+ * @property {function(ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
  * @example <caption>ImportDocumentConfig</caption>
  * const config = {
  *   events: {
@@ -237,16 +321,9 @@ declare class ImportDocument {
      * Processes a page and returns the content and attachment.
      * @param {ImportDocumentConfig} config The configuration object.
      * @param {string} slug The slug of the document.
-     * @param {{ url: string; name: string; type: string }} page The page to process.
-     * @returns {Promise<{content: string, attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[]}>} The content and attachments.
+     * @param {ImportDocumentConfigPage} page The page to process.
+     * @returns {Promise<ImportDocumentProcessPage>} The content and attachments.
      */
-    static processPage(config: ImportDocumentConfig, slug: string, page: {
-        url: string;
-        name: string;
-        type: string;
-    }): Promise<{
-        content: string;
-        attachments: import("../../src/wiki.js").UttoriWikiDocumentAttachment[];
-    }>;
+    static processPage(config: ImportDocumentConfig, slug: string, page: ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>;
 }
 //# sourceMappingURL=import-document.d.ts.map

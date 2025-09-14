@@ -96,7 +96,9 @@ test('can be replaced', async (t) => {
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
+  const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.delete({ params: { key: 'test-key' } }, response, next);
@@ -106,6 +108,7 @@ test('falls through to next when slug is missing', async (t) => {
 test('falls through to next when document is not found', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);

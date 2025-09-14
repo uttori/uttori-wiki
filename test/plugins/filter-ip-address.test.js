@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import fs from 'fs';
 import * as url from 'url';
 import FilterIPAddress from '../../src/plugins/filter-ip-address.js';
-import path from 'path';
+import path from 'node:path';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 

@@ -216,6 +216,7 @@ test('redirects back after attempting to saving with an existing document with a
 test('redirects back after attempting to saving when missing body keys', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const redirect = sandbox.spy();
   const response = { redirect };
@@ -232,6 +233,7 @@ test('redirects back after attempting to saving when missing body keys', async (
 test('redirects back after attempting to saving when missing body', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const redirect = sandbox.spy();
   const response = { redirect };
@@ -248,6 +250,7 @@ test('redirects back after attempting to saving when missing body', async (t) =>
 test('redirects back after attempting to saving when useEditKey is set but no editKey is provided', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const redirect = sandbox.spy();
   const response = { redirect };

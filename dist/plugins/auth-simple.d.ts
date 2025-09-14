@@ -1,64 +1,48 @@
 export default AuthSimple;
-export type AuthSimpleConfigEvents = {
-    /**
-     * The collection of events to bind to for setting up the login and logout routes.
-     */
-    bindRoutes: string[];
-    /**
-     * The collection of events to bind to for validating the configuration.
-     */
-    validateConfig: string[];
-};
 export type AuthSimpleConfig = {
     /**
-     * Events to bind to.
+     * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: AuthSimpleConfigEvents;
+    events?: Record<string, string[]>;
     /**
      * The path to the login endpoint.
      */
     loginPath?: string;
     /**
-     * The path to redirect to after logging in.
-     */
-    loginRedirectPath?: string;
-    /**
-     * The middleware to use on the login route.
-     */
-    loginMiddleware?: Function[];
-    /**
      * The path to the logout endpoint.
      */
     logoutPath?: string;
+    /**
+     * The path to redirect to after logging in.
+     */
+    loginRedirectPath?: string;
     /**
      * The path to redirect to after logging out.
      */
     logoutRedirectPath?: string;
     /**
+     * The middleware to use on the login route.
+     */
+    loginMiddleware?: import("express").RequestHandler[];
+    /**
      * The middleware to use on the logout route.
      */
-    logoutMiddleware?: Function[];
+    logoutMiddleware?: import("express").RequestHandler[];
     /**
      * Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
      */
-    validateLogin: ((request: import("express").Request) => Promise<object | null>);
+    validateLogin: (arg0: import("express").Request) => Promise<object | null>;
 };
 /**
- * @typedef AuthSimpleConfigEvents
- * @type {object}
- * @property {string[]} bindRoutes The collection of events to bind to for setting up the login and logout routes.
- * @property {string[]} validateConfig The collection of events to bind to for validating the configuration.
- */
-/**
  * @typedef {object} AuthSimpleConfig
- * @property {AuthSimpleConfigEvents} [events] Events to bind to.
+ * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {string} [loginPath] The path to the login endpoint.
- * @property {string} [loginRedirectPath] The path to redirect to after logging in.
- * @property {Function[]} [loginMiddleware] The middleware to use on the login route.
  * @property {string} [logoutPath] The path to the logout endpoint.
+ * @property {string} [loginRedirectPath] The path to redirect to after logging in.
  * @property {string} [logoutRedirectPath] The path to redirect to after logging out.
- * @property {Function[]} [logoutMiddleware] The middleware to use on the logout route.
- * @property {((request: import('express').Request) => Promise<object | null>)} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
+ * @property {import('express').RequestHandler[]} [loginMiddleware] The middleware to use on the login route.
+ * @property {import('express').RequestHandler[]} [logoutMiddleware] The middleware to use on the logout route.
+ * @property {function(import('express').Request): Promise<object | null>} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
  */
 /**
  * Uttori Auth (Simple)
@@ -116,8 +100,7 @@ declare class AuthSimple {
     static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-auth-simple", AuthSimpleConfig>): void;
     /**
      * Add the login & logout routes to the server object.
-     * @param {object} server An Express server instance.
-     * @param {Function} server.post Function to register route.
+     * @param {import('express').Application} server An Express server instance.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>} context A Uttori-like context.
      * @example <caption>AuthSimple.bindRoutes(server, context)</caption>
      * const context = {
@@ -136,9 +119,7 @@ declare class AuthSimple {
      * AuthSimple.bindRoutes(server, context);
      * @static
      */
-    static bindRoutes(server: {
-        post: Function;
-    }, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-auth-simple", AuthSimpleConfig>): void;
+    static bindRoutes(server: import("express").Application, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-auth-simple", AuthSimpleConfig>): void;
     /**
      * The Express route method to process the login request and provide a response or redirect.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>} context A Uttori-like context.
@@ -151,11 +132,11 @@ declare class AuthSimple {
     /**
      * The Express route method to process the logout request and clear the session.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>} context A Uttori-like context.
-     * @returns {import('express').RequestHandler<{}, {}, {}, {}>} The function to pass to Express.
+     * @returns {import('express').RequestHandler} The function to pass to Express.
      * @example <caption>AuthSimple.login(context)(request, response, _next)</caption>
      * server.post('/logout', AuthSimple.login(context));
      * @static
      */
-    static logout(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-auth-simple", AuthSimpleConfig>): import("express").RequestHandler<{}, {}, {}, {}>;
+    static logout(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-auth-simple", AuthSimpleConfig>): import("express").RequestHandler;
 }
 //# sourceMappingURL=auth-simple.d.ts.map

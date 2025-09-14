@@ -36,7 +36,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Add
 /**
  * @typedef {object} AddQueryOutputToViewModelConfig
  * @property {Record<string, AddQueryOutputToViewModelQuery[]>} queries The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added.
- * @property {Record<string, string[]>} events An object whose keys correspong to methods, and contents are events to listen for.
+ * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  */
 
 /**
@@ -60,22 +60,22 @@ class AddQueryOutputToViewModel {
 
   /**
    * The default configuration.
-   * @returns {Partial<AddQueryOutputToViewModelConfig>} The configuration.
+   * @returns {AddQueryOutputToViewModelConfig} The configuration.
    * @example <caption>AddQueryOutputToViewModel.defaultConfig()</caption>
    * const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
    * @static
    */
   static defaultConfig() {
     return {
-      // Queries to be added to the view model.
       queries: {},
+      events: {},
     };
   }
 
   /**
    * Validates the provided configuration for required entries.
    * @param {Record<string, AddQueryOutputToViewModelConfig>} config A configuration object.
-   * @param {object} _context A Uttori-like context (unused).
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>} _context A Uttori-like context (unused).
    * @example <caption>AddQueryOutputToViewModel.validateConfig(config, _context)</caption>
    * AddQueryOutputToViewModel.validateConfig({ ... });
    * @static
@@ -101,7 +101,7 @@ class AddQueryOutputToViewModel {
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>} context A Uttori-like context.
    * @example <caption>AddQueryOutputToViewModel.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -126,7 +126,7 @@ class AddQueryOutputToViewModel {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
       throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
     }
-    /** @type {Partial<AddQueryOutputToViewModelConfig>} */
+    /** @type {AddQueryOutputToViewModelConfig} */
     const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
     if (!config.events) {
       throw new Error("Missing events to listen to for in 'config.events'.");
@@ -151,7 +151,7 @@ class AddQueryOutputToViewModel {
    * @template T The viewModel we are manipulating.
    * @param {string} eventLabel The event label to run queries for.
    * @param {T} viewModel A Uttori view-model object.
-   * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>} context A Uttori-like context.
    * @returns {Promise<T>} The provided view-model document.
    * @example <caption>AddQueryOutputToViewModel.callback(viewModel, context)</caption>
    * const context = {

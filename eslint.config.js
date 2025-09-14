@@ -31,55 +31,56 @@ export default defineConfig([globalIgnores([
     "**/node_modules",
     "dist/*",
     "eslint.config.js",
+    "src/**/*.png",
+    "build/**/*",
 ]), {
-    extends: fixupConfigRules(compat.extends(
-        "plugin:ava/recommended",
-        "plugin:import/recommended",
-        "plugin:jsdoc/recommended",
-        "plugin:n/recommended",
-        "plugin:optimize-regex/all",
-        "plugin:security/recommended-legacy",
-        "plugin:@typescript-eslint/recommended-type-checked",
-    )),
+  extends: fixupConfigRules(compat.extends(
+    "plugin:ava/recommended",
+    "plugin:import/recommended",
+    "plugin:jsdoc/recommended",
+    "plugin:n/recommended",
+    "plugin:optimize-regex/all",
+    "plugin:security/recommended-legacy",
+    "plugin:@typescript-eslint/recommended-type-checked",
+  )),
 
-    plugins: {
-        "anti-trojan-source": antiTrojanSource,
-        ava: fixupPluginRules(ava),
-        import: fixupPluginRules(_import),
-        "no-inferred-method-name": noInferredMethodName,
-        n: fixupPluginRules(n),
-        "optimize-regex": fixupPluginRules(optimizeRegex),
-        security: fixupPluginRules(security),
-        xss,
+  plugins: {
+    "anti-trojan-source": antiTrojanSource,
+    ava: fixupPluginRules(ava),
+    import: fixupPluginRules(_import),
+    "no-inferred-method-name": noInferredMethodName,
+    n: fixupPluginRules(n),
+    "optimize-regex": fixupPluginRules(optimizeRegex),
+    security: fixupPluginRules(security),
+    xss,
+  },
+
+  languageOptions: {
+    globals: {
+      ...globals.browser,
+      ...globals.node,
+      sinon: false,
+      expect: true,
     },
 
-    languageOptions: {
-        globals: {
-            ...globals.browser,
-            ...globals.node,
-            sinon: false,
-            expect: true,
-        },
+    parser: tsParser,
+    ecmaVersion: "latest",
+    sourceType: "module",
 
-        parser: tsParser,
-        ecmaVersion: "latest",
-        sourceType: "module",
-
-        parserOptions: {
-            project: "./tsconfig.json",
-            requireConfigFile: false,
-        },
+    parserOptions: {
+      project: "./tsconfig.json",
+      requireConfigFile: false,
     },
+  },
 
-    settings: {
-        jsdoc: {
-            mode: "typescript",
-        },
-
-        react: {
-            version: "detect",
-        },
+  settings: {
+    jsdoc: {
+      mode: "typescript",
     },
+    react: {
+      version: "detect",
+    },
+  },
 
     rules: {
         "@typescript-eslint/no-unsafe-argument": "warn",
@@ -144,7 +145,7 @@ export default defineConfig([globalIgnores([
         "security/detect-object-injection": 0,
     },
 }, {
-    files: ["**/*.test.js", "test/_helpers/*.*"],
+    files: ["**/*.test.js", "test/_helpers/*.js"],
 
     languageOptions: {
         ecmaVersion: 5,

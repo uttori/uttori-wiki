@@ -240,6 +240,7 @@ test('redirects to the document after saving with a full payload', async (t) => 
 test('falls through to next when missing body keys', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -250,6 +251,7 @@ test('falls through to next when missing body keys', async (t) => {
 test('falls through to next when missing slug', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -260,6 +262,7 @@ test('falls through to next when missing slug', async (t) => {
 test('falls through to next when missing body', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
@@ -270,6 +273,7 @@ test('falls through to next when missing body', async (t) => {
 test('falls through to next when useEditKey is set but no editKey is provided', async (t) => {
   t.plan(1);
 
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);

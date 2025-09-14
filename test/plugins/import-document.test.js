@@ -405,6 +405,7 @@ test('apiRequestHandler: should reject requests with missing title or slug', asy
 
 test('apiRequestHandler: should reject requests with invalid referrer', async (t) => {
   const _server = express();
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const context = {
     config: {
@@ -439,6 +440,7 @@ test('apiRequestHandler: should reject requests with invalid referrer', async (t
 });
 
 test('apiRequestHandler: should reject requests with empty referrer when allowedReferrers is set', async (t) => {
+  /** @type {import('express').NextFunction} */
   const next = sandbox.spy();
   const context = {
     config: {

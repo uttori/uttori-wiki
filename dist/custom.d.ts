@@ -22,20 +22,34 @@ declare namespace Express {
   }
 }
 
-export type UttoriPluginConfig =
-  import('../src/plugins/query-output.js').AddQueryOutputToViewModelConfig |
-  import('../src/plugins/ejs-includes.js').EJSRendererConfig |
-  import('../src/plugins/download-route.js').DownloadRouterConfig |
-  import('../src/plugins/import-document.js').ImportDocumentConfig |
-  import('../src/plugins/filter-ip-address.js').FilterIPAddressConfig
+/**
+ * Uttori plugin configuration type.
+ */
+export type UttoriPluginConfig = Record<string, unknown>;
+
+/**
+ * Known plugin configuration keys mapped to their specific config types.
+ */
+export type KnownPluginConfigs = {
+  'custom-plugin-add-query-output-to-view-model': import('./plugins/query-output.js').AddQueryOutputToViewModelConfig;
+  'uttori-plugin-analytics-json-file': import('./plugins/analytics-json-file.js').AnalyticsPluginConfig;
+  'uttori-plugin-auth-simple': import('./plugins/auth-simple.js').AuthSimpleConfig;
+  'uttori-plugin-download-router': import('./plugins/download-route.js').DownloadRouterConfig;
+  'uttori-plugin-filter-ip-address': import('./plugins/filter-ip-address.js').FilterIPAddressConfig;
+  'uttori-plugin-generator-sitemap': import('./plugins/sitemap-generator.js').SitemapGeneratorConfig;
+  'uttori-plugin-import-document': import('./plugins/import-document.js').ImportDocumentConfig;
+  'uttori-plugin-renderer-ejs': import('./plugins/ejs-includes.js').EJSRendererConfig;
+  'uttori-plugin-renderer-replacer': import('./plugins/renderer-replacer.js').ReplacerRendererConfig;
+  'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
+}
 
 export type UttoriContext = {
-  config: Record<string, UttoriPluginConfig>;
+  config: KnownPluginConfigs & Record<string, UttoriPluginConfig>;
   hooks: EventDispatcher;
 }
 
 /**
- * Extend a specific key with an extra config type.
+ * Extend a Uttori Context with a specific plugin config type.
  * @example <caption>UttoriContextWithPluginConfig</caption>
  * const context: UttoriContextWithPluginConfig<'my-plugin', MyPluginConfig> = {
  *   config: {
@@ -45,23 +59,14 @@ export type UttoriContext = {
  */
 export type UttoriContextWithPluginConfig<K extends string, CustomPluginConfig> =
   Omit<UttoriContext, 'config'> & {
-    config: UttoriContext['config'] & Record<K, UttoriPluginConfig | CustomPluginConfig>;
+    config: KnownPluginConfigs & Record<string, UttoriPluginConfig> & Record<K, CustomPluginConfig>;
   };
 
 export type UttoriMiddleware = (string | Function | boolean)[]
 
-export type AddQueryOutputToViewModelFormatFunction = (documents:any[]) => any[]
-export type AddQueryOutputToViewModelQueryFunction = (target:any, context:UttoriContext) => Promise<any[][]>
-export type AddQueryOutputToViewModelCallback = (target:any, context:UttoriContext) => Promise<any>
-
-export interface ParsedPathKey {
-  /** The name of the segment variable. */
-  name: string;
-  /** When true, they segment is optional. */
-  optional: boolean;
-  /** The default value, if set. */
-  def?: string;
-}
+export type AddQueryOutputToViewModelFormatFunction = (documents: UttoriWikiDocument[]) => any[]
+export type AddQueryOutputToViewModelQueryFunction = (target: any, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>) => Promise<any[][]>
+export type AddQueryOutputToViewModelCallback = (target: any, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>) => Promise<any>
 
 export interface UttoriRedirect {
   /** The route to redirect from. */
@@ -94,14 +99,3 @@ export interface UttoriWikiPlugin {
   static bindRoutes?: (app: Express, context: UttoriContext) => void
 }
 
-export * from './config'
-export * from './index'
-export * from './middleware'
-export * from './redirect'
-export * from './wiki-flash'
-export * from './wiki'
-export * from './plugins/download-route'
-export * from './plugins/ejs-includes'
-export * from './plugins/query-output'
-export * from './plugins/import-document'
-export * from './plugins/filter-ip-address'

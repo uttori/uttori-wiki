@@ -18,7 +18,7 @@ test('configKey: should return correct key', (t) => {
 
 test('defaultConfig: should return correct default configuration', (t) => {
   const defaultConfig = AddQueryOutputToViewModel.defaultConfig();
-  t.deepEqual(defaultConfig, { queries: {} });
+  t.deepEqual(defaultConfig, { queries: {}, events: {} });
 });
 
 test('validateConfig: should throw error if configKey is missing', (t) => {
@@ -65,6 +65,7 @@ test('register: should throw error if events are missing', (t) => {
     },
     config: {
       [AddQueryOutputToViewModel.configKey]: {
+        events: undefined,
         queries: {},
       },
     },

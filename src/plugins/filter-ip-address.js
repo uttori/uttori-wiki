@@ -1,6 +1,6 @@
 // const invalid = await this.hooks.validate('validate-save', request, this);
 import fs from 'fs';
-import path from 'path';
+import path from 'node:path';
 import * as url from 'url';
 
 /** @type {string} The directory name of the current file. */

@@ -1,28 +1,60 @@
 
 import fs, { createWriteStream } from 'node:fs';
 import path, { dirname } from 'node:path';
-import { cmd } from './utilities/cmd.js';
 import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
+
+import { cmd } from './utilities/cmd.js';
 
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ImportDocument'); } catch {}
 
 /**
+ * @typedef {object} ImportDocumentConfigPage
+ * @property {string} url The URL of the page.
+ * @property {string} name The name of the page.
+ * @property {string} type The type of the page.
+ */
+
+/**
+ * @typedef {object} ImportDocumentDownload
+ * @property {string} url The URL of the page.
+ * @property {string} fileName The name of the file.
+ * @property {string} type The type of the page.
+ */
+
+/**
+ * @typedef {object} ImportDocumentProcessPage
+ * @property {string} content The content of the page.
+ * @property {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} attachments The attachments of the page.
+ */
+
+/**
+ * @typedef {object} ImportDocumentApiPayload
+ * @property {string} title The title of the document.
+ * @property {string} image The image of the document.
+ * @property {string} excerpt The excerpt of the document.
+ * @property {ImportDocumentConfigPage[]} pages The pages of the document.
+ * @property {string[]} tags The tags of the document.
+ * @property {string} slug The slug of the document.
+ * @property {string[]} redirects The redirects of the document.
+ */
+
+/**
  * @typedef {object} ImportDocumentConfig
- * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} apiRoute The API route for importing documents.
- * @property {string} publicRoute Server route to show the import interface.
- * @property {string} uploadPath The path to reference uploaded files by.
- * @property {string} uploadDirectory The directory to upload files to.
- * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
- * @property {((context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>) => import('express').RequestHandler) | undefined} [interfaceRequestHandler] A request handler for the interface route.
- * @property {((context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>) => import('express').RequestHandler) | undefined} [apiRequestHandler] A request handler for the API route.
- * @property {import('express').RequestHandler[]} middlewareApi Custom Middleware for the API route.
- * @property {import('express').RequestHandler[]} middlewarePublic Custom Middleware for the public route.
- * @property {((options: { url: string; fileName: string; type: string }) => Promise<void>)} downloadFile A function to handle the download.
- * @property {((config: ImportDocumentConfig, slug: string, page: { url: string; name: string; type: string }) => Promise<{ content: string; attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[] }>)} processPage A function to handle the imported page processing.
+ * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
+ * @property {string} [apiRoute] The API route for importing documents.
+ * @property {string} [publicRoute] Server route to show the import interface.
+ * @property {string} [uploadPath] The path to reference uploaded files by.
+ * @property {string} [uploadDirectory] The directory to upload files to.
+ * @property {string[]} [allowedReferrers] When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
+ * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route.
+ * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
+ * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
+ * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
+ * @property {function(ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
  * @example <caption>ImportDocumentConfig</caption>
  * const config = {
  *   events: {
@@ -94,40 +126,19 @@ class ImportDocument {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = dirname(__filename);
     return {
-      /** The API route for importing documents. */
       apiRoute: '/import-api',
-
-      /** Server route to show the import interface. */
       publicRoute: '/import',
-
-      /** When set, check the referrers against this list, when an empty array don't check at all. */
-      allowedReferrers: [],
-
-      /** Custom Middleware for the routes */
-      middlewarePublic: [],
-
-      /** Custom Middleware for the routes */
-      middlewareApi: [],
-
-      /** The path to upload files to. */
       uploadPath: 'uploads',
-
-      /** The directory to upload files to. */
       uploadDirectory: path.join(__dirname, 'uploads'),
-
-      /** A function to handle the download. */
+      allowedReferrers: [],
+      middlewarePublic: [],
+      middlewareApi: [],
       // eslint-disable-next-line @typescript-eslint/unbound-method
       downloadFile: ImportDocument.downloadFile,
-
-      /** A function to handle the imported page processing. */
       // eslint-disable-next-line @typescript-eslint/unbound-method
       processPage: ImportDocument.processPage,
-
-      /** An Express request handler for the API route. */
       // eslint-disable-next-line @typescript-eslint/unbound-method
       apiRequestHandler: ImportDocument.apiRequestHandler,
-
-      /** An Express request handler for the interface route. */
       // eslint-disable-next-line @typescript-eslint/unbound-method
       interfaceRequestHandler: ImportDocument.interfaceRequestHandler,
     };
@@ -217,15 +228,18 @@ class ImportDocument {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
       throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
     }
+    /** @type {ImportDocumentConfig} */
     const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
     if (!config.events) {
       throw new Error("Missing events to listen to for in 'config.events'.");
     }
     // Bind events
-    for (const [method, eventNames] of Object.entries(config.events)) {
+    for (const [method, events] of Object.entries(config.events)) {
       if (typeof ImportDocument[method] === 'function') {
-        for (const event of eventNames) {
-          context.hooks.on(event, ImportDocument[method]);
+        for (const event of events) {
+          /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
+          const callback = ImportDocument[method];
+          context.hooks.on(event, callback);
         }
       } else {
         debug(`Missing function "${method}"`);
@@ -251,6 +265,7 @@ class ImportDocument {
    */
   static bindRoutes(server, context) {
     debug('bindRoutes');
+    /** @type {ImportDocumentConfig} */
     const { apiRoute, publicRoute, middlewareApi, middlewarePublic, apiRequestHandler, interfaceRequestHandler } = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
     if (!interfaceRequestHandler) {
       throw new Error('Config Error: `interfaceRequestHandler` is missing.');
@@ -286,9 +301,10 @@ class ImportDocument {
    * @static
    */
   static apiRequestHandler(context) {
-    /** @type {import('express').RequestHandler<{}, import('../../src/wiki.js').UttoriWikiDocument | { error: string }, { title: string; image: string; excerpt: string; pages: { url: string; name: string; type: string }[]; tags: string[]; slug: string; redirects: string[]; }>} */
+    /** @type {import('express').RequestHandler<{}, import('../../src/wiki.js').UttoriWikiDocument | { error: string }, ImportDocumentApiPayload>} */
     return async (request, response, next) => {
       debug('apiRequestHandler');
+      /** @type {ImportDocumentConfig} */
       const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
       const referrer = request.get('Referrer') || '';
       debug('apiRequestHandler referrer:', referrer);
@@ -467,8 +483,8 @@ class ImportDocument {
    * Processes a page and returns the content and attachment.
    * @param {ImportDocumentConfig} config The configuration object.
    * @param {string} slug The slug of the document.
-   * @param {{ url: string; name: string; type: string }} page The page to process.
-   * @returns {Promise<{content: string, attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[]}>} The content and attachments.
+   * @param {ImportDocumentConfigPage} page The page to process.
+   * @returns {Promise<ImportDocumentProcessPage>} The content and attachments.
    */
   static async processPage(config, slug, page) {
     debug('processPage:', page);

@@ -1,9 +1,10 @@
 {
   "include": [
-    "src/**/*",
+    "src/**/*.js",
     "dist/custom.d.ts"
   ],
   "exclude": [
+    "build/**/*",
     "node_modules",
     "test/**/*",
     "eslint.config.js"
