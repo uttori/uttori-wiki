@@ -1,5 +1,3 @@
-import MarkdownIt from 'markdown-it';
-
 import { footnoteDefinition, footnoteReferences, configFootnoteReference, configFootnoteOpen, configFootnoteClose } from './footnotes.js';
 import { headingOpen, tocOpen, tocClose, tocBody, tocRule, collectHeaders } from './toc.js';
 import { wikilinks } from './wikilinks.js';
@@ -14,7 +12,7 @@ import { lineBreaker } from './line-breaker.js';
  * - External Links with Domain Filters
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
- * @param {MarkdownIt} md The MarkdownIt instance.
+ * @param {import('markdown-it').default} md The MarkdownIt instance.
  * @returns {object} The instance of Plugin.
  */
 function Plugin(md) {

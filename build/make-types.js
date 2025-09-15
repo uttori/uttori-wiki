@@ -147,8 +147,14 @@ const main = async () => {
       'plugins/renderer-markdown-it.d.ts',
       'plugins/renderer-replacer.d.ts',
       'plugins/sitemap-generator.d.ts',
+      'plugins/search-provider-lunr.d.ts',
+      'plugins/storage-provider-json-file.d.ts',
+      'plugins/storage-provider-json-memory.d.ts',
+      'plugins/storeage-provider-json/storage-provider-file.d.ts',
+      'plugins/storeage-provider-json/storage-provider-memory.d.ts',
       'plugins/upload-multer.d.ts',
       'plugins/utilities/analytics-provider.d.ts',
+      'plugins/utilities/cmd.d.ts',
     ];
     for (const file of files) {
       if (fs.existsSync(`dist/${file}`)) {

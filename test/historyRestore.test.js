@@ -10,7 +10,7 @@ const response = { set: () => {}, render: () => {}, redirect: () => {} };
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {

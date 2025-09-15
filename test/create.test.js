@@ -8,7 +8,7 @@ import { config, serverSetup, seed } from './_helpers/server.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {

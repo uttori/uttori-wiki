@@ -27,9 +27,9 @@ export async function cmd (command, { log = () => {}, timeout = 30000 } = {}) {
       return;
     }
 
+    // eslint-disable-next-line security/detect-child-process
     const commandProcess = child_process.exec(command);
     // Special condition for tests
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
     if (`${commandProcess}` === 'TEST') {
       resolve('TEST');
       return;

@@ -10,7 +10,7 @@
 <dt><a href="#tocClose">tocClose(_tokens, _index, options)</a> ⇒ <code>string</code></dt>
 <dd><p>Creates the closing tag of the TOC.</p>
 </dd>
-<dt><a href="#tocBody">tocBody(_tokens, _index, options, env, _slf)</a> ⇒ <code>string</code></dt>
+<dt><a href="#tocBody">tocBody(_tokens, _index, _options, env, _slf)</a> ⇒ <code>string</code></dt>
 <dd><p>Creates the contents of the TOC.</p>
 </dd>
 <dt><a href="#tocRule">tocRule(state)</a> ⇒ <code>boolean</code></dt>
@@ -65,7 +65,7 @@ Creates the closing tag of the TOC.
 
 <a name="tocBody"></a>
 
-## tocBody(_tokens, _index, options, env, _slf) ⇒ <code>string</code>
+## tocBody(_tokens, _index, _options, env, _slf) ⇒ <code>string</code>
 Creates the contents of the TOC.
 
 **Kind**: global function  
@@ -75,7 +75,7 @@ Creates the contents of the TOC.
 | --- | --- | --- |
 | _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>MarkdownItRendererOptions</code> | Option parameters of the parser instance. |
+| _options | <code>MarkdownItRendererOptions</code> | Option parameters of the parser instance. |
 | env | <code>object</code> | Additional data from parsed input (the toc_headings, for example). |
 | _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
 

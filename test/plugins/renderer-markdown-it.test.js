@@ -54,10 +54,10 @@ test('MarkdownItRenderer.extendConfig(config): can extend a config at all levels
       ...MarkdownItRenderer.defaultConfig().markdownIt,
       uttori: {
         haystack: 'needle',
-          ...MarkdownItRenderer.defaultConfig().markdownIt.uttori,
-        },
+        ...MarkdownItRenderer.defaultConfig().markdownIt.uttori,
       },
-    });
+    },
+  });
   t.deepEqual(MarkdownItRenderer.extendConfig({ markdownIt: { uttori: { toc: { haystack: 'needle' } } } }), {
     ...MarkdownItRenderer.defaultConfig(),
     markdownIt: {
@@ -76,9 +76,9 @@ test('MarkdownItRenderer.extendConfig(config): can extend a config at all levels
     markdownIt: {
       ...MarkdownItRenderer.defaultConfig().markdownIt,
       uttori: {
-      ...MarkdownItRenderer.defaultConfig().markdownIt.uttori,
-      wikilinks: {
-        ...MarkdownItRenderer.defaultConfig().markdownIt.uttori.wikilinks,
+        ...MarkdownItRenderer.defaultConfig().markdownIt.uttori,
+        wikilinks: {
+          ...MarkdownItRenderer.defaultConfig().markdownIt.uttori.wikilinks,
           haystack: 'needle',
         },
       },
@@ -157,12 +157,12 @@ test('MarkdownItRenderer.render(content, config): replaces missing links with a 
 
 test('MarkdownItRenderer.render(content, config): works with and without link validation', (t) => {
   t.is(MarkdownItRenderer.render('![](data:image/gif;base64,R0lGODlhAQABAAAAACw=)'), '<p><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" loading="lazy"></p>');
-  t.is(MarkdownItRenderer.render("![](data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E)"), '<p>![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)</p>');
-  t.is(MarkdownItRenderer.render("![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)"), '<p>![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)</p>');
+  t.is(MarkdownItRenderer.render('![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)'), '<p>![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)</p>');
+  t.is(MarkdownItRenderer.render('![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)'), '<p>![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)</p>');
 
   t.is(MarkdownItRenderer.render('![](data:image/gif;base64,R0lGODlhAQABAAAAACw=)', { markdownIt: { uttori: { disableValidation: true } } }), '<p><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""></p>');
-  t.is(MarkdownItRenderer.render("![](data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E)", { markdownIt: { uttori: { disableValidation: true } } }), '<p>![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)</p>');
-  t.is(MarkdownItRenderer.render("![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)", { markdownIt: { uttori: { disableValidation: true } } }), '<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=" alt=""></p>');
+  t.is(MarkdownItRenderer.render('![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)', { markdownIt: { uttori: { disableValidation: true } } }), '<p>![](data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\'/%3E)</p>');
+  t.is(MarkdownItRenderer.render('![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)', { markdownIt: { uttori: { disableValidation: true } } }), '<p><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=" alt=""></p>');
 });
 
 test('MarkdownItRenderer.parse(content, config): handles empty values', (t) => {
@@ -758,7 +758,7 @@ test('MarkdownItRenderer.parse(content, config): works with and without link val
       type: 'paragraph_close',
     },
   ];
-  let parsed = JSON.parse(JSON.stringify(MarkdownItRenderer.parse("![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)", MarkdownItRenderer.defaultConfig())));
+  let parsed = JSON.parse(JSON.stringify(MarkdownItRenderer.parse('![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)', MarkdownItRenderer.defaultConfig())));
   t.deepEqual(parsed, tokens);
 
   tokens = [
@@ -833,7 +833,7 @@ test('MarkdownItRenderer.parse(content, config): works with and without link val
       type: 'paragraph_close',
     },
   ];
-  parsed = JSON.parse(JSON.stringify(MarkdownItRenderer.parse("![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)", { markdownIt: { uttori: { disableValidation: true } } })));
+  parsed = JSON.parse(JSON.stringify(MarkdownItRenderer.parse('![](data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnLz4=)', { markdownIt: { uttori: { disableValidation: true } } })));
   t.deepEqual(parsed, tokens);
 });
 

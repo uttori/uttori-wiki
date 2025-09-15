@@ -7,6 +7,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Ren
 /**
  * @typedef {object} EJSRendererConfig
  * @property {Record<string, string[]>} [events] Events to bind to.
+ * @property {ejs.Options} [ejs] EJS configuration.
  */
 
 /**
@@ -30,19 +31,21 @@ class EJSRenderer {
 
   /**
    * The default configuration.
-   * @returns {ejs.Options} The configuration.
+   * @returns {EJSRendererConfig} The configuration.
    * @example <caption>EJSRenderer.defaultConfig()</caption>
    * const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
    * @static
    */
   static defaultConfig() {
-    return {};
+    return {
+      ejs: {},
+    };
   }
 
   /**
    * Validates the provided configuration for required entries.
    * @param {Record<string, EJSRendererConfig>} config A provided configuration to use.
-   * @param {object} _context Unused
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} _context Unused
    * @example <caption>EJSRenderer.validateConfig(config, _context)</caption>
    * EJSRenderer.validateConfig({ ... });
    * @static
@@ -52,15 +55,13 @@ class EJSRenderer {
     if (!config || !config[EJSRenderer.configKey]) {
       throw new Error(`EJSRenderer Config Warning: '${EJSRenderer.configKey}' configuration key is missing.`);
     }
+
     debug('Validated config.');
   }
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {object} context A Uttori-like context.
-   * @param {object} context.hooks An event system / hook system to use.
-   * @param {Function} context.hooks.on An event registration function.
-   * @param {Record<string, EJSRendererConfig>} context.config A provided configuration to use.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
    * @example <caption>EJSRenderer.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -82,19 +83,21 @@ class EJSRenderer {
    */
   static register(context) {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {EJSRendererConfig} */
     const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Bind events
     for (const [method, eventNames] of Object.entries(config.events)) {
       if (typeof EJSRenderer[method] === 'function') {
         for (const event of eventNames) {
-          context.hooks.on(event, EJSRenderer[method]);
+          /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
+          const callback = EJSRenderer[method];
+          context.hooks.on(event, callback);
         }
       } else {
         debug(`Missing function "${method}"`);
@@ -104,9 +107,8 @@ class EJSRenderer {
 
   /**
    * Replace content in a provided string with a provided context.
-   * @param {string} content - Content to be converted to HTML.
-   * @param {object} context - A Uttori-like context.
-   * @param {Record<string, EJSRendererConfig>} context.config - A provided configuration to use.
+   * @param {string} content Content to be converted to HTML.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
    * @returns {string} The rendered content.
    * @example <caption>EJSRenderer.renderContent(content, context)</caption>
    * const context = {
@@ -124,19 +126,16 @@ class EJSRenderer {
     if (!context || !context.config || !context.config[EJSRenderer.configKey]) {
       throw new Error('Missing configuration.');
     }
-    const config = {
-      ...EJSRenderer.defaultConfig(),
-      ...context.config[EJSRenderer.configKey],
-    };
-    return EJSRenderer.render(content, config);
+    /** @type {EJSRendererConfig} */
+    const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
+    return EJSRenderer.render(content, config.ejs);
   }
 
   /**
    * Replace content in a collection of Uttori documents with a provided context.
-   * @param {import('../wiki.js').UttoriWikiDocument[]} collection - A collection of Uttori documents.
-   * @param {object} context - A Uttori-like context.
-   * @param {Record<string, EJSRendererConfig>} context.config - A provided configuration to use.
-   * @returns {object[]}} The rendered documents.
+   * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
+   * @returns {import('../wiki.js').UttoriWikiDocument[]} The rendered documents.
    * @example <caption>EJSRenderer.renderCollection(collection, context)</caption>
    * const context = {
    *   config: {
@@ -153,20 +152,18 @@ class EJSRenderer {
     if (!context || !context.config || !context.config[EJSRenderer.configKey]) {
       throw new Error('Missing configuration.');
     }
-    const config = {
-      ...EJSRenderer.defaultConfig(),
-      ...context.config[EJSRenderer.configKey],
-    };
+    /** @type {EJSRendererConfig} */
+    const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
     return collection.map((document) => {
-      const html = EJSRenderer.render(document.html, config);
+      const html = EJSRenderer.render(document.html, config.ejs);
       return { ...document, html };
     });
   }
 
   /**
    * Render EJS content in a provided string.
-   * @param {string} content - Content to be searched through to make replacements.
-   * @param {ejs.Options} config - A provided configuration to use.
+   * @param {string} content Content to be searched through to make replacements.
+   * @param {ejs.Options} config A provided configuration to use.
    * @returns {string} The rendered content.
    * @example <caption>EJSRenderer.render(content, config)</caption>
    * const html = EJSRenderer.render(content, config);

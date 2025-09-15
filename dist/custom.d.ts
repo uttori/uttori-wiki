@@ -41,6 +41,9 @@ export type KnownPluginConfigs = {
   'uttori-plugin-renderer-ejs': import('./plugins/ejs-includes.js').EJSRendererConfig;
   'uttori-plugin-renderer-markdown-it': import('./plugins/renderer-markdown-it.js').MarkdownItRendererConfig;
   'uttori-plugin-renderer-replacer': import('./plugins/renderer-replacer.js').ReplacerRendererConfig;
+  'uttori-plugin-search-provider-lunr': import('./plugins/search-provider-lunr.js').SearchProviderLunrConfig;
+  'uttori-plugin-storage-provider-json-file': import('./plugins/storage-provider-json-file.js').StorageProviderJsonFileConfig;
+  'uttori-plugin-storage-provider-json-memory': import('./plugins/storage-provider-json-memory.js').StorageProviderJsonMemoryConfig;
   'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
 }
 
@@ -93,9 +96,22 @@ export interface UttoriWikiPlugin {
   /** The default config for the plugin. */
   static defaultConfig: Record<string, any>
   /** Validates the config. */
-  static validateConfig?: (config: Record<string, object>) => boolean
+  static validateConfig?: (config: Record<string, object>, _context: UttoriContext) => void
   /** Sets up any hooks the plugin needs. */
   static register: (context: UttoriWiki) => void
   /** If the plugin has routes to bind, this function will be called with the Express app and the context. */
   static bindRoutes?: (app: Express, context: UttoriContext) => void
 }
+
+export type Operator = '=' | '!=' | '<=' | '<' | '>=' | '>' | 'LIKE' | 'IN' | 'NOT_IN' | 'INCLUDES' | 'EXCLUDES' | 'IS_NULL' | 'IS_NOT_NULL' | 'BETWEEN' | 'AND' | 'OR';
+export type Value = string | number | Array<string | number | SqlWhereParserAst> | [string | number, string | number];
+
+export type SqlWhereParserAst = {
+  [key in Exclude<Operator, 'AND' | 'OR'>]?: Value;
+} & {
+  AND?: SqlWhereParserAst[];
+  OR?: SqlWhereParserAst[];
+};
+export type ParserOperand = boolean | string | number | symbol | SqlWhereParserAst | Array<boolean | string | number | symbol | SqlWhereParserAst>;
+
+export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<string>) => Array<SqlWhereParserAst> | SqlWhereParserAst;

@@ -14,16 +14,16 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Ren
  * @property {boolean} disableValidation Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled.
  * @property {boolean} openNewWindow Open external domains in a new window.
  * @property {boolean} lazyImages Add lazy loading params to image tags.
- * @property {object} footnotes Footnote settings.
+ * @property {object} [footnotes] Footnote settings.
  * @property {Function} footnotes.referenceTag A funciton to return the default HTML for a footnote reference.
  * @property {Function} footnotes.definitionOpenTag A funciton to return the default opening HTML for a footnote definition.
  * @property {string} footnotes.definitionCloseTag The default closing HTML for a footnote definition.
- * @property {object} toc Table of Contents settings.
+ * @property {object} [toc] Table of Contents settings.
  * @property {boolean} toc.extract When true, extract the table of contents to the view model from the content.
  * @property {string} toc.openingTag The opening DOM tag for the TOC container.
  * @property {string} toc.closingTag The closing DOM tag for the TOC container.
  * @property {object} toc.slugify Slugify options for convering headings to anchor links.
- * @property {object} wikilinks WikiLinks settings.
+ * @property {object} [wikilinks] WikiLinks settings.
  * @property {object} wikilinks.slugify Slugify options for convering Wikilinks to anchor links.
  */
 
@@ -198,11 +198,11 @@ class MarkdownItRenderer {
    */
   static register(context) {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     const config = MarkdownItRenderer.extendConfig(/** @type {MarkdownItRendererConfig} */ (context.config[MarkdownItRenderer.configKey]));
     if (!config.events || Object.keys(config.events).length === 0) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Bind events

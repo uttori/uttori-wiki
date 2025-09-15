@@ -26,12 +26,12 @@ export function tocClose(_tokens: import("markdown-it/index.js").Token[], _index
  * Creates the contents of the TOC.
  * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
- * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options Option parameters of the parser instance.
+ * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} _options Option parameters of the parser instance.
  * @param {object} env Additional data from parsed input (the toc_headings, for example).
  * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
  * @returns {string} The contents tag of the TOC.
  */
-export function tocBody(_tokens: import("markdown-it/index.js").Token[], _index: number, options: import("./../renderer-markdown-it.js").MarkdownItRendererOptions, env: object, _slf: import("markdown-it/index.js").Renderer): string;
+export function tocBody(_tokens: import("markdown-it/index.js").Token[], _index: number, _options: import("./../renderer-markdown-it.js").MarkdownItRendererOptions, env: object, _slf: import("markdown-it/index.js").Renderer): string;
 /**
  * Find and replace the TOC tag with the TOC itself.
  * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.

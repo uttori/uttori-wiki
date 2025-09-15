@@ -4,10 +4,15 @@ export type EJSRendererConfig = {
      * Events to bind to.
      */
     events?: Record<string, string[]>;
+    /**
+     * EJS configuration.
+     */
+    ejs?: ejs.Options;
 };
 /**
  * @typedef {object} EJSRendererConfig
  * @property {Record<string, string[]>} [events] Events to bind to.
+ * @property {ejs.Options} [ejs] EJS configuration.
  */
 /**
  * Uttori Replacer Renderer
@@ -27,27 +32,24 @@ declare class EJSRenderer {
     static get configKey(): string;
     /**
      * The default configuration.
-     * @returns {ejs.Options} The configuration.
+     * @returns {EJSRendererConfig} The configuration.
      * @example <caption>EJSRenderer.defaultConfig()</caption>
      * const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
      * @static
      */
-    static defaultConfig(): ejs.Options;
+    static defaultConfig(): EJSRendererConfig;
     /**
      * Validates the provided configuration for required entries.
      * @param {Record<string, EJSRendererConfig>} config A provided configuration to use.
-     * @param {object} _context Unused
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} _context Unused
      * @example <caption>EJSRenderer.validateConfig(config, _context)</caption>
      * EJSRenderer.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, EJSRendererConfig>, _context: object): void;
+    static validateConfig(config: Record<string, EJSRendererConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {object} context A Uttori-like context.
-     * @param {object} context.hooks An event system / hook system to use.
-     * @param {Function} context.hooks.on An event registration function.
-     * @param {Record<string, EJSRendererConfig>} context.config A provided configuration to use.
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
      * @example <caption>EJSRenderer.register(context)</caption>
      * const context = {
      *   hooks: {
@@ -67,17 +69,11 @@ declare class EJSRenderer {
      * EJSRenderer.register(context);
      * @static
      */
-    static register(context: {
-        hooks: {
-            on: Function;
-        };
-        config: Record<string, EJSRendererConfig>;
-    }): void;
+    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): void;
     /**
      * Replace content in a provided string with a provided context.
-     * @param {string} content - Content to be converted to HTML.
-     * @param {object} context - A Uttori-like context.
-     * @param {Record<string, EJSRendererConfig>} context.config - A provided configuration to use.
+     * @param {string} content Content to be converted to HTML.
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
      * @returns {string} The rendered content.
      * @example <caption>EJSRenderer.renderContent(content, context)</caption>
      * const context = {
@@ -90,15 +86,12 @@ declare class EJSRenderer {
      * EJSRenderer.renderContent(content, context);
      * @static
      */
-    static renderContent(content: string, context: {
-        config: Record<string, EJSRendererConfig>;
-    }): string;
+    static renderContent(content: string, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): string;
     /**
      * Replace content in a collection of Uttori documents with a provided context.
-     * @param {import('../wiki.js').UttoriWikiDocument[]} collection - A collection of Uttori documents.
-     * @param {object} context - A Uttori-like context.
-     * @param {Record<string, EJSRendererConfig>} context.config - A provided configuration to use.
-     * @returns {object[]}} The rendered documents.
+     * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
+     * @returns {import('../wiki.js').UttoriWikiDocument[]} The rendered documents.
      * @example <caption>EJSRenderer.renderCollection(collection, context)</caption>
      * const context = {
      *   config: {
@@ -110,13 +103,11 @@ declare class EJSRenderer {
      * EJSRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: {
-        config: Record<string, EJSRendererConfig>;
-    }): object[];
+    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): import("../wiki.js").UttoriWikiDocument[];
     /**
      * Render EJS content in a provided string.
-     * @param {string} content - Content to be searched through to make replacements.
-     * @param {ejs.Options} config - A provided configuration to use.
+     * @param {string} content Content to be searched through to make replacements.
+     * @param {ejs.Options} config A provided configuration to use.
      * @returns {string} The rendered content.
      * @example <caption>EJSRenderer.render(content, config)</caption>
      * const html = EJSRenderer.render(content, config);

@@ -20,7 +20,7 @@ test('MarkdownItRenderer.render(content, config): can render a WikiLink with cus
 });
 
 test('MarkdownItRenderer.render(content, config): can render a WikiLink with a bracket character in the text', (t) => {
-  const markdown = `A deep [[LINK|\\[hole]]`;
+  const markdown = 'A deep [[LINK|\\[hole]]';
   const output = '<p>A deep <a href="link">\\[hole</a></p>';
   t.is(MarkdownItRenderer.render(markdown, MarkdownItRenderer.defaultConfig()), output);
 });

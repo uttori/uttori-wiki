@@ -6,7 +6,7 @@ import EJSRenderer from '../../src/plugins/ejs-includes.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {
@@ -19,7 +19,7 @@ test('configKey: should return the correct configuration key', (t) => {
 
 test('defaultConfig: should return the default configuration', (t) => {
   const config = EJSRenderer.defaultConfig();
-  t.deepEqual(config, {});
+  t.deepEqual(config, { ejs: {} });
 });
 
 test('validateConfig: should throw an error if the configuration key is missing', (t) => {
@@ -31,7 +31,7 @@ test('validateConfig: should be able to validate the config', (t) => {
 });
 
 test('register: should throw an error if context is missing', (t) => {
-  t.throws(() => EJSRenderer.register(), { message: "Missing event dispatcher in 'context.hooks.on(event, callback)' format." });
+  t.throws(() => EJSRenderer.register(), { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
 test('register: should throw an error if events are missing in config', (t) => {
@@ -43,7 +43,7 @@ test('register: should throw an error if events are missing in config', (t) => {
       [EJSRenderer.configKey]: EJSRenderer.defaultConfig(),
     },
   };
-  t.throws(() => EJSRenderer.register(context), { message: "Missing events to listen to for in 'config.events'." });
+  t.throws(() => EJSRenderer.register(context), { message: 'Missing events to listen to for in \'config.events\'.' });
 });
 
 test('register: should register events if they are present in config', (t) => {

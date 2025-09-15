@@ -130,7 +130,7 @@ test.serial('AnalyticsPlugin: E2E', async (t) => {
   t.is(output, '{"test":2,"zero":0,"two":2,"new":2}');
 
   await hooks.filter('document-save', { slug: 'new' });
-    output = await fs.readFile(path.join('test/site/data', 'visits.json'), 'utf8');
+  output = await fs.readFile(path.join('test/site/data', 'visits.json'), 'utf8');
   t.is(output, '{"test":2,"zero":0,"two":2,"new":3}');
 
   // Fetch returns an array of results.

@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import multer from 'multer';
 
 let debug = (..._) => {};
@@ -113,12 +113,12 @@ class MulterUpload {
   static register(context) {
     debug('register');
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {MulterUploadConfig} */
     const config = { ...MulterUpload.defaultConfig(), ...context.config[MulterUpload.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Ensure the directory exists.

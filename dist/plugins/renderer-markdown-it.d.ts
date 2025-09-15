@@ -23,7 +23,7 @@ export type MarkdownItRendererOptionsUttori = {
     /**
      * Footnote settings.
      */
-    footnotes: {
+    footnotes?: {
         referenceTag: Function;
         definitionOpenTag: Function;
         definitionCloseTag: string;
@@ -31,7 +31,7 @@ export type MarkdownItRendererOptionsUttori = {
     /**
      * Table of Contents settings.
      */
-    toc: {
+    toc?: {
         extract: boolean;
         openingTag: string;
         closingTag: string;
@@ -40,7 +40,7 @@ export type MarkdownItRendererOptionsUttori = {
     /**
      * WikiLinks settings.
      */
-    wikilinks: {
+    wikilinks?: {
         slugify: object;
     };
 };
@@ -95,16 +95,16 @@ export type MarkdownItRendererConfig = {
  * @property {boolean} disableValidation Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled.
  * @property {boolean} openNewWindow Open external domains in a new window.
  * @property {boolean} lazyImages Add lazy loading params to image tags.
- * @property {object} footnotes Footnote settings.
+ * @property {object} [footnotes] Footnote settings.
  * @property {Function} footnotes.referenceTag A funciton to return the default HTML for a footnote reference.
  * @property {Function} footnotes.definitionOpenTag A funciton to return the default opening HTML for a footnote definition.
  * @property {string} footnotes.definitionCloseTag The default closing HTML for a footnote definition.
- * @property {object} toc Table of Contents settings.
+ * @property {object} [toc] Table of Contents settings.
  * @property {boolean} toc.extract When true, extract the table of contents to the view model from the content.
  * @property {string} toc.openingTag The opening DOM tag for the TOC container.
  * @property {string} toc.closingTag The closing DOM tag for the TOC container.
  * @property {object} toc.slugify Slugify options for convering headings to anchor links.
- * @property {object} wikilinks WikiLinks settings.
+ * @property {object} [wikilinks] WikiLinks settings.
  * @property {object} wikilinks.slugify Slugify options for convering Wikilinks to anchor links.
  */
 /**

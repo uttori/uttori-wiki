@@ -9,7 +9,7 @@ import DownloadRouter from '../../src/plugins/download-route.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {
@@ -116,7 +116,7 @@ test('register: should throw an error if events are missing in config', (t) => {
 });
 
 test('register: should register events if they are present in config', (t) => {
-  const on = sandbox.spy()
+  const on = sandbox.spy();
   const context = {
     hooks: {
       on,

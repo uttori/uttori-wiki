@@ -1,4 +1,4 @@
-/* eslint-disable n/no-unsupported-features/node-builtins */
+
 import test from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
@@ -10,7 +10,7 @@ import ImportDocument from '../../src/plugins/import-document.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {
@@ -38,10 +38,10 @@ test('defaultConfig: should return the default configuration', (t) => {
 
 test('validateConfig: should throw an error if the configuration key is missing', (t) => {
   t.throws(() => ImportDocument.validateConfig(), {
-    message: `Config Error: '${ImportDocument.configKey}' configuration key is missing.`
+    message: `Config Error: '${ImportDocument.configKey}' configuration key is missing.`,
   });
   t.throws(() => ImportDocument.validateConfig({}), {
-    message: `Config Error: '${ImportDocument.configKey}' configuration key is missing.`
+    message: `Config Error: '${ImportDocument.configKey}' configuration key is missing.`,
   });
 });
 
@@ -52,7 +52,7 @@ test('validateConfig: should throw an error if allowedReferrers is not an array'
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `allowedReferrers` should be an array of URLs or an empty array.'
+    message: 'Config Error: `allowedReferrers` should be an array of URLs or an empty array.',
   });
 });
 
@@ -64,7 +64,7 @@ test('validateConfig: should throw an error if uploadPath is not a string', (t) 
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `uploadPath` should be a string path to reference uploaded files by.'
+    message: 'Config Error: `uploadPath` should be a string path to reference uploaded files by.',
   });
 });
 
@@ -76,7 +76,7 @@ test('validateConfig: should throw an error if uploadPath is empty', (t) => {
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `uploadPath` should be a string path to reference uploaded files by.'
+    message: 'Config Error: `uploadPath` should be a string path to reference uploaded files by.',
   });
 });
 
@@ -89,7 +89,7 @@ test('validateConfig: should throw an error if uploadDirectory is not a string',
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `uploadDirectory` should be a string path to a directory to upload files to.'
+    message: 'Config Error: `uploadDirectory` should be a string path to a directory to upload files to.',
   });
 });
 
@@ -102,7 +102,7 @@ test('validateConfig: should throw an error if uploadDirectory is empty', (t) =>
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `uploadDirectory` should be a string path to a directory to upload files to.'
+    message: 'Config Error: `uploadDirectory` should be a string path to a directory to upload files to.',
   });
 });
 
@@ -116,7 +116,7 @@ test('validateConfig: should throw an error if apiRequestHandler is not a functi
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `apiRequestHandler` should be a function to handle the API route.'
+    message: 'Config Error: `apiRequestHandler` should be a function to handle the API route.',
   });
 });
 
@@ -131,7 +131,7 @@ test('validateConfig: should throw an error if interfaceRequestHandler is not a 
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `interfaceRequestHandler` should be a function to handle the interface route.'
+    message: 'Config Error: `interfaceRequestHandler` should be a function to handle the interface route.',
   });
 });
 
@@ -147,7 +147,7 @@ test('validateConfig: should throw an error if downloadFile is not a function', 
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `downloadFile` should be a function to handle the download.'
+    message: 'Config Error: `downloadFile` should be a function to handle the download.',
   });
 });
 
@@ -164,7 +164,7 @@ test('validateConfig: should throw an error if middlewareApi is not an array', (
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `middlewareApi` should be an array of middleware.'
+    message: 'Config Error: `middlewareApi` should be an array of middleware.',
   });
 });
 
@@ -182,7 +182,7 @@ test('validateConfig: should throw an error if middlewarePublic is not an array'
     },
   };
   t.throws(() => ImportDocument.validateConfig(config), {
-    message: 'Config Error: `middlewarePublic` should be an array of middleware.'
+    message: 'Config Error: `middlewarePublic` should be an array of middleware.',
   });
 });
 
@@ -204,13 +204,13 @@ test('validateConfig: should validate a valid config', (t) => {
 
 test('register: should throw an error if context is missing', (t) => {
   t.throws(() => ImportDocument.register(), {
-    message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.'
+    message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
   });
 });
 
 test('register: should throw an error if hooks.on is missing', (t) => {
   t.throws(() => ImportDocument.register({ hooks: {} }), {
-    message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.'
+    message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
   });
 });
 
@@ -224,7 +224,7 @@ test('register: should throw an error if events are missing in config', (t) => {
     },
   };
   t.throws(() => ImportDocument.register(context), {
-    message: 'Missing events to listen to for in \'config.events\'.'
+    message: 'Missing events to listen to for in \'config.events\'.',
   });
 });
 
@@ -283,7 +283,7 @@ test('bindRoutes: should throw an error if interfaceRequestHandler is missing', 
     },
   };
   t.throws(() => ImportDocument.bindRoutes(server, context), {
-    message: 'Config Error: `interfaceRequestHandler` is missing.'
+    message: 'Config Error: `interfaceRequestHandler` is missing.',
   });
 });
 
@@ -530,7 +530,7 @@ test.serial('downloadFile: should download a file from URL', async (t) => {
     start(controller) {
       controller.enqueue(new Uint8Array([1, 2, 3]));
       controller.close();
-    }
+    },
   });
 
   const mockFetch = sandbox.stub().resolves({

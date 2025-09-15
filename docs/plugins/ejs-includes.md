@@ -23,11 +23,11 @@ Uttori Replacer Renderer
 * [EJSRenderer](#EJSRenderer)
     * [new EJSRenderer()](#new_EJSRenderer_new)
     * [.configKey](#EJSRenderer.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#EJSRenderer.defaultConfig) ⇒ <code>ejs.Options</code>
+    * [.defaultConfig()](#EJSRenderer.defaultConfig) ⇒ [<code>EJSRendererConfig</code>](#EJSRendererConfig)
     * [.validateConfig(config, _context)](#EJSRenderer.validateConfig)
     * [.register(context)](#EJSRenderer.register)
     * [.renderContent(content, context)](#EJSRenderer.renderContent) ⇒ <code>string</code>
-    * [.renderCollection(collection, context)](#EJSRenderer.renderCollection) ⇒ <code>Array.&lt;object&gt;</code>
+    * [.renderCollection(collection, context)](#EJSRenderer.renderCollection) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
     * [.render(content, config)](#EJSRenderer.render) ⇒ <code>string</code>
 
 <a name="new_EJSRenderer_new"></a>
@@ -50,11 +50,11 @@ const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.c
 ```
 <a name="EJSRenderer.defaultConfig"></a>
 
-### EJSRenderer.defaultConfig() ⇒ <code>ejs.Options</code>
+### EJSRenderer.defaultConfig() ⇒ [<code>EJSRendererConfig</code>](#EJSRendererConfig)
 The default configuration.
 
 **Kind**: static method of [<code>EJSRenderer</code>](#EJSRenderer)  
-**Returns**: <code>ejs.Options</code> - The configuration.  
+**Returns**: [<code>EJSRendererConfig</code>](#EJSRendererConfig) - The configuration.  
 **Example** *(EJSRenderer.defaultConfig())*  
 ```js
 const config = { ...EJSRenderer.defaultConfig(), ...context.config[EJSRenderer.configKey] };
@@ -69,7 +69,7 @@ Validates the provided configuration for required entries.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>Record.&lt;string, EJSRendererConfig&gt;</code> | A provided configuration to use. |
-| _context | <code>object</code> | Unused |
+| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-ejs&#x27;, EJSRendererConfig&gt;</code> | Unused |
 
 **Example** *(EJSRenderer.validateConfig(config, _context))*  
 ```js
@@ -84,10 +84,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>object</code> | A Uttori-like context. |
-| context.hooks | <code>object</code> | An event system / hook system to use. |
-| context.hooks.on | <code>function</code> | An event registration function. |
-| context.config | <code>Record.&lt;string, EJSRendererConfig&gt;</code> | A provided configuration to use. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-ejs&#x27;, EJSRendererConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(EJSRenderer.register(context))*  
 ```js
@@ -119,8 +116,7 @@ Replace content in a provided string with a provided context.
 | Param | Type | Description |
 | --- | --- | --- |
 | content | <code>string</code> | Content to be converted to HTML. |
-| context | <code>object</code> | A Uttori-like context. |
-| context.config | <code>Record.&lt;string, EJSRendererConfig&gt;</code> | A provided configuration to use. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-ejs&#x27;, EJSRendererConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(EJSRenderer.renderContent(content, context))*  
 ```js
@@ -135,17 +131,16 @@ EJSRenderer.renderContent(content, context);
 ```
 <a name="EJSRenderer.renderCollection"></a>
 
-### EJSRenderer.renderCollection(collection, context) ⇒ <code>Array.&lt;object&gt;</code>
+### EJSRenderer.renderCollection(collection, context) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
 Replace content in a collection of Uttori documents with a provided context.
 
 **Kind**: static method of [<code>EJSRenderer</code>](#EJSRenderer)  
-**Returns**: <code>Array.&lt;object&gt;</code> - } The rendered documents.  
+**Returns**: <code>Array.&lt;UttoriWikiDocument&gt;</code> - The rendered documents.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | collection | <code>Array.&lt;UttoriWikiDocument&gt;</code> | A collection of Uttori documents. |
-| context | <code>object</code> | A Uttori-like context. |
-| context.config | <code>Record.&lt;string, EJSRendererConfig&gt;</code> | A provided configuration to use. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-ejs&#x27;, EJSRendererConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(EJSRenderer.renderCollection(collection, context))*  
 ```js
@@ -184,4 +179,5 @@ const html = EJSRenderer.render(content, config);
 | Name | Type | Description |
 | --- | --- | --- |
 | [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | Events to bind to. |
+| [ejs] | <code>ejs.Options</code> | EJS configuration. |
 

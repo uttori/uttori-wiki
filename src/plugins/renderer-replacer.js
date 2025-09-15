@@ -89,12 +89,12 @@ class ReplacerRenderer {
    */
   static register(context) {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {ReplacerRendererConfig} */
     const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Bind events

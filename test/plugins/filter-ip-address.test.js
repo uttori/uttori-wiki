@@ -10,7 +10,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {
@@ -85,11 +85,11 @@ test('validateConfig: should throw an error if trustProxy is not a boolean', (t)
 });
 
 test('register: should throw error if context is missing', (t) => {
-  t.throws(() => FilterIPAddress.register(), { message: "Missing event dispatcher in 'context.hooks.on(event, callback)' format." });
+  t.throws(() => FilterIPAddress.register(), { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
 test('register: should throw error if hooks are missing', (t) => {
-  t.throws(() => FilterIPAddress.register({}), { message: "Missing event dispatcher in 'context.hooks.on(event, callback)' format." });
+  t.throws(() => FilterIPAddress.register({}), { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
 test('register: should throw error if events are missing', (t) => {

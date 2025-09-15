@@ -132,12 +132,12 @@ class AuthSimple {
   static register(context) {
     debug('register');
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {AuthSimpleConfig} */
     const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
     // Bind events
     for (const [method, events] of Object.entries(config.events)) {

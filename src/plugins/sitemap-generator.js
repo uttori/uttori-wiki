@@ -125,12 +125,12 @@ class SitemapGenerator {
    */
   static register(context) {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {SitemapGeneratorConfig} */
     const config = { ...SitemapGenerator.defaultConfig(), ...context.config[SitemapGenerator.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Bind events
@@ -215,7 +215,7 @@ class SitemapGenerator {
     /** @type {import('../../src/wiki.js').UttoriWikiDocument[]} */
     let documents = [];
     try {
-      [documents] = await context.hooks.fetch('storage-query', "SELECT 'slug', 'createDate', 'updateDate' FROM documents WHERE slug != '' ORDER BY updateDate DESC LIMIT 10000");
+      [documents] = await context.hooks.fetch('storage-query', 'SELECT \'slug\', \'createDate\', \'updateDate\' FROM documents WHERE slug != \'\' ORDER BY updateDate DESC LIMIT 10000');
     } catch (error) {
       /* c8 ignore next 1 */
       debug('Error geting documents:', error);

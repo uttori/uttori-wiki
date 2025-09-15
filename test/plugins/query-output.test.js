@@ -5,7 +5,7 @@ import AddQueryOutputToViewModel from '../../src/plugins/query-output.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {

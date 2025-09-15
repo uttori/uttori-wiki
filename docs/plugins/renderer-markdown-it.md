@@ -251,16 +251,16 @@ viewModel = MarkdownItRenderer.viewModelDetail(viewModel, context);
 | disableValidation | <code>boolean</code> | Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled. |
 | openNewWindow | <code>boolean</code> | Open external domains in a new window. |
 | lazyImages | <code>boolean</code> | Add lazy loading params to image tags. |
-| footnotes | <code>object</code> | Footnote settings. |
+| [footnotes] | <code>object</code> | Footnote settings. |
 | footnotes.referenceTag | <code>function</code> | A funciton to return the default HTML for a footnote reference. |
 | footnotes.definitionOpenTag | <code>function</code> | A funciton to return the default opening HTML for a footnote definition. |
 | footnotes.definitionCloseTag | <code>string</code> | The default closing HTML for a footnote definition. |
-| toc | <code>object</code> | Table of Contents settings. |
+| [toc] | <code>object</code> | Table of Contents settings. |
 | toc.extract | <code>boolean</code> | When true, extract the table of contents to the view model from the content. |
 | toc.openingTag | <code>string</code> | The opening DOM tag for the TOC container. |
 | toc.closingTag | <code>string</code> | The closing DOM tag for the TOC container. |
 | toc.slugify | <code>object</code> | Slugify options for convering headings to anchor links. |
-| wikilinks | <code>object</code> | WikiLinks settings. |
+| [wikilinks] | <code>object</code> | WikiLinks settings. |
 | wikilinks.slugify | <code>object</code> | Slugify options for convering Wikilinks to anchor links. |
 
 <a name="MarkdownItRendererOptions"></a>

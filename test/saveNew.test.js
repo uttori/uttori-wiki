@@ -9,7 +9,7 @@ import { config, serverSetup } from './_helpers/server.js';
 
 let sandbox;
 test.beforeEach(() => {
-    sandbox = sinon.createSandbox();
+  sandbox = sinon.createSandbox();
 });
 
 test.afterEach(() => {
@@ -225,7 +225,7 @@ test('redirects back after attempting to saving when missing body keys', async (
   await uttori.saveNew({
     get: () => {},
     params: { key: 'test-key' },
-    body: {}
+    body: {},
   }, response, next);
   t.true(redirect.calledOnce);
 });
@@ -242,7 +242,7 @@ test('redirects back after attempting to saving when missing body', async (t) =>
   await uttori.saveNew({
     get: () => {},
     params: { key: 'test-key' },
-    body: undefined
+    body: undefined,
   }, response, next);
   t.true(redirect.calledOnce);
 });
@@ -259,7 +259,7 @@ test('redirects back after attempting to saving when useEditKey is set but no ed
   await uttori.saveNew({
     get: () => {},
     params: { key: 'bad-key' },
-    body: { title: 'Title' }
+    body: { title: 'Title' },
   }, response, next);
   t.true(redirect.calledOnce);
 });

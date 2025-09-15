@@ -12,5 +12,5 @@ Extend MarkdownIt with Uttori specific items:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| md | <code>MarkdownIt</code> | The MarkdownIt instance. |
+| md | <code>module:markdown-it~default</code> | The MarkdownIt instance. |
 

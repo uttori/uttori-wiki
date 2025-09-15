@@ -103,7 +103,7 @@ class FilterIPAddress {
   static register(context) {
     debug('Registering...');
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
 
     const config = { ...FilterIPAddress.defaultConfig(), ...context.config[FilterIPAddress.configKey] };

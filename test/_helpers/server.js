@@ -8,8 +8,8 @@ import cors from 'cors';
 
 const MemoryStore = createMemoryStore(session);
 
-import { Plugin as StorageProviderJSON } from '@uttori/storage-provider-json-memory';
-import { Plugin as SearchProviderLunr } from '@uttori/search-provider-lunr';
+import StorageProviderJSON from '../../src/plugins/storage-provider-json-memory.js';
+import SearchProviderLunr from '../../src/plugins/search-provider-lunr.js';
 import defaultConfig from '../../src/config.js';
 import { middleware as flash } from '../../src/wiki-flash.js';
 
@@ -75,7 +75,6 @@ export const serverSetup = () => {
   server.set('layout extractStyles', true);
   server.set('view engine', 'html');
   // server.enable('view cache');
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   server.engine('html', ejs.renderFile);
 
   // Setup Express

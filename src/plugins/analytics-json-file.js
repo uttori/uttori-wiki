@@ -104,12 +104,12 @@ class AnalyticsPlugin {
    */
   static register(context) {
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {AnalyticsPluginConfig} */
     const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
     const analytics = new AnalyticsProvider(config);
     for (const [method, eventNames] of Object.entries(config.events)) {

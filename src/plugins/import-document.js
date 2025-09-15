@@ -133,13 +133,13 @@ class ImportDocument {
       allowedReferrers: [],
       middlewarePublic: [],
       middlewareApi: [],
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       downloadFile: ImportDocument.downloadFile,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       processPage: ImportDocument.processPage,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       apiRequestHandler: ImportDocument.apiRequestHandler,
-      // eslint-disable-next-line @typescript-eslint/unbound-method
+
       interfaceRequestHandler: ImportDocument.interfaceRequestHandler,
     };
   }
@@ -226,12 +226,12 @@ class ImportDocument {
   static register(context) {
     debug('register');
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {ImportDocumentConfig} */
     const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
     if (!config.events) {
-      throw new Error("Missing events to listen to for in 'config.events'.");
+      throw new Error('Missing events to listen to for in \'config.events\'.');
     }
     // Bind events
     for (const [method, events] of Object.entries(config.events)) {
@@ -354,14 +354,14 @@ class ImportDocument {
           await config.downloadFile({
             url: image,
             fileName: path.join(config.uploadDirectory, slug, imageFileName),
-            type: `image`,
+            type: 'image',
           });
 
           // Add to attachments
           attachments.push({
             name: imageFileName,
             path: path.join(config.uploadPath, slug, imageFileName),
-            type: `image/${imageExt.slice(1)}`
+            type: `image/${imageExt.slice(1)}`,
           });
 
           importedImagePath = path.join(config.uploadPath, slug, imageFileName);
@@ -443,7 +443,7 @@ class ImportDocument {
       viewModel = await context.hooks.filter('view-model-import-document', viewModel, this);
       response.set('X-Robots-Tag', 'noindex');
       response.render('import', viewModel);
-    }
+    };
   }
 
   /**
@@ -461,11 +461,11 @@ class ImportDocument {
       await fs.promises.mkdir(path.dirname(fileName), { recursive: true });
       const response = await fetch(url);
       if (response.ok && response.body) {
-        debug("downloadFile: writing to file:", fileName);
+        debug('downloadFile: writing to file:', fileName);
         let writer = createWriteStream(fileName);
         await new Promise((resolve, reject) => {
           // @ts-expect-error Readable.fromWeb is still experimental
-          // eslint-disable-next-line n/no-unsupported-features/node-builtins
+
           Readable.fromWeb(response.body)
             .pipe(writer)
             .on('finish', () => resolve())
@@ -502,7 +502,7 @@ class ImportDocument {
     // Handle local files (markdown, PDF, and images)
     if (page.type === 'text') {
       const markdownFileName = path.join(config.uploadDirectory, slug, page.name);
-      await config.downloadFile({ url: page.url, fileName: markdownFileName, type: `text` });
+      await config.downloadFile({ url: page.url, fileName: markdownFileName, type: 'text' });
       const markdownContent = await fs.promises.readFile(markdownFileName, { encoding: 'utf-8' });
       content += `${markdownContent}\n\n---\n\n`;
       hasContent = true;
@@ -511,11 +511,11 @@ class ImportDocument {
     // Store binary files as attachments
     if (page.type === 'binary') {
       const binaryFileName = path.join(config.uploadDirectory, slug, page.name);
-      await config.downloadFile({ url: page.url, fileName: binaryFileName, type: `binary` });
+      await config.downloadFile({ url: page.url, fileName: binaryFileName, type: 'binary' });
       attachments.push({
         name: page.name,
         path: path.join(config.uploadPath, slug, page.name),
-        type: path.extname(page.name).slice(1).toLowerCase() === 'pdf' ? 'application/pdf' : path.extname(page.name).slice(1).toLowerCase()
+        type: path.extname(page.name).slice(1).toLowerCase() === 'pdf' ? 'application/pdf' : path.extname(page.name).slice(1).toLowerCase(),
       });
     }
 
