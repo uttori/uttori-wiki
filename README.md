@@ -390,6 +390,8 @@ The following events are avaliable to hook into through plugins and are used in 
 ## Typedefs
 
 <dl>
+<dt><a href="#UttoriWikiViewModel">UttoriWikiViewModel</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#UttoriWikiDocumentAttachment">UttoriWikiDocumentAttachment</a> : <code>object</code></dt>
@@ -837,6 +839,29 @@ Hooks:
 | Param | Type | Description |
 | --- | --- | --- |
 | server | <code>module:express~Application</code> | The Express server instance. |
+
+<a name="UttoriWikiViewModel"></a>
+
+## UttoriWikiViewModel : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| title | <code>string</code> | The document title to be used anywhere a title may be needed. |
+| config | <code>UttoriWikiConfig</code> | The configuration object. |
+| meta | [<code>UttoriWikiDocumentMetaData</code>](#UttoriWikiDocumentMetaData) | The metadata object. |
+| basePath | <code>string</code> | The base path of the request. |
+| [document] | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) | The document object. |
+| [session] | <code>module:express-session~Session</code> | The Express session object. |
+| [flash] | <code>boolean</code> \| <code>object</code> \| <code>Array.&lt;string&gt;</code> | The flash object. |
+| [taggedDocuments] | [<code>Array.&lt;UttoriWikiDocument&gt;</code>](#UttoriWikiDocument) \| <code>Record.&lt;string, Array.&lt;UttoriWikiDocument&gt;&gt;</code> | An array of documents that are tagged with the document. |
+| [searchTerm] | <code>string</code> | The search term to be used in the search results. |
+| [searchResults] | [<code>Array.&lt;UttoriWikiDocument&gt;</code>](#UttoriWikiDocument) | An array of search results. |
+| [slug] | <code>string</code> | The slug of the document. |
+| [action] | <code>string</code> | The action to be used in the form. |
+| [revision] | <code>string</code> | The revision of the document. |
+| [historyByDay] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object of history by day. |
 
 <a name="UttoriWikiDocument"></a>
 

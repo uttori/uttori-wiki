@@ -5,7 +5,15 @@ import MulterUpload from '../../src/plugins/upload-multer.js';
 
 test('MulterUpload.register(context): can register', (t) => {
   t.notThrows(() => {
-    MulterUpload.register({ hooks: { on: () => {} }, config: { [MulterUpload.configKey]: { events: { callback: [] } } } });
+    MulterUpload.register({
+      hooks: { on: () => {} },
+      config: {
+        [MulterUpload.configKey]: {
+          directory: '/tmp/uploads',
+          events: { callback: [] },
+        },
+      },
+    });
   });
 });
 
@@ -29,6 +37,7 @@ test('Plugin.register(context): does not error with events corresponding to miss
       },
       config: {
         [MulterUpload.configKey]: {
+          directory: '/tmp/uploads',
           events: {
             test: ['test'],
             bindRoutes: ['bind-routes'],
@@ -63,7 +72,7 @@ test('MulterUpload.validateConfig(config, _context): throws when route is not a 
   t.throws(() => {
     MulterUpload.validateConfig({
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route: 10,
       },
     });
@@ -74,7 +83,7 @@ test('MulterUpload.validateConfig(config, _context): throws when publicRoute is 
   t.throws(() => {
     MulterUpload.validateConfig({
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route: '/upload',
       },
     });
@@ -85,7 +94,7 @@ test('MulterUpload.validateConfig(config, _context): throws when middleware is n
   t.throws(() => {
     MulterUpload.validateConfig({
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route: '/upload',
         publicRoute: '/uploads',
         middleware: {},
@@ -98,7 +107,7 @@ test('MulterUpload.validateConfig(config, _context): can validate', (t) => {
   t.notThrows(() => {
     MulterUpload.validateConfig({
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route: '/upload',
         publicRoute: '/uploads',
         middleware: [],
@@ -114,7 +123,7 @@ test('MulterUpload.bindRoutes(server, context): can bind routes', (t) => {
   MulterUpload.bindRoutes(server, {
     config: {
       [MulterUpload.configKey]: {
-        directory: 'uploadz',
+        directory: '/tmp/uploadz',
         route: '/up-load',
       },
     },
@@ -130,7 +139,7 @@ test('MulterUpload.upload(context): returns a Express route and can upload files
   const context = {
     config: {
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route,
       },
     },
@@ -138,8 +147,8 @@ test('MulterUpload.upload(context): returns a Express route and can upload files
   const server = serverSetup();
   MulterUpload.bindRoutes(server, context);
   const response = await request(server).post(route).attach('file', 'test/_helpers/am-i-human.png');
-  t.is(response.status, 200);
   t.is(response.text.slice(0, 20), '/uploads/am-i-human-');
+  t.is(response.status, 200);
 });
 
 test('MulterUpload.upload(context): returns a Express route and can upload nested files and returns the file path', async (t) => {
@@ -149,7 +158,7 @@ test('MulterUpload.upload(context): returns a Express route and can upload neste
   const context = {
     config: {
       [MulterUpload.configKey]: {
-        directory: 'uploads',
+        directory: '/tmp/uploads',
         route,
       },
     },

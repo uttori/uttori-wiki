@@ -8,9 +8,28 @@ let debug = (..._) => {};
 /* c8 ignore next */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
 
+// TODO Standardize the view model so it is consistent across all the routes.
+
 /**
- * @typedef UttoriWikiDocument
- * @type {object}
+ * @typedef {object} UttoriWikiViewModel
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {UttoriWikiDocumentMetaData} meta The metadata object.
+ * @property {string} basePath The base path of the request.
+ * @property {UttoriWikiDocument} [document] The document object.
+ * @property {import('express-session').Session} [session] The Express session object.
+ * @property {(boolean | object | Array<string>)} [flash] The flash object.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] An array of documents that are tagged with the document.
+ * @property {string} [searchTerm] The search term to be used in the search results.
+ * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
+ * @property {string} [slug] The slug of the document.
+ * @property {string} [action] The action to be used in the form.
+ * @property {string} [revision] The revision of the document.
+ * @property {Record<string, string[]>} [historyByDay] An object of history by day.
+ */
+
+/**
+ * @typedef {object} UttoriWikiDocument
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
  * @property {string} [image] An image to represent the document in Open Graph or elsewhere.
@@ -335,10 +354,11 @@ class UttoriWiki {
 
     const meta = await this.buildMetadata(document, '');
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: document.title,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       document,
       meta,
       basePath: request.baseUrl,
@@ -399,6 +419,7 @@ class UttoriWiki {
     }
 
     // Collect & sort all the tagged documents for each tag.
+    /** @type {Record<string, UttoriWikiDocument[]>} */
     const taggedDocuments = {};
     await Promise.all(tags.map(async (tag) => {
       const sorted = await this.getTaggedDocuments(tag);
@@ -407,10 +428,11 @@ class UttoriWiki {
 
     const meta = await this.buildMetadata({}, `/${this.config.routes.tags}`);
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: this.config.titles.tags,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       taggedDocuments,
       meta,
       basePath: request.baseUrl,
@@ -455,10 +477,11 @@ class UttoriWiki {
     const meta = await this.buildMetadata({}, `/${this.config.routes.tags}/${request.params.tag}`);
     const title = this.config.titles[request.params.tag] || request.params.tag;
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       taggedDocuments,
       meta,
       basePath: request.baseUrl,
@@ -493,10 +516,11 @@ class UttoriWiki {
     }
 
     const meta = await this.buildMetadata({ title: 'Search' }, '/search');
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: 'Search',
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       searchTerm: '',
       searchResults: [],
       meta,
@@ -589,11 +613,12 @@ class UttoriWiki {
     }
 
     const meta = await this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`);
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: `Editing ${document.title}`,
       document,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       meta,
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
@@ -811,12 +836,13 @@ class UttoriWiki {
     };
 
     const meta = await this.buildMetadata(document, '/new');
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       document,
       title,
       meta,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/new`,
       flash: request.wikiFlash(),
@@ -890,10 +916,11 @@ class UttoriWiki {
 
     const meta = await this.buildMetadata(document, `/${request.params.slug}`);
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: document.title,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       document,
       meta,
       basePath: request.baseUrl,
@@ -1014,12 +1041,13 @@ class UttoriWiki {
     }, `/${request.params.slug}/history`, 'noindex');
 
     debug('document.title:', document.title);
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: `${document.title} Revision History`,
       document,
       historyByDay,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       meta,
       basePath: request.baseUrl,
       flash: request.wikiFlash(),
@@ -1089,10 +1117,11 @@ class UttoriWiki {
       title: `${document.title} Revision ${revision}`,
     }, `/${slug}/history/${revision}`, 'noindex');
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       basePath: request.baseUrl,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       title: `${document.title} Revision ${revision}`,
       document,
       meta,
@@ -1163,10 +1192,11 @@ class UttoriWiki {
       title: `Editing ${document.title} from Revision ${revision}`,
     }, `/${slug}/history/${revision}/restore`, 'noindex');
 
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       basePath: request.baseUrl,
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       title: `Editing ${document.title} from Revision ${revision}`,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
       document,
@@ -1206,10 +1236,11 @@ class UttoriWiki {
     }
 
     const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
+    /** @type {UttoriWikiViewModel} */
     let viewModel = {
       title: '404 Not Found',
       config: this.config,
-      session: request.session || {},
+      session: request.session,
       slug: request.params.slug || '404',
       meta,
       basePath: request.baseUrl,

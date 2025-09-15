@@ -1,5 +1,4 @@
-import fs from 'fs';
-import { execSync } from 'child_process';
+import fs from 'node:fs';
 import ts from 'typescript';
 
 // Configuration
@@ -81,8 +80,6 @@ const compileTypes = async () => {
 
   // Find wiki.js first (it should be compiled first)
   const wikiFile = sourceFiles.find(file => file.fileName.includes('src/wiki.js'));
-  const otherFiles = sourceFiles.filter(file => !file.fileName.includes('src/wiki.js') && file.fileName.includes('src/'));
-
   // Compile wiki.js first
   if (wikiFile) {
     console.log('Compiling wiki.js first...');
@@ -127,7 +124,7 @@ const main = async () => {
     console.log('Cleaning up existing type files...');
     const files = [
       'config.d.ts',
-      // 'wiki.d.ts',
+      'wiki.d.ts',
       'middleware.d.ts',
       'redirect.d.ts',
       'wiki-flash.d.ts',
@@ -138,10 +135,20 @@ const main = async () => {
       'plugins/ejs-includes.d.ts',
       'plugins/filter-ip-address.d.ts',
       'plugins/import-document.d.ts',
+      'plugins/markdown-it-plugin/footnotes.d.ts',
+      'plugins/markdown-it-plugin/line-breaker.d.ts',
+      'plugins/markdown-it-plugin/markdown-it-plugin.d.ts',
+      'plugins/markdown-it-plugin/toc.d.ts',
+      'plugins/markdown-it-plugin/uttori-inline.d.ts',
+      'plugins/markdown-it-plugin/video.d.ts',
+      'plugins/markdown-it-plugin/wikilinks.d.ts',
+      'plugins/markdown-it-plugin/youtube.d.ts',
       'plugins/query-output.d.ts',
+      'plugins/renderer-markdown-it.d.ts',
       'plugins/renderer-replacer.d.ts',
       'plugins/sitemap-generator.d.ts',
       'plugins/upload-multer.d.ts',
+      'plugins/utilities/analytics-provider.d.ts',
     ];
     for (const file of files) {
       if (fs.existsSync(`dist/${file}`)) {

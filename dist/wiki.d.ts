@@ -1,4 +1,91 @@
 export default UttoriWiki;
+export type UttoriWikiViewModel = {
+    /**
+     * The document title to be used anywhere a title may be needed.
+     */
+    title: string;
+    /**
+     * The configuration object.
+     */
+    config: import("./config.js").UttoriWikiConfig;
+    /**
+     * The metadata object.
+     */
+    meta: {
+        /**
+         * `${this.config.publicUrl}/private-document-path`
+         */
+        canonical: string;
+        /**
+         * 'no-index'
+         */
+        robots: string;
+        /**
+         * document.title
+         */
+        title: string;
+        /**
+         * document.excerpt || document.content.slice(0, 160)
+         */
+        description: string;
+        /**
+         * new Date(document.updateDate).toISOString()
+         */
+        modified: string;
+        /**
+         * new Date(document.createDate).toISOString()
+         */
+        published: string;
+        /**
+         * OpenGraph Image
+         */
+        image: string;
+    };
+    /**
+     * The base path of the request.
+     */
+    basePath: string;
+    /**
+     * The document object.
+     */
+    document?: UttoriWikiDocument;
+    /**
+     * The Express session object.
+     */
+    session?: import("express-session").Session;
+    /**
+     * The flash object.
+     */
+    flash?: (boolean | object | Array<string>);
+    /**
+     * An array of documents that are tagged with the document.
+     */
+    taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    /**
+     * The search term to be used in the search results.
+     */
+    searchTerm?: string;
+    /**
+     * An array of search results.
+     */
+    searchResults?: UttoriWikiDocument[];
+    /**
+     * The slug of the document.
+     */
+    slug?: string;
+    /**
+     * The action to be used in the form.
+     */
+    action?: string;
+    /**
+     * The revision of the document.
+     */
+    revision?: string;
+    /**
+     * An object of history by day.
+     */
+    historyByDay?: Record<string, string[]>;
+};
 export type UttoriWikiDocument = {
     /**
      * The document slug to be used in the URL and as a unique ID.
@@ -64,8 +151,24 @@ export type UttoriWikiDocumentAttachment = {
     type: string;
 };
 /**
- * @typedef UttoriWikiDocument
- * @type {object}
+ * @typedef {object} UttoriWikiViewModel
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {UttoriWikiDocumentMetaData} meta The metadata object.
+ * @property {string} basePath The base path of the request.
+ * @property {UttoriWikiDocument} [document] The document object.
+ * @property {import('express-session').Session} [session] The Express session object.
+ * @property {(boolean | object | Array<string>)} [flash] The flash object.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] An array of documents that are tagged with the document.
+ * @property {string} [searchTerm] The search term to be used in the search results.
+ * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
+ * @property {string} [slug] The slug of the document.
+ * @property {string} [action] The action to be used in the form.
+ * @property {string} [revision] The revision of the document.
+ * @property {Record<string, string[]>} [historyByDay] An object of history by day.
+ */
+/**
+ * @typedef {object} UttoriWikiDocument
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
  * @property {string} [image] An image to represent the document in Open Graph or elsewhere.

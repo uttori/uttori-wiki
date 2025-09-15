@@ -139,9 +139,9 @@ class ReplacerRenderer {
 
   /**
    * Replace content in a collection of Uttori documents with a provided context.
-   * @param {import('../../dist/wiki.d.ts').UttoriWikiDocument[]} collection A collection of Uttori documents.
+   * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
    * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>} context A Uttori-like context.
-   * @returns {import('../../dist/wiki.d.ts').UttoriWikiDocument[]} The rendered documents.
+   * @returns {import('../wiki.js').UttoriWikiDocument[]} The rendered documents.
    * @example <caption>ReplacerRenderer.renderCollection(collection, context)</caption>
    * const context = {
    *   config: {

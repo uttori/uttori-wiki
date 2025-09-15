@@ -25,7 +25,7 @@ declare namespace Express {
 /**
  * Uttori plugin configuration type.
  */
-export type UttoriPluginConfig = Record<string, unknown>;
+export type UttoriPluginConfig = Record<string, any>;
 
 /**
  * Known plugin configuration keys mapped to their specific config types.
@@ -39,6 +39,7 @@ export type KnownPluginConfigs = {
   'uttori-plugin-generator-sitemap': import('./plugins/sitemap-generator.js').SitemapGeneratorConfig;
   'uttori-plugin-import-document': import('./plugins/import-document.js').ImportDocumentConfig;
   'uttori-plugin-renderer-ejs': import('./plugins/ejs-includes.js').EJSRendererConfig;
+  'uttori-plugin-renderer-markdown-it': import('./plugins/renderer-markdown-it.js').MarkdownItRendererConfig;
   'uttori-plugin-renderer-replacer': import('./plugins/renderer-replacer.js').ReplacerRendererConfig;
   'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
 }
@@ -98,4 +99,3 @@ export interface UttoriWikiPlugin {
   /** If the plugin has routes to bind, this function will be called with the Express app and the context. */
   static bindRoutes?: (app: Express, context: UttoriContext) => void
 }
-

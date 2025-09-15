@@ -104,9 +104,9 @@ declare class ReplacerRenderer {
     static renderContent(content: string, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): string;
     /**
      * Replace content in a collection of Uttori documents with a provided context.
-     * @param {import('../../dist/wiki.d.ts').UttoriWikiDocument[]} collection A collection of Uttori documents.
+     * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>} context A Uttori-like context.
-     * @returns {import('../../dist/wiki.d.ts').UttoriWikiDocument[]} The rendered documents.
+     * @returns {import('../wiki.js').UttoriWikiDocument[]} The rendered documents.
      * @example <caption>ReplacerRenderer.renderCollection(collection, context)</caption>
      * const context = {
      *   config: {
@@ -118,7 +118,7 @@ declare class ReplacerRenderer {
      * ReplacerRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import("../../dist/wiki.d.ts").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): import("../../dist/wiki.d.ts").UttoriWikiDocument[];
+    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): import("../wiki.js").UttoriWikiDocument[];
     /**
      * Replace content in a provided string with a provided set of rules.
      * @param {string} content Content to be searched through to make replacements.
