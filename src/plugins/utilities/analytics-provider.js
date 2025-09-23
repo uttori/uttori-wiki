@@ -13,7 +13,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Utilities.
  */
 
 /**
- * @typedef {object} AnalyticsProviderPageVisits
+ * @typedef {Record<string, number>} AnalyticsProviderPageVisits
  * @property {string} slug The slug of the document to be updated.
  * @property {number} count The number of hits for a given slug.
  */
@@ -123,12 +123,6 @@ class AnalyticsProvider {
       .map(([slug, count]) => ({ slug, count: Number(count) }))
       .sort((a, b) => Number(b.count) - Number(a.count))
       .slice(0, limit);
-    // const popular = R.map((slug) => ({ slug }),
-    //   R.pluck(0,
-    //     R.take(limit,
-    //       R.reverse(
-    //         R.sortBy(R.prop(1))(R.toPairs(this.pageVisits)),
-    //       ))));
 
     debug('Found:', popular);
     return popular;

@@ -61,5 +61,5 @@ return objects.filter(whereFunctions);
 ```
 <a name="parseQueryToFilterFunctions..operations"></a>
 
-### parseQueryToFilterFunctions~operations : <code>Array.&lt;function(any): boolean&gt;</code>
+### parseQueryToFilterFunctions~operations : <code>Array.&lt;function(Record.&lt;string, any&gt;): boolean&gt;</code>
 **Kind**: inner constant of [<code>parseQueryToFilterFunctions</code>](#parseQueryToFilterFunctions)  

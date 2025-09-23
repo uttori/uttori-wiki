@@ -50,6 +50,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
+ * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
  */
 
 /**
@@ -1295,6 +1296,15 @@ class UttoriWiki {
 
     const { title = '', excerpt = '', content = '', image = '' } = request.body;
 
+    /** @type {string} */
+    let slug = request.body.slug || request.params.slug;
+    if (!slug) {
+      request.wikiFlash('error', 'Missing slug.');
+      response.redirect(request.get('Referrer') || '/');
+      return;
+    }
+    slug = slug.toLowerCase();
+
     // Filter out any unwanted keys
     const custom = this.config.allowedDocumentKeys.reduce((output, key) => {
       if (request.body[key]) {
@@ -1323,14 +1333,12 @@ class UttoriWiki {
     }
     redirects = [...new Set(redirects.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
-    /** @type {string} */
-    let slug = request.body.slug || request.params.slug;
-    if (!slug) {
-      request.wikiFlash('error', 'Missing slug.');
-      response.redirect(request.get('Referrer') || '/');
-      return;
+    /** @type {UttoriWikiDocumentAttachment[]} */
+    let attachments = [];
+    debug('attachments:', request.body.attachments);
+    if (Array.isArray(request.body.attachments)) {
+      attachments = request.body.attachments;
     }
-    slug = slug.toLowerCase();
 
     /** @type {UttoriWikiDocument} */
     let document = {
@@ -1344,6 +1352,7 @@ class UttoriWiki {
       slug,
       createDate: Date.now(),
       updateDate: Date.now(),
+      attachments,
     };
     document = await this.hooks.filter('document-save', document, this);
 

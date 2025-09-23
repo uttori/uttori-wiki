@@ -431,6 +431,21 @@ class ImportDocument {
   static interfaceRequestHandler (context) {
     return async (request, response, _next) => {
       debug('interfaceRequestHandler');
+
+      // Fetch all the used tags to populate the tags dropdown.
+      /** @type {string[]} */
+      let tags = [];
+      try {
+        const query = 'SELECT tags FROM documents WHERE slug NOT_IN ("home-page") ORDER BY updateDate DESC LIMIT -1';
+        /** @type {import('../../src/wiki.js').UttoriWikiDocument[][]} */
+        const [results] = await context.hooks.fetch('storage-query', query, context);
+        // Organize and deduplicate, and sort the tags.
+        tags = [...new Set(results.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+      /* c8 ignore next 3 */
+      } catch (error) {
+        debug('Error fetching tags:', error);
+      }
+
       let viewModel = {
         title: 'Import Document',
         config: context.config,
@@ -439,6 +454,7 @@ class ImportDocument {
         meta: {},
         basePath: request.baseUrl,
         flash: request.wikiFlash(),
+        tags,
       };
       viewModel = await context.hooks.filter('view-model-import-document', viewModel, this);
       response.set('X-Robots-Tag', 'noindex');
@@ -532,6 +548,7 @@ class ImportDocument {
       --timestamping \\
       --execute robots=off \\
       --random-wait \\
+      --span-hosts \\
       ${page.url}`;
       try {
         debug('scraping page:', scrape);

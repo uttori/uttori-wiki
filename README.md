@@ -895,6 +895,7 @@ Hooks:
 | name | <code>string</code> | The display name of the attachment. |
 | path | <code>string</code> | The path to the attachment. |
 | type | <code>string</code> | The MIME type of the attachment. |
+| [skip] | <code>boolean</code> | Whether to skip the attachment. Used to control whether to index the attachment. |
 
 <a name="UttoriWikiDocumentMetaData"></a>
 

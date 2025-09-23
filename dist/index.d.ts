@@ -16,6 +16,7 @@ export { default as SearchProviderLunr } from "./plugins/search-provider-lunr.js
 export { default as SitemapGenerator } from "./plugins/sitemap-generator.js";
 export { default as StorageProviderJsonFile } from "./plugins/storage-provider-json-file.js";
 export { default as StorageProviderJsonMemory } from "./plugins/storage-provider-json-memory.js";
+export { default as AIChatBot } from "./plugins/ai-chat-bot.js";
 export * from "./config.js";
 export * from "./middleware.js";
 export * from "./redirect.js";
@@ -35,6 +36,7 @@ export * from "./plugins/sitemap-generator.js";
 export * from "./plugins/storage-provider-json-file.js";
 export * from "./plugins/storage-provider-json-memory.js";
 export * from "./plugins/upload-multer.js";
+export * from "./plugins/ai-chat-bot.js";
 export * from "./plugins/markdown-it-plugin/footnotes.js";
 export * from "./plugins/markdown-it-plugin/toc.js";
 export * from "./plugins/markdown-it-plugin/wikilinks.js";
@@ -54,6 +56,9 @@ export * from "./plugins/storeage-provider-json/validate-query.js";
 export * from "./plugins/storeage-provider-json/where-parser.js";
 export * from "./plugins/utilities/analytics-provider.js";
 export * from "./plugins/utilities/search-lunr.js";
+export * from "./plugins/chat-bot/ollama-embedder.js";
+export * from "./plugins/chat-bot/memory.js";
+export * from "./plugins/chat-bot/utilities.js";
 
 export * from "./custom.d.ts";
 //# sourceMappingURL=index.d.ts.map

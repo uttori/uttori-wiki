@@ -32,7 +32,7 @@ const isIn = (list, value) => {
  */
 const parseQueryToFilterFunctions = (ast) => {
   // debug('AST:', JSON.stringify(ast, null, 2));
-  /** @type {Array<function(any): boolean>} */
+  /** @type {Array<function(Record<string, any>): boolean>} */
   const operations = Object.keys(ast).map((key) => {
     /** @type {import('../../../dist/custom.d.ts').Value} */
     const operands = ast[key];

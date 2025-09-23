@@ -27,46 +27,49 @@
     "@uttori/event-dispatcher": "^3.0.2"
   },
   "optionalDependencies": {
+    "better-sqlite3": "^12.4.1",
     "debug": "^4.4.3",
     "ejs": "^3.1.10",
     "express-session": "^1.18.2",
-    "lunr": "^2.3.9",
     "lunr-languages": "^1.14.0",
+    "lunr": "^2.3.9",
     "markdown-it": "^14.1.0",
     "memorystore": "^1.6.7",
     "multer": "^2.0.2",
+    "pdfreader": "^3.0.7",
     "sanitize-filename": "^1.6.3",
-    "slugify": "^1.6.6"
+    "slugify": "^1.6.6",
+    "sqlite-vec": "^0.1.7-alpha.2"
   },
   "peerDependencies": {
     "express": "^5"
   },
   "devDependencies": {
-    "@eslint/compat": "^1.3.2",
+    "@eslint/compat": "^1.4.0",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.35.0",
-    "@stylistic/eslint-plugin": "^5.3.1",
+    "@eslint/js": "^9.36.0",
+    "@stylistic/eslint-plugin": "^5.4.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/debug": "^4.1.12",
     "@types/ejs": "^3.1.5",
     "@types/express": "^5.0.3",
     "@types/express-session": "^1.18.2",
     "@types/lunr": "^2.3.7",
     "@types/multer": "^2.0.0",
-    "@types/node": "^24.4.0",
+    "@types/node": "^24.5.2",
     "@types/sinon": "^17.0.4",
     "@types/supertest": "^6.0.3",
-    "@typescript-eslint/eslint-plugin": "^8.43.0",
-    "@typescript-eslint/parser": "^8.43.0",
     "ava": "^6.4.1",
+    "better-sqlite3": "^12.4.1",
     "c8": "^10.1.3",
     "cors": "^2.8.5",
     "ejs": "^3.1.10",
-    "eslint": "^9.35.0",
+    "eslint": "^9.36.0",
     "eslint-plugin-anti-trojan-source": "^1.1.1",
     "eslint-plugin-ava": "^15.1.0",
     "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-jsdoc": "^57.0.8",
-    "eslint-plugin-n": "^17.22.0",
+    "eslint-plugin-jsdoc": "^60.1.1",
+    "eslint-plugin-n": "^17.23.1",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-optimize-regex": "^1.2.1",
     "eslint-plugin-security": "^3.0.1",
@@ -83,14 +86,16 @@
     "lunr-languages": "^1.14.0",
     "markdown-it": "^14.1.0",
     "memorystore": "^1.6.7",
+    "pdfreader": "^3.0.7",
     "pre-commit": "^1.2.2",
-    "release-it": "^19.0.4",
+    "release-it": "^19.0.5",
     "sanitize-filename": "^1.6.3",
     "sinon": "^21.0.0",
     "slugify": "^1.6.6",
+    "sqlite-vec": "^0.1.7-alpha.2",
     "supertest": "^7.1.4",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.43.0"
+    "typescript-eslint": "^8.44.1"
   },
   "files": [
     "dist/*",
@@ -165,6 +170,10 @@
       "import": "./src/plugins/renderer-replacer.js",
       "types": "./dist/plugins/renderer-replacer.d.ts"
     },
+    "./plugins/ai-chat-bot": {
+      "import": "./src/plugins/ai-chat-bot.js",
+      "types": "./dist/plugins/ai-chat-bot.d.ts"
+    },
     "./plugins/markdown-it-plugin/footnotes": {
       "import": "./src/plugins/markdown-it-plugin/footnotes.js",
       "types": "./dist/plugins/markdown-it-plugin/footnotes.d.ts"
@@ -200,6 +209,18 @@
     "./plugins/utilities/analytics-provider": {
       "import": "./src/plugins/utilities/analytics-provider.js",
       "types": "./dist/plugins/utilities/analytics-provider.d.ts"
+    },
+    "./plugins/chat-bot/memory": {
+      "import": "./src/plugins/chat-bot/memory.js",
+      "types": "./dist/plugins/chat-bot/memory.d.ts"
+    },
+    "./plugins/chat-bot/ollama-embedder": {
+      "import": "./src/plugins/chat-bot/ollama-embedder.js",
+      "types": "./dist/plugins/chat-bot/ollama-embedder.d.ts"
+    },
+    "./plugins/chat-bot/utilities": {
+      "import": "./src/plugins/chat-bot/utilities.js",
+      "types": "./dist/plugins/chat-bot/utilities.d.ts"
     }
   },
   "ava": {

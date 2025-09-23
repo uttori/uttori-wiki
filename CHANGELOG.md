@@ -2,17 +2,19 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [7.0.0](https://github.com/uttori/uttori-wiki/compare/v6.1.3...v7.0.0) - 2025-09-07)
+## [7.0.0](https://github.com/uttori/uttori-wiki/compare/v6.1.3...v7.0.0) - 2025-09-14)
 
 - 💥 BREAKING CHANGES!
 - 💥 Upgrade to Express v5
 - 💥 Expecting Node v22 or higher (I have note tested to see if it works on older versions)
+- 💥 Migrated all first party plugins to be included with the main wiki package to simplify development
 - 🪓 Removed now unused `asyncHandler`
 - 🛠 Clean up many types
+- 🛠 Rebuilt ESLint configuration
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Add `ImportDocument` plugin for importing documents & files (HTML, Markdown, PDF, etc.)
-- 🧰 Add `AIChatRoute` plugin for chatting with the documents with LLM (Ollama locally)
+- 🧰 Add `AIChatBot` plugin for chatting with the documents with LLM (Ollama locally)
 - 🧰 Added explicit `attachments` to document type for better file management
 
 ## [6.1.3](https://github.com/uttori/uttori-wiki/compare/v6.1.2...v6.1.3) - 2025-08-25
