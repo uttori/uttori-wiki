@@ -13,7 +13,7 @@ test.afterEach(() => {
 });
 
 test('configKey: should return correct key', (t) => {
-  t.is(AddQueryOutputToViewModel.configKey, 'custom-plugin-add-query-output-to-view-model');
+  t.is(AddQueryOutputToViewModel.configKey, 'uttori-plugin-add-query-output-to-view-model');
 });
 
 test('defaultConfig: should return correct default configuration', (t) => {

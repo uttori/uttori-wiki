@@ -5,7 +5,7 @@
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
  * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
- * @property {(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>) => import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
  * @property {import('express').RequestHandler[]} middlewareApiRoute Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
  * @property {string} databasePath The path to the database.
@@ -29,7 +29,7 @@
  * @property {string[]} ignoreTags Tags to ignore.
  * @property {string} attachmentsRoot The root path to the attachments.
  * @property {boolean} includeAttachments Whether to include attachments.
- * @property {function(AIChatBotConfig, { path: string; mime: string; skip?: boolean }): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
+ * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
  * @property {number} chunkTokens Used during indexing, the number of tokens per chunk.
  * @property {number} overlapTokens Used during indexing, the number of tokens to overlap between chunks.
  * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
@@ -56,17 +56,19 @@
  * @property {string} summary.model The model to use for the summary.
  */
 /**
+ * @typedef {object} AIChatBotApiRequestBody
+ * @property {string} sessionId The session ID.
+ * @property {string} query The query.
+ * @property {string[]} slugs The slugs.
+ */
+/**
  * Extract text from an attachment.
  * For PDFs, this now preserves page boundaries to help with chunking.
  * @param {AIChatBotConfig} config The configuration.
- * @param { { path: string; mime: string; skip?: boolean }} attachment The attachment.
+ * @param {import('../wiki.js').UttoriWikiDocumentAttachment} attachment The attachment.
  * @returns {Promise<string>} The text of the attachment.
  */
-export function extractAttachmentText(config: AIChatBotConfig, attachment: {
-    path: string;
-    mime: string;
-    skip?: boolean;
-}): Promise<string>;
+export function extractAttachmentText(config: AIChatBotConfig, attachment: import("../wiki.js").UttoriWikiDocumentAttachment): Promise<string>;
 export default AIChatBot;
 export type AIChatBotConfig = {
     /**
@@ -92,7 +94,7 @@ export type AIChatBotConfig = {
     /**
      * A request handler for the interface route.
      */
-    interfaceRequestHandler?: (context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>) => import("express").RequestHandler;
+    interfaceRequestHandler?: (arg0: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>) => import("express").RequestHandler;
     /**
      * Custom Middleware for the API route.
      */
@@ -188,11 +190,7 @@ export type AIChatBotConfig = {
     /**
      * The function to use to extract text from an attachment.
      */
-    extractAttachmentText?: (arg0: AIChatBotConfig, arg1: {
-        path: string;
-        mime: string;
-        skip?: boolean;
-    }) => Promise<string>;
+    extractAttachmentText?: (arg0: AIChatBotConfig, arg1: import("../wiki.js").UttoriWikiDocumentAttachment) => Promise<string>;
     /**
      * Used during indexing, the number of tokens per chunk.
      */
@@ -243,6 +241,20 @@ export type AIChatBotConfig = {
         model: string;
     };
 };
+export type AIChatBotApiRequestBody = {
+    /**
+     * The session ID.
+     */
+    sessionId: string;
+    /**
+     * The query.
+     */
+    query: string;
+    /**
+     * The slugs.
+     */
+    slugs: string[];
+};
 export type StreamHandlers = {
     /**
      * The function to call when a token is received.
@@ -291,6 +303,58 @@ export type RetrievedChunk = {
      */
     score: number;
 };
+export type RetrieveResponse = {
+    /**
+     * The query.
+     */
+    query: string;
+    /**
+     * The chunks.
+     */
+    chunks: RetrievedChunk[];
+    /**
+     * The citations.
+     */
+    citations: any[];
+};
+export type FtsRow = {
+    /**
+     * The rowid of the chunk.
+     */
+    rowid: number;
+    /**
+     * The source id of the chunk.
+     */
+    source_id: string;
+    /**
+     * The index of the chunk.
+     */
+    idx: number;
+    /**
+     * The text of the chunk.
+     */
+    text: string;
+    /**
+     * The token count of the chunk.
+     */
+    token_count: number;
+    /**
+     * The meta JSON of the chunk.
+     */
+    meta_json: string;
+    /**
+     * The title of the source.
+     */
+    source_title: string;
+    /**
+     * The slug of the source.
+     */
+    source_slug: string;
+    /**
+     * The rank of the chunk.
+     */
+    rank: number;
+};
 export type Block = {
     /**
      * The type of block.
@@ -321,44 +385,6 @@ export type Block = {
      */
     slug?: string;
 };
-export type Document = {
-    /**
-     * The id of the document.
-     */
-    id: string;
-    /**
-     * The title of the document.
-     */
-    title: string;
-    /**
-     * The slug of the document.
-     */
-    slug: string;
-    /**
-     * The content of the document.
-     */
-    content: string;
-    /**
-     * The tags of the document.
-     */
-    tags: string[];
-    /**
-     * The creation date of the document.
-     */
-    createDate: number;
-    /**
-     * The update date of the document.
-     */
-    updateDate: number;
-    /**
-     * The attachments of the document.
-     */
-    attachments: {
-        path: string;
-        mime: string;
-        skip?: boolean;
-    }[];
-};
 export type ChunkWithMeta = {
     /**
      * The text of the chunk.
@@ -388,6 +414,34 @@ export type ChunkWithMeta = {
      * The meta JSON of the chunk.
      */
     meta?: object;
+};
+export type BlendedChunk = {
+    /**
+     * The rowid of the chunk.
+     */
+    rowid: number;
+    /**
+     * The score of the chunk.
+     */
+    score: number;
+    /**
+     * The title boost of the chunk.
+     */
+    titleBoost: number;
+    /**
+     * The text boost of the chunk.
+     */
+    textBoost: number;
+};
+export type ChatBotMessage = {
+    /**
+     * The role of the message.
+     */
+    role: "system" | "user" | "assistant" | "tool";
+    /**
+     * The content of the message.
+     */
+    content: string;
 };
 /**
  * Uttori AI Chat Bot
@@ -470,32 +524,25 @@ declare class AIChatBot {
     /**
      * The Express route method to process the upload request and provide a response.
      * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-     * @returns {import('express').RequestHandler<{}, { error: string }, { sessionId?: string; query: string; slugs?: string[] }>} The function to pass to Express.
+     * @returns {import('express').RequestHandler<{}, { error: string }, AIChatBotApiRequestBody>} The function to pass to Express.
      * @example <caption>AIChatBot.apiRequestHandler(context)(request, response, _next)</caption>
      * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
      * @static
      */
     static apiRequestHandler(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): import("express").RequestHandler<{}, {
         error: string;
-    }, {
-        sessionId?: string;
-        query: string;
-        slugs?: string[];
-    }>;
+    }, AIChatBotApiRequestBody>;
     /**
      * Build messages for the AI chat bot.
      * @param {string} userQuestion The user's question.
      * @param {RetrievedChunk[]} chunks The chunks of text to use as context.
      * @param {object} opts The options for the prompt.
      * @param {number} opts.maxContextCharacters The maximum number of characters to include in the context.
-     * @returns {{ role: "system" | "user" | "assistant" | "tool"; content: string }[]} The messages for the AI chat bot.
+     * @returns {ChatBotMessage[]} The messages for the AI chat bot.
      */
     static buildPromptMessages(userQuestion: string, chunks: RetrievedChunk[], opts: {
         maxContextCharacters: number;
-    }): {
-        role: "system" | "user" | "assistant" | "tool";
-        content: string;
-    }[];
+    }): ChatBotMessage[];
     /**
      * Rewrite the user's question into diverse, self-contained search queries for a documentation/wiki RAG system.
      * @param {string} baseUrl The base URL of the API.
@@ -523,42 +570,17 @@ declare class AIChatBot {
      * @param {string} model The model to use for the chat bot.
      * @param {number} temperature The temperature for the chat bot.
      * @param {number} maxTokens The maximum number of tokens to generate.
-     * @param {{ role: "system" | "user" | "assistant" | "tool"; content: string }[]} messages The messages to send to the chat bot.
+     * @param {ChatBotMessage[]} messages The messages to send to the chat bot.
      * @param {StreamHandlers} handler The handler for the chat bot.
      * @returns {Promise<void>} The response from the chat bot.
      */
-    static stream(baseUrl: string, model: string, temperature: number, maxTokens: number, messages: {
-        role: "system" | "user" | "assistant" | "tool";
-        content: string;
-    }[], handler: StreamHandlers): Promise<void>;
+    static stream(baseUrl: string, model: string, temperature: number, maxTokens: number, messages: ChatBotMessage[], handler: StreamHandlers): Promise<void>;
     /**
      * Open the database and create the necessary tables if they don't exist.
      * @param {Partial<AIChatBotConfig>} config The configuration.
      * @returns {import('better-sqlite3').Database} The database.
      */
     static openDatabase(config: Partial<AIChatBotConfig>): import("better-sqlite3").Database;
-    /**
-     * Build blocks from a document.
-     * @param {Document} document The document to build blocks from.
-     * @param {AIChatBotConfig} config The options.
-     * @returns {Promise<Block[]>} The blocks.
-     */
-    static buildBlocks(document: Document, config: AIChatBotConfig): Promise<Block[]>;
-    /**
-     * Chunk blocks into chunks.
-     * Aggressively chunk large blocks to prevent oversized chunks.
-     * @param {Block[]} blocks The blocks to chunk.
-     * @param {AIChatBotConfig} config The configuration.
-     * @returns {ChunkWithMeta[]} The chunks.
-     */
-    static chunkBlocks(blocks: Block[], config: AIChatBotConfig): ChunkWithMeta[];
-    /**
-     * Index all documents in the database.
-     * @param {Record<string, AIChatBotConfig>} fullConfig The configuration.
-     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context The context.
-     * @returns {Promise<void>} The indexed documents.
-     */
-    static indexAllDocuments(fullConfig: Record<string, AIChatBotConfig>, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): Promise<void>;
     /**
      * Extract 1 to 6 short entities/concepts from the question.
      * Returns a lowercase array; strictly JSON (no prose).
@@ -583,24 +605,17 @@ declare class AIChatBot {
      * @param {string} model The model to use for reranking.
      * @param {string} query The query to rerank the chunks for.
      * @param {RetrievedChunk[]} chunks The chunks to rerank.
-     * @returns {Promise<{ chunk: RetrievedChunk; score: number }[]>} The reranked chunks.
+     * @returns {Promise<RetrievedChunk[]>} The reranked chunks.
      */
-    static localRerank(baseUrl: string, model: string, query: string, chunks: RetrievedChunk[]): Promise<{
-        chunk: RetrievedChunk;
-        score: number;
-    }[]>;
+    static localRerank(baseUrl: string, model: string, query: string, chunks: RetrievedChunk[]): Promise<RetrievedChunk[]>;
     /**
      * Retrieve chunks from the database.
      * @param {string} query The query to retrieve chunks for.
      * @param {AIChatBotConfig} config The options for the retrieval.
      * @param {string[]} [slugs] Optional array of source slugs to restrict search to.
-     * @returns {Promise<{ query: string; chunks: RetrievedChunk[]; citations: any[] }>} The retrieved chunks.
+     * @returns {Promise<RetrieveResponse>} The retrieved chunks.
      */
-    static retrieve(query: string, config: AIChatBotConfig, slugs?: string[]): Promise<{
-        query: string;
-        chunks: RetrievedChunk[];
-        citations: any[];
-    }>;
+    static retrieve(query: string, config: AIChatBotConfig, slugs?: string[]): Promise<RetrieveResponse>;
 }
 import Database from 'better-sqlite3';
 //# sourceMappingURL=ai-chat-bot.d.ts.map

@@ -12,6 +12,7 @@ import StorageProviderJSON from '../../src/plugins/storage-provider-json-memory.
 import SearchProviderLunr from '../../src/plugins/search-provider-lunr.js';
 import defaultConfig from '../../src/config.js';
 import { middleware as flash } from '../../src/wiki-flash.js';
+import TagRoutesPlugin from '../../src/plugins/tag-routes.js';
 
 /** @type {import('../../src/config.js').UttoriWikiConfig} */
 export const config = {
@@ -29,6 +30,7 @@ export const config = {
   plugins: [
     StorageProviderJSON,
     SearchProviderLunr,
+    TagRoutesPlugin,
   ],
   middleware: [
     ['disable', 'x-powered-by'],
@@ -45,6 +47,17 @@ export const config = {
       route: '/2009/:slug',
     },
   ],
+  [TagRoutesPlugin.configKey]: {
+    tagIndexRoute: 'tags',
+    tagRoute: 'tags',
+    apiRoute: 'tag-api',
+    title: 'Tags',
+    limit: 1024,
+    events: {
+      bindRoutes: ['bind-routes'],
+      validateConfig: ['validate-config'],
+    },
+  },
 };
 
 export const serverSetup = () => {

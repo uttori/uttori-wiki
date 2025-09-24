@@ -10,6 +10,11 @@
  * @property {Turn[]} last The last N turns.
  * @property {Record<string,string>} [entities] The optional entities.
  */
+/**
+ * @typedef {object} Memories
+ * @property {Memory} mem The memory.
+ * @property {number} expires The expiration time.
+ */
 export class MemoryStore {
     /**
      * The constructor.
@@ -19,12 +24,9 @@ export class MemoryStore {
     constructor(ttlMs?: number, maxTurns?: number);
     /**
      * The memories.
-     * @type {Map<string, { mem: Memory; expires: number }>}
+     * @type {Map<string, Memories>}
      */
-    memories: Map<string, {
-        mem: Memory;
-        expires: number;
-    }>;
+    memories: Map<string, Memories>;
     /**
      * The TTL in milliseconds.
      * @type {number}
@@ -95,5 +97,15 @@ export type Memory = {
      * The optional entities.
      */
     entities?: Record<string, string>;
+};
+export type Memories = {
+    /**
+     * The memory.
+     */
+    mem: Memory;
+    /**
+     * The expiration time.
+     */
+    expires: number;
 };
 //# sourceMappingURL=memory.d.ts.map

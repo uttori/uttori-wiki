@@ -6,19 +6,19 @@ export default OllamaEmbedder;
 export const stopwordsEnglish: string[];
 declare class OllamaEmbedder {
     /**
-     * Sleep for a given number of milliseconds.
-     * @param {number} ms The number of milliseconds to sleep.
-     * @returns {Promise<void>} A promise that resolves after the sleep.
-     */
-    static sleep(ms: number): Promise<void>;
-    /**
      * Approximate the number of tokens in a string.
      * A rough approximation of tokens is 3/4 the number of words for English text.
      * @param {string} text The text to approximate the number of tokens of.
      * @returns {number} The approximate token length of the text (rounded down).
      */
     static approxTokenLen(text: string): number;
-    static removeStopWords(text: any, stopwords?: string[]): string[];
+    /**
+     * Remove stop words from a text string.
+     * @param {string} text The text to remove stop words from.
+     * @param {string[]} [stopwords] The stopwords to remove. Defaults to English stopwords.
+     * @returns {string[]} The text with the stopwords removed.
+     */
+    static removeStopWords(text: string, stopwords?: string[]): string[];
     /**
      * @param {string} baseUrl The base URL of the Ollama server.
      * @param {string} model The model to use for the embeddings.

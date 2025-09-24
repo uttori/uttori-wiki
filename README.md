@@ -420,8 +420,6 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.hooks](#UttoriWiki+hooks) : <code>module:@uttori/event-dispatcher~EventDispatcher</code>
     * [.home](#UttoriWiki+home)
     * [.homepageRedirect](#UttoriWiki+homepageRedirect) : <code>module:express~RequestHandler</code>
-    * [.tagIndex](#UttoriWiki+tagIndex)
-    * [.tag](#UttoriWiki+tag)
     * [.search](#UttoriWiki+search)
     * [.edit](#UttoriWiki+edit)
     * [.delete](#UttoriWiki+delete)
@@ -435,7 +433,6 @@ UttoriWiki is a fast, simple, wiki knowledge base.
     * [.historyRestore](#UttoriWiki+historyRestore)
     * [.notFound](#UttoriWiki+notFound)
     * [.saveValid](#UttoriWiki+saveValid)
-    * [.getTaggedDocuments](#UttoriWiki+getTaggedDocuments) ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>
     * [.registerPlugins(config)](#UttoriWiki+registerPlugins)
     * [.validateConfig(config)](#UttoriWiki+validateConfig)
     * [.buildMetadata(document, [path], [robots])](#UttoriWiki+buildMetadata) ⇒ [<code>Promise.&lt;UttoriWikiDocumentMetaData&gt;</code>](#UttoriWikiDocumentMetaData)
@@ -489,40 +486,6 @@ Hooks:
 Redirects to the homepage.
 
 **Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
-<a name="UttoriWiki+tagIndex"></a>
-
-### uttoriWiki.tagIndex
-Renders the tag index page with the `tags` template.
-
-Hooks:
-- `filter` - `view-model-tag-index` - Passes in the viewModel.
-
-**Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
-| response | <code>module:express~Response</code> | The Express Response object. |
-| next | <code>module:express~NextFunction</code> | The Express Next function. |
-
-<a name="UttoriWiki+tag"></a>
-
-### uttoriWiki.tag
-Renders the tag detail page with `tag` template.
-Sets the `X-Robots-Tag` header to `noindex`.
-Attempts to pull in the relevant site section for the tag if defined in the config site sections.
-
-Hooks:
-- `filter` - `view-model-tag` - Passes in the viewModel.
-
-**Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
-| response | <code>module:express~Response</code> | The Express Response object. |
-| next | <code>module:express~NextFunction</code> | The Express Next function. |
-
 <a name="UttoriWiki+search"></a>
 
 ### uttoriWiki.search
@@ -749,28 +712,6 @@ Hooks:
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 
-<a name="UttoriWiki+getTaggedDocuments"></a>
-
-### uttoriWiki.getTaggedDocuments ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>
-Returns the documents with the provided tag, up to the provided limit.
-This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
-
-Hooks:
-- `fetch` - `storage-query` - Searched for the tagged documents.
-
-**Kind**: instance property of [<code>UttoriWiki</code>](#UttoriWiki)  
-**Returns**: <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code> - Promise object that resolves to the array of the documents.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| tag | <code>string</code> | The tag to look for in documents. |
-| [limit] | <code>number</code> | The maximum number of documents to be returned. |
-
-**Example**  
-```js
-wiki.getTaggedDocuments('example', 10);
-➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-```
 <a name="UttoriWiki+registerPlugins"></a>
 
 ### uttoriWiki.registerPlugins(config)

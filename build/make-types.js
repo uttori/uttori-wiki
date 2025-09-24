@@ -152,6 +152,7 @@ const main = async () => {
       'plugins/storage-provider-json-memory.d.ts',
       'plugins/storeage-provider-json/storage-provider-file.d.ts',
       'plugins/storeage-provider-json/storage-provider-memory.d.ts',
+      'plugins/tag-routes.d.ts',
       'plugins/upload-multer.d.ts',
       'plugins/utilities/analytics-provider.d.ts',
       'plugins/utilities/cmd.d.ts',

@@ -30,8 +30,8 @@
 | ignoreTags | <code>Array.&lt;string&gt;</code> |  | Tags to ignore when generating the tags page, default is an empty array; |
 | [excerptLength] | <code>number</code> | <code>400</code> | Excerpt length, used in search result previews. |
 | [publicUrl] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Application base URL. Used for canonical URLs and redirects, do not include a trailing slash. |
-| routes | <code>Record.&lt;string, string&gt;</code> |  | The object containing the route strings for search & tags. |
-| titles | <code>Record.&lt;string, string&gt;</code> |  | The object containing the default titles for search & tags. |
+| routes | <code>Record.&lt;string, string&gt;</code> |  | The object containing the route strings for search. |
+| titles | <code>Record.&lt;string, string&gt;</code> |  | The object containing the default titles for search. |
 | [themePath] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Specify the path to the theme directory, no trailing slash. |
 | publicPath | <code>string</code> |  | Path to the static file directory for themes, no trailing slash |
 | [allowCRUDRoutes] | <code>boolean</code> | <code>true</code> | Enable creation, deletion and editing routes. |
@@ -46,8 +46,6 @@
 | [cacheShort] | <code>number</code> | <code>(60 * 60)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
 | [cacheLong] | <code>number</code> | <code>(60 * 60 * 24)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |
 | [homeRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the home route. |
-| [tagIndexRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the tag inded route. |
-| [tagRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the tag show route. |
 | [searchRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the search route. |
 | [editRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the edit route. |
 | [deleteRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the delete route. |

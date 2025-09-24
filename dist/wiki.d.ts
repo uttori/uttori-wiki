@@ -149,6 +149,10 @@ export type UttoriWikiDocumentAttachment = {
      * The MIME type of the attachment.
      */
     type: string;
+    /**
+     * Whether to skip the attachment. Used to control whether to index the attachment.
+     */
+    skip?: boolean;
 };
 /**
  * @typedef {object} UttoriWikiViewModel
@@ -188,6 +192,7 @@ export type UttoriWikiDocumentAttachment = {
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
+ * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
@@ -311,30 +316,6 @@ declare class UttoriWiki {
      * @type {import('express').RequestHandler}
      */
     homepageRedirect: import("express").RequestHandler;
-    /**
-     * Renders the tag index page with the `tags` template.
-     *
-     * Hooks:
-     * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-     * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
-     */
-    tagIndex: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
-    /**
-     * Renders the tag detail page with `tag` template.
-     * Sets the `X-Robots-Tag` header to `noindex`.
-     * Attempts to pull in the relevant site section for the tag if defined in the config site sections.
-     *
-     * Hooks:
-     * - `filter` - `view-model-tag` - Passes in the viewModel.
-     * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
-     */
-    tag: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Renders the search page using the `search` template.
      *
@@ -498,20 +479,5 @@ declare class UttoriWiki {
      * @param {import('express').NextFunction} next The Express Next function.
      */
     saveValid: (request: import("express").Request<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
-    /**
-     * Returns the documents with the provided tag, up to the provided limit.
-     * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
-     *
-     * Hooks:
-     * - `fetch` - `storage-query` - Searched for the tagged documents.
-     * @async
-     * @param {string} tag The tag to look for in documents.
-     * @param {number} [limit] The maximum number of documents to be returned.
-     * @returns {Promise<UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
-     * @example
-     * wiki.getTaggedDocuments('example', 10);
-     * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-     */
-    getTaggedDocuments: (tag: string, limit?: number) => Promise<UttoriWikiDocument[]>;
 }
 //# sourceMappingURL=wiki.d.ts.map

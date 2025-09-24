@@ -31,19 +31,20 @@ export type UttoriPluginConfig = Record<string, any>;
  * Known plugin configuration keys mapped to their specific config types.
  */
 export type KnownPluginConfigs = {
-  'custom-plugin-add-query-output-to-view-model': import('./plugins/query-output.js').AddQueryOutputToViewModelConfig;
   'uttori-plugin-analytics-json-file': import('./plugins/analytics-json-file.js').AnalyticsPluginConfig;
   'uttori-plugin-auth-simple': import('./plugins/auth-simple.js').AuthSimpleConfig;
   'uttori-plugin-download-router': import('./plugins/download-route.js').DownloadRouterConfig;
-  'uttori-plugin-filter-ip-address': import('./plugins/filter-ip-address.js').FilterIPAddressConfig;
-  'uttori-plugin-generator-sitemap': import('./plugins/sitemap-generator.js').SitemapGeneratorConfig;
-  'uttori-plugin-import-document': import('./plugins/import-document.js').ImportDocumentConfig;
   'uttori-plugin-renderer-ejs': import('./plugins/ejs-includes.js').EJSRendererConfig;
+  'uttori-plugin-filter-ip-address': import('./plugins/filter-ip-address.js').FilterIPAddressConfig;
+  'uttori-plugin-import-document': import('./plugins/import-document.js').ImportDocumentConfig;
+  'uttori-plugin-add-query-output-to-view-model': import('./plugins/query-output.js').AddQueryOutputToViewModelConfig;
   'uttori-plugin-renderer-markdown-it': import('./plugins/renderer-markdown-it.js').MarkdownItRendererConfig;
   'uttori-plugin-renderer-replacer': import('./plugins/renderer-replacer.js').ReplacerRendererConfig;
   'uttori-plugin-search-provider-lunr': import('./plugins/search-provider-lunr.js').SearchProviderLunrConfig;
+  'uttori-plugin-generator-sitemap': import('./plugins/sitemap-generator.js').SitemapGeneratorConfig;
   'uttori-plugin-storage-provider-json-file': import('./plugins/storage-provider-json-file.js').StorageProviderJsonFileConfig;
   'uttori-plugin-storage-provider-json-memory': import('./plugins/storage-provider-json-memory.js').StorageProviderJsonMemoryConfig;
+  'uttori-plugin-tag-routes': import('./plugins/tag-routes.js').TagRoutesPluginConfig;
   'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
 }
 

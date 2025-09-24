@@ -55,7 +55,7 @@ class AddQueryOutputToViewModel {
    * @static
    */
   static get configKey() {
-    return 'custom-plugin-add-query-output-to-view-model';
+    return 'uttori-plugin-add-query-output-to-view-model';
   }
 
   /**

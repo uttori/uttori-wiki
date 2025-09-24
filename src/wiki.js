@@ -233,11 +233,7 @@ class UttoriWiki {
     debug('Binding search route:', `/${this.config.routes.search}`);
     server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, this.search);
 
-    // Tags
-    debug('Binding tag index route:', `/${this.config.routes.tags}`);
-    debug('Binding tag route:', `/${this.config.routes.tags}/:tag`);
-    server.get(`/${this.config.routes.tags}/:tag`, this.config.routeMiddleware.tag, this.tag);
-    server.get(`/${this.config.routes.tags}`, this.config.routeMiddleware.tagIndex, this.tagIndex);
+    // Tags - handled by plugin
 
     // Not Found Placeholder
     server.head('/404', this.config.routeMiddleware.notFound, this.notFound);
@@ -383,117 +379,7 @@ class UttoriWiki {
     return;
   };
 
-  /**
-   * Renders the tag index page with the `tags` template.
-   *
-   * Hooks:
-   * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-   * @async
-   * @param {import('express').Request} request The Express Request object.
-   * @param {import('express').Response} response The Express Response object.
-   * @param {import('express').NextFunction} next The Express Next function.
-   */
-  tagIndex = async (request, response, next) => {
-    debug('Tag Index Route');
 
-    // Check for custom route function, and use it if it exists.
-    if (this.config.tagIndexRoute) {
-      debug('Custom Tag Index Route');
-      this.config.tagIndexRoute.call(this, request, response, next);
-      return;
-    }
-
-    const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
-    const ignoreTags = `"${this.config.ignoreTags.join('", "')}"`;
-    const query = `SELECT tags FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND tags EXCLUDES (${ignoreTags}) ORDER BY updateDate DESC LIMIT -1`;
-    /** @type {string[]} */
-    let tags = [];
-    try {
-      // Fetch all the used tags.
-      /** @type {UttoriWikiDocument[][]} */
-      const [results] = await this.hooks.fetch('storage-query', query, this);
-      // Organize and deduplicate, and sort the tags.
-      tags = [...new Set(results.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b));
-    /* c8 ignore next 3 */
-    } catch (error) {
-      debug('Error fetching tags:', error);
-    }
-
-    // Collect & sort all the tagged documents for each tag.
-    /** @type {Record<string, UttoriWikiDocument[]>} */
-    const taggedDocuments = {};
-    await Promise.all(tags.map(async (tag) => {
-      const sorted = await this.getTaggedDocuments(tag);
-      taggedDocuments[tag] = sorted.sort((a, b) => a.title.localeCompare(b.title));
-    }));
-
-    const meta = await this.buildMetadata({}, `/${this.config.routes.tags}`);
-
-    /** @type {UttoriWikiViewModel} */
-    let viewModel = {
-      title: this.config.titles.tags,
-      config: this.config,
-      session: request.session,
-      taggedDocuments,
-      meta,
-      basePath: request.baseUrl,
-      flash: request.wikiFlash(),
-    };
-    viewModel = await this.hooks.filter('view-model-tag-index', viewModel, this);
-    if (this.config.useCache) {
-      response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
-    }
-    response.render('tags', viewModel);
-  };
-
-  /**
-   * Renders the tag detail page with `tag` template.
-   * Sets the `X-Robots-Tag` header to `noindex`.
-   * Attempts to pull in the relevant site section for the tag if defined in the config site sections.
-   *
-   * Hooks:
-   * - `filter` - `view-model-tag` - Passes in the viewModel.
-   * @async
-   * @param {import('express').Request} request The Express Request object.
-   * @param {import('express').Response} response The Express Response object.
-   * @param {import('express').NextFunction} next The Express Next function.
-   */
-  tag = async (request, response, next) => {
-    debug('Tag Route');
-
-    // Check for custom route function, and use it if it exists.
-    if (this.config.tagRoute) {
-      debug('Custom Tag Route');
-      this.config.tagRoute.call(this, request, response, next);
-      return;
-    }
-
-    const taggedDocuments = await this.getTaggedDocuments(request.params.tag);
-    if (taggedDocuments.length === 0) {
-      debug('No documents for tag!');
-      next();
-      return;
-    }
-
-    const meta = await this.buildMetadata({}, `/${this.config.routes.tags}/${request.params.tag}`);
-    const title = this.config.titles[request.params.tag] || request.params.tag;
-
-    /** @type {UttoriWikiViewModel} */
-    let viewModel = {
-      title,
-      config: this.config,
-      session: request.session,
-      taggedDocuments,
-      meta,
-      basePath: request.baseUrl,
-      flash: request.wikiFlash(),
-    };
-    viewModel = await this.hooks.filter('view-model-tag', viewModel, this);
-    if (this.config.useCache) {
-      response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
-    }
-    response.render('tag', viewModel);
-  };
 
   /**
    * Renders the search page using the `search` template.
@@ -1363,35 +1249,6 @@ class UttoriWiki {
     this.hooks.dispatch('search-update', [{ document, originalSlug }], this);
 
     response.redirect(`${this.config.publicUrl}/${slug}`);
-  };
-
-  /**
-   * Returns the documents with the provided tag, up to the provided limit.
-   * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
-   *
-   * Hooks:
-   * - `fetch` - `storage-query` - Searched for the tagged documents.
-   * @async
-   * @param {string} tag The tag to look for in documents.
-   * @param {number} [limit] The maximum number of documents to be returned.
-   * @returns {Promise<UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
-   * @example
-   * wiki.getTaggedDocuments('example', 10);
-   * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-   */
-  getTaggedDocuments = async (tag, limit = 1024) => {
-    debug('getTaggedDocuments:', tag, limit);
-    /** @type {UttoriWikiDocument[]} */
-    let results = [];
-    try {
-      const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
-      const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND tags INCLUDES "${tag}" ORDER BY title ASC LIMIT ${limit}`;
-      [results] = await this.hooks.fetch('storage-query', query, this);
-    /* c8 ignore next 3 */
-    } catch (error) {
-      debug('getTaggedDocuments Error:', error);
-    }
-    return results.filter(Boolean);
   };
 }
 

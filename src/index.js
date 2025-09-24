@@ -19,6 +19,7 @@ export { default as SitemapGenerator } from './plugins/sitemap-generator.js';
 export { default as StorageProviderJsonFile } from './plugins/storage-provider-json-file.js';
 export { default as StorageProviderJsonMemory } from './plugins/storage-provider-json-memory.js';
 export { default as AIChatBot } from './plugins/ai-chat-bot.js';
+export { default as TagRoutesPlugin } from './plugins/tag-routes.js';
 
 // Everything below is for TypeScript exports
 export * from './config.js';
@@ -42,6 +43,7 @@ export * from './plugins/storage-provider-json-file.js';
 export * from './plugins/storage-provider-json-memory.js';
 export * from './plugins/upload-multer.js';
 export * from './plugins/ai-chat-bot.js';
+export * from './plugins/tag-routes.js';
 
 export * from './plugins/markdown-it-plugin/footnotes.js';
 export * from './plugins/markdown-it-plugin/toc.js';

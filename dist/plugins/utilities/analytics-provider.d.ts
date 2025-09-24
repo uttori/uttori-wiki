@@ -13,16 +13,7 @@ export type AnalyticsProviderConfig = {
      */
     extension?: string;
 };
-export type AnalyticsProviderPageVisits = {
-    /**
-     * The slug of the document to be updated.
-     */
-    slug: string;
-    /**
-     * The number of hits for a given slug.
-     */
-    count: number;
-};
+export type AnalyticsProviderPageVisits = Record<string, number>;
 /**
  * @typedef {object} AnalyticsProviderConfig
  * @property {string} directory The directory to store the JSON file containing the page view analytics.
@@ -30,7 +21,7 @@ export type AnalyticsProviderPageVisits = {
  * @property {string} [extension] The file extension of the file containing the page view analytics.
  */
 /**
- * @typedef {object} AnalyticsProviderPageVisits
+ * @typedef {Record<string, number>} AnalyticsProviderPageVisits
  * @property {string} slug The slug of the document to be updated.
  * @property {number} count The number of hits for a given slug.
  */

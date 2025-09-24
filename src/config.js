@@ -7,8 +7,8 @@
  * @property {string[]} ignoreTags Tags to ignore when generating the tags page, default is an empty array;
  * @property {number} [excerptLength=400] Excerpt length, used in search result previews.
  * @property {string} [publicUrl=''] Application base URL. Used for canonical URLs and redirects, do not include a trailing slash.
- * @property {Record<string, string>} routes The object containing the route strings for search & tags.
- * @property {Record<string, string>} titles The object containing the default titles for search & tags.
+ * @property {Record<string, string>} routes The object containing the route strings for search.
+ * @property {Record<string, string>} titles The object containing the default titles for search.
  * @property {string} [themePath=''] Specify the path to the theme directory, no trailing slash.
  * @property {string} publicPath Path to the static file directory for themes, no trailing slash
  * @property {boolean} [allowCRUDRoutes=true] Enable creation, deletion and editing routes.
@@ -23,8 +23,6 @@
  * @property {number} [cacheShort=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
  * @property {number} [cacheLong=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
  * @property {import("express").RequestHandler} [homeRoute] A replacement route handler for the home route.
- * @property {import("express").RequestHandler} [tagIndexRoute] A replacement route handler for the tag inded route.
- * @property {import("express").RequestHandler} [tagRoute] A replacement route handler for the tag show route.
  * @property {import("express").RequestHandler} [searchRoute] A replacement route handler for the search route.
  * @property {import("express").RequestHandler} [editRoute] A replacement route handler for the edit route.
  * @property {import("express").RequestHandler} [deleteRoute] A replacement route handler for the delete route.
@@ -53,11 +51,9 @@ const config = {
   excerptLength: 400,
   publicUrl: '',
   routes: {
-    tags: 'tags',
     search: 'search',
   },
   titles: {
-    tags: 'Tags',
     search: 'Search',
   },
   themePath: '',
@@ -75,8 +71,6 @@ const config = {
   cacheLong: 60 * 60 * 24,
   routeMiddleware: {
     home: [],
-    tagIndex: [],
-    tag: [],
     search: [],
     notFound: [],
     create: [],
