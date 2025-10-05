@@ -13,6 +13,12 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.For
  */
 
 /**
+ * @typedef {object} GoogleDocsSheetItem
+ * @property {string} name The name of the sheet.
+ * @property {string} id The ID of the sheet.
+ */
+
+/**
  * Google Docs/Sheets handler for form submissions.
  * @example <caption>GoogleDocsHandler</caption>
  * const googleDocsHandler = GoogleDocsHandler.create(config);
@@ -236,7 +242,7 @@ class GoogleDocsHandler {
    * Lists all spreadsheets the service account has access to.
    * Not used in this handler but is useful for debugging.
    * @param {GoogleDocsHandlerConfig} config Handler configuration.
-   * @returns {Promise<{ id: string; name: string; }[]>} List of accessible spreadsheets.
+   * @returns {Promise<GoogleDocsSheetItem[]>} List of accessible spreadsheets.
    * @static
    */
   static async listSpreadsheets(config) {

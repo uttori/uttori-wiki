@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🎁 Update dev dependencies
 - 🧰 Add `ImportDocument` plugin for importing documents & files (HTML, Markdown, PDF, etc.)
 - 🧰 Add `AIChatBot` plugin for chatting with the documents with LLM (Ollama locally)
+- 🧰 Add `FormHandler` plugin for defining forms and allowing basic handling and routing to Nodemailer and Google Sheets
 - 🧰 Added explicit `attachments` to document type for better file management
 
 ## [6.1.3](https://github.com/uttori/uttori-wiki/compare/v6.1.2...v6.1.3) - 2025-08-25

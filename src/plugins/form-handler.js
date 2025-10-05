@@ -11,8 +11,14 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.For
  * @property {boolean} required Whether the field is required.
  * @property {string} [label] The field label for display.
  * @property {string} [placeholder] The field placeholder text.
- * @property {(value: string) => boolean} [validation] Custom validation function.
+ * @property {FormFieldValidationFunction} [validation] Custom validation function.
  * @property {string} [errorMessage] Custom error message for validation.
+ */
+
+/**
+ * @typedef {Function} FormFieldValidationFunction
+ * @param {string} value The field value.
+ * @returns {boolean} Whether the field is valid.
  */
 
 /**

@@ -23,12 +23,13 @@ export type FormField = {
     /**
      * Custom validation function.
      */
-    validation?: (value: string) => boolean;
+    validation?: FormFieldValidationFunction;
     /**
      * Custom error message for validation.
      */
     errorMessage?: string;
 };
+export type FormFieldValidationFunction = Function;
 export type FormConfig = {
     /**
      * The form name/identifier.
@@ -105,8 +106,13 @@ export type FormHandlerValidationResult = {
  * @property {boolean} required Whether the field is required.
  * @property {string} [label] The field label for display.
  * @property {string} [placeholder] The field placeholder text.
- * @property {(value: string) => boolean} [validation] Custom validation function.
+ * @property {FormFieldValidationFunction} [validation] Custom validation function.
  * @property {string} [errorMessage] Custom error message for validation.
+ */
+/**
+ * @typedef {Function} FormFieldValidationFunction
+ * @param {string} value The field value.
+ * @returns {boolean} Whether the field is valid.
  */
 /**
  * @typedef {object} FormConfig

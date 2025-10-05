@@ -80,7 +80,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContext</code> | A Uttori-like context. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-filter-ip-address&#x27;, FilterIPAddressConfig&gt;</code> | A Uttori-like context. |
 
 **Example** *(FilterIPAddress.register(context))*  
 ```js
@@ -136,7 +136,7 @@ Validates the request IP against the blocklist and logs the activity.
 | Param | Type | Description |
 | --- | --- | --- |
 | request | <code>module:express~Request</code> | The Express request object. |
-| context | <code>UttoriContext</code> | Unused context object. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-filter-ip-address&#x27;, FilterIPAddressConfig&gt;</code> | Unused context object. |
 
 <a name="__dirname"></a>
 

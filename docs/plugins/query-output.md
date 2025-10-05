@@ -160,7 +160,7 @@ Curry the hook function to take the current event label.
 | --- | --- | --- |
 | [query] | <code>string</code> | The query to be run. |
 | key | <code>string</code> | The key to add the query output to. |
-| fallback | <code>Array.&lt;object&gt;</code> | The fallback value to use if the query fails. |
+| fallback | <code>Array.&lt;UttoriWikiDocument&gt;</code> | The fallback value to use if the query fails. |
 | [format] | <code>AddQueryOutputToViewModelFormatFunction</code> | An optional function to format the query output. |
 | [queryFunction] | <code>AddQueryOutputToViewModelQueryFunction</code> | An optional custom function to execut the query. |
 

@@ -17,12 +17,27 @@ export type GoogleDocsHandlerConfig = {
      */
     prependTimestamp?: boolean;
 };
+export type GoogleDocsSheetItem = {
+    /**
+     * The name of the sheet.
+     */
+    name: string;
+    /**
+     * The ID of the sheet.
+     */
+    id: string;
+};
 /**
  * @typedef {object} GoogleDocsHandlerConfig
  * @property {string} credentialsPath Path to Google service account credentials JSON file.
  * @property {string} spreadsheetId Google Sheets spreadsheet ID.
  * @property {string} sheetName Name of the sheet to write to.
  * @property {boolean} [prependTimestamp] Whether to prepend a timestamp to each row.
+ */
+/**
+ * @typedef {object} GoogleDocsSheetItem
+ * @property {string} name The name of the sheet.
+ * @property {string} id The ID of the sheet.
  */
 /**
  * Google Docs/Sheets handler for form submissions.
@@ -78,12 +93,9 @@ declare class GoogleDocsHandler {
      * Lists all spreadsheets the service account has access to.
      * Not used in this handler but is useful for debugging.
      * @param {GoogleDocsHandlerConfig} config Handler configuration.
-     * @returns {Promise<{ id: string; name: string; }[]>} List of accessible spreadsheets.
+     * @returns {Promise<GoogleDocsSheetItem[]>} List of accessible spreadsheets.
      * @static
      */
-    static listSpreadsheets(config: GoogleDocsHandlerConfig): Promise<{
-        id: string;
-        name: string;
-    }[]>;
+    static listSpreadsheets(config: GoogleDocsHandlerConfig): Promise<GoogleDocsSheetItem[]>;
 }
 //# sourceMappingURL=google-docs-handler.d.ts.map
