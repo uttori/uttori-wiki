@@ -26,7 +26,16 @@ export async function buildBlocks(document, config) {
 
   const sectionHash = {};
   for (const section of sections) {
-    if (section.type === 'paragraph' || section.type === 'bullet_list' || section.type === 'ordered_list' || section.type === 'code' || section.type === 'table' || section.type === 'footnote') {
+    if (
+      section.type === 'paragraph' ||
+      section.type === 'blockquote' ||
+      section.type === 'bullet_list' ||
+      section.type === 'ordered_list' ||
+      section.type === 'code' ||
+      section.type === 'table' ||
+      section.type === 'footnote' ||
+      section.type === 'image'
+    ) {
       const slug = section.headers.join('-');
       if (!sectionHash[slug]) {
         sectionHash[slug] = {

@@ -1,4 +1,14 @@
 /**
+ * @typedef {object} MarkdownASTNode
+ * @property {string} type The type of node.
+ * @property {string[]} content Text content for the node.
+ * @property {Array<Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
+ * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
+ * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
+ * @property {MarkdownASTNode[]} children The child nodes for this node.
+ */
+
+/**
  * Convert newlines to spaces.
  * @param {string} text The text to convert newlines to spaces.
  * @param {string} [replace] The string to replace newlines with, defaults to a single space.
@@ -28,16 +38,6 @@ export const toCSV = (table, seperator = ',', newLine = '\n', alwaysDoubleQuote 
   .join(newLine);
 
 /**
- * @typedef {object} MarkdownASTNode
- * @property {string} type The type of node.
- * @property {string[]} content Text content for the node.
- * @property {Array<Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
- * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
- * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
- * @property {MarkdownASTNode[]} children The child nodes for this node.
- */
-
-/**
  * Create a node from a MarkdownIt Token.
  * @param {import('markdown-it/index.js').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
@@ -61,6 +61,414 @@ export function genTreeNode(token) {
     headers: [],
     children: [],
   };
+}
+
+/**
+ * Strip images from markdown text, leaving only the text content.
+ * @param {string} text The markdown text to clean.
+ * @returns {string} The text with images removed.
+ */
+export function stripImagesFromMarkdown(text) {
+  if (typeof text !== 'string') {
+    return text;
+  }
+
+  // Remove image markdown syntax: ![alt](src) or ![alt](src "title")
+  // Also handles data URLs and other image formats
+  return text.replace(/!\[([^\]]*)\]\([^)]+\)/g, (match, altText) => {
+    // If there's alt text, keep it, otherwise remove the entire image
+    return altText ? altText : '';
+  }).replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Consolidate header objects to their text content.
+ * @param {MarkdownASTNode[]} items The array of itens to check.
+ * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
+ */
+export function joinContent(items) {
+  return items.map((item) => {
+    if (item.content && item.content.length > 0) {
+      item.content = [item.content.join(' ')];
+    } else {
+      console.warn('🐛 Mush', item);
+    }
+    if (item.children.length > 0) {
+      console.warn('🐛? item.children', item.children);
+    }
+    return item;
+  });
+}
+
+/**
+ * Consolidate header objects to their text content.
+ * @param {MarkdownASTNode[]} items The array of itens to check.
+ * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
+ */
+export function consolidateHeaders(items) {
+  return items.map((item) => {
+    if (item.headers && item.headers.length > 0) {
+      item.headers = item.headers.map((header) => {
+        if (typeof header[0] === 'string') {
+          return stripImagesFromMarkdown(header[0]);
+        }
+        if (typeof header[0] === 'number') {
+          return header[0];
+        }
+        if (typeof header[0] === 'object' && header[0] !== null && header[0].content) {
+          // Handle both string content and array content
+          if (typeof header[0].content === 'string') {
+            return stripImagesFromMarkdown(header[0].content);
+          }
+          if (Array.isArray(header[0].content)) {
+            return stripImagesFromMarkdown(header[0].content.join(' '));
+          }
+          return header[0].content;
+        }
+        return header[0];
+      });
+    }
+    return item;
+  });
+}
+
+/**
+ * Consolidate a Token's children to plain text.
+ * @param {MarkdownASTNode} token The Token to consolidate.
+ * @returns {string[]} The consolidated text string.
+ */
+export function consolidateParagraph(token) {
+  if (token.children && token.children.length > 0) {
+    const content = [];
+    for (const childToken of token.children) {
+      // Images can be ignored and links contain text.
+      if (['image', 'link_open', 'link_close'].includes(childToken.type)) {
+        continue;
+      }
+
+      // Text will be added to the buffer.
+      if (childToken.type === 'text') {
+        if (Array.isArray(childToken.content)) {
+          content.push(...childToken.content);
+        } else {
+          content.push(childToken.content);
+        }
+        continue;
+      }
+
+      // List items
+      if (childToken.type === 'list_item') {
+        if (childToken.children) {
+          for (const p of childToken.children) {
+            content.push(...consolidateParagraph(p));
+          }
+        }
+        if (childToken.content && childToken.content.length !== 0) {
+          console.warn('🐛 Unhandled list_item content', childToken, childToken.children[0]);
+        }
+        if (Array.isArray(childToken.content)) {
+          content.push(...childToken.content);
+        } else if (childToken.content) {
+          content.push(childToken.content);
+        }
+        continue;
+      }
+
+      // Text will be added to the buffer.
+      if (childToken.type === 'paragraph') {
+        if (childToken.children) {
+          for (const p of childToken.children) {
+            if (Array.isArray(p.content)) {
+              content.push(...consolidateParagraph(p));
+            } else {
+              content.push(consolidateParagraph(p));
+            }
+          }
+        }
+        if (Array.isArray(childToken.content)) {
+          content.push(...childToken.content);
+        } else {
+          content.push(childToken.content);
+        }
+        continue;
+      }
+
+      console.warn('🐛 Unknown Consolidate Child Token Type:', childToken);
+    }
+    return content;
+  }
+  return token.content;
+}
+
+/**
+ * Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote
+ * @param {MarkdownASTNode[]} items The array of itens to consolidate.
+ * @returns {MarkdownASTNode[]} The array of items with flattened structures.
+ */
+export function consolidateNestedItems(items) {
+  return items.map((item) => {
+    if (![
+      'blockquote',
+      'bullet_list',
+      'code',
+      'footnote',
+      'heading',
+      'ordered_list',
+      'paragraph',
+      'table',
+    ].includes(item.type)) {
+      console.warn('🐛 Unknown Item Type to Consolidate:', item);
+    }
+
+    // Every table is laid out differently, making parsing very difficult.
+    // Examples; tables with x & y labels; tables comparing across various products
+    if (item.type === 'table') {
+      /** @type {string[]} */
+      const header = [];
+      /** @type {string[][]} */
+      const bodyRows = [];
+      for (const child of item.children) {
+        // Check for table header
+        if (child.type === 'thead') {
+          // Is there ever two TR rows? Never seen this in MarkdownIt output.
+          child.children[0].children.forEach((th) => {
+            if (th.children.length > 0) {
+              console.warn('🐛 Unhandled TH Children');
+            }
+            if (th.type === 'th') {
+              header.push(...th.content);
+            }
+          });
+        } else if (child.type === 'tbody') {
+          child.children.forEach((tr) => {
+            /** @type {string[]} */
+            const bodyRow = [];
+            tr.children.forEach((td) => {
+              if (td.children.length > 0) {
+                console.warn('🐛 Unhandled TD Children');
+              }
+              bodyRow.push(...td.content);
+            });
+            bodyRows.push(bodyRow);
+          });
+        } else {
+          console.warn('🐛 Unknown Table Child:', child);
+        }
+      }
+
+      // Convert Table to CSV
+      const content = [
+        'Table as CSV:\n',
+        toCSV([
+          header,
+          ...bodyRows,
+        ]),
+      ];
+
+      item.content = content;
+      item.children = [];
+    }
+
+    // Unordered List
+    if (item.type === 'bullet_list') {
+      // Loop over list items and pull out their paragraphs
+      const content = [];
+      let { headers } = item;
+      for (const li of item.children) {
+        for (const p of li.children) {
+          headers = p.headers;
+          const paragraphContent = consolidateParagraph(p);
+          content.push(paragraphContent);
+        }
+      }
+      item.headers = headers;
+      item.content = content; // .join('; ');
+      item.children = [];
+    }
+
+    // Ordered List
+    if (item.type === 'ordered_list') {
+      let { headers } = item;
+      // Loop over list items and pull out their paragraphs
+      for (const [i, li] of item.children.entries()) {
+        for (const p of li.children) {
+          headers = p.headers;
+          const paragraphContent = consolidateParagraph(p);
+          const contentString = Array.isArray(paragraphContent) ? paragraphContent.join('') : paragraphContent;
+          item.content.push(`${i + 1}.) ${contentString}`);
+        }
+      }
+      item.headers = headers;
+      item.children = [];
+    }
+
+    // Footnotes
+    if (item.type === 'footnote') {
+      // Loop over children and pull out their paragraphs
+      for (const child of item.children) {
+        item.content.push(`Footenote ${item?.open?.meta?.label || ''}: ${consolidateParagraph(child).join('; ')}`);
+      }
+      item.children = [];
+    }
+
+    // Blockquote
+    if (item.type === 'blockquote') {
+      // Loop over children and pull out their paragraphs
+      for (const child of item.children) {
+        item.content.push(...consolidateParagraph(child));
+      }
+      // item.content = item.content.trim();
+      item.children = [];
+    }
+
+    return item;
+  });
+}
+
+/**
+ * Remove any items with no content and no children.
+ * @param {MarkdownASTNode[]} items The array of itens to check.
+ * @returns {MarkdownASTNode[]} The array of items with empty items removed.
+ */
+export function removeEmptyItems(items) {
+  return items.map((item) => {
+    if (item.children && item.children.length > 0) {
+      item.children = removeEmptyItems(item.children);
+    }
+    return item;
+  }).filter((item) => (item.content && item.content.length > 0) || (item.children && item.children.length > 0));
+}
+
+/**
+ * Removes curly quotes, punctuation, normalizes whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
+ * @param {string} input The text input to count words in.
+ * @returns {Record<string, number>} The word count hash.
+ */
+export function countWords(input) {
+  return input
+    .replace(/[\u2018\u2019]/g, ' ') // ‘’
+    .replace(/[\u201C\u201D]/g, ' ') // “”
+    .replace(/[!"#$%&()*,./:;<=?[\]^_`{|}~“”≈►◄\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .toLowerCase()
+    .split(' ')
+    .reduce((hash, word) => {
+      if (word) {
+        if (!Object.prototype.hasOwnProperty.call(hash, word)) {
+          hash[word] = 0;
+        }
+        hash[word]++;
+      }
+      return hash;
+    }, {});
+}
+
+/**
+ * Find the longest common prefix of an array of paths.
+ * @param {string[][]} paths The array of paths to find the longest common prefix of.
+ * @returns {string[]} The longest common prefix of the paths.
+ */
+export function longestCommonPrefix(paths) {
+  if (paths.length === 0) return [];
+  let i = 0;
+  while (true) {
+    const segment = paths[0][i];
+    if (segment === undefined) {
+      break;
+    }
+    for (let k = 1; k < paths.length; k++) {
+      if (paths[k][i] !== segment) {
+        return paths[0].slice(0, i);
+      }
+    }
+    i++;
+  }
+  return paths[0].slice(0, i);
+}
+
+/**
+ * Consolidate like sub-sections by their headers.
+ * @param {import('../ai-chat-bot.js').Block[]} items The items to consolidate.
+ * @param {number} [maximumTokenCount] The maximum token count to consolidate to.
+ * @param {number} [softMinTokens] If we've already packed at least this many tokens, and the next item would shrink the anchor, flush early.
+ * @param {number} [minAnchorDecrease] How much the anchor must shrink (in header levels) to trigger early flush.
+ * @returns {object[]} The consolidated items.
+ */
+export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity, softMinTokens = 600, minAnchorDecrease = 1) {
+  const result = [];
+
+  // Group items by slug
+  /** @type {Map<string, import('../ai-chat-bot.js').Block[]>} */
+  const bySlug = new Map();
+  for (const item of items) {
+    const parent = item.slug;
+    const arrayOfItems = bySlug.get(parent) || [];
+    arrayOfItems.push(item);
+    bySlug.set(parent, arrayOfItems);
+  }
+
+  for (const [_slug, slugItems] of bySlug.entries()) {
+    /** @type {import('../ai-chat-bot.js').Block[]} */
+    let pack = [];
+    let packTokens = 0;
+    let index = 1;
+
+    const flush = () => {
+      if (!pack.length) return;
+      const anchor = longestCommonPrefix(pack.map(p => p.sectionPath));
+      // never let anchor be empty: default to top-level header
+      const parentPath = anchor.length ? anchor : [pack[0].sectionPath[0]];
+
+      result.push({
+        ...pack[0],
+        sectionPath: parentPath,
+        text: pack.map(p => {
+          const tail = p.sectionPath.slice(parentPath.length).join(' - ');
+          return tail ? `${tail} - ${p.text}` : p.text;
+        }).join('\n'),
+        tokenCount: packTokens,
+        idx: index++,
+      });
+      pack = [];
+      packTokens = 0;
+    };
+
+    for (const item of slugItems) {
+      const tokenCount = item.tokenCount ?? countWords(item.text ?? '').length * 0.75;
+
+      // If single item is bigger than the cap, emit current pack (if any),
+      // then emit the item as-is (can't split further here).
+      if (tokenCount > maximumTokenCount) {
+        flush();
+        result.push({ ...item, tokenCount: tokenCount, idx: index++ });
+        continue;
+      }
+
+      // Soft-minimum early flush if the next item would shrink the anchor (LCP)
+      if (pack.length && packTokens >= softMinTokens) {
+        const currentAnchorLen = longestCommonPrefix(pack.map(p => p.sectionPath)).length;
+        const prospectiveAnchorLen = longestCommonPrefix([...pack, item].map(p => p.sectionPath)).length;
+        const anchorDecrease = currentAnchorLen - prospectiveAnchorLen;
+        if (anchorDecrease >= minAnchorDecrease) {
+          flush();
+        }
+      }
+
+      // If adding this item would exceed the cap, flush current pack first.
+      if (pack.length && packTokens + tokenCount > maximumTokenCount) {
+        flush();
+      }
+
+      // Start/extend the pack.
+      pack.push(item);
+      packTokens += tokenCount;
+    }
+
+    // Handle last section for this slug
+    flush();
+  }
+
+  return result;
 }
 
 /**
@@ -96,6 +504,7 @@ export function markdownItAST(tokens, title) {
         'thead_open',
         'tr_open',
         'video_open',
+        /* c8 ignore next 3 */
       ].includes(token.type)) {
         console.warn('🐛 Unknown Token 1:', token);
       }
@@ -119,10 +528,12 @@ export function markdownItAST(tokens, title) {
       }
     } else if (token.nesting === -1) {
       // current.close = token;
+      /* c8 ignore next 3 */
       if (!stack.length) {
         throw new Error('AST stack underflow.');
       }
 
+      /* c8 ignore next 22 */
       if (![
         'blockquote_close',
         'bullet_list_close',
@@ -250,402 +661,4 @@ export function markdownItAST(tokens, title) {
   rootNode.children = consolidateHeaders(rootNode.children);
 
   return rootNode.children;
-}
-
-/**
- * Consolidate header objects to their text content.
- * @param {MarkdownASTNode[]} items The array of itens to check.
- * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
- */
-export function joinContent(items) {
-  return items.map((item) => {
-    if (item.content && item.content.length > 0) {
-      item.content = item.content.join(' ');
-    } else {
-      console.warn('🐛 Mush', item);
-    }
-    if (item.children.length > 0) {
-      console.warn('🐛? item.children', item.children);
-    }
-    return item;
-  });
-}
-
-/**
- * Consolidate header objects to their text content.
- * @param {MarkdownASTNode[]} items The array of itens to check.
- * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
- */
-export function consolidateHeaders(items) {
-  return items.map((item) => {
-    if (item.headers && item.headers.length > 0) {
-      item.headers = item.headers.map((header) => {
-        if (typeof header[0] === 'string') {
-          return header[0];
-        }
-        if (typeof header[0] === 'number') {
-          return header[0];
-        }
-        if (typeof header[0] === 'object' && header[0].content) {
-          return header[0].content;
-        }
-        return header[0];
-      });
-    }
-    return item;
-  });
-}
-
-/**
- * Consolidate a Token's children to plain text.
- * @param {MarkdownASTNode} token The Token to consolidate.
- * @returns {string[]} The consolidated text string.
- */
-export function consolidateParagraph(token) {
-  if (token.children && token.children.length > 0) {
-    const content = [];
-    for (const childToken of token.children) {
-      // Images can be ignored and links contain text.
-      if (['image', 'link_open', 'link_close'].includes(childToken.type)) {
-        continue;
-      }
-
-      // Text will be added to the buffer.
-      if (childToken.type === 'text') {
-        content.push(...childToken.content);
-        continue;
-      }
-
-      // List items
-      if (childToken.type === 'list_item') {
-        if (childToken.children) {
-          for (const p of childToken.children) {
-            content.push(...consolidateParagraph(p));
-          }
-        }
-        if (childToken.content && childToken.content.length !== 0) {
-          console.warn('🐛 Unhandled list_item content', childToken, childToken.children[0]);
-        }
-        content.push(...childToken.content);
-        continue;
-      }
-
-      // Text will be added to the buffer.
-      if (childToken.type === 'paragraph') {
-        if (childToken.children) {
-          for (const p of childToken.children) {
-            content.push(...consolidateParagraph(p));
-          }
-        }
-        content.push(...childToken.content);
-        continue;
-      }
-
-      console.warn('🐛 Unknown Consolidate Child Token Type:', childToken);
-    }
-    return content; // .join('; ');
-  }
-  return token.content;
-}
-
-/**
- * Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote
- * @param {MarkdownASTNode[]} items The array of itens to consolidate.
- * @returns {MarkdownASTNode[]} The array of items with flattened structures.
- */
-export function consolidateNestedItems(items) {
-  return items.map((item) => {
-    if (![
-      'blockquote',
-      'bullet_list',
-      'code',
-      'footnote',
-      'heading',
-      'ordered_list',
-      'paragraph',
-      'table',
-    ].includes(item.type)) {
-      console.warn('🐛 Unknown Item Type to Consolidate:', item);
-    }
-
-    // Every table is laid out differently, making parsing very difficult.
-    // Examples; tables with x & y labels; tables comparing across various products
-    if (item.type === 'table') {
-      /** @type {string[]} */
-      const header = [];
-      /** @type {string[][]} */
-      const bodyRows = [];
-      for (const child of item.children) {
-        // Check for table header
-        if (child.type === 'thead') {
-          // Is there ever two TR rows? Never seen this in MarkdownIt output.
-          child.children[0].children.forEach((th) => {
-            if (th.children.length > 0) {
-              console.warn('🐛 Unhandled TH Children');
-            }
-            if (th.type === 'th') {
-              header.push(...th.content);
-            }
-          });
-        } else if (child.type === 'tbody') {
-          child.children.forEach((tr) => {
-            /** @type {string[]} */
-            const bodyRow = [];
-            tr.children.forEach((td) => {
-              if (td.children.length > 0) {
-                console.warn('🐛 Unhandled TD Children');
-              }
-              bodyRow.push(...td.content);
-            });
-            bodyRows.push(bodyRow);
-          });
-        } else {
-          console.warn('🐛 Unknown Table Child:', child);
-        }
-      }
-
-      // Loop over the rows to build the inline text output by appending the cell content to the header.
-      // const content = bodyRows.reduce((tableContent, bodyRow) => {
-      //   // Combine each header with each row value and append.
-      //   const output = bodyRow.reduce((rowContent, cell, index) => {
-      //     if (!header[index]) {
-      //       console.warn('🐛 Table Header Missing');
-      //     }
-      //     if (cell) {
-      //       return [...rowContent, `${header[index] || ''}: ${cell.trim()}`];
-      //     }
-
-      //     console.warn('🐛 No cell?');
-      //     return rowContent;
-      //   }, []);
-
-      //   return [...tableContent, output];
-      // }, []);
-
-      // Convert Table to CSV
-      const content = [
-        'Table as CSV:\n',
-        toCSV([
-          header,
-          ...bodyRows,
-        ]),
-      ];
-
-      // Clean up any duplicate text items like seperators and remove extra whitespace.
-      // item.content = content.split('; ')
-      //   .filter(Boolean)
-      //   .join('; ')
-      //   .replace(/\s\s+/g, ' ')
-      //   .trim();
-      item.content = content;
-      item.children = [];
-    }
-
-    // Unordered List
-    if (item.type === 'bullet_list') {
-      // Loop over list items and pull out their paragraphs
-      const content = [];
-      let { headers } = item;
-      for (const li of item.children) {
-        for (const p of li.children) {
-          headers = p.headers;
-          content.push(consolidateParagraph(p));
-        }
-      }
-      item.headers = headers;
-      item.content = content; // .join('; ');
-      item.children = [];
-    }
-
-    // Ordered List
-    if (item.type === 'ordered_list') {
-      let { headers } = item;
-      // Loop over list items and pull out their paragraphs
-      for (const [i, li] of item.children.entries()) {
-        for (const p of li.children) {
-          headers = p.headers;
-          item.content.push(`${i + 1}.) ${consolidateParagraph(p)}`);
-        }
-      }
-      item.headers = headers;
-      item.children = [];
-    }
-
-    // Footnotes
-    if (item.type === 'footnote') {
-      // Loop over children and pull out their paragraphs
-      for (const child of item.children) {
-        item.content.push(`Footenote ${item?.open?.meta?.label || ''}: ${consolidateParagraph(child).join('; ')}`);
-      }
-      item.children = [];
-    }
-
-    // Blockquote
-    if (item.type === 'blockquote') {
-      // Loop over children and pull out their paragraphs
-      for (const child of item.children) {
-        item.content.push(...consolidateParagraph(child));
-      }
-      // item.content = item.content.trim();
-      item.children = [];
-    }
-
-    return item;
-  });
-}
-
-/**
- * Remove any items with no content and no children.
- * @param {MarkdownASTNode[]} items The array of itens to check.
- * @returns {MarkdownASTNode[]} The array of items with empty items removed.
- */
-export function removeEmptyItems(items) {
-  return items.map((item) => {
-    if (item.children && item.children.length > 0) {
-      item.children = removeEmptyItems(item.children);
-    }
-
-    // Clean up any duplicate text items like seperators and remove extra whitespace.
-    // if (item.content) {
-    //   item.content = item.content.split('; ')
-    //     .filter(Boolean)
-    //     .join('; ')
-    //     .replace(/\s\s+/g, ' ')
-    //     .trim();
-    // }
-
-    return item;
-  }).filter((item) => (item.content && item.content.length > 0) || (item.children && item.children.length > 0));
-}
-
-/**
- * Replace curly quotes with regular quotes, remove punctuation, normalize whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
- * @param {string} input The text input to count words in.
- * @returns {Record<string, number>} The word count hash.
- */
-export function countWords(input) {
-  return input
-    .replace(/[\u2018\u2019]/g, '\'') // ‘’
-    .replace(/[\u201C\u201D]/g, '"') // “”
-    .replace(/[!"#$%&()*,./:;<=?[\]^_`{|}~“”≈►◄\-]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .toLowerCase()
-    .split(' ')
-    .reduce((hash, word) => {
-      if (word) {
-        if (!Object.prototype.hasOwnProperty.call(hash, word)) {
-          hash[word] = 0;
-        }
-        hash[word]++;
-      }
-      return hash;
-    }, {});
-}
-
-/**
- * Find the longest common prefix of a list of paths.
- * @param {string[][]} paths The paths to find the longest common prefix of.
- * @returns {string[]} The longest common prefix of the paths.
- */
-function longestCommonPrefix(paths) {
-  if (paths.length === 0) return [];
-  let i = 0;
-  while (true) {
-    const segment = paths[0][i];
-    if (segment === undefined) {
-      break;
-    }
-    for (let k = 1; k < paths.length; k++) {
-      if (paths[k][i] !== segment) {
-        return paths[0].slice(0, i);
-      }
-    }
-    i++;
-  }
-  return paths[0].slice(0, i);
-}
-
-/**
- * Consolidate like sub-sections by their headers.
- * @param {import('../ai-chat-bot.js').Block[]} items The items to consolidate.
- * @param {number} [maximumTokenCount] The maximum token count to consolidate to.
- * @param {number} [softMinTokens] If we've already packed at least this many tokens, and the next item would shrink the anchor, flush early.
- * @param {number} [minAnchorDecrease] How much the anchor must shrink (in header levels) to trigger early flush.
- * @returns {object[]} The consolidated items.
- */
-export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity, softMinTokens = 600, minAnchorDecrease = 1) {
-  const result = [];
-
-  // Group items by slug
-  /** @type {Map<string, import('../ai-chat-bot.js').Block[]>} */
-  const bySlug = new Map();
-  for (const item of items) {
-    const parent = item.slug;
-    const arrayOfItems = bySlug.get(parent) || [];
-    arrayOfItems.push(item);
-    bySlug.set(parent, arrayOfItems);
-  }
-
-  for (const [_slug, slugItems] of bySlug.entries()) {
-    /** @type {import('../ai-chat-bot.js').Block[]} */
-    let pack = [];
-    let packTokens = 0;
-    let index = 1;
-
-    const flush = () => {
-      if (!pack.length) return;
-      const anchor = longestCommonPrefix(pack.map(p => p.sectionPath));
-      // never let anchor be empty: default to top-level header
-      const parentPath = anchor.length ? anchor : [pack[0].sectionPath[0]];
-
-      result.push({
-        ...pack[0],
-        sectionPath: parentPath,
-        text: pack.map(p => {
-          const tail = p.sectionPath.slice(parentPath.length).join(' - ');
-          return tail ? `${tail} - ${p.text}` : p.text;
-        }).join('\n'),
-        tokenCount: packTokens,
-        idx: index++,
-      });
-      pack = [];
-      packTokens = 0;
-    };
-
-    for (const item of slugItems) {
-      const tokenCount = item.tokenCount ?? countWords(item.text ?? '').length * 0.75;
-
-      // If single item is bigger than the cap, emit current pack (if any),
-      // then emit the item as-is (can't split further here).
-      if (tokenCount > maximumTokenCount) {
-        flush();
-        result.push({ ...item, tokenCount: tokenCount, idx: index++ });
-        continue;
-      }
-
-      // Soft-minimum early flush if the next item would shrink the anchor (LCP)
-      if (pack.length && packTokens >= softMinTokens) {
-        const currentAnchorLen = longestCommonPrefix(pack.map(p => p.sectionPath)).length;
-        const prospectiveAnchorLen = longestCommonPrefix([...pack, item].map(p => p.sectionPath)).length;
-        const anchorDecrease = currentAnchorLen - prospectiveAnchorLen;
-        if (anchorDecrease >= minAnchorDecrease) {
-          flush();
-        }
-      }
-
-      // If adding this item would exceed the cap, flush current pack first.
-      if (pack.length && packTokens + tokenCount > maximumTokenCount) {
-        flush();
-      }
-
-      // Start/extend the pack.
-      pack.push(item);
-      packTokens += tokenCount;
-    }
-
-    // Handle last section for this slug
-    flush();
-  }
-
-  return result;
 }

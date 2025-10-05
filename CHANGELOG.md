@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 - 💥 BREAKING CHANGES!
 - 💥 Upgrade to Express v5
-- 💥 Expecting Node v22 or higher (I have note tested to see if it works on older versions)
+- 💥 Expecting Node v22 or higher (I have not tested to see if it works on older versions)
 - 💥 Migrated all first party plugins to be included with the main wiki package to simplify development
 - 🪓 Removed now unused `asyncHandler`
 - 🛠 New type & docs build system
