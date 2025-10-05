@@ -7,13 +7,23 @@ import { config, serverSetup } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
+
+let sandbox;
+test.beforeEach(() => {
+  sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('saveValid: parses tags as a string', async (t) => {
   t.plan(2);
   const slug = 'test-parse-tags-string';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: { slug },
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({ params: { slug },
     body: {
       title: 'Delete Page',
       slug,
@@ -22,7 +32,7 @@ test('saveValid: parses tags as a string', async (t) => {
       createDate: undefined,
       tags: ['tag-1', 'tag-2', 'tag-3'],
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
@@ -33,14 +43,14 @@ test('saveValid: parses tags as a string', async (t) => {
 test('route can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const saveValidRoute = (_request, _response, next) => {
     spy();
     next();
   };
   const server = serverSetup();
   const uttori = new UttoriWiki({ ...config, saveValidRoute }, server);
-  await uttori.saveValid({ params: { slug: 'test-can-be-replaced' }, body: {} }, response, () => {});
+  await uttori.saveValid(({ params: { slug: 'test-can-be-replaced' }, body: {} }), (response), () => {});
   t.is(spy.called, true);
 });
 
@@ -49,8 +59,8 @@ test('saveValid: parses tags as an array', async (t) => {
   const slug = 'test-parse-tags-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({ params: {},
     body: {
       title: 'Delete Page',
       slug,
@@ -59,7 +69,7 @@ test('saveValid: parses tags as an array', async (t) => {
       createDate: undefined,
       tags: ['tag-1', 'tag-2', 'tag-3'],
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
@@ -72,8 +82,8 @@ test('saveValid: sorts tags', async (t) => {
   const slug = 'test-parse-tags-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({ params: {},
     body: {
       title: 'Delete Page',
       slug,
@@ -82,7 +92,7 @@ test('saveValid: sorts tags', async (t) => {
       createDate: undefined,
       tags: ['c', 'b', 'a'],
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
@@ -95,8 +105,8 @@ test('saveValid: parses redirects as a string', async (t) => {
   const slug = 'test-parse-redirects-string';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({ params: {},
     body: {
       title: 'Delete Page',
       slug,
@@ -106,7 +116,7 @@ test('saveValid: parses redirects as a string', async (t) => {
       tags: [],
       redirects: 'old-url,older-url,oldest-url\n\rsomehow-older',
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
@@ -119,8 +129,8 @@ test('saveValid: parses redirects as an array', async (t) => {
   const slug = 'test-parse-redirects-array';
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({ params: {},
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({ params: {},
     body: {
       title: 'Delete Page',
       slug,
@@ -130,7 +140,7 @@ test('saveValid: parses redirects as an array', async (t) => {
       tags: [],
       redirects: ['old-url', 'older-url', 'oldest-url'],
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
@@ -142,8 +152,8 @@ test('saveValid: redirects back when no slug is found', async (t) => {
   t.plan(1);
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
-  const wikiFlash = sinon.spy();
-  await uttori.saveValid({
+  const wikiFlash = sandbox.spy();
+  await uttori.saveValid(({
     get: () => {},
     params: {},
     body: {
@@ -154,10 +164,88 @@ test('saveValid: redirects back when no slug is found', async (t) => {
       createDate: undefined,
       tags: ['tag-1', 'tag-2', 'tag-3'],
     },
-    wikiFlash }, response, () => {});
+    wikiFlash }), (response), () => {});
 
   t.deepEqual(wikiFlash.lastCall.args, [
     'error',
     'Missing slug.',
   ]);
+});
+
+test('saveValid: handles attachments as an array', async (t) => {
+  t.plan(2);
+  const slug = 'test-attachments-array';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+  const attachments = [
+    { name: 'test1.pdf', path: '/files/test1.pdf', type: 'application/pdf' },
+    { name: 'test2.jpg', path: '/files/test2.jpg', type: 'image/jpeg' },
+  ];
+
+  await uttori.saveValid(({ params: {},
+    body: {
+      title: 'Test Attachments',
+      slug,
+      content: '## Test Attachments',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+      attachments,
+    },
+    wikiFlash }), (response), () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [document] = await uttori.hooks.fetch('storage-get', slug, this);
+  t.is(document.slug, slug);
+  t.deepEqual(document.attachments, attachments);
+});
+
+test('saveValid: handles missing attachments', async (t) => {
+  t.plan(2);
+  const slug = 'test-attachments-missing';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+
+  await uttori.saveValid(({ params: {},
+    body: {
+      title: 'Test No Attachments',
+      slug,
+      content: '## Test No Attachments',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+    },
+    wikiFlash }), (response), () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [document] = await uttori.hooks.fetch('storage-get', slug, this);
+  t.is(document.slug, slug);
+  t.deepEqual(document.attachments, []);
+});
+
+test('saveValid: ignores non-array attachments', async (t) => {
+  t.plan(2);
+  const slug = 'test-attachments-non-array';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+
+  await uttori.saveValid(({ params: {},
+    body: {
+      title: 'Test Non-Array Attachments',
+      slug,
+      content: '## Test Non-Array Attachments',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+      attachments: 'not-an-array',
+    },
+    wikiFlash }), (response), () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [document] = await uttori.hooks.fetch('storage-get', slug, this);
+  t.is(document.slug, slug);
+  t.deepEqual(document.attachments, []);
 });

@@ -3,9 +3,16 @@ let debug = (..._) => {};
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki.Redirect'); } catch {}
 
 /**
+ * @typedef {object} ParsedPathKey
+ * @property {string} name The name of the segment variable.
+ * @property {boolean} optional When true, the segment is optional.
+ * @property {string} [def] The default value of the segment, if set.
+ */
+
+/**
  * Parse an Express compatible path into an array containing literal path segments and ParsedPathKey objects.
  * @param {string} path The path to parse.
- * @returns {(string|import('../dist/custom.js').ParsedPathKey)[]} The parsed path segments.
+ * @returns {Array<ParsedPathKey | string>} The parsed path segments.
  */
 export function parsePath(path) {
   debug('parsePath:', { path });
@@ -74,13 +81,13 @@ export function parsePath(path) {
 }
 
 /**
- * The function now iterates over the parsed segments of the target.
+ * The function iterates over the parsed segments of the target.
  * For each segment, if it's an object representing a key, it checks against the routeKeyMap to see if the key is present in the route.
  * If the key is not in the route, it checks if the key is optional or has a default value.
  * String segments (path elements) are returned as is, while key objects are returned with their modifications (if any).
  * @param {string} route The route to process.
  * @param {string} target The target to process.
- * @returns {(string|import('../dist/custom.js').ParsedPathKey)[]} The processed segments, ready to be used for path construction.
+ * @returns {Array<ParsedPathKey | string>} The processed segments, ready to be used for path construction.
  */
 export function prepareTarget(route, target) {
   debug('prepareTarget:', { route, target });
@@ -88,7 +95,7 @@ export function prepareTarget(route, target) {
   const parsedTarget = parsePath(target);
 
   // Create a map of route keys for easy lookup
-  /** @type {Map<string, import('../dist/custom.js').ParsedPathKey>} */
+  /** @type {Map<string, ParsedPathKey>} */
   const routeKeyMap = new Map();
   for (const segment of parsedRoute) {
     if (typeof segment === 'object') {

@@ -1,5 +1,91 @@
-export function asyncHandler(fn: any): (request: any, response: any, next: any) => void;
 export default UttoriWiki;
+export type UttoriWikiViewModel = {
+    /**
+     * The document title to be used anywhere a title may be needed.
+     */
+    title: string;
+    /**
+     * The configuration object.
+     */
+    config: import("./config.js").UttoriWikiConfig;
+    /**
+     * The metadata object.
+     */
+    meta: {
+        /**
+         * `${this.config.publicUrl}/private-document-path`
+         */
+        canonical: string;
+        /**
+         * 'no-index'
+         */
+        robots: string;
+        /**
+         * document.title
+         */
+        title: string;
+        /**
+         * document.excerpt || document.content.slice(0, 160)
+         */
+        description: string;
+        /**
+         * new Date(document.updateDate).toISOString()
+         */
+        modified: string;
+        /**
+         * new Date(document.createDate).toISOString()
+         */
+        published: string;
+        /**
+         * OpenGraph Image
+         */
+        image: string;
+    };
+    /**
+     * The base path of the request.
+     */
+    basePath: string;
+    /**
+     * The document object.
+     */
+    document?: UttoriWikiDocument;
+    /**
+     * The Express session object.
+     */
+    session?: import("express-session").Session;
+    /**
+     * The flash object.
+     */
+    flash?: (boolean | object | Array<string>);
+    /**
+     * An array of documents that are tagged with the document.
+     */
+    taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    /**
+     * The search term to be used in the search results.
+     */
+    searchTerm?: string;
+    /**
+     * An array of search results.
+     */
+    searchResults?: UttoriWikiDocument[];
+    /**
+     * The slug of the document.
+     */
+    slug?: string;
+    /**
+     * The action to be used in the form.
+     */
+    action?: string;
+    /**
+     * The revision of the document.
+     */
+    revision?: string;
+    /**
+     * An object of history by day.
+     */
+    historyByDay?: Record<string, string[]>;
+};
 export type UttoriWikiDocument = {
     /**
      * The document slug to be used in the URL and as a unique ID.
@@ -45,10 +131,48 @@ export type UttoriWikiDocument = {
      * The layout to use when rendering the document.
      */
     layout?: string;
+    /**
+     * An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+     */
+    attachments?: UttoriWikiDocumentAttachment[];
+};
+export type UttoriWikiDocumentAttachment = {
+    /**
+     * The display name of the attachment.
+     */
+    name: string;
+    /**
+     * The path to the attachment.
+     */
+    path: string;
+    /**
+     * The MIME type of the attachment.
+     */
+    type: string;
+    /**
+     * Whether to skip the attachment. Used to control whether to index the attachment.
+     */
+    skip?: boolean;
 };
 /**
- * @typedef UttoriWikiDocument
- * @type {object}
+ * @typedef {object} UttoriWikiViewModel
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {UttoriWikiDocumentMetaData} meta The metadata object.
+ * @property {string} basePath The base path of the request.
+ * @property {UttoriWikiDocument} [document] The document object.
+ * @property {import('express-session').Session} [session] The Express session object.
+ * @property {(boolean | object | Array<string>)} [flash] The flash object.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] An array of documents that are tagged with the document.
+ * @property {string} [searchTerm] The search term to be used in the search results.
+ * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
+ * @property {string} [slug] The slug of the document.
+ * @property {string} [action] The action to be used in the form.
+ * @property {string} [revision] The revision of the document.
+ * @property {Record<string, string[]>} [historyByDay] An object of history by day.
+ */
+/**
+ * @typedef {object} UttoriWikiDocument
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
  * @property {string} [image] An image to represent the document in Open Graph or elsewhere.
@@ -60,6 +184,15 @@ export type UttoriWikiDocument = {
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
+ * @property {UttoriWikiDocumentAttachment[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
+ */
+/**
+ * @typedef UttoriWikiDocumentAttachment
+ * @type {object}
+ * @property {string} name The display name of the attachment.
+ * @property {string} path The path to the attachment.
+ * @property {string} type The MIME type of the attachment.
+ * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
@@ -184,41 +317,19 @@ declare class UttoriWiki {
      */
     homepageRedirect: import("express").RequestHandler;
     /**
-     * Renders the tag index page with the `tags` template.
-     *
-     * Hooks:
-     * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-     * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
-     */
-    tagIndex: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
-    /**
-     * Renders the tag detail page with `tag` template.
-     * Sets the `X-Robots-Tag` header to `noindex`.
-     * Attempts to pull in the relevant site section for the tag if defined in the config site sections.
-     *
-     * Hooks:
-     * - `filter` - `view-model-tag` - Passes in the viewModel.
-     * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
-     */
-    tag: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
-    /**
      * Renders the search page using the `search` template.
      *
      * Hooks:
      * - `filter` - `render-search-results` - Passes in the search results.
      * - `filter` - `view-model-search` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
+     * @param {import('express').Request<{}, {}, {}, { s: string }>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    search: (request: import("express").Request, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+    search: (request: import("express").Request<{}, {}, {}, {
+        s: string;
+    }>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Renders the edit page using the `edit` template.
      *
@@ -250,11 +361,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.d.ts').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    save: (request: import("express").Request<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+    save: (request: import("express").Request<import("../dist/custom.d.ts").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *
@@ -368,20 +479,5 @@ declare class UttoriWiki {
      * @param {import('express').NextFunction} next The Express Next function.
      */
     saveValid: (request: import("express").Request<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
-    /**
-     * Returns the documents with the provided tag, up to the provided limit.
-     * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
-     *
-     * Hooks:
-     * - `fetch` - `storage-query` - Searched for the tagged documents.
-     * @async
-     * @param {string} tag The tag to look for in documents.
-     * @param {number} [limit] The maximum number of documents to be returned.
-     * @returns {Promise<UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
-     * @example
-     * wiki.getTaggedDocuments('example', 10);
-     * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
-     */
-    getTaggedDocuments: (tag: string, limit?: number) => Promise<UttoriWikiDocument[]>;
 }
 //# sourceMappingURL=wiki.d.ts.map

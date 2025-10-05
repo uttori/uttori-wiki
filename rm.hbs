@@ -4,17 +4,15 @@
 
 # Uttori Wiki
 
-UttoriWiki is a fast, simple, wiki / knowledge base built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing single chunks of functionality be changed or swapped out to fit specific needs.
+UttoriWiki is a fast, simple, blog / wiki / knowledge base / generic website built around Express.js using the [Uttori](https://github.com/uttori) set of components allowing specific chunks of functionality be changed or swapped out to fit specific needs.
 
-Why yet another knowledge management / note taking app? I wanted to have something that functioned as a Wiki or Blog or similar small app that I could reuse components for and keep extensible.
+Why yet another knowledge management / note taking app? I wanted to have something that functioned as a wiki or blog or similar small app that I could reuse components for and keep extensible without having to rewrite everything or learn a new framework.
 
-Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc.
+Because of that, UttoriWiki is plugin based. Search and Storage engines are fully configurable. The format of the data is also up to you: Markdown, Wikitext, Creole, AsciiDoc, Textile, reStructuredText, BBCode, Pendown, etc. Markdown is the default and best supported.
 
 Nothing is prescribed. Don't want to write in Markdown? You don't need to! Don't want to store files on disk? Choose a database storage engine! Already running a bunch of external dependencies and want to plug into those? You can _most likely_ do it!
 
-Rendering happens in a pipeline making it easy to render to Markdown, then filter words out and replace text with emojis.
-
-If you want to test it out, check out [the demo repo](https://github.com/uttori/uttori-wiki-demo-site) to get up and going in a minutes.
+Rendering happens in a pipeline making it easy to render to Markdown, then filter content out and manipulate the content like removing tags or replacing text with emojis.
 
 ## Configuration
 
@@ -378,6 +376,522 @@ The following events are avaliable to hook into through plugins and are used in 
 | `view-model-tag`             | `filter`   | View Model                | Called when rendering a tag detail page just before being shown. |
 
 * * *
+
+## Included Plugins
+
+## Form Handler Plugin
+
+A flexible form handling plugin for Uttori Wiki that allows you to easily define multiple forms through configuration objects and handle submissions with configurable handlers.
+
+### Features
+
+- **Multiple Form Support**: Define multiple forms with different configurations
+- **Flexible Field Types**: Support for text, email, textarea, number, url, and custom validation
+- **Configurable Handlers**: Default console logging, email sending, Google Sheets integration
+- **JSON and Form Data**: Accepts both JSON and form-encoded data
+- **Validation**: Built-in validation with custom regex support
+- **Middleware Support**: Add custom middleware for authentication, rate limiting, etc.
+- **Error Handling**: Comprehensive error handling and validation
+
+### Configuration
+
+Add the plugin to your Uttori Wiki configuration:
+
+```javascript
+import FormHandler from './src/plugins/form-handler.js';
+import EmailHandler from './src/plugins/form-handlers/email-handler.js';
+import GoogleDocsHandler from './src/plugins/form-handlers/google-docs-handler.js';
+
+const config = {
+  // ... other config
+  plugins: [
+    FormHandler,
+    // ... other plugins
+  ],
+  [FormHandler.configKe]: {
+    baseRoute: '/forms', // Optional: base route for all forms
+    forms: [
+      {
+        name: 'contact',
+        route: '/contact',
+        fields: [
+          {
+            name: 'name',
+            type: 'text',
+            required: true,
+            label: 'Full Name',
+            placeholder: 'Enter your full name'
+          },
+          {
+            name: 'email',
+            type: 'email',
+            required: true,
+            label: 'Email Address',
+            placeholder: 'Enter your email address'
+          },
+          {
+            name: 'message',
+            type: 'textarea',
+            required: true,
+            label: 'Message',
+            placeholder: 'Enter your message'
+          }
+        ],
+        handler: EmailHandler.create({
+          host: 'smtp.gmail.com',
+          port: 587,
+          secure: false,
+          user: 'your-email@gmail.com',
+          pass: 'your-app-password',
+          from: 'your-email@gmail.com',
+          to: 'contact@yoursite.com',
+          subject: 'Contact Form Submission from {name}',
+          template: `
+            <h2>New Contact Form Submission</h2>
+            <p><strong>Name:</strong> {name}</p>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Message:</strong></p>
+            <p>{message}</p>
+            <hr>
+            <p><em>Submitted at: {timestamp}</em></p>
+          `
+        }),
+        successMessage: 'Thank you for your message! We will get back to you soon.',
+        errorMessage: 'There was an error submitting your message. Please try again.'
+      }
+    ]
+  }
+};
+```
+
+### Form Configuration
+
+#### Form Object Properties
+
+- **name** (string, required): Unique identifier for the form
+- **route** (string, required): URL route for form submission (relative to baseRoute)
+- **fields** (array, required): Array of field configurations
+- **handler** (function, optional): Custom handler function for form processing
+- **successMessage** (string, required): Success message to return
+- **errorMessage** (string, required): Error message to return
+- **middleware** (array, optional): Custom Express middleware for the form route
+
+#### Field Object Properties
+
+- **name** (string, required): Field name (used as form data key)
+- **type** (string, required): Field type (text, email, textarea, number, url)
+- **required** (boolean, optional): Whether the field is required
+- **label** (string, optional): Display label for the field
+- **placeholder** (string, optional): Placeholder text for the field
+- **validation** (function, optional): Custom validation function
+- **errorMessage** (string, optional): Custom error message for validation
+
+### Built-in Handlers
+
+#### Default Handler (Console Logging)
+
+If no custom handler is provided, the form data will be logged to the console:
+
+```javascript
+{
+  name: 'feedback',
+  route: '/feedback',
+  fields: [
+    { name: 'rating', type: 'number', required: true },
+    { name: 'comment', type: 'textarea', required: false }
+  ]
+  // No handler - uses default console.log
+}
+```
+
+#### Email Handler
+
+Send form submissions via email using `nodemailer`:
+
+```javascript
+import EmailHandler from './src/plugins/form-handlers/email-handler.js';
+
+// In your form configuration
+handler: EmailHandler.create({
+  transportOptions: { ... },
+  from: 'your-email@gmail.com',
+  to: 'contact@yoursite.com',
+  subject: 'Contact Form Submission from {name}',
+  template: `
+    <h2>New Contact Form Submission</h2>
+    <p><strong>Name:</strong> {name}</p>
+    <p><strong>Email:</strong> {email}</p>
+    <p><strong>Message:</strong></p>
+    <p>{message}</p>
+  `
+})
+```
+
+##### Email Handler Configuration
+
+- **transportOptions.host** (string, required): SMTP host
+- **transportOptions.port** (number, required): SMTP port
+- **transportOptions.secure** (boolean, optional): Whether to use SSL/TLS
+- **transportOptions.auth.user** (string, required): SMTP username
+- **transportOptions.auth.pass** (string, required): SMTP password
+- **from** (string, required): Email address to send from
+- **to** (string, required): Email address to send to
+- **subject** (string, required): Email subject template
+- **template** (string, optional): Email body HTML template
+
+##### Email Template Variables
+
+- `{formName}`: The form name
+- `{timestamp}`: Current timestamp
+- `{fieldName}`: Any form field value (replace `fieldName` with actual field name)
+
+#### Google Sheets Handler
+
+Write form submissions to Google Sheets:
+
+```javascript
+import GoogleDocsHandler from './src/plugins/form-handlers/google-docs-handler.js';
+
+// In your form configuration
+handler: GoogleDocsHandler.create({
+  credentialsPath: './google-credentials.json',
+  spreadsheetId: 'your-spreadsheet-id',
+  sheetName: 'Form Submissions',
+  headers: ['name', 'email', 'message'],
+  appendTimestamp: true
+})
+```
+
+##### Google Sheets Handler Configuration
+
+- **credentialsPath** (string, required): Path to Google service account credentials JSON file
+- **spreadsheetId** (string, required): Google Sheets spreadsheet ID
+- **sheetName** (string, required): Name of the sheet to write to
+- **headers** (array, optional): Custom headers for the spreadsheet
+- **appendTimestamp** (boolean, optional): Whether to append timestamp to each row
+
+##### Setting up Google Sheets
+
+1. Create a Google Cloud Project and enable the Google Sheets API
+2. Create a service account and download the credentials JSON file
+3. Share your Google Sheet with the service account email
+4. Use `GoogleDocsHandler.setupHeaders(config)` to initialize the sheet headers
+
+### Custom Handlers
+
+You can create custom handlers by providing a function that accepts form data, form config, request, and response:
+
+```javascript
+{
+  name: 'custom-form',
+  route: '/custom',
+  fields: [
+    { name: 'data', type: 'text', required: true }
+  ],
+  handler: async (formData, formConfig, req, res) => {
+    // Custom processing logic
+    console.log('Custom handler processing:', formData);
+
+    // Save to database, send to API, etc.
+    await saveToDatabase(formData);
+
+    return {
+      message: 'Data processed successfully',
+      id: 'some-id'
+    };
+  }
+}
+```
+
+### API Endpoints
+
+Forms are accessible at: `{baseRoute}{formRoute}`
+
+For example, with `baseRoute: '/forms'` and form `route: '/contact'`:
+- POST `/forms/contact`
+
+### Request/Response Format
+
+#### Request
+
+Accepts both JSON and form-encoded data:
+
+```javascript
+// JSON
+fetch('/forms/contact', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'John Doe',
+    email: 'john@example.com',
+    message: 'Hello world!'
+  })
+});
+
+// Form data
+const formData = new FormData();
+formData.append('name', 'John Doe');
+formData.append('email', 'john@example.com');
+formData.append('message', 'Hello world!');
+
+fetch('/forms/contact', {
+  method: 'POST',
+  body: formData
+});
+```
+
+#### Response
+
+```javascript
+// Success
+{
+  "success": true,
+  "message": "Thank you for your message! We will get back to you soon.",
+  "data": {
+    "messageId": "email-message-id",
+    "message": "Email sent successfully"
+  }
+}
+
+// Error
+{
+  "success": false,
+  "message": "There was an error submitting your message. Please try again.",
+  "errors": [
+    "Field \"email\" must be a valid email address"
+  ]
+}
+```
+
+### Validation
+
+The plugin provides built-in validation for:
+
+- **Required fields**: Checks if required fields are present and not empty
+- **Email format**: Validates email addresses using regex
+- **Number format**: Validates numeric values
+- **URL format**: Validates URLs
+- **Custom regex**: Supports custom validation patterns
+
+### Middleware Support
+
+Add custom middleware for authentication, rate limiting, etc.:
+
+```javascript
+{
+  name: 'admin-form',
+  route: '/admin/feedback',
+  fields: [
+    { name: 'feedback', type: 'textarea', required: true }
+  ],
+  middleware: [
+    // Authentication middleware
+    (req, res, next) => {
+      if (!req.session || !req.session.user) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      next();
+    },
+    // Rate limiting middleware
+    rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 5 // limit each IP to 5 requests per windowMs
+    })
+  ],
+  handler: customHandler
+}
+```
+
+### Error Handling
+
+The plugin handles various error scenarios:
+
+- **Validation errors**: Returns 400 with validation details
+- **Handler errors**: Returns 500 with error message
+- **Configuration errors**: Throws during plugin registration
+- **Missing fields**: Validates required fields
+- **Invalid data types**: Validates field types and formats
+
+### Dependencies
+
+- **nodemailer**: For email handler (install with `npm install nodemailer`)
+- **googleapis**: For Google Sheets handler (install with `npm install googleapis`)
+
+### Security Considerations
+
+- Validate all input data
+- Use HTTPS in production
+- Implement rate limiting for public forms
+- Sanitize email templates to prevent injection
+- Secure Google credentials file
+- Use environment variables for sensitive configuration
+
+---
+
+## Tag Routes Plugin
+
+This plugin provides tag index and individual tag pages.
+
+### Installation
+
+Add the plugin to your wiki configuration:
+
+```javascript
+import TagRoutesPlugin from './plugins/tag-routes.js';
+
+const config = {
+  plugins: [
+    TagRoutesPlugin,
+    // ... other plugins
+  ],
+  'uttori-plugin-tag-routes': {
+    // plugin configuration
+  }
+};
+```
+
+### Configuration
+
+The plugin accepts the following configuration options:
+
+```javascript
+{
+  'uttori-plugin-tag-routes': {
+    route: 'tags',                    // Route path for tag pages (default: 'tags')
+    title: 'Tags',                    // Default title for tag pages (default: 'Tags')
+    ignoreTags: [],                   // Tags to ignore when generating the tags page (default: [])
+    limit: 1024,                      // Max documents per tag (default: 1024)
+    titles: {},                       // Custom titles for specific tags (default: {})
+    tagIndexRoute: undefined,         // Custom tag index route handler (default: undefined)
+    tagRoute: undefined,              // Custom tag detail route handler (default: undefined)
+    routeMiddleware: {                // Middleware for tag routes
+      tagIndex: [],
+      tag: []
+    }
+  }
+}
+```
+
+### Required Hooks
+
+The plugin uses the following hooks to maintain existing functionality:
+
+#### Core Hooks Used
+
+1. **`bind-routes`** (dispatch)
+   - **Purpose**: Registers tag routes with the Express server
+   - **Usage**: Plugin listens to this hook to add its routes
+   - **Implementation**: `context.hooks.on('bind-routes', TagRoutesPlugin.bindRoutes(plugin))`
+
+2. **`storage-query`** (fetch)
+   - **Purpose**: Queries the storage system for documents
+   - **Usage**: Used in `getTaggedDocuments()` to find documents with specific tags
+   - **Implementation**: `await this.context.hooks.fetch('storage-query', query, this.context)`
+
+3. **`view-model-tag-index`** (filter)
+   - **Purpose**: Allows modification of the tag index view model
+   - **Usage**: Applied to the view model before rendering the tag index page
+   - **Implementation**: `await this.context.hooks.filter('view-model-tag-index', viewModel, this.context)`
+
+4. **`view-model-tag`** (filter)
+   - **Purpose**: Allows modification of the individual tag view model
+   - **Usage**: Applied to the view model before rendering individual tag pages
+   - **Implementation**: `await this.context.hooks.filter('view-model-tag', viewModel, this.context)`
+
+#### Context Methods Used
+
+The plugin relies on the following methods from the wiki context:
+
+1. **`buildMetadata(document, path, robots)`**
+   - **Purpose**: Builds metadata for view models
+   - **Usage**: Creates metadata for tag index and tag detail pages
+
+2. **`config.ignoreSlugs`**
+   - **Purpose**: List of slugs to exclude from tag queries
+   - **Usage**: Used in storage queries to filter out ignored documents
+
+### Routes Provided
+
+The plugin registers the following routes:
+
+1. **`GET /{route}`** (default: `GET /tags`)
+   - **Handler**: `tagIndex`
+   - **Purpose**: Displays the tag index page with all available tags
+   - **Template**: `tags`
+
+2. **`GET /{route}/:tag`** (default: `GET /tags/:tag`)
+   - **Handler**: `tag`
+   - **Purpose**: Displays all documents with a specific tag
+   - **Template**: `tag`
+
+### Templates Required
+
+The plugin expects the following templates to exist in your theme:
+
+1. **`tags`** - Tag index page template
+   - **Variables**: `title`, `config`, `session`, `taggedDocuments`, `meta`, `basePath`, `flash`
+
+2. **`tag`** - Individual tag page template
+   - **Variables**: `title`, `config`, `session`, `taggedDocuments`, `meta`, `basePath`, `flash`
+
+### Migration from Core
+
+When migrating from the core tag functionality:
+
+1. **Remove from config.js**:
+   - `ignoreTags` property
+   - `routes.tags` property
+   - `titles.tags` property
+   - `tagIndexRoute` and `tagRoute` properties
+   - `routeMiddleware.tagIndex` and `routeMiddleware.tag` properties
+
+2. **Remove from wiki.js**:
+   - `tagIndex` method
+   - `tag` method
+   - `getTaggedDocuments` method
+   - Tag route binding in `bindRoutes`
+
+3. **Add plugin to configuration**:
+   - Import `TagRoutesPlugin`
+   - Add to `plugins` array
+   - Configure with `'uttori-plugin-tag-routes'` key
+
+### Backward Compatibility
+
+The plugin maintains full backward compatibility with existing functionality:
+
+- All existing hooks continue to work
+- Template variables remain the same
+- Route structure is preserved (configurable)
+- Custom route handlers are supported
+- Middleware support is maintained
+
+### Example Usage
+
+```javascript
+import UttoriWiki from './src/wiki.js';
+import TagRoutesPlugin from './src/plugins/tag-routes.js';
+
+const config = {
+  plugins: [TagRoutesPlugin],
+  'uttori-plugin-tag-routes': {
+    route: 'categories',              // Use 'categories' instead of 'tags'
+    title: 'Categories',              // Custom title
+    ignoreTags: ['private', 'draft'], // Ignore these tags
+    limit: 50,                        // Limit to 50 documents per tag
+    titles: {                         // Custom titles for specific tags
+      'javascript': 'JavaScript',
+      'nodejs': 'Node.js'
+    }
+  }
+};
+
+const wiki = new UttoriWiki(config, server);
+```
+
+This will create routes at `/categories` and `/categories/:tag` with the specified configuration.
+
+---
 
 ## API Reference
 

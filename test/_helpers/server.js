@@ -1,13 +1,18 @@
 import express from 'express';
+import session from 'express-session';
+import createMemoryStore from 'memorystore';
 import ejs from 'ejs';
 import layouts from 'express-ejs-layouts';
-import path from 'path';
+import path from 'node:path';
 import cors from 'cors';
 
-import { Plugin as StorageProviderJSON } from '@uttori/storage-provider-json-memory';
-import { Plugin as SearchProviderLunr } from '@uttori/search-provider-lunr';
+const MemoryStore = createMemoryStore(session);
+
+import StorageProviderJSON from '../../src/plugins/storage-provider-json-memory.js';
+import SearchProviderLunr from '../../src/plugins/search-provider-lunr.js';
 import defaultConfig from '../../src/config.js';
 import { middleware as flash } from '../../src/wiki-flash.js';
+import TagRoutesPlugin from '../../src/plugins/tag-routes.js';
 
 /** @type {import('../../src/config.js').UttoriWikiConfig} */
 export const config = {
@@ -25,6 +30,7 @@ export const config = {
   plugins: [
     StorageProviderJSON,
     SearchProviderLunr,
+    TagRoutesPlugin,
   ],
   middleware: [
     ['disable', 'x-powered-by'],
@@ -41,6 +47,17 @@ export const config = {
       route: '/2009/:slug',
     },
   ],
+  [TagRoutesPlugin.configKey]: {
+    tagIndexRoute: 'tags',
+    tagRoute: 'tags',
+    apiRoute: 'tag-api',
+    title: 'Tags',
+    limit: 1024,
+    events: {
+      bindRoutes: ['bind-routes'],
+      validateConfig: ['validate-config'],
+    },
+  },
 };
 
 export const serverSetup = () => {
@@ -49,13 +66,28 @@ export const serverSetup = () => {
   server.set('port', process.env.PORT || 8123);
   server.set('ip', process.env.IP || '127.0.0.1');
 
+  // Setup sessions.
+  server.use(session({
+    secret: 'auth-simple',
+    name: 'session',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      maxAge: 60000,
+      sameSite: true,
+      secure: true,
+    },
+    store: new MemoryStore({
+      checkPeriod: 3600000, // prune expired entries every hour
+    }),
+  }));
+
   server.set('views', path.join(config.themePath, 'templates'));
   server.use(layouts);
   server.set('layout extractScripts', true);
   server.set('layout extractStyles', true);
   server.set('view engine', 'html');
   // server.enable('view cache');
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   server.engine('html', ejs.renderFile);
 
   // Setup Express
@@ -71,6 +103,7 @@ export const serverSetup = () => {
   // Setup wikiFlash
   server.use(flash);
 
+  // process.title (for stopping after)
   if (process.argv[2] && process.argv[2] !== 'undefined') {
     console.log('Setting process.title:', typeof process.argv[2], process.argv[2]);
     process.title = process.argv[2];
@@ -87,7 +120,7 @@ export const serverSetup = () => {
   if (import.meta.url === (`file:///${process.argv[1].replace(/\\/g, '/')}`).replace(/\/{3,}/, '///')) {
     // No, this is a CLI tool.
     console.log('Starting test server...');
-    server.listen(server.get('port'), server.get('ip'));
+    server.listen(Number(server.get('port')), String(server.get('ip')));
   }
 
   return server;

@@ -1,6 +1,6 @@
 // const invalid = await this.hooks.validate('validate-save', request, this);
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import * as url from 'url';
 
 /** @type {string} The directory name of the current file. */
@@ -82,7 +82,7 @@ class FilterIPAddress {
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context A Uttori-like context.
    * @example <caption>FilterIPAddress.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -103,7 +103,7 @@ class FilterIPAddress {
   static register(context) {
     debug('Registering...');
     if (!context || !context.hooks || typeof context.hooks.on !== 'function') {
-      throw new Error("Missing event dispatcher in 'context.hooks.on(event, callback)' format.");
+      throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
 
     const config = { ...FilterIPAddress.defaultConfig(), ...context.config[FilterIPAddress.configKey] };
@@ -178,7 +178,7 @@ class FilterIPAddress {
   /**
    * Validates the request IP against the blocklist and logs the activity.
    * @param {import('express').Request} request The Express request object.
-   * @param {import('../../dist/custom.js').UttoriContext} context Unused context object.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context Unused context object.
    * @returns {boolean} Returns `true` if the IP is blocklisted (invalid), `false` otherwise.
    * @static
    */

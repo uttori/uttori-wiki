@@ -53,7 +53,7 @@ declare class FilterIPAddress {
     static validateConfig(config: Record<string, FilterIPAddressConfig>, _context: object): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {import('../../dist/custom.js').UttoriContext} context A Uttori-like context.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context A Uttori-like context.
      * @example <caption>FilterIPAddress.register(context)</caption>
      * const context = {
      *   hooks: {
@@ -71,7 +71,7 @@ declare class FilterIPAddress {
      * FilterIPAddress.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.js").UttoriContext): void;
+    static register(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-ip-address", FilterIPAddressConfig>): void;
     /**
      * Gets the real IP address from the request, considering proxy headers if configured.
      * @param {FilterIPAddressConfig} config The configuration object.
@@ -91,10 +91,10 @@ declare class FilterIPAddress {
     /**
      * Validates the request IP against the blocklist and logs the activity.
      * @param {import('express').Request} request The Express request object.
-     * @param {import('../../dist/custom.js').UttoriContext} context Unused context object.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context Unused context object.
      * @returns {boolean} Returns `true` if the IP is blocklisted (invalid), `false` otherwise.
      * @static
      */
-    static validateIP(request: import("express").Request, context: import("../../dist/custom.js").UttoriContext): boolean;
+    static validateIP(request: import("express").Request, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-ip-address", FilterIPAddressConfig>): boolean;
 }
 //# sourceMappingURL=filter-ip-address.d.ts.map

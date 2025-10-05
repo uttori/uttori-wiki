@@ -11,6 +11,8 @@
 <dl>
 <dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#UttoriWikiDocumentAttachment">UttoriWikiDocumentAttachment</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#UttoriWikiDocumentMetaData">UttoriWikiDocumentMetaData</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -151,7 +153,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
+| request | <code>module:express~Request.&lt;{}, {}, {}, {s: string}&gt;</code> | The Express Request object. |
 | response | <code>module:express~Response</code> | The Express Response object. |
 | next | <code>module:express~NextFunction</code> | The Express Next function. |
 
@@ -474,6 +476,19 @@ Hooks:
 | tags | <code>string</code> \| <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
 | [layout] | <code>string</code> | The layout to use when rendering the document. |
+| [attachments] | [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment) | An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc. |
+
+<a name="UttoriWikiDocumentAttachment"></a>
+
+## UttoriWikiDocumentAttachment : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The display name of the attachment. |
+| path | <code>string</code> | The path to the attachment. |
+| type | <code>string</code> | The MIME type of the attachment. |
 
 <a name="UttoriWikiDocumentMetaData"></a>
 

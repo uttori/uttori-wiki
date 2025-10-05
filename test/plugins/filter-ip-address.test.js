@@ -3,9 +3,19 @@ import sinon from 'sinon';
 import fs from 'fs';
 import * as url from 'url';
 import FilterIPAddress from '../../src/plugins/filter-ip-address.js';
-import path from 'path';
+import path from 'node:path';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
+
+
+let sandbox;
+test.beforeEach(() => {
+  sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
 
 test('configKey: should return the correct configuration key', (t) => {
   t.is(FilterIPAddress.configKey, 'uttori-plugin-filter-ip-address');
@@ -75,17 +85,17 @@ test('validateConfig: should throw an error if trustProxy is not a boolean', (t)
 });
 
 test('register: should throw error if context is missing', (t) => {
-  t.throws(() => FilterIPAddress.register(), { message: "Missing event dispatcher in 'context.hooks.on(event, callback)' format." });
+  t.throws(() => FilterIPAddress.register(), { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
 test('register: should throw error if hooks are missing', (t) => {
-  t.throws(() => FilterIPAddress.register({}), { message: "Missing event dispatcher in 'context.hooks.on(event, callback)' format." });
+  t.throws(() => FilterIPAddress.register({}), { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
 test('register: should throw error if events are missing', (t) => {
   const context = {
     hooks: {
-      on: sinon.spy(),
+      on: sandbox.spy(),
     },
     config: {
       [FilterIPAddress.configKey]: {
@@ -99,7 +109,7 @@ test('register: should throw error if events are missing', (t) => {
 test('register: should register events', (t) => {
   const context = {
     hooks: {
-      on: sinon.spy(),
+      on: sandbox.spy(),
     },
     config: {
       [FilterIPAddress.configKey]: {
@@ -147,9 +157,9 @@ test('getClientIP: should return x-forwarded-for IP when trustProxy is true', (t
 
 test('logIPActivity: should create log directory if it does not exist', (t) => {
   const config = { logPath: './test-logs' };
-  const existsSyncStub = sinon.stub(fs, 'existsSync').returns(false);
-  const mkdirSyncStub = sinon.stub(fs, 'mkdirSync');
-  const appendFileSyncStub = sinon.stub(fs, 'appendFileSync');
+  const existsSyncStub = sandbox.stub(fs, 'existsSync').returns(false);
+  const mkdirSyncStub = sandbox.stub(fs, 'mkdirSync');
+  const appendFileSyncStub = sandbox.stub(fs, 'appendFileSync');
 
   FilterIPAddress.logIPActivity(config, '192.168.1.5', { originalUrl: '/test', body: { title: 'Test' } });
 
@@ -164,8 +174,8 @@ test('logIPActivity: should create log directory if it does not exist', (t) => {
 
 test('logIPActivity: should append to log file', (t) => {
   const config = { logPath: './test-logs' };
-  const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
-  const appendFileSyncStub = sinon.stub(fs, 'appendFileSync');
+  const existsSyncStub = sandbox.stub(fs, 'existsSync').returns(true);
+  const appendFileSyncStub = sandbox.stub(fs, 'appendFileSync');
 
   FilterIPAddress.logIPActivity(config, '192.168.1.6', { originalUrl: '/test', body: { title: 'Test' } });
 
@@ -178,8 +188,8 @@ test('logIPActivity: should append to log file', (t) => {
 
 test('logIPActivity: should handle fallbacks', (t) => {
   const config = { logPath: './test-logs' };
-  const existsSyncStub = sinon.stub(fs, 'existsSync').returns(true);
-  const appendFileSyncStub = sinon.stub(fs, 'appendFileSync');
+  const existsSyncStub = sandbox.stub(fs, 'existsSync').returns(true);
+  const appendFileSyncStub = sandbox.stub(fs, 'appendFileSync');
 
   FilterIPAddress.logIPActivity(config, '192.168.1.6', { });
 
@@ -201,8 +211,8 @@ test('validateIP: should return false for non-blocklisted IPs', (t) => {
   };
 
   const request = { ip: '192.168.1.7' };
-  const logIPActivityStub = sinon.stub(FilterIPAddress, 'logIPActivity');
-  const getClientIPStub = sinon.stub(FilterIPAddress, 'getClientIP').returns('192.168.1.7');
+  const logIPActivityStub = sandbox.stub(FilterIPAddress, 'logIPActivity');
+  const getClientIPStub = sandbox.stub(FilterIPAddress, 'getClientIP').returns('192.168.1.7');
 
   const result = FilterIPAddress.validateIP(request, context);
 
@@ -225,8 +235,8 @@ test('validateIP: should return true for blocklisted IPs', (t) => {
   };
 
   const request = { ip: '192.168.1.8' };
-  const logIPActivityStub = sinon.stub(FilterIPAddress, 'logIPActivity');
-  const getClientIPStub = sinon.stub(FilterIPAddress, 'getClientIP').returns('192.168.1.8');
+  const logIPActivityStub = sandbox.stub(FilterIPAddress, 'logIPActivity');
+  const getClientIPStub = sandbox.stub(FilterIPAddress, 'getClientIP').returns('192.168.1.8');
 
   const result = FilterIPAddress.validateIP(request, context);
 

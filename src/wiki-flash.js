@@ -11,6 +11,7 @@ const debug = () => {}; // try { debug = require('debug')('Uttori.Wiki.WikiFlash
  * @returns {Record<string, string[]>|Array|boolean} Returns the current flash data, or the data for the given key, or false if no data is found.
  */
 export function wikiFlash(key, value) {
+  /* c8 ignore next 4 */
   if (!this.session) {
     debug('Express Session is required.');
     return {};
@@ -47,11 +48,11 @@ export function wikiFlash(key, value) {
  * @param {import('express').NextFunction} next The Express Next function.
  */
 export function middleware(request, _response, next) {
-  /* istanbul ignore else */
   if (!request.wikiFlash) {
     request.wikiFlash = wikiFlash;
   }
   next();
+  return;
 }
 
 export default {

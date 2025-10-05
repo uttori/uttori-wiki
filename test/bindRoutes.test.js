@@ -12,7 +12,7 @@ test('bindRoutes(server): should redirect correctly', async (t) => {
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
   const express_response = await request(server).get('/2008/demo-title?redirect=true');
-  t.is(express_response.status, 301);
+  t.is(express_response.status, 302);
 });
 
 test('should handle home route', async (t) => {

@@ -8,6 +8,15 @@ import { config, serverSetup, seed } from './_helpers/server.js';
 
 const response = { set: () => {}, redirect: () => {}, render: () => {} };
 
+let sandbox;
+test.beforeEach(() => {
+  sandbox = sinon.createSandbox();
+});
+
+test.afterEach(() => {
+  sandbox.restore();
+});
+
 test('deletes the document and redirects to config.publicUrl', async (t) => {
   t.plan(2);
 
@@ -21,7 +30,7 @@ test('deletes the document and redirects to config.publicUrl', async (t) => {
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await seed(uttori);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {}, body: testDelete, wikiFlash }, response, () => {});
   const express_response = await request(server).get('/test-delete/delete/test-key');
   t.is(express_response.status, 302);
@@ -42,7 +51,7 @@ test('deletes the document and redirects to root if there is no config.publicUrl
   const uttori = new UttoriWiki(config, server);
   uttori.config.publicUrl = undefined;
   await seed(uttori);
-  const wikiFlash = sinon.spy();
+  const wikiFlash = sandbox.spy();
   await uttori.saveValid({ params: {}, body: testDelete, wikiFlash }, response, () => {});
   const express_response = await request(server).get('/test-delete/delete/test-key');
   t.is(express_response.status, 302);
@@ -73,7 +82,7 @@ test('can have middleware set and used', async (t) => {
 test('can be replaced', async (t) => {
   t.plan(1);
 
-  const spy = sinon.spy();
+  const spy = sandbox.spy();
   const deleteRoute = (_request, _response, next) => {
     spy();
     next();
@@ -87,7 +96,9 @@ test('can be replaced', async (t) => {
 test('falls through to next when slug is missing', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  /** @type {import('express').NextFunction} */
+  const next = sandbox.spy();
+  const response = { set: () => {}, render: () => {}, redirect: () => {} };
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.delete({ params: { key: 'test-key' } }, response, next);
@@ -97,7 +108,8 @@ test('falls through to next when slug is missing', async (t) => {
 test('falls through to next when document is not found', async (t) => {
   t.plan(1);
 
-  const next = sinon.spy();
+  /** @type {import('express').NextFunction} */
+  const next = sandbox.spy();
   const server = serverSetup();
   const uttori = new UttoriWiki(config, server);
   await uttori.delete({ params: { slug: 'missing', key: 'test-key' } }, response, next);

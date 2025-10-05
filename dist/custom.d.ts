@@ -1,5 +1,7 @@
 import { Express } from 'express-serve-static-core';
 import { EventDispatcher } from '@uttori/event-dispatcher';
+import { UttoriWikiConfig } from './config.js';
+import { UttoriWikiDocument, UttoriWikiDocumentMetaData } from './wiki.js';
 
 // https://plusreturn.com/blog/how-to-extend-express-request-interface-in-typescript/
 /** Add wikiFlash to the Request type. */
@@ -22,18 +24,41 @@ declare namespace Express {
   }
 }
 
-export type UttoriPluginConfig =
-  import('../src/plugins/add-query-output.js').AddQueryOutputToViewModelConfig |
-  import('../src/plugins/add-ejs-includes.js').EJSRendererConfig |
-  import('../src/plugins/add-download-route.js').DownloadRouterConfig
+/**
+ * Uttori plugin configuration type.
+ */
+export type UttoriPluginConfig = Record<string, any>;
+
+/**
+ * Known plugin configuration keys mapped to their specific config types.
+ */
+export type KnownPluginConfigs = {
+  'uttori-plugin-add-query-output-to-view-model': import('./plugins/query-output.js').AddQueryOutputToViewModelConfig;
+  'uttori-plugin-analytics-json-file': import('./plugins/analytics-json-file.js').AnalyticsPluginConfig;
+  'uttori-plugin-auth-simple': import('./plugins/auth-simple.js').AuthSimpleConfig;
+  'uttori-plugin-download-router': import('./plugins/download-route.js').DownloadRouterConfig;
+  'uttori-plugin-filter-ip-address': import('./plugins/filter-ip-address.js').FilterIPAddressConfig;
+  'uttori-plugin-form-handler': import('./plugins/form-handler.js').FormHandlerConfig;
+  'uttori-plugin-generator-sitemap': import('./plugins/sitemap-generator.js').SitemapGeneratorConfig;
+  'uttori-plugin-import-document': import('./plugins/import-document.js').ImportDocumentConfig;
+  'uttori-plugin-renderer-ejs': import('./plugins/ejs-includes.js').EJSRendererConfig;
+  'uttori-plugin-renderer-markdown-it': import('./plugins/renderer-markdown-it.js').MarkdownItRendererConfig;
+  'uttori-plugin-renderer-replacer': import('./plugins/renderer-replacer.js').ReplacerRendererConfig;
+  'uttori-plugin-search-provider-lunr': import('./plugins/search-provider-lunr.js').SearchProviderLunrConfig;
+  'uttori-plugin-storage-provider-json-file': import('./plugins/storage-provider-json-file.js').StorageProviderJsonFileConfig;
+  'uttori-plugin-storage-provider-json-memory': import('./plugins/storage-provider-json-memory.js').StorageProviderJsonMemoryConfig;
+  'uttori-plugin-tag-routes': import('./plugins/tag-routes.js').TagRoutesPluginConfig;
+  'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
+}
 
 export type UttoriContext = {
-  config: Record<string, UttoriPluginConfig>;
+  config: UttoriWikiConfig & KnownPluginConfigs & Record<string, UttoriPluginConfig>;
   hooks: EventDispatcher;
+  buildMetadata: (document: Partial<UttoriWikiDocument>, path?: string, robots?: string) => Promise<UttoriWikiDocumentMetaData>;
 }
 
 /**
- * Extend a specific key with an extra config type.
+ * Extend a Uttori Context with a specific plugin config type.
  * @example <caption>UttoriContextWithPluginConfig</caption>
  * const context: UttoriContextWithPluginConfig<'my-plugin', MyPluginConfig> = {
  *   config: {
@@ -43,23 +68,14 @@ export type UttoriContext = {
  */
 export type UttoriContextWithPluginConfig<K extends string, CustomPluginConfig> =
   Omit<UttoriContext, 'config'> & {
-    config: UttoriContext['config'] & Record<K, UttoriPluginConfig | CustomPluginConfig>;
+    config: UttoriWikiConfig & KnownPluginConfigs & Record<string, UttoriPluginConfig> & Record<K, CustomPluginConfig>;
   };
 
 export type UttoriMiddleware = (string | Function | boolean)[]
 
-export type AddQueryOutputToViewModelFormatFunction = (documents:any[]) => any[]
-export type AddQueryOutputToViewModelQueryFunction = (target:any, context:UttoriContext) => Promise<any[][]>
-export type AddQueryOutputToViewModelCallback = (target:any, context:UttoriContext) => Promise<any>
-
-export interface ParsedPathKey {
-  /** The name of the segment variable. */
-  name: string;
-  /** When true, they segment is optional. */
-  optional: boolean;
-  /** The default value, if set. */
-  def?: string;
-}
+export type AddQueryOutputToViewModelFormatFunction = (documents: UttoriWikiDocument[]) => any[]
+export type AddQueryOutputToViewModelQueryFunction = (target: any, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>) => Promise<any[][]>
+export type AddQueryOutputToViewModelCallback = (target: any, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>) => Promise<any>
 
 export interface UttoriRedirect {
   /** The route to redirect from. */
@@ -76,7 +92,7 @@ export interface SaveParams {
   /** Optional edit key/ */
   key?: string
   /** The slug to save to. */
-  slug: string
+  slug?: string
 }
 
 export interface UttoriWikiPlugin {
@@ -85,19 +101,22 @@ export interface UttoriWikiPlugin {
   /** The default config for the plugin. */
   static defaultConfig: Record<string, any>
   /** Validates the config. */
-  static validateConfig?: (config: Record<string, object>) => boolean
+  static validateConfig?: (config: Record<string, object>, _context: UttoriContext) => void
   /** Sets up any hooks the plugin needs. */
   static register: (context: UttoriWiki) => void
   /** If the plugin has routes to bind, this function will be called with the Express app and the context. */
   static bindRoutes?: (app: Express, context: UttoriContext) => void
 }
 
-export * from './config'
-export * from './index'
-export * from './middleware'
-export * from './redirect'
-export * from './wiki-flash'
-export * from './wiki'
-export * from './plugins/add-download-route'
-export * from './plugins/add-ejs-includes'
-export * from './plugins/add-query-output'
+export type Operator = '=' | '!=' | '<=' | '<' | '>=' | '>' | 'LIKE' | 'IN' | 'NOT_IN' | 'INCLUDES' | 'EXCLUDES' | 'IS_NULL' | 'IS_NOT_NULL' | 'BETWEEN' | 'AND' | 'OR';
+export type Value = string | number | Array<string | number | SqlWhereParserAst> | [string | number, string | number];
+
+export type SqlWhereParserAst = {
+  [key in Exclude<Operator, 'AND' | 'OR'>]?: Value;
+} & {
+  AND?: SqlWhereParserAst[];
+  OR?: SqlWhereParserAst[];
+};
+export type ParserOperand = boolean | string | number | symbol | SqlWhereParserAst | Array<boolean | string | number | symbol | SqlWhereParserAst>;
+
+export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<string>) => Array<SqlWhereParserAst> | SqlWhereParserAst;
