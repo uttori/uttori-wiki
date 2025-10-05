@@ -454,7 +454,6 @@ test.serial('TagRoutesPlugin: E2E integration test', async (t) => {
 
   // Test getTaggedDocuments
   hooks.on('storage-query', async (query, _ctx) => {
-    console.log('🪓',query);
     if (query.includes('tags INCLUDES "cool"')) {
       return [
         { slug: 'doc1', title: 'Document 1', tags: ['cool'] },

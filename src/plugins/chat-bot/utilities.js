@@ -280,7 +280,15 @@ export function consolidateHeaders(items) {
   return items.map((item) => {
     if (item.headers && item.headers.length > 0) {
       item.headers = item.headers.map((header) => {
-        header[0] = typeof header[0] === 'string' ? header[0] : header[0].content;
+        if (typeof header[0] === 'string') {
+          return header[0];
+        }
+        if (typeof header[0] === 'number') {
+          return header[0];
+        }
+        if (typeof header[0] === 'object' && header[0].content) {
+          return header[0].content;
+        }
         return header[0];
       });
     }

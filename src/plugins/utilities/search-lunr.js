@@ -74,6 +74,7 @@ class SearchProvider {
     }
     debug('buildIndex');
     const { lunr_locales, ignoreSlugs } = this.config;
+    /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
     let documents = [];
     const not_in = `"${ignoreSlugs.join('", "')}"`;
     const query = `SELECT 'slug', 'title', 'tags', 'content' FROM documents WHERE slug NOT_IN (${not_in}) ORDER BY title ASC LIMIT 10000`;
@@ -110,7 +111,7 @@ class SearchProvider {
    * Searches for documents matching the provided query with Lunr.
    * @param {SearchLunrConfigSearchOptions} options The passed in options.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
-   * @returns {Promise<import('../../../dist/wiki.d.ts').UttoriWikiDocument[]>} Returns an array of search results no longer than limit.
+   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]>} Returns an array of search results no longer than limit.
    * @async
    */
   internalSearch = async ({ query, limit = 100 }, context) => {
@@ -126,7 +127,7 @@ class SearchProvider {
 
     // Find the full documents from the slugs returned.
     const { ignoreSlugs } = this.config;
-    /** @type {import('../../../dist/wiki.d.ts').UttoriWikiDocument[]} */
+    /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
     let documents = [];
     const not_in = `"${ignoreSlugs.join('", "')}"`;
     const slug_in = `"${slugs.join('", "')}"`;
@@ -146,7 +147,7 @@ class SearchProvider {
    * Uses the `internalSearch` method internally.
    * @param {SearchLunrConfigSearchOptions} options The passed in options.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
-   * @returns {Promise<import('../../../dist/wiki.d.ts').UttoriWikiDocument[]>} Returns an array of search results no longer than limit.
+   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]>} Returns an array of search results no longer than limit.
    * @async
    * @example
    * ```js
@@ -163,7 +164,7 @@ class SearchProvider {
   /**
    * Adds documents to the index.
    * For this implementation, it is rebuilding the index.
-   * @param {import('../../../dist/wiki.d.ts').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
+   * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
    */
   indexAdd = async (documents, context) => {
@@ -174,7 +175,7 @@ class SearchProvider {
   /**
    * Updates documents in the index.
    * For this implementation, it is rebuilding the index.
-   * @param {import('../../../dist/wiki.d.ts').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
+   * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
    */
   indexUpdate = async (documents, context) => {
@@ -185,7 +186,7 @@ class SearchProvider {
   /**
    * Removes documents from the index.
    * For this implementation, it is rebuilding the index.
-   * @param {import('../../../dist/wiki.d.ts').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
+   * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
    */
   indexRemove = async (documents, context) => {

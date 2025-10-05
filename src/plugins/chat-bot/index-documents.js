@@ -152,7 +152,7 @@ export async function buildBlocks(document, config) {
   debug('buildBlocks: total sections per-merge:', output.length);
   const newItems = consolidateSectionsByHeader(output, 500, 600);
   debug('buildBlocks: total sections after merge:', newItems.length);
-  debug('buildBlocks: sections:', x.map((section) => ( {
+  debug('buildBlocks: sections:', newItems.map((section) => ( {
     tokenCount: section.tokenCount,
     sectionPath: section.sectionPath,
     slug: section.slug,

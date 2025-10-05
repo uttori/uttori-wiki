@@ -7,6 +7,7 @@ import request from 'supertest';
 import child_process from 'node:child_process';
 
 import ImportDocument from '../../src/plugins/import-document.js';
+import { EventDispatcher } from '@uttori/event-dispatcher';
 
 let sandbox;
 test.beforeEach(() => {
@@ -216,9 +217,7 @@ test('register: should throw an error if hooks.on is missing', (t) => {
 
 test('register: should throw an error if events are missing in config', (t) => {
   const context = {
-    hooks: {
-      on: () => {},
-    },
+    hooks: new EventDispatcher(),
     config: {
       [ImportDocument.configKey]: ImportDocument.defaultConfig(),
     },

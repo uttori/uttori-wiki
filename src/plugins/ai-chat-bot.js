@@ -758,19 +758,14 @@ class AIChatBot {
             response.end();
           },
         });
-      } catch (err) {
+      } catch (error) {
         const requestEndTime = Date.now();
         const totalRequestTime = requestEndTime - requestStartTime;
-        debug('apiRequestHandler: error after', totalRequestTime + 'ms:', err);
-        // Best-effort error down the stream (SSE-safe)
-        try {
-          response.write(`data: ${JSON.stringify({ error: String(err?.message || err) })}\n\n`);
-          response.end();
-        } catch (err) {
-          debug('apiRequestHandler: error:', err);
-          // fall back if headers not sent
-          if (!response.headersSent) response.status(500).json({ error: 'chat failed' });
-        }
+        debug('apiRequestHandler: error after', totalRequestTime + 'ms:', error);
+        response.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : String(error) })}\n\n`);
+        response.end();
+        // fall back if headers not sent
+        // if (!response.headersSent) response.status(500).json({ error: 'chat failed' });
       }
     };
   }

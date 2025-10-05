@@ -6,7 +6,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Add
  * @typedef {object} AddQueryOutputToViewModelQuery
  * @property {string} [query] The query to be run.
  * @property {string} key The key to add the query output to.
- * @property {object[]} fallback The fallback value to use if the query fails.
+ * @property {import('../../dist/wiki.js').UttoriWikiDocument[]} fallback The fallback value to use if the query fails.
  * @property {import('../../dist/custom.js').AddQueryOutputToViewModelFormatFunction} [format] An optional function to format the query output.
  * @property {import('../../dist/custom.js').AddQueryOutputToViewModelQueryFunction} [queryFunction] An optional custom function to execut the query.
  * @example <caption>Query with a custom function</caption>

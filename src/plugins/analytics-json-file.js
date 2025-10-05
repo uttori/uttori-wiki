@@ -196,7 +196,7 @@ class AnalyticsPlugin {
       debug('getPopularDocuments');
       /** @type {AnalyticsPluginPopularDocument[]} */
       let documents = [];
-      const limit = (config && config[AnalyticsPlugin.configKey]?.limit) || 10;
+      const limit = config[AnalyticsPlugin.configKey].limit;
       documents = analytics.getPopularDocuments(limit);
       return documents;
     };

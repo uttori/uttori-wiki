@@ -22,7 +22,11 @@ test('register(context): errors without events', (t) => {
 
 test('register(context): handles missing methods', (t) => {
   t.notThrows(() => {
-    Plugin.register({ hooks: { on: () => {} }, config: { [Plugin.configKey]: { events: { womp: ['womp'] } } } });
+    Plugin.register({
+      hooks: new EventDispatcher(),
+      config: { [Plugin.configKey]: { events: { womp: ['womp'] } } },
+      buildMetadata: () => Promise.resolve({}),
+    });
   });
 });
 

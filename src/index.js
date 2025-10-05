@@ -20,6 +20,9 @@ export { default as StorageProviderJsonFile } from './plugins/storage-provider-j
 export { default as StorageProviderJsonMemory } from './plugins/storage-provider-json-memory.js';
 export { default as AIChatBot } from './plugins/ai-chat-bot.js';
 export { default as TagRoutesPlugin } from './plugins/tag-routes.js';
+export { default as FormHandler } from './plugins/form-handler.js';
+export { default as EmailHandler } from './plugins/form-handlers/email-handler.js';
+export { default as GoogleDocsHandler } from './plugins/form-handlers/google-docs-handler.js';
 
 // Everything below is for TypeScript exports
 export * from './config.js';
@@ -44,6 +47,7 @@ export * from './plugins/storage-provider-json-memory.js';
 export * from './plugins/upload-multer.js';
 export * from './plugins/ai-chat-bot.js';
 export * from './plugins/tag-routes.js';
+export * from './plugins/form-handler.js';
 
 export * from './plugins/markdown-it-plugin/footnotes.js';
 export * from './plugins/markdown-it-plugin/toc.js';
@@ -70,3 +74,6 @@ export * from './plugins/utilities/search-lunr.js';
 export * from './plugins/chat-bot/ollama-embedder.js';
 export * from './plugins/chat-bot/memory.js';
 export * from './plugins/chat-bot/utilities.js';
+
+export * from './plugins/form-handlers/email-handler.js';
+export * from './plugins/form-handlers/google-docs-handler.js';

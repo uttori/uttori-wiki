@@ -38,6 +38,17 @@ test('AnalyticsPlugin.validateConfig(config, _context): throws when directory is
   }, { message: 'directory is required should be the path to the location you want the JSON file to be writtent to.' });
 });
 
+test('AnalyticsPlugin.validateConfig(config, _context): throws when limit is not a number', (t) => {
+  t.throws(() => {
+    AnalyticsPlugin.validateConfig({
+      [AnalyticsPlugin.configKey]: {
+        directory: './',
+        limit: 'a',
+      },
+    });
+  }, { message: 'limit is required should be the number of documents to return.' });
+});
+
 test('AnalyticsPlugin.validateConfig(config, _context): can validate', (t) => {
   t.notThrows(() => {
     AnalyticsPlugin.validateConfig({
@@ -81,27 +92,34 @@ test('Plugin.register(context): does not error with events corresponding to miss
 
 test('AnalyticsPlugin.register(context): can register', (t) => {
   t.notThrows(() => {
-    AnalyticsPlugin.register({ hooks: { on: () => {} }, config: { [AnalyticsPlugin.configKey]: { events: { updateDocument: [] }, directory: 'test/site/data' } } });
+    AnalyticsPlugin.register({
+      hooks: new EventDispatcher(),
+      config: { [AnalyticsPlugin.configKey]: { events: { updateDocument: [] }, directory: 'test/site/data', limit: 10 } },
+      buildMetadata: () => Promise.resolve({}),
+    });
   });
 });
 
 test.serial('AnalyticsPlugin: E2E', async (t) => {
   const hooks = new EventDispatcher();
-  /** @type {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} */
+  const config = {
+    [AnalyticsPlugin.configKey]: {
+      name: 'visits',
+      extension: 'json',
+      directory: 'test/site/data',
+      events: {
+        getCount: ['document-view-count'],
+        getPopularDocuments: ['popular-documents'],
+        updateDocument: ['document-save'],
+      },
+      limit: 10,
+    },
+  };
+  /** @type {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', import('../../dist/plugins/analytics-json-file.d.ts').AnalyticsPluginConfig>} */
   const context = {
     hooks,
-    config: {
-      'uttori-plugin-analytics-json-file': {
-        name: 'visits',
-        extension: 'json',
-        directory: 'test/site/data',
-        events: {
-          getCount: ['document-view-count'],
-          getPopularDocuments: ['popular-documents'],
-          updateDocument: ['document-save'],
-        },
-      },
-    },
+    config,
+    buildMetadata: () => Promise.resolve({}),
   };
 
   AnalyticsPlugin.register(context);
@@ -134,21 +152,21 @@ test.serial('AnalyticsPlugin: E2E', async (t) => {
   t.is(output, '{"test":2,"zero":0,"two":2,"new":3}');
 
   // Fetch returns an array of results.
-  output = await hooks.fetch('popular-documents', { limit: 4 });
+  output = await hooks.fetch('popular-documents', config, context);
   t.deepEqual(output[0], [
     { slug: 'new', count: 3 },
     { slug: 'test', count: 2 },
     { slug: 'two', count: 2 },
     { slug: 'zero', count: 0 },
   ]);
-  output = await hooks.fetch('popular-documents', {});
+  output = await hooks.fetch('popular-documents', config, context);
   t.deepEqual(output[0], [
     { slug: 'new', count: 3 },
     { slug: 'test', count: 2 },
     { slug: 'two', count: 2 },
     { slug: 'zero', count: 0 },
   ]);
-  output = await hooks.fetch('popular-documents');
+  output = await hooks.fetch('popular-documents', config, context);
   t.deepEqual(output[0], [
     { slug: 'new', count: 3 },
     { slug: 'test', count: 2 },
@@ -157,12 +175,12 @@ test.serial('AnalyticsPlugin: E2E', async (t) => {
   ]);
 
   // Can return the view count for a found document.
-  output = await hooks.fetch('document-view-count', { slug: 'new' });
+  output = await hooks.fetch('document-view-count', { slug: 'new' }, context);
   t.is(output[0], 3);
 
   // Return 0 for missing documents.
-  output = await hooks.fetch('document-view-count', { slug: 'nada' });
+  output = await hooks.fetch('document-view-count', { slug: 'nada' }, context);
   t.is(output[0], 0);
-  output = await hooks.fetch('document-view-count');
+  output = await hooks.fetch('document-view-count', {}, context);
   t.is(output[0], 0);
 });
