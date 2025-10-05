@@ -2,7 +2,7 @@
   "include": [
     "src/**/*.js",
     "dist/custom.d.ts"
-, "form-handler-examples.js", "form-handler-usage-example.js"  ],
+  ],
   "exclude": [
     "build/**/*",
     "node_modules",
