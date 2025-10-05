@@ -20,12 +20,14 @@ class OllamaEmbedder {
   /**
    * Embed a text string with Ollama via the embeddings API.
    * @param {string} text The text to embed.
+   * @param {number} numAttempts The number of attempts to make.
    * @returns {Promise<number[]>} The embedding vector.
    */
-  async embed(text) {
+  async embed(text, numAttempts = 5) {
     debug('embed:', { text: text.length });
+    let lastError = null;
     /** Some versions expect "input", others "prompt". We'll send both. */
-    for (let attempt = 0; attempt < 5; attempt++) {
+    for (let attempt = 0; attempt < numAttempts; attempt++) {
       try {
         const response = await fetch(`${this.baseUrl.replace(/\/$/, '')}/api/embeddings`, {
           method: 'POST',
@@ -55,9 +57,10 @@ class OllamaEmbedder {
         debug('embed: attempt failed:', { attempt: attempt + 1, message: err.message, backoff });
         // Sleep for the backoff time.
         await new Promise(resolve => setTimeout(resolve, backoff));
+        lastError = err;
       }
     }
-    throw new Error('Failed to embed after 5 attempts');
+    throw new Error(`Failed to embed after ${numAttempts} attempts: ${lastError?.message}`);
   }
 
   /**

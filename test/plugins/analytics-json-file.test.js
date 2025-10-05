@@ -72,7 +72,7 @@ test('AnalyticsPlugin.register(context): errors without events', (t) => {
   }, { message: 'Missing events to listen to for in \'config.events\'.' });
 });
 
-test('Plugin.register(context): does not error with events corresponding to missing methods', (t) => {
+test.serial('Plugin.register(context): does not error with events corresponding to missing methods', (t) => {
   t.notThrows(() => {
     AnalyticsPlugin.register({
       hooks: {
@@ -90,7 +90,7 @@ test('Plugin.register(context): does not error with events corresponding to miss
   });
 });
 
-test('AnalyticsPlugin.register(context): can register', (t) => {
+test.serial('AnalyticsPlugin.register(context): can register', (t) => {
   t.notThrows(() => {
     AnalyticsPlugin.register({
       hooks: new EventDispatcher(),
