@@ -722,7 +722,7 @@ class AIChatBot {
         })));
 
         // Keepalive ping every 15s
-        const ping = setInterval(() => response.write(': ping\n\n'), 15000);
+        const ping = setInterval(() => response.write('data: ping\n\n'), 15000);
 
         // Stream from Ollama and capture assistant text for memory
         const streamStartTime = Date.now();

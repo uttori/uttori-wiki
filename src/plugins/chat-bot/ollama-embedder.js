@@ -35,7 +35,7 @@ class OllamaEmbedder {
           body: JSON.stringify({ model: this.model, input: text, prompt: text }),
         });
         if (!response.ok) {
-          console.error('Ollama embedding error:', await response.text());
+          debug('Ollama embedding error:', await response.text());
           const msg = await response.text();
           throw new Error(`Ollama ${response.status}: ${msg}`);
         }
@@ -48,7 +48,7 @@ class OllamaEmbedder {
         } else if (Array.isArray(data?.data?.[0]?.embedding)) {
           vec = data.data[0].embedding;
         } else {
-          console.error('Ollama embedding error:', data);
+          debug('Ollama embedding error:', data);
           throw new Error('Unexpected embedding response shape');
         }
         return vec;
@@ -83,7 +83,7 @@ class OllamaEmbedder {
         try {
           out[idx] = await this.embed(texts[idx]);
         } catch (error) {
-          console.error('embedBatch error:', error);
+          debug('embedBatch error:', error);
           throw error;
         }
       }

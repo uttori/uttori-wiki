@@ -90,14 +90,20 @@ class FormHandler {
    */
   static defaultConfig() {
     return {
-      // Base route prefix for all forms
+      /**
+       * Base route prefix for all forms
+       * @type {string}
+       */
       baseRoute: '/forms',
 
-      // Array of form configurations
+      /**
+       * Array of form configurations
+       * @type {FormConfig[]}
+       */
       forms: [],
 
-      // Default handler function for forms without custom handlers
       /**
+       * Default handler function for forms without custom handlers
        * @param {Record<string, any>} formData The form data.
        * @param {FormConfig} formConfig The form configuration.
        * @param {import('express').Request} _req The request.
