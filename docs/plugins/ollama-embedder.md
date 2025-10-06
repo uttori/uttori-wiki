@@ -23,7 +23,7 @@
     * _instance_
         * [.baseUrl](#OllamaEmbedder+baseUrl)
         * [.model](#OllamaEmbedder+model)
-        * [.embed(text)](#OllamaEmbedder+embed) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+        * [.embed(text, numAttempts)](#OllamaEmbedder+embed) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
         * [.embedBatch(texts, [concurrency])](#OllamaEmbedder+embedBatch) ⇒ <code>Promise.&lt;Array.&lt;Array.&lt;number&gt;&gt;&gt;</code>
         * [.probeDimension()](#OllamaEmbedder+probeDimension) ⇒ <code>Promise.&lt;number&gt;</code>
     * _static_
@@ -53,15 +53,16 @@ The model to use for the embeddings.
 **Kind**: instance property of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
 <a name="OllamaEmbedder+embed"></a>
 
-### ollamaEmbedder.embed(text) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+### ollamaEmbedder.embed(text, numAttempts) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
 Embed a text string with Ollama via the embeddings API.
 
 **Kind**: instance method of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
 **Returns**: <code>Promise.&lt;Array.&lt;number&gt;&gt;</code> - The embedding vector.  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| text | <code>string</code> | The text to embed. |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  | The text to embed. |
+| numAttempts | <code>number</code> | <code>5</code> | The number of attempts to make. |
 
 <a name="OllamaEmbedder+embedBatch"></a>
 

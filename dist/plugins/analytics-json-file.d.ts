@@ -135,7 +135,7 @@ declare class AnalyticsPlugin {
     /**
      * Wrapper function for calling update.
      * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-     * @returns {function(Record<string, AnalyticsPluginConfig>, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
+     * @returns {function(unknown, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
      * @example <caption>AnalyticsPlugin.getPopularDocuments(analytics)</caption>
      * const context = {
      *   config: {
@@ -147,6 +147,6 @@ declare class AnalyticsPlugin {
      * AnalyticsPlugin.getPopularDocuments(analytics);
      * @static
      */
-    static getPopularDocuments(analytics: import("./utilities/analytics-provider.js").default): (arg0: Record<string, AnalyticsPluginConfig>, arg1: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => Array<AnalyticsPluginPopularDocument>;
+    static getPopularDocuments(analytics: import("./utilities/analytics-provider.js").default): (arg0: unknown, arg1: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => Array<AnalyticsPluginPopularDocument>;
 }
 //# sourceMappingURL=analytics-json-file.d.ts.map

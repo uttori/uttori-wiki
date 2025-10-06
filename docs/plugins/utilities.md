@@ -15,8 +15,8 @@
 <dt><a href="#genTreeNode">genTreeNode([token])</a> ⇒ <code><a href="#MarkdownASTNode">MarkdownASTNode</a></code></dt>
 <dd><p>Create a node from a MarkdownIt Token.</p>
 </dd>
-<dt><a href="#markdownItAST">markdownItAST(tokens, title)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
-<dd><p>Convert MarkdownIt Tokens to an AST.</p>
+<dt><a href="#stripImagesFromMarkdown">stripImagesFromMarkdown(text)</a> ⇒ <code>string</code></dt>
+<dd><p>Strip images from markdown text, leaving only the text content.</p>
 </dd>
 <dt><a href="#joinContent">joinContent(items)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
 <dd><p>Consolidate header objects to their text content.</p>
@@ -34,13 +34,16 @@
 <dd><p>Remove any items with no content and no children.</p>
 </dd>
 <dt><a href="#countWords">countWords(input)</a> ⇒ <code>Record.&lt;string, number&gt;</code></dt>
-<dd><p>Replace curly quotes with regular quotes, remove punctuation, normalize whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.</p>
+<dd><p>Removes curly quotes, punctuation, normalizes whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.</p>
 </dd>
 <dt><a href="#longestCommonPrefix">longestCommonPrefix(paths)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
-<dd><p>Find the longest common prefix of a list of paths.</p>
+<dd><p>Find the longest common prefix of an array of paths.</p>
 </dd>
 <dt><a href="#consolidateSectionsByHeader">consolidateSectionsByHeader(items, [maximumTokenCount], [softMinTokens], [minAnchorDecrease])</a> ⇒ <code>Array.&lt;object&gt;</code></dt>
 <dd><p>Consolidate like sub-sections by their headers.</p>
+</dd>
+<dt><a href="#markdownItAST">markdownItAST(tokens, title)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
+<dd><p>Convert MarkdownIt Tokens to an AST.</p>
 </dd>
 </dl>
 
@@ -91,32 +94,18 @@ Create a node from a MarkdownIt Token.
 | --- | --- | --- |
 | [token] | <code>module:markdown-it/index.js~Token</code> | A token to convert. |
 
-<a name="markdownItAST"></a>
+<a name="stripImagesFromMarkdown"></a>
 
-## markdownItAST(tokens, title) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
-Convert MarkdownIt Tokens to an AST.
+## stripImagesFromMarkdown(text) ⇒ <code>string</code>
+Strip images from markdown text, leaving only the text content.
 
 **Kind**: global function  
-**Returns**: [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) - The MarkdownIt tokens processed to a collection of MarkdownASTNodes.  
+**Returns**: <code>string</code> - The text with images removed.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Tokens to convert. |
-| title | <code>string</code> | The document title used as the H1 in the header stack. |
+| text | <code>string</code> | The markdown text to clean. |
 
-
-* [markdownItAST(tokens, title)](#markdownItAST) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
-    * [~headerLevel](#markdownItAST..headerLevel) : <code>number</code>
-    * [~headersStack](#markdownItAST..headersStack) : <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code>
-
-<a name="markdownItAST..headerLevel"></a>
-
-### markdownItAST~headerLevel : <code>number</code>
-**Kind**: inner property of [<code>markdownItAST</code>](#markdownItAST)  
-<a name="markdownItAST..headersStack"></a>
-
-### markdownItAST~headersStack : <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code>
-**Kind**: inner constant of [<code>markdownItAST</code>](#markdownItAST)  
 <a name="joinContent"></a>
 
 ## joinContent(items) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
@@ -180,7 +169,7 @@ Remove any items with no content and no children.
 <a name="countWords"></a>
 
 ## countWords(input) ⇒ <code>Record.&lt;string, number&gt;</code>
-Replace curly quotes with regular quotes, remove punctuation, normalize whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
+Removes curly quotes, punctuation, normalizes whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
 
 **Kind**: global function  
 **Returns**: <code>Record.&lt;string, number&gt;</code> - The word count hash.  
@@ -192,14 +181,14 @@ Replace curly quotes with regular quotes, remove punctuation, normalize whitespa
 <a name="longestCommonPrefix"></a>
 
 ## longestCommonPrefix(paths) ⇒ <code>Array.&lt;string&gt;</code>
-Find the longest common prefix of a list of paths.
+Find the longest common prefix of an array of paths.
 
 **Kind**: global function  
 **Returns**: <code>Array.&lt;string&gt;</code> - The longest common prefix of the paths.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| paths | <code>Array.&lt;Array.&lt;string&gt;&gt;</code> | The paths to find the longest common prefix of. |
+| paths | <code>Array.&lt;Array.&lt;string&gt;&gt;</code> | The array of paths to find the longest common prefix of. |
 
 <a name="consolidateSectionsByHeader"></a>
 
@@ -229,6 +218,32 @@ Consolidate like sub-sections by their headers.
 
 ### consolidateSectionsByHeader~bySlug : <code>Map.&lt;string, Array.&lt;Block&gt;&gt;</code>
 **Kind**: inner constant of [<code>consolidateSectionsByHeader</code>](#consolidateSectionsByHeader)  
+<a name="markdownItAST"></a>
+
+## markdownItAST(tokens, title) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
+Convert MarkdownIt Tokens to an AST.
+
+**Kind**: global function  
+**Returns**: [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) - The MarkdownIt tokens processed to a collection of MarkdownASTNodes.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Tokens to convert. |
+| title | <code>string</code> | The document title used as the H1 in the header stack. |
+
+
+* [markdownItAST(tokens, title)](#markdownItAST) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
+    * [~headerLevel](#markdownItAST..headerLevel) : <code>number</code>
+    * [~headersStack](#markdownItAST..headersStack) : <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code>
+
+<a name="markdownItAST..headerLevel"></a>
+
+### markdownItAST~headerLevel : <code>number</code>
+**Kind**: inner property of [<code>markdownItAST</code>](#markdownItAST)  
+<a name="markdownItAST..headersStack"></a>
+
+### markdownItAST~headersStack : <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code>
+**Kind**: inner constant of [<code>markdownItAST</code>](#markdownItAST)  
 <a name="MarkdownASTNode"></a>
 
 ## MarkdownASTNode : <code>object</code>

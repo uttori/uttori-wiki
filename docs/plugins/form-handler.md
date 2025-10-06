@@ -6,11 +6,23 @@
 </dd>
 </dl>
 
+## Members
+
+<dl>
+<dt><a href="#baseRoute">baseRoute</a> : <code>string</code></dt>
+<dd><p>Base route prefix for all forms</p>
+</dd>
+<dt><a href="#forms">forms</a> : <code><a href="#FormConfig">Array.&lt;FormConfig&gt;</a></code></dt>
+<dd><p>Array of form configurations</p>
+</dd>
+</dl>
+
 ## Functions
 
 <dl>
 <dt><a href="#defaultHandler">defaultHandler(formData, formConfig, _req, _res)</a> ⇒ <code><a href="#FormHandlerResult">Promise.&lt;FormHandlerResult&gt;</a></code></dt>
-<dd></dd>
+<dd><p>Default handler function for forms without custom handlers</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -157,9 +169,23 @@ Validates form data against form configuration.
 | formData | <code>Record.&lt;string, any&gt;</code> | The form data to validate. |
 | formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
 
+<a name="baseRoute"></a>
+
+## baseRoute : <code>string</code>
+Base route prefix for all forms
+
+**Kind**: global variable  
+<a name="forms"></a>
+
+## forms : [<code>Array.&lt;FormConfig&gt;</code>](#FormConfig)
+Array of form configurations
+
+**Kind**: global variable  
 <a name="defaultHandler"></a>
 
 ## defaultHandler(formData, formConfig, _req, _res) ⇒ [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult)
+Default handler function for forms without custom handlers
+
 **Kind**: global function  
 **Returns**: [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult) - The result.  
 

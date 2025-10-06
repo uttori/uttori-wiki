@@ -31,9 +31,10 @@ declare class OllamaEmbedder {
     /**
      * Embed a text string with Ollama via the embeddings API.
      * @param {string} text The text to embed.
+     * @param {number} numAttempts The number of attempts to make.
      * @returns {Promise<number[]>} The embedding vector.
      */
-    embed(text: string): Promise<number[]>;
+    embed(text: string, numAttempts?: number): Promise<number[]>;
     /**
      * Embed a batch of text strings with Ollama via the embeddings API.
      * @param {string[]} texts The text strings to embed.

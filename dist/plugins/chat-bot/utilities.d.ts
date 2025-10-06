@@ -1,25 +1,15 @@
 /**
- * @typedef {object} MarkdownASTNode
- * @property {string} type The type of node.
- * @property {string[]} content Text content for the node.
- * @property {Array<Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
- * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
- * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
- * @property {MarkdownASTNode[]} children The child nodes for this node.
- */
-/**
  * Create a node from a MarkdownIt Token.
  * @param {import('markdown-it/index.js').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
  */
 export function genTreeNode(token?: import("markdown-it/index.js").Token): MarkdownASTNode;
 /**
- * Convert MarkdownIt Tokens to an AST.
- * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
- * @param {string} title The document title used as the H1 in the header stack.
- * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
+ * Strip images from markdown text, leaving only the text content.
+ * @param {string} text The markdown text to clean.
+ * @returns {string} The text with images removed.
  */
-export function markdownItAST(tokens: import("markdown-it/index.js").Token[], title: string): MarkdownASTNode[];
+export function stripImagesFromMarkdown(text: string): string;
 /**
  * Consolidate header objects to their text content.
  * @param {MarkdownASTNode[]} items The array of itens to check.
@@ -51,11 +41,17 @@ export function consolidateNestedItems(items: MarkdownASTNode[]): MarkdownASTNod
  */
 export function removeEmptyItems(items: MarkdownASTNode[]): MarkdownASTNode[];
 /**
- * Replace curly quotes with regular quotes, remove punctuation, normalize whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
+ * Removes curly quotes, punctuation, normalizes whitespace, lowercase, split at the space, use a loop to count word occurrences into an index object.
  * @param {string} input The text input to count words in.
  * @returns {Record<string, number>} The word count hash.
  */
 export function countWords(input: string): Record<string, number>;
+/**
+ * Find the longest common prefix of an array of paths.
+ * @param {string[][]} paths The array of paths to find the longest common prefix of.
+ * @returns {string[]} The longest common prefix of the paths.
+ */
+export function longestCommonPrefix(paths: string[][]): string[];
 /**
  * Consolidate like sub-sections by their headers.
  * @param {import('../ai-chat-bot.js').Block[]} items The items to consolidate.
@@ -65,6 +61,13 @@ export function countWords(input: string): Record<string, number>;
  * @returns {object[]} The consolidated items.
  */
 export function consolidateSectionsByHeader(items: import("../ai-chat-bot.js").Block[], maximumTokenCount?: number, softMinTokens?: number, minAnchorDecrease?: number): object[];
+/**
+ * Convert MarkdownIt Tokens to an AST.
+ * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
+ * @param {string} title The document title used as the H1 in the header stack.
+ * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
+ */
+export function markdownItAST(tokens: import("markdown-it/index.js").Token[], title: string): MarkdownASTNode[];
 export function oneLine(text: string, replace?: string): string;
 export function toCSV(table: string[][], seperator?: string, newLine?: string, alwaysDoubleQuote?: boolean): string;
 export type MarkdownASTNode = {

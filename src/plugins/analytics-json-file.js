@@ -179,7 +179,7 @@ class AnalyticsPlugin {
   /**
    * Wrapper function for calling update.
    * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-   * @returns {function(Record<string, AnalyticsPluginConfig>, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
+   * @returns {function(unknown, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
    * @example <caption>AnalyticsPlugin.getPopularDocuments(analytics)</caption>
    * const context = {
    *   config: {
@@ -192,12 +192,13 @@ class AnalyticsPlugin {
    * @static
    */
   static getPopularDocuments(analytics) {
-    return (config, _context) => {
+    return (_data, context) => {
       debug('getPopularDocuments');
       /** @type {AnalyticsPluginPopularDocument[]} */
       let documents = [];
-      const limit = config[AnalyticsPlugin.configKey].limit;
-      documents = analytics.getPopularDocuments(limit);
+      /** @type {AnalyticsPluginConfig} */
+      const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
+      documents = analytics.getPopularDocuments(config.limit);
       return documents;
     };
   }
