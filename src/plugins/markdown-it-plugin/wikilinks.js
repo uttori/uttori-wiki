@@ -58,6 +58,7 @@ export function wikilinks(state) {
 
   // Build the links parts
   const parts = text.slice(0, -2).split('|');
+  // @ts-expect-error slugify is not typed
   const link = slugify(parts[0], state.md.options?.uttori?.wikilinks?.slugify);
   const anchor_text = parts.length > 1 && parts[1] ? parts[1] : parts[0];
 

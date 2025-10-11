@@ -1,11 +1,12 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
+import url from 'node:url';
+import { WebSocketServer } from 'ws';
 
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 import { PdfReader } from 'pdfreader';
-
 
 import { MemoryStore } from './chat-bot/memory.js';
 import OllamaEmbedder from './chat-bot/ollama-embedder.js';
@@ -95,6 +96,8 @@ import { indexAllDocuments } from './chat-bot/index-documents.js';
  * @typedef {object} ChatBotMessage
  * @property {"system" | "user" | "assistant" | "tool"} role The role of the message.
  * @property {string} content The content of the message.
+ * @property {string} [name] The name of the tool.
+ * @property {string[]} [slugs] The slugs of the sources to use as context.
  */
 
 /**
@@ -109,17 +112,18 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
 /**
  * @typedef {object} AIChatBotConfig
  * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} apiRoute The API route for streaming to and from the chat bot interface.
+ * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
  * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
  * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
- * @property {import('express').RequestHandler[]} middlewareApiRoute Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
  * @property {string} databasePath The path to the database.
  * @property {Database.Options} databseOptions The options for the database.
  * @property {string} ollamaBaseUrl The base URL for the Ollama server.
  * @property {string} embedModel The model to use for the embedder.
+ * @property {function(string, string): string} [embedPrompt] The prompt to use for the embedder.
+ * @property {object[]} tools The tools to use for the chat.
  * @property {string} chatModel The model to use for the chat.
  * @property {number} maxTokens The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window.
  * @property {number} temperature The temperature for the model.
@@ -141,23 +145,6 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {number} chunkTokens Used during indexing, the number of tokens per chunk.
  * @property {number} overlapTokens Used during indexing, the number of tokens to overlap between chunks.
  * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
- * @property {object} entities The entities configuration.
- * @property {boolean} entities.enabled Whether to use the entities.
- * @property {string} entities.baseUrl The base URL for the entities server.
- * @property {string} entities.model The model to use for the entities.
- * @property {number} entities.max The maximum number of entities to return.
- * @property {object} rewriter The rewriter configuration.
- * @property {boolean} rewriter.enabled Whether to use the rewriter.
- * @property {string} rewriter.baseUrl The base URL for the rewriter.
- * @property {string} rewriter.model The model to use for the rewriter.
- * @property {number} rewriter.numberOfQueries The number of queries to use for the rewriter.
- * @property {boolean} rewriter.includeOriginal Whether to include the original query in the rewriter.
- * @property {number} rewriter.temperature The temperature for the rewriter.
- * @property {object} rerank The rerank configuration.
- * @property {boolean} rerank.enabled Whether to use the rerank.
- * @property {string} rerank.baseUrl The base URL for the rerank.
- * @property {string} rerank.model The model to use for the rerank.
- * @property {number} rerank.topN The top N to use for the rerank.
  * @property {object} summary The summary configuration.
  * @property {boolean} summary.enabled Whether to use the summary.
  * @property {string} summary.baseUrl The base URL for the summary.
@@ -251,6 +238,9 @@ export async function extractAttachmentText(config, attachment) {
   return '';
 }
 
+/** @type {import('ws').WebSocketServer | undefined} */
+let wss = new WebSocketServer({ noServer: true });
+
 /**
  * Uttori AI Chat Bot
  * @example <caption>AIChatBot</caption>
@@ -279,10 +269,9 @@ class AIChatBot {
    */
   static defaultConfig() {
     return {
-      apiRoute: '/chat-api',
+      websocketRoute: '/chat-api',
       publicRoute: '/chat',
       documentsRoute: '/chat-documents',
-      middlewareApiRoute: [],
       middlewarePublicRoute: [],
       interfaceRequestHandler: undefined,
 
@@ -293,12 +282,14 @@ class AIChatBot {
       databasePath: './site/data/uttori-chat.db',
       databseOptions: {
         // readonly: true,
-        // verbose: console.log,
+        // verbose: debug,
       },
 
       chatModel: 'qwen3:8b',
       ollamaBaseUrl: 'http://127.0.0.1:11434',
-      embedModel: 'dengcao/Qwen3-Embedding-8B:Q8_0', // bge-m3
+      embedModel: 'bge-m3:latest', // bge-m3
+      embedPrompt: (task, query) => query,
+      tools: [],
       maxTokens: -2,
       temperature: 0.6,
 
@@ -368,26 +359,6 @@ class AIChatBot {
         },
       },
 
-      entities: {
-        enabled: true,
-        baseUrl: 'http://127.0.0.1:11434',
-        model: 'qwen3:8b',
-        max: 5,
-      },
-      rewriter: {
-        enabled: false,
-        baseUrl: 'http://127.0.0.1:11434',
-        model: 'qwen3:8b',
-        numberOfQueries: 3,
-        includeOriginal: true,
-        temperature: 0.6,
-      },
-      rerank: {
-        enabled: false,
-        baseUrl: 'http://127.0.0.1:11434',
-        model: 'qwen3:8b',
-        topN: 24,
-      },
       summary: {
         enabled: false,
         baseUrl: 'http://127.0.0.1:11434',
@@ -411,8 +382,8 @@ class AIChatBot {
       debug(error);
       throw new Error(error);
     }
-    if (typeof config[AIChatBot.configKey].apiRoute !== 'string') {
-      const error = 'Config Error: `apiRoute` should be a string server route to where files should be API will be reached from.';
+    if (typeof config[AIChatBot.configKey].websocketRoute !== 'string') {
+      const error = 'Config Error: `websocketRoute` should be a string server route to where files should be API will be reached from.';
       debug(error);
       throw new Error(error);
     }
@@ -423,11 +394,6 @@ class AIChatBot {
     }
     if (!Array.isArray(config[AIChatBot.configKey].allowedReferrers)) {
       const error = 'Config Error: `allowedReferrers` should be an array of URLs or a blank array.';
-      debug(error);
-      throw new Error(error);
-    }
-    if (!Array.isArray(config[AIChatBot.configKey].middlewareApiRoute)) {
-      const error = 'Config Error: `middlewareApiRoute` should be an array of middleware.';
       debug(error);
       throw new Error(error);
     }
@@ -517,7 +483,6 @@ class AIChatBot {
    * const context = {
    *   config: {
    *     [AIChatBot.configKey]: {
-   *       middlewareApiRoute: [],
    *       middlewarePublicRoute: [],
    *     },
    *   },
@@ -528,11 +493,8 @@ class AIChatBot {
   static bindRoutes(server, context) {
     debug('bindRoutes');
     /** @type {AIChatBotConfig} */
-    const { apiRoute, publicRoute, documentsRoute, middlewareApiRoute, middlewarePublicRoute, interfaceRequestHandler } = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
-    debug('bindRoutes:', { apiRoute, publicRoute, documentsRoute });
-
-    // Endpoint to stream to & from the chat bot interface
-    server.post(`${apiRoute}`, ...middlewareApiRoute, AIChatBot.apiRequestHandler(context));
+    const { publicRoute, documentsRoute, middlewarePublicRoute, interfaceRequestHandler } = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
+    debug('bindRoutes:', { publicRoute, documentsRoute });
 
     // Endpoint to fetch available documents for the document selector
     server.get(`${documentsRoute}`, AIChatBot.documentsHandler(context));
@@ -546,6 +508,284 @@ class AIChatBot {
   }
 
   /**
+   * Bind the WebSocket server to the server object.
+   * @param {import('http').Server} server An Express server instance.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @example <caption>AIChatBot.bindWebSocket(server, context)</caption>
+   * AIChatBot.bindWebSocket(server, context);
+   * @static
+   */
+  static bindWebSocket(server, context) {
+    debug('bindWebSocket');
+    /** @type {AIChatBotConfig} */
+    const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
+
+    if (typeof WebSocketServer === 'function') {
+      debug('WebSocket supported');
+      debug('Creating WebSocket server with HTTP server');
+
+      // Create WebSocket server with manual upgrade handling
+      wss = new WebSocketServer({ noServer: true });
+
+      // Handle upgrade requests manually
+      server.on('upgrade', (request, socket, head) => {
+        debug('🔌 HTTP upgrade request received:', request.url);
+
+        const { pathname } = new URL(request.url, `http://${request.headers.host}`);
+
+        debug('Checking pathname:', pathname);
+        if (pathname === `${config.websocketRoute}`) {
+          debug(`✅ Upgrading to WebSocket for ${config.websocketRoute}`);
+          wss.handleUpgrade(request, socket, head, (ws) => {
+            wss.emit('connection', ws, request);
+          });
+        } else {
+          debug('❌ Rejecting upgrade for path:', pathname);
+          socket.destroy();
+        }
+      });
+
+      debug('🔌 WebSocket upgrade handler registered');
+      wss.on('connection', (ws, request) => {
+        debug('WebSocket connection');
+        const parameters = url.parse(request.url, true);
+        ws['uniqueId'] = parameters.query.uniqueId || 'no-unique-id';
+
+        let firstMessage = true;
+
+        // Maintains a rolling summary of the conversation
+        /** @type {string | string[]} */
+        if (config.summary.enabled && ws['uniqueId']) {
+          debug('🍜 Getting memory for', ws['uniqueId']);
+          if (!memStore.get(`${ws['uniqueId']}`)) {
+            debug('🍜 No memory found for', ws['uniqueId']);
+            memStore.set(`${ws['uniqueId']}`, { summary: '', last: [] });
+          }
+          memStore.touch(`${ws['uniqueId']}`);
+        }
+
+        ws.on('message', async (raw) => {
+          debug('WebSocket message', raw.toString());
+          // Expect: { messages: [{role, content}, ...] }
+          /** @type {Record<string, ChatBotMessage[]>} */
+          let payload;
+          try {
+            payload = JSON.parse(raw.toString());
+          } catch {
+            debug('WebSocket message parse error', raw.toString());
+            return;
+          }
+
+          // Build prompt with a short memory preface
+          const memoryNote = config.summary.enabled && memStore.get(`${ws['uniqueId']}`)?.summary ? `Conversation Summary for added context:\n${memStore.get(`${ws['uniqueId']}`).summary}` : '';
+          debug('🍜 Memory note:', memoryNote);
+
+          /** @type {ChatBotMessage[]} */
+          let messages = payload.messages ?? [];
+          if (firstMessage && messages.length) {
+            firstMessage = false;
+
+            // Add the prompt to the message and pull it from the first message
+            messages = AIChatBot.buildPromptMessages(
+              payload.messages[0].content,
+              payload.messages[0].slugs ?? [],
+              { maxContextCharacters: 20000 },
+            );
+          } else if (config.summary.enabled && memoryNote) {
+            messages = messages.map(msg => ({
+              ...msg,
+              content: `${msg.content}\n\n${memoryNote}`,
+            }));
+          }
+
+          const totalPromptTokens = messages.reduce((total, msg) => {
+            return total + OllamaEmbedder.approxTokenLen(msg.content);
+          }, 0);
+          debug('Total Prompt Tokens:', totalPromptTokens);
+
+          try {
+            // Keep running passes until there are no more tool calls.
+            for (;;) {
+              const { messages: nextMessages, finished } = await AIChatBot.runChatPass(ws, messages, config);
+              messages = nextMessages;
+              if (finished) break;
+            }
+
+            // Update memory (summarize)
+            if (config.summary.enabled) {
+              const newTurns = [
+                ...memStore.get(`${ws['uniqueId']}`).last,
+                {
+                  user: payload.messages[0].content,
+                  assistant: messages[messages.length - 1].content,
+                  ts: Date.now(),
+                },
+              ];
+              const newSummary = await AIChatBot.summarizeTurn(
+                config.summary.baseUrl,
+                config.summary.model,
+                memStore.get(`${ws['uniqueId']}`).summary,
+                memStore.get(`${ws['uniqueId']}`).last,
+                payload.messages[0].content,
+                messages[messages.length - 1].content,
+              );
+              debug('New Summary:', newSummary);
+              memStore.set(`${ws['uniqueId']}`, { summary: newSummary, last: newTurns });
+            }
+
+            debug('WebSocket message done:', messages.length);
+            ws.send(JSON.stringify({ type: 'done' }));
+          } catch (err) {
+            debug('WebSocket message error', err);
+            ws.send(JSON.stringify({ type: 'error', error: String(err) }));
+          }
+        });
+        ws.on('close', () => {
+          debug('WebSocket close');
+        });
+      });
+      wss.on('error', (error) => {
+        debug('WebSocket error', error);
+      });
+      wss.on('close', () => {
+        debug('WebSocket close');
+        memStore.cleanup();
+      });
+      debug('WebSocket server created successfully');
+    } else {
+      debug('WebSocket not supported');
+    }
+  }
+
+  /**
+   * Helper: stream one /api/chat call and forward chunks to client,
+   * intercepting tool calls. Returns {messages, finished}
+   * messages: updated transcript to continue if tool used
+   * finished: true once an assistant final turn is produced
+   * @param {import('ws').WebSocket} ws The WebSocket instance.
+   * @param {ChatBotMessage[]} messages The messages.
+   * @param {AIChatBotConfig} config The configuration.
+   * @returns {Promise<{messages: ChatBotMessage[], finished: boolean}>} The messages and finished status.
+   */
+  static async runChatPass(ws, messages, config) {
+    debug('runChatPass');
+    const response = await fetch(`${config.ollamaBaseUrl}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: config.chatModel,
+        options: {
+          temperature: config.temperature,
+          num_predict: config.maxTokens,
+        },
+        messages,
+        tools: config.tools,
+        stream: true,
+      }),
+    });
+
+    if (!response.ok || !response.body) {
+      debug('Ollama HTTP error', response.status, response);
+      throw new Error(`Ollama HTTP ${response.status}`);
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let assistantAccumulated = ''; // for the assistant content this pass
+    /** @type {Record<string, any>[]} */
+    let pendingToolCalls = [];     // collect tool calls observed in this pass
+
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) {
+        break;
+      }
+      const chunk = decoder.decode(value, { stream: true });
+
+      // Ollama streams newline-delimited JSON objects (NDJSON)
+      for (const line of chunk.split('\n')) {
+        // Skip empty lines
+        if (!line.trim()) {
+          continue;
+        }
+        // Parse the line as JSON
+        /** @type {Record<string, Record<string, any>>} */
+        let obj;
+        try {
+          obj = JSON.parse(line);
+        } catch {
+          continue;
+        }
+
+        // Forward assistant tokens to WebSocket right away
+        if (obj?.message?.content) {
+          assistantAccumulated += obj.message.content;
+          ws.send(JSON.stringify({ type: 'token', data: obj.message.content }));
+        }
+
+        // tool calls may appear in-stream
+        const calls = obj?.message?.tool_calls;
+        if (Array.isArray(calls) && calls.length) {
+          // Stop forwarding (optional) and collect calls
+          pendingToolCalls.push(...calls);
+        }
+
+        if (obj?.done) {
+          // end of this pass
+        }
+      }
+    }
+
+    // If there were tool calls, run them now and return updated messages
+    if (pendingToolCalls.length) {
+      for (const call of pendingToolCalls) {
+        const name = call.function?.name;
+        const args = call.function?.arguments ?? {};
+        ws.send(JSON.stringify({ type: 'tool_call', name, args }));
+
+        let toolResult;
+        if (name === 'vectorSearch') {
+          debug('vectorSearch:', args);
+          toolResult = await AIChatBot.retrieve(args?.query, config, args.slugs);
+          // Compose a compact context block with separators + local citations
+          /** @type {string[]} */
+          const blocks = [];
+          for (const chunk of toolResult.chunks) {
+            const srcTitle = chunk.source.title || chunk.source.id;
+            const section = chunk.sectionPath?.length ? ` - ${chunk.sectionPath.join(' > ')}` : '';
+            const text = chunk.text.length <= 1500 ? chunk.text : chunk.text.slice(0, 1500 - 1) + '…';
+            blocks.push(`SOURCE: ${srcTitle}${section}\nSLUG: ${chunk.source.slug ?? ''}\n---\n${text}`);
+          }
+          toolResult = blocks.join('\n\n====\n\n');
+        } else {
+          toolResult = { error: `Unknown tool: ${name}` };
+        }
+
+        // Append the tool response as a new message for the next pass
+        messages.push({
+          role: 'tool',
+          content: JSON.stringify(toolResult),
+          name,
+        });
+
+        ws.send(JSON.stringify({ type: 'tool_result', name, data: toolResult }));
+      }
+
+      // Also keep the assistant "function call turn" (usually empty content) if needed
+      // and return to allow caller to run another pass
+      return { messages, finished: false };
+    }
+
+    // No tool calls: finalize this assistant message in the transcript
+    if (assistantAccumulated) {
+      messages.push({ role: 'assistant', content: assistantAccumulated });
+    }
+    return { messages, finished: true };
+
+  }
+
+  /**
    * Handle requests to fetch available documents for the document selector.
    * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
@@ -553,7 +793,7 @@ class AIChatBot {
    */
   static documentsHandler(context) {
     debug('documentsHandler');
-    return (request, response) => {
+    return (_request, response) => {
       try {
         // Get all documents from the database
         /** @type {AIChatBotConfig} */
@@ -578,226 +818,26 @@ class AIChatBot {
   }
 
   /**
-   * The Express route method to process the upload request and provide a response.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-   * @returns {import('express').RequestHandler<{}, { error: string }, AIChatBotApiRequestBody>} The function to pass to Express.
-   * @example <caption>AIChatBot.apiRequestHandler(context)(request, response, _next)</caption>
-   * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
-   * @static
-   */
-  static apiRequestHandler(context) {
-    return async (request, response, next) => {
-      const requestStartTime = Date.now();
-      debug('apiRequestHandler');
-      /** @type {AIChatBotConfig} */
-      const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
-
-      const referrer = request.get('Referrer') || '';
-      debug('referrer:', referrer);
-      // referrer is an optional http header, it may not exist
-      if (config.allowedReferrers.length && !referrer) {
-        debug('empty referrer:', referrer);
-        next();
-        return;
-      }
-
-      // Check for our allowed domains
-      if (config.allowedReferrers.length && !config.allowedReferrers.some((check) => referrer.startsWith(check))) {
-        debug('now allowed referrer:', referrer);
-        next();
-        return;
-      }
-
-      // Maintains a rolling summary of the conversation
-      /** @type {import('./chat-bot/memory.js').Memory }} */
-      let mem = { summary: '', last: [] };
-      /** @type {string} */
-      let sessionId = 'anon';
-      if (config.summary.enabled) {
-        let sessionId = (request.headers['x-session-id'] || request.body?.sessionId || 'anon');
-        sessionId = Array.isArray(sessionId) ? sessionId[0] : sessionId;
-        mem = memStore.get(sessionId) ?? { summary: '', last: [] };
-        memStore.touch(sessionId);
-      }
-
-      const query = request.body.query;
-      const slugs = request.body.slugs || null;
-      debug('apiRequestHandler:', { query, slugs });
-
-      try {
-        // Contextualized user question for rewriting, rewrite (using contextualized question)
-        const rewriteStartTime = Date.now();
-        const contextualQuestion = mem.summary ? `${query}\n\n[Context summary: ${mem.summary}]` : query;
-        let queries = [query];
-        if (config.rewriter?.enabled) {
-          try {
-            const rewrites = await AIChatBot.rewriteQueries(
-              config.ollamaBaseUrl,
-              config.rewriter.model,
-              contextualQuestion,
-              config.rewriter.numberOfQueries,
-              config.rewriter.temperature,
-            );
-            queries = [...(config.rewriter.includeOriginal !== false ? [query] : []), ...rewrites];
-            const rewriteTime = Date.now() - rewriteStartTime;
-            debug('apiRequestHandler: rewrite time:', rewriteTime + 'ms');
-          } catch (e) {
-            const rewriteTime = Date.now() - rewriteStartTime;
-            debug('apiRequestHandler: Rewriter failed after', rewriteTime + 'ms:', e);
-          }
-        }
-        debug('apiRequestHandler: queries:', queries);
-
-        // Retrieval, run retrieval for each and merge by rowid with best score
-        const retrievalStartTime = Date.now();
-        /** @type {RetrieveResponse[]} */
-        let results = [];
-        try {
-          results = await Promise.all(
-            queries.map(q => AIChatBot.retrieve(q, config, slugs)),
-          );
-          const retrievalTime = Date.now() - retrievalStartTime;
-          debug('apiRequestHandler: retrieval time:', retrievalTime + 'ms');
-          debug('apiRequestHandler: results:', results);
-        } catch (error) {
-          const retrievalTime = Date.now() - retrievalStartTime;
-          debug('apiRequestHandler: retrieval failed after', retrievalTime + 'ms:', error);
-        }
-
-        // merge chunks (keep best score) and citations
-        /** @type {Map<number, RetrievedChunk>} */
-        const byRow = new Map();
-        for (const result of results) {
-          for (const chunk of result.chunks) {
-            const prev = byRow.get(chunk.rowid);
-            if (!prev || chunk.score < prev.score) {
-              byRow.set(chunk.rowid, chunk);
-            }
-          }
-        }
-        /** @type {RetrievedChunk[]} */
-        const mergedChunks = Array.from(byRow.values()).sort((a, b) => b.score - a.score);
-        /** @type {RetrievedChunk[]} */
-        const mergedResult = mergedChunks.slice(0, config.chunkLimit);
-
-        // build citations from merged chunks
-        const citations = mergedResult.map(c => ({
-          title: c.source.title || c.source.id,
-          slug: c.source.slug || '',
-          sectionPath: c.sectionPath,
-          source_id: c.source_id,
-          idx: c.idx,
-          score: c.score,
-        }));
-        debug('apiRequestHandler: citations:', citations);
-        debug('apiRequestHandler: context chunks token breakdown:', mergedResult.map(chunk => ({
-          source: chunk.source.title || chunk.source.id,
-          tokens: chunk.token_count || OllamaEmbedder.approxTokenLen(chunk.text),
-          textLength: chunk.text.length,
-          score: chunk.score,
-          // text: chunk.text,
-        })));
-
-        // Build prompt with a short memory preface
-        const memoryNote = config.summary.enabled && mem.summary ? `Conversation summary:\n${mem.summary}\n\n` : '';
-        const messages = AIChatBot.buildPromptMessages(
-          `${query}\n\n${memoryNote}`.trim(),
-          mergedResult,
-          { maxContextCharacters: 20000 },
-        );
-
-        // Calculate total prompt tokens
-        const totalPromptTokens = messages.reduce((total, msg) => {
-          return total + OllamaEmbedder.approxTokenLen(msg.content);
-        }, 0);
-        const totalContextTokens = mergedResult.reduce((total, chunk) => {
-          return total + (chunk.token_count || OllamaEmbedder.approxTokenLen(chunk.text));
-        }, 0);
-        debug('apiRequestHandler: Total prompt tokens:', totalPromptTokens);
-        debug('apiRequestHandler: Total context tokens:', totalContextTokens);
-        debug('apiRequestHandler: Messages breakdown:', messages.map(msg => ({
-          role: msg.role,
-          tokens: OllamaEmbedder.approxTokenLen(msg.content),
-          contentLength: msg.content.length,
-        })));
-
-        // Keepalive ping every 15s
-        const ping = setInterval(() => response.write('data: ping\n\n'), 15000);
-
-        // Stream from Ollama and capture assistant text for memory
-        const streamStartTime = Date.now();
-        let assistantText = '';
-
-        await AIChatBot.stream(config.ollamaBaseUrl, config.chatModel, config.temperature, config.maxTokens, messages, {
-          onToken: (t) => {
-            assistantText += t;
-            response.write(`data: ${JSON.stringify({ token: t })}\n\n`);
-          },
-          onDone: async () => {
-            debug('apiRequestHandler: onDone');
-            // Send citations at the end
-            response.write(`data: ${JSON.stringify({ done: true, sources: citations })}\n\n`);
-            clearInterval(ping);
-
-            const streamTime = Date.now() - streamStartTime;
-            debug('apiRequestHandler: stream time:', streamTime + 'ms');
-
-            // Update memory (summarize)
-            if (config.summary.enabled) {
-              const newTurns = [...mem.last, { user: query, assistant: assistantText, ts: Date.now() }];
-              if (mem.summary) {
-                const newSummary = await AIChatBot.summarizeTurn(config.summary.baseUrl, config.summary.model, mem.summary, mem.last, query, assistantText);
-                memStore.set(sessionId, { summary: newSummary, last: newTurns });
-              }
-            }
-
-            // All done, end the response
-            const requestEndTime = Date.now();
-            const totalRequestTime = requestEndTime - requestStartTime;
-            debug('apiRequestHandler: Total request time:', totalRequestTime + 'ms');
-            response.end();
-          },
-        });
-      } catch (error) {
-        const requestEndTime = Date.now();
-        const totalRequestTime = requestEndTime - requestStartTime;
-        debug('apiRequestHandler: error after', totalRequestTime + 'ms:', error);
-        response.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : String(error) })}\n\n`);
-        response.end();
-        // fall back if headers not sent
-        // if (!response.headersSent) response.status(500).json({ error: 'chat failed' });
-      }
-    };
-  }
-
-  /**
    * Build messages for the AI chat bot.
    * @param {string} userQuestion The user's question.
-   * @param {RetrievedChunk[]} chunks The chunks of text to use as context.
+   * @param {string[]} slugs The slugs of the sources to use as context.
    * @param {object} opts The options for the prompt.
    * @param {number} opts.maxContextCharacters The maximum number of characters to include in the context.
    * @returns {ChatBotMessage[]} The messages for the AI chat bot.
    */
-  static buildPromptMessages(userQuestion, chunks, opts) {
-    // Compose a compact context block with separators + local citations
-    /** @type {string[]} */
-    const blocks = [];
-    for (const chunk of chunks) {
-      const srcTitle = chunk.source.title || chunk.source.id;
-      const section = chunk.sectionPath?.length ? ` - ${chunk.sectionPath.join(' > ')}` : '';
-      const text = chunk.text.length <= 1500 ? chunk.text : chunk.text.slice(0, 1500 - 1) + '…';
-      blocks.push(`SOURCE: ${srcTitle}${section}\nSLUG: ${chunk.source.slug ?? ''}\n---\n${text}`);
-    }
-
-    let context = blocks.join('\n\n====\n\n');
-    if (context.length > opts.maxContextCharacters) {
-      context = context.slice(0, opts.maxContextCharacters);
-    }
+  static buildPromptMessages(userQuestion, slugs, opts) {
+    debug('buildPromptMessages', { userQuestion, slugs, opts });
+    // let context = blocks.join('\n\n====\n\n');
+    // if (context.length > opts.maxContextCharacters) {
+    //   context = context.slice(0, opts.maxContextCharacters);
+    // }
 
     const system = `<goal>
 You are Uttori, the dedicated wiki assistant.
-The user is asking a question about products and services they have and have given us context to.
-Your role is to answer question on the documents in the wiki that you are an expert on.
+The user is asking a question about products and services they have and have given us context to in the form of Markdown documents.
+Your role is to answer question based on the documents in the wiki that you are an expert on.
+The documents will be provided to you in the context section.
+If a question seems vague or unclear, it is referring to items that are in the specifically provided documents and searching in those documents is the best way to answer the question.
 </goal>
 
 <format_rules>
@@ -806,32 +846,49 @@ Use Markdown for clarity and readability. Follow these style rules:
 ## Document Structure
 
 ### Lists and Organization
+
 - Use bullet points for clarity
-    - Primary points at first level
-    - Supporting details indented
-    - Limit nesting to two levels
+  - Primary points at first level
+  - Supporting details indented
+  - Limit nesting to two levels
 - Use numbered lists only for sequential instructions.
 
 ### Styling
+
 - Use capitalized words sparingly for emphasis.
 - DO NOT use italics or bold formatting.
-- Maintain a professional tone and friendly voice.
+- Maintain a fun and friendly tone.
 </format_rules>
 
 <planning_guidance>
 When drafting a response:
 
 1. Identify the underlying type of the question (e.g., product, service, feature, etc.).
-2. Ensure clarity, coherence, and a professional tone.
+2. Ensure clarity, coherence, and a fun tone.
 3. Follow <format_rules> to maintain consistency and readability.
 </planning_guidance>
 
 <session_context>
 The current date is ${new Date().toLocaleDateString()}.
 - User Preferences:
-    - Prefers concise responses.
-    - Uses American English spelling.
+  - Prefers concise responses.
+  - Uses American English spelling.
 </session_context>
+
+You may use vectorSearch to search the wiki for information.
+Rules:
+- Keep query concise.
+- Ask once per user question unless results are empty, then you may refine and try once more.
+Use this array of slugs as the 'slugs' parameter:
+${JSON.stringify(slugs)}.
+
+If and only if there are no results for the first vectorSearch query, rewrite the user's question into 3 diverse, self-contained vectorSearch queries for a documentation/wiki RAG system.
+- Keep them concise (<= 15 words).
+- Cover likely synonyms and platform variants.
+- Include key entities and constraints.
+- Remove punctuation/hyphens/spaces for one variant.
+- Replace Roman numerals with Arabic ("MKII"→"MK2") and vice-versa.
+- Include both compact and spaced forms.
 
 <output>
 - Use the context below to help answer the question.
@@ -844,92 +901,11 @@ The current date is ${new Date().toLocaleDateString()}.
 - When searching context, consider normalized aliases of key terms.
 - If multiple aliases refer to the same thing, merge evidence and cite once.
 </output>`;
-    // You can call tools. To call a tool, output ONLY a JSON object with this schema:
-    // {"tool":"search_wiki","args":{"q":"<query>","limit":5}}
-    // Available tool:
-    // search_wiki(args: {q: string, limit?: number}) → {items: Array<{title, url, sectionPath, snippet}>}
-    // Use ONLY by outputting a single JSON object exactly like:
-    // {"tool":"search_wiki","args":{"q":"<query>","limit":5}}
-    // Rules:
-    // - Keep q concise.
-    // - Ask once per user question unless results are empty, then you may refine and try once more.
-    // - After a tool call, wait for tool output; do not answer until you see it.
-    // - If tool returns nothing, say you don't know and suggest a better query.
-    // - When you need facts from the wiki, call search_wiki with a focused query.
-    // - Prefer exact titles/aliases and include variants (e.g., "SP-404 MKII" / "SP404MK2").
-    // - Read results: prefer items whose title matches the entity.
-    const user = `Question: ${userQuestion}
-
-Context:
-${context}`;
-
+    const user = `Question: ${userQuestion}`;
     return [
       { role: 'system', content: system },
       { role: 'user', content: user },
     ];
-  }
-
-  /**
-   * Rewrite the user's question into diverse, self-contained search queries for a documentation/wiki RAG system.
-   * @param {string} baseUrl The base URL of the API.
-   * @param {string} model The model to use for the rewriter.
-   * @param {string} userQuery The user's question.
-   * @param {number} numberOfQueries The number of queries to generate.
-   * @param {number} temperature The temperature for the rewriter.
-   * @returns {Promise<string[]>} The rewritten queries.
-   */
-  static async rewriteQueries(baseUrl, model, userQuery, numberOfQueries, temperature) {
-    const prompt = [
-      {
-        role: 'system',
-        content: `Rewrite the user's question into ${numberOfQueries} diverse, self-contained search queries for a documentation/wiki RAG system.
-- Keep them concise (<= 15 words).
-- Cover likely synonyms and platform variants.
-- Include key entities and constraints.
-- Remove punctuation/hyphens/spaces for one variant.
-- Replace Roman numerals with Arabic ("MKII"→"MK2") and vice-versa.
-- Include both compact and spaced forms.
-- Output as a JSON array of strings.`,
-      },
-      {
-        role: 'user',
-        content: `Question: ${userQuery}`,
-      },
-    ];
-
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, stream: false, options: { temperature }, messages: prompt }),
-    });
-    if (!response.ok) {
-      debug('Rewriter error:', await response.text());
-      throw new Error(await response.text());
-    }
-
-    let text = '';
-    try {
-      /** @type {Record<string, any>} */
-      const data = await response.json();
-      text = data?.message?.content || data?.choices?.[0]?.message?.content || '[]';
-      debug('Rewriter response:', text);
-    } catch (error) {
-      debug('Rewriter error:', error);
-    }
-
-    try {
-      // Remove think tags and content between them before parsing
-      const cleanedText = text.replace(/<think>[\S\s]*?<\/think>/g, '').trim();
-      const arr = JSON.parse(cleanedText);
-      return Array.isArray(arr) ? arr.map(String) : [userQuery];
-    } catch (error) {
-      debug('Rewriter error:', error);
-      // Fallback: split lines and filter think content
-      const cleanedText = text.replace(/<think>[\S\s]*?<\/think>/g, '').trim();
-      const lines = cleanedText.split(/\n+/).map(s => s.trim()).filter(Boolean);
-      debug('Rewriter fallback:', lines);
-      return lines;
-    }
   }
 
   /**
@@ -943,11 +919,13 @@ ${context}`;
    * @returns {Promise<string>} The new summary of the conversation.
    */
   static async summarizeTurn(baseUrl, model, prevSummary, lastTurns, newUser, newAssistant) {
+    debug('summarizeTurn', { prevSummary, lastTurns, newUser, newAssistant });
     const system = 'You maintain a very short rolling summary (1-3 sentences) of a support conversation. Keep only stable facts, user goals. Omit chit-chat.';
     const user = `Previous summary:\n${prevSummary || '(none)'}\n
 Recent turns:\n${lastTurns.map(t => `U: ${t.user}\nA: ${t.assistant ?? ''}`).join('\n')}
 New turn:\nU: ${newUser}\nA: ${newAssistant}\n
 Write the new summary (<= 60 words).`;
+    debug('summarizeTurn user:', user);
 
     const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/chat`, {
       method: 'POST',
@@ -959,7 +937,7 @@ Write the new summary (<= 60 words).`;
     });
 
     if (!response.ok) {
-      debug('Summarizer error:', await response.text());
+      debug('summarizeTurn error:', await response.text());
       throw new Error(await response.text());
     }
 
@@ -968,71 +946,12 @@ Write the new summary (<= 60 words).`;
       /** @type {Record<string, Record<string, string | any>>} */
       const data = await response.json();
       text = data?.message?.content || data?.choices?.[0]?.message?.content || '[]';
-      debug('Summarizer response:', text);
+      // Remove the <think> and </think> tags from the user and assistant messages
+      text = text.replace(/<think>[\S\s]*?<\/think>/g, '').trim();
     } catch (error) {
-      debug('Summarizer error:', error);
+      debug('summarizeTurn parse error:', error);
     }
     return text.trim();
-  }
-
-  /**
-   * Stream the response from the AI chat bot.
-   * @param {string} baseUrl The base URL of the API.
-   * @param {string} model The model to use for the chat bot.
-   * @param {number} temperature The temperature for the chat bot.
-   * @param {number} maxTokens The maximum number of tokens to generate.
-   * @param {ChatBotMessage[]} messages The messages to send to the chat bot.
-   * @param {StreamHandlers} handler The handler for the chat bot.
-   * @returns {Promise<void>} The response from the chat bot.
-   */
-  static async stream(baseUrl, model, temperature, maxTokens, messages, handler) {
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: model,
-        stream: true,
-        options: {
-          temperature: temperature,
-          num_predict: maxTokens,
-        },
-        messages,
-      }),
-    });
-
-    if (!response.ok || !response.body) {
-      throw new Error(`Ollama chat error: ${response.status} ${await response.text()}`);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-
-      // Ollama streams newline-delimited JSON chunks
-      for (const line of chunk.split('\n')) {
-        const s = line.trim();
-        if (!s) continue;
-        try {
-          /** @type {Record<string, Record<string, string>>} */
-          const json = JSON.parse(s);
-          // message?.content is appended token(s), or empty when only metadata
-          const token = json?.message?.content ?? '';
-          if (token) {
-            await handler.onToken(token);
-          }
-          if (json?.done) {
-            await handler.onDone();
-            return;
-          }
-        } catch (_) {
-          // ignore partial lines until next read
-        }
-      }
-    }
   }
 
   /**
@@ -1073,71 +992,19 @@ Write the new summary (<= 60 words).`;
   }
 
   /**
-   * Extract 1 to 6 short entities/concepts from the question.
-   * Returns a lowercase array; strictly JSON (no prose).
-   * @param {string} baseUrl The base URL of the Ollama server.
-   * @param {string} model The model to use for entity extraction.
-   * @param {string} question The question to extract entities from.
-   * @param {number} max The maximum number of entities to extract, defaults to 5.
-   * @returns {Promise<string[]>} A lowercase array of entities.
-   */
-  static async extractEntities (baseUrl, model, question, max = 5) {
-    const sys = `Extract up to ${max} short entities or key concepts from a user question.
-- Use 1-4 words per entity.
-- Prefer product/model names, page titles, components, features.
-- Lowercase the output.
-Return ONLY a JSON array of strings.`;
-
-    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model, stream: false, options: { temperature: 0.1 },
-        messages: [
-          { role: 'system', content: sys },
-          { role: 'user', content: question },
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      debug('extractEntities: entities extraction error:', text);
-      return [];
-    }
-
-    /** @type {Record<string, Record<string, string>>} */
-    const data = await response.json();
-    /** @type {string} */
-    const text = data?.message?.content ?? '[]';
-    const cleanedText = text.replace(/<think>[\S\s]*?<\/think>/g, '').trim();
-
-    try {
-      const arr = JSON.parse(cleanedText);
-      if (!Array.isArray(arr)) {
-        debug('extractEntities error: response was not an array');
-        return [];
-      }
-      return arr.map(x => String(x).toLowerCase().trim()).filter(Boolean);
-    } catch (error) {
-      debug('extractEntities error:', error);
-      return [];
-    }
-  }
-
-  /**
    * Embed a query using the Ollama API.
    * @param {string} baseUrl The base URL of the Ollama server.
    * @param {string} model The model to use for embedding.
-   * @param {string} text The text to embed.
+   * @param {string} input The text to embed.
+   * @param {string} [prompt] The prompt to embed.
    * @returns {Promise<Float32Array>} The embedded query.
    */
-  static async embedQuery(baseUrl, model, text) {
+  static async embedQuery(baseUrl, model, input, prompt) {
     try {
       const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/embeddings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, input: text, prompt: text }),
+        body: JSON.stringify({ model, input, prompt: prompt ?? input }),
       });
       if (!response.ok) {
         const text = await response.text();
@@ -1163,57 +1030,6 @@ Return ONLY a JSON array of strings.`;
     }
   }
 
-
-  /**
-   * Rerank the chunks using a local LLM (0=irrelevant..3=high)
-   * @param {string} baseUrl The base URL of the Ollama server.
-   * @param {string} model The model to use for reranking.
-   * @param {string} query The query to rerank the chunks for.
-   * @param {RetrievedChunk[]} chunks The chunks to rerank.
-   * @returns {Promise<RetrievedChunk[]>} The reranked chunks.
-   */
-  static async localRerank(baseUrl, model, query, chunks) {
-    const passages = chunks.map((c, i) =>
-      `[${i}] ${c.source.title||c.source.id} - ${c.sectionPath?.join(' > ')||''}\n${c.text.slice(0,800)}`).join('\n\n');
-    const prompt = [
-      { role: 'system', content:
-`Rate how relevant each passage is to the user's question.
-Return a JSON array of numbers (0=irrelevant,1=low,2=medium,3=high), same order.`,
-      },
-      { role: 'user', content: `Question: ${query}
-Passages:
-${passages}
-` },
-    ];
-    const response = await fetch(`${baseUrl.replace(/\/$/,'')}/api/chat`, {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ model, stream: false, options: { temperature: 0.1 }, messages: prompt }),
-    });
-    if (!response.ok) {
-      const text = await response.text();
-      debug('localRerank: local reranker error:', text);
-      throw new Error(text);
-    }
-    /** @type {Record<string, Record<string, string>>} */
-    const data = await response.json();
-
-    /** @type {number[]} */
-    let scores = [];
-    try {
-      scores = JSON.parse(data?.message?.content ?? '[]');
-    } catch (error) {
-      debug('Local reranker error:', error);
-    }
-    if (!Array.isArray(scores)) {
-      debug('localRerank: scores was not an array');
-      scores = [];
-    }
-
-    // Pad/clip scores to match chunks length
-    scores.length = chunks.length;
-    return chunks.map((c, i)=>({ ...c, score: Number(scores[i] ?? 0) }));
-  }
-
   /**
    * Retrieve chunks from the database.
    * @param {string} query The query to retrieve chunks for.
@@ -1223,6 +1039,8 @@ ${passages}
    */
   static async retrieve(query, config, slugs = null) {
     debug('retrieve:', { query, slugs });
+    const retrievalStartTime = Date.now();
+
     // Load the database
     /** @type {import('better-sqlite3/index.js').Database} */
     const db = new Database(config.databasePath, config.databseOptions);
@@ -1241,7 +1059,12 @@ ${passages}
 
     // Embed the query
     query = OllamaEmbedder.removeStopWords(query.trim()).join(' ');
-    const queryVectors = await AIChatBot.embedQuery(config.ollamaBaseUrl, config.embedModel, query);
+    const queryVectors = await AIChatBot.embedQuery(
+      config.ollamaBaseUrl,
+      config.embedModel,
+      query,
+      config.embedPrompt('Given a web search query, retrieve relevant passages that answer the query', query),
+    );
 
     // Vector search via sqlite-vss (top K more than we need to allow blending)
     const vectorQuery = `WITH vec_matches AS (
@@ -1279,23 +1102,6 @@ ${passages}
     if (config.hybrid) {
       try {
         // Ask small local model for entities/concepts
-        const entitiesStartTime = Date.now();
-        /** @type {string[]} */
-        if (config.entities?.enabled) {
-          try {
-            debug('retrieve: extracting entities...');
-            entities = [
-              ...entities,
-              ...(await AIChatBot.extractEntities(config.entities.baseUrl, config.entities.model, query, config.entities.max)),
-            ];
-            const entitiesTime = Date.now() - entitiesStartTime;
-            debug('retrieve: entities extraction time:', entitiesTime + 'ms');
-            debug('retrieve: entities:', entities);
-          } catch (e) {
-            const entitiesTime = Date.now() - entitiesStartTime;
-            debug('retrieve: entities extraction failed after', entitiesTime + 'ms:', e);
-          }
-        }
 
         // Setup the FTS query
         const ftsStmt = db.prepare(`
@@ -1312,7 +1118,9 @@ ${passages}
         // Join entities and parts with " OR " and make loose variants
         const items = entities.filter(Boolean).map(t => t.replace(/\?/g, '').replace(/\s+/g, ' ').trim());
         const pieces = items.map(phrase => {
-          const parts = phrase.split(/\s+/).filter(Boolean);
+          let parts = phrase.split(/\s+/).filter(Boolean);
+          // Remove duplicates
+          parts = [...new Set(parts)];
           const loose = parts.length ? `${parts.map(t => `"${t}"*`).join(' AND ')}` : null;
           return [loose].filter(Boolean).join(' OR ');
         });
@@ -1543,25 +1351,6 @@ ${passages}
     debug('retrieve: picked chunks:', picked.length);
     debug('retrieve: picked chunks:', picked.map(c => ({ source_id: c.source_id, score: c.score })));
 
-    // Local re-ranker on the final candidate set
-    if (config.rerank?.enabled) {
-      const topN = config.rerank.topN ?? Math.min(30, picked.length);
-      const slice = picked.slice(0, topN);
-
-      // score with a tiny local model (0=irrelevant..3=high)
-      const scored = await AIChatBot.localRerank(config.rerank.baseUrl, config.rerank.model, query, slice);
-
-      // keep only >1, sort desc by rerank score
-      const good = scored.filter((chunk) => chunk.score >= 2).sort((a, b)=> b.score - a.score);
-
-      // fall back to original if reranker is too strict
-      if (good.length >= Math.min(5, slice.length/2)) {
-        picked.splice(0, slice.length, ...good);
-      }
-      debug('retrieve: reranked chunks:', picked.length);
-      debug('retrieve: reranked chunks:', picked.map(c => c.source_id));
-    }
-
     // Prepare citations with anchors
     const citations = picked.map(c => {
       const anchor = c.sectionPath.length ? '#' + c.sectionPath.map(encodeURIComponent).join('-') : '';
@@ -1577,7 +1366,27 @@ ${passages}
     debug('retrieve: citations:', citations.length);
     debug('retrieve: citations:', citations.map(c => { return { slug: c.slug, sectionPath: c.sectionPath, score: c.score, source_id: c.source_id }; }));
 
-    return { query, chunks: picked, citations };
+    // merge chunks (keep best score) and citations
+    /** @type {Map<number, RetrievedChunk>} */
+    const byRow = new Map();
+    for (const chunk of picked) {
+      const prev = byRow.get(chunk.rowid);
+      if (!prev || chunk.score < prev.score) {
+        byRow.set(chunk.rowid, chunk);
+      }
+    }
+
+    /** @type {RetrievedChunk[]} */
+    const sortedChunks = Array.from(byRow.values()).sort((a, b) => b.score - a.score).slice(0, config.chunkLimit);
+
+    const totalContextTokens = sortedChunks.reduce((total, chunk) => {
+      return total + (chunk.token_count || OllamaEmbedder.approxTokenLen(chunk.text));
+    }, 0);
+    debug('Total Context Tokens:', totalContextTokens);
+
+    const retrievalTime = Date.now() - retrievalStartTime;
+    debug('Retrieval Time:', retrievalTime + 'ms');
+    return { query, chunks: sortedChunks, citations };
   }
 }
 

@@ -1,5 +1,4 @@
 export { default as config } from "./config.js";
-export { default as wiki } from "./middleware.js";
 export { default as UttoriWiki } from "./wiki.js";
 export { default as wikiFlash } from "./wiki-flash.js";
 export { default as AddQueryOutputToViewModel } from "./plugins/query-output.js";
@@ -22,7 +21,6 @@ export { default as FormHandler } from "./plugins/form-handler.js";
 export { default as EmailHandler } from "./plugins/form-handlers/email-handler.js";
 export { default as GoogleDocsHandler } from "./plugins/form-handlers/google-docs-handler.js";
 export * from "./config.js";
-export * from "./middleware.js";
 export * from "./redirect.js";
 export * from "./wiki-flash.js";
 export * from "./wiki.js";

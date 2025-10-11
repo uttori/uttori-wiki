@@ -41,7 +41,9 @@ export function video(state) {
     if (src.startsWith('http://') || src.startsWith('https://')) {
       const url = new URL(src);
       // If a domain is not in this list, it is set to 'nofollow'.
-      if (state.md.options?.uttori?.allowedExternalDomains?.includes(url.hostname)) {
+      /** @type {import('markdown-it/index.js').Options | { uttori: { allowedExternalDomains: string[] } }} */
+      const options = { uttori: { allowedExternalDomains: [] }, ...state.md.options };
+      if (options?.uttori?.allowedExternalDomains?.includes(url.hostname)) {
         token = new state.Token('video_open', 'video', 1);
         token.attrs = [
           ['class', 'video-embed-video video-embed-external'],

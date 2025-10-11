@@ -23,8 +23,8 @@
     * _instance_
         * [.baseUrl](#OllamaEmbedder+baseUrl)
         * [.model](#OllamaEmbedder+model)
-        * [.embed(text, numAttempts)](#OllamaEmbedder+embed) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
-        * [.embedBatch(texts, [concurrency])](#OllamaEmbedder+embedBatch) ⇒ <code>Promise.&lt;Array.&lt;Array.&lt;number&gt;&gt;&gt;</code>
+        * [.embed(input, [prompt], [numAttempts])](#OllamaEmbedder+embed) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+        * [.embedBatch(texts, [prompt], [concurrency])](#OllamaEmbedder+embedBatch) ⇒ <code>Promise.&lt;Array.&lt;Array.&lt;number&gt;&gt;&gt;</code>
         * [.probeDimension()](#OllamaEmbedder+probeDimension) ⇒ <code>Promise.&lt;number&gt;</code>
     * _static_
         * [.approxTokenLen(text)](#OllamaEmbedder.approxTokenLen) ⇒ <code>number</code>
@@ -53,7 +53,7 @@ The model to use for the embeddings.
 **Kind**: instance property of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
 <a name="OllamaEmbedder+embed"></a>
 
-### ollamaEmbedder.embed(text, numAttempts) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
+### ollamaEmbedder.embed(input, [prompt], [numAttempts]) ⇒ <code>Promise.&lt;Array.&lt;number&gt;&gt;</code>
 Embed a text string with Ollama via the embeddings API.
 
 **Kind**: instance method of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
@@ -61,12 +61,13 @@ Embed a text string with Ollama via the embeddings API.
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
-| text | <code>string</code> |  | The text to embed. |
-| numAttempts | <code>number</code> | <code>5</code> | The number of attempts to make. |
+| input | <code>string</code> |  | The text to embed. |
+| [prompt] | <code>string</code> |  | The prompt to embed. |
+| [numAttempts] | <code>number</code> | <code>5</code> | The number of attempts to make. Defaults to 5. |
 
 <a name="OllamaEmbedder+embedBatch"></a>
 
-### ollamaEmbedder.embedBatch(texts, [concurrency]) ⇒ <code>Promise.&lt;Array.&lt;Array.&lt;number&gt;&gt;&gt;</code>
+### ollamaEmbedder.embedBatch(texts, [prompt], [concurrency]) ⇒ <code>Promise.&lt;Array.&lt;Array.&lt;number&gt;&gt;&gt;</code>
 Embed a batch of text strings with Ollama via the embeddings API.
 
 **Kind**: instance method of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
@@ -75,7 +76,8 @@ Embed a batch of text strings with Ollama via the embeddings API.
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |
 | texts | <code>Array.&lt;string&gt;</code> |  | The text strings to embed. |
-| [concurrency] | <code>number</code> | <code>8</code> | The number of concurrent requests to make. |
+| [prompt] | <code>string</code> |  | The prompt to embed. |
+| [concurrency] | <code>number</code> | <code>8</code> | The number of concurrent requests to make. Defaults to 8. |
 
 <a name="OllamaEmbedder+probeDimension"></a>
 

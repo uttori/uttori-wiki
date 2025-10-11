@@ -11,7 +11,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.StoragePro
  * Processes a query string.
  * @param {string} query - The SQL-like query to parse.
  * @param {import('../../wiki.js').UttoriWikiDocument[]} objects - An array of object to search within.
- * @returns {import('../../wiki.js').UttoriWikiDocument[]|number} Returns an array of all matched documents, or a count.
+ * @returns {import('../../wiki.js').UttoriWikiDocument[]|Partial<import('../../wiki.js').UttoriWikiDocument>[]|number} Returns an array of all matched documents, or a count.
  * @example
  * ```js
  * processQuery('SELECT name FROM table WHERE age > 1 ORDER BY RANDOM LIMIT 3', [{ ... }, ...]);
@@ -58,7 +58,7 @@ const processQuery = (query, objects) => {
   // Select
   if (!fields.includes('*')) {
     output = output.map((item) => {
-      /** @type {import('../../wiki.js').UttoriWikiDocument} */
+      /** @type {Partial<import('../../wiki.js').UttoriWikiDocument>} */
       const newItem = {};
       fields.forEach((field) => {
         if (Object.hasOwn(item, field)) {

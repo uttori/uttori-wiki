@@ -30,18 +30,20 @@ declare class OllamaEmbedder {
     model: string;
     /**
      * Embed a text string with Ollama via the embeddings API.
-     * @param {string} text The text to embed.
-     * @param {number} numAttempts The number of attempts to make.
+     * @param {string} input The text to embed.
+     * @param {string} [prompt] The prompt to embed.
+     * @param {number} [numAttempts] The number of attempts to make. Defaults to 5.
      * @returns {Promise<number[]>} The embedding vector.
      */
-    embed(text: string, numAttempts?: number): Promise<number[]>;
+    embed(input: string, prompt?: string, numAttempts?: number): Promise<number[]>;
     /**
      * Embed a batch of text strings with Ollama via the embeddings API.
      * @param {string[]} texts The text strings to embed.
-     * @param {number} [concurrency] The number of concurrent requests to make.
+     * @param {string} [prompt] The prompt to embed.
+     * @param {number} [concurrency] The number of concurrent requests to make. Defaults to 8.
      * @returns {Promise<number[][]>} The embedding vectors.
      */
-    embedBatch(texts: string[], concurrency?: number): Promise<number[][]>;
+    embedBatch(texts: string[], prompt?: string, concurrency?: number): Promise<number[][]>;
     /**
      * Probe the dimension of the embedding vector.
      * @returns {Promise<number>} The dimension of the embedding vector.

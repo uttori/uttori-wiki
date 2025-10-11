@@ -19,12 +19,13 @@ class OllamaEmbedder {
 
   /**
    * Embed a text string with Ollama via the embeddings API.
-   * @param {string} text The text to embed.
-   * @param {number} numAttempts The number of attempts to make.
+   * @param {string} input The text to embed.
+   * @param {string} [prompt] The prompt to embed.
+   * @param {number} [numAttempts] The number of attempts to make. Defaults to 5.
    * @returns {Promise<number[]>} The embedding vector.
    */
-  async embed(text, numAttempts = 5) {
-    debug('embed:', { text: text.length });
+  async embed(input, prompt, numAttempts = 5) {
+    debug('embed:', { input: input.length, prompt });
     let lastError = null;
     /** Some versions expect "input", others "prompt". We'll send both. */
     for (let attempt = 0; attempt < numAttempts; attempt++) {
@@ -32,12 +33,12 @@ class OllamaEmbedder {
         const response = await fetch(`${this.baseUrl.replace(/\/$/, '')}/api/embeddings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model: this.model, input: text, prompt: text }),
+          body: JSON.stringify({ model: this.model, input, prompt: prompt ?? input }),
         });
         if (!response.ok) {
-          debug('Ollama embedding error:', await response.text());
           const msg = await response.text();
-          throw new Error(`Ollama ${response.status}: ${msg}`);
+          debug('Ollama embedding error:', msg);
+          throw new Error(`Ollama ${response.status}: ${msg} ${this.model} ${input} ${prompt}`);
         }
         const data = await response.json();
         // Common shapes: { embedding: number[] } or { data:[{embedding:[]}] }
@@ -66,10 +67,11 @@ class OllamaEmbedder {
   /**
    * Embed a batch of text strings with Ollama via the embeddings API.
    * @param {string[]} texts The text strings to embed.
-   * @param {number} [concurrency] The number of concurrent requests to make.
+   * @param {string} [prompt] The prompt to embed.
+   * @param {number} [concurrency] The number of concurrent requests to make. Defaults to 8.
    * @returns {Promise<number[][]>} The embedding vectors.
    */
-  async embedBatch(texts, concurrency = 8) {
+  async embedBatch(texts, prompt, concurrency = 8) {
     debug('embedBatch:', { texts: texts.length, concurrency });
     /** @type {number[][]} */
     const out = new Array(texts.length);
@@ -81,7 +83,7 @@ class OllamaEmbedder {
           return;
         }
         try {
-          out[idx] = await this.embed(texts[idx]);
+          out[idx] = await this.embed(texts[idx], prompt);
         } catch (error) {
           debug('embedBatch error:', error);
           throw error;

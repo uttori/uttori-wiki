@@ -14,6 +14,7 @@ Find and replace the <video> tags with safe <video> tags.
 * [video(state)](#video)
     * [~parts](#video..parts) : <code>IterableIterator.&lt;RegExpMatchArray&gt;</code>
     * [~keys](#video..keys) : <code>Record.&lt;string, string&gt;</code>
+    * [~options](#video..options) : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
 
 <a name="video..parts"></a>
 
@@ -22,4 +23,8 @@ Find and replace the <video> tags with safe <video> tags.
 <a name="video..keys"></a>
 
 ### video~keys : <code>Record.&lt;string, string&gt;</code>
+**Kind**: inner constant of [<code>video</code>](#video)  
+<a name="video..options"></a>
+
+### video~options : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>video</code>](#video)  

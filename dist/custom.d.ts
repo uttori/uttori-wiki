@@ -119,4 +119,4 @@ export type SqlWhereParserAst = {
 };
 export type ParserOperand = boolean | string | number | symbol | SqlWhereParserAst | Array<boolean | string | number | symbol | SqlWhereParserAst>;
 
-export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<string>) => Array<SqlWhereParserAst> | SqlWhereParserAst;
+export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<ParserOperand>) => Array<SqlWhereParserAst> | SqlWhereParserAst;

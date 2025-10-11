@@ -341,6 +341,7 @@ class MarkdownItRenderer {
       debug('Found missing links:', missingLinks.length);
       for (const match of missingLinks) {
         const title = match.slice(1).slice(0, -3);
+        // @ts-expect-error slugify is not typed
         const slug = slugify(title, { lower: true });
         content = content.replace(match, `[${title}](/${slug})`);
       }

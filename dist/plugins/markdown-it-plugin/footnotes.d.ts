@@ -42,12 +42,18 @@ export function definitionOpenTag({ id, label }: {
  * Creates the tag for the Footnote reference.
  * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens to render.
  * @param {number} index The index of the current token in the Tokens array.
- * @param {import('markdown-it/index.js').Options} options Option parameters of the parser instance.
+ * @param {import('markdown-it/index.js').Options | { uttori: { footnotes: { referenceTag: Function } } }} options Option parameters of the parser instance.
  * @param {object} _env Additional data from parsed input (references, for example).
  * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
  * @returns {string} The tag for the Footnote reference.
  */
-export function configFootnoteReference(tokens: import("markdown-it/index.js").Token[], index: number, options: import("markdown-it/index.js").Options, _env: object, _slf: import("markdown-it/index.js").Renderer): string;
+export function configFootnoteReference(tokens: import("markdown-it/index.js").Token[], index: number, options: import("markdown-it/index.js").Options | {
+    uttori: {
+        footnotes: {
+            referenceTag: Function;
+        };
+    };
+}, _env: object, _slf: import("markdown-it/index.js").Renderer): string;
 /**
  * Creates the opening tag of the Footnote items block.
  * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens to render.

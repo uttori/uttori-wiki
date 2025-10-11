@@ -1,6 +1,4 @@
-
 export { default as config } from './config.js';
-export { default as wiki } from './middleware.js';
 export { default as UttoriWiki } from './wiki.js';
 export { default as wikiFlash } from './wiki-flash.js';
 
@@ -26,7 +24,6 @@ export { default as GoogleDocsHandler } from './plugins/form-handlers/google-doc
 
 // Everything below is for TypeScript exports
 export * from './config.js';
-export * from './middleware.js';
 export * from './redirect.js';
 export * from './wiki-flash.js';
 export * from './wiki.js';

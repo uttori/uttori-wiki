@@ -53,28 +53,39 @@ export function uttoriInline(state) {
   state.tokens.forEach((blockToken) => {
     if (blockToken.type === 'inline' && blockToken.children) {
       // https://markdown-it.github.io/markdown-it/#Token
+      /** @type {import('markdown-it/index.js').Options | { uttori: { lazyImages: boolean, allowedExternalDomains: string[], openNewWindow: boolean, baseUrl: string } }} */
+      const options = {
+        uttori: {
+          lazyImages: false,
+          allowedExternalDomains: [],
+          openNewWindow: false,
+          baseUrl: '',
+        },
+        ...state.md.options,
+      };
       blockToken.children.forEach((token) => {
         switch (token.type) {
           case 'image': {
-            if (state.md.options?.uttori?.lazyImages) {
+            if (options?.uttori?.lazyImages) {
               updateValue(token, 'loading', 'lazy');
             }
             break;
           }
           case 'link_open': {
+            /** @type {string} */
             const href = getValue(token, 'href');
             if (href) {
               // Absolute URLs
               if (href.startsWith('http://') || href.startsWith('https://')) {
                 const url = new URL(href);
                 // If a domain is not in this list, it is set to 'nofollow'.
-                if (state.md.options?.uttori?.allowedExternalDomains?.includes(url.hostname)) {
+                if (options?.uttori?.allowedExternalDomains?.includes(url.hostname)) {
                   updateValue(token, 'rel', 'external noopener noreferrer');
                 } else {
                   updateValue(token, 'rel', 'external nofollow noopener noreferrer');
                 }
                 // Open external domains in a new window.
-                if (state.md.options?.uttori?.openNewWindow) {
+                if (options?.uttori?.openNewWindow) {
                   updateValue(token, 'target', '_blank');
                 }
               } else if (href.startsWith('color:')) {
@@ -85,10 +96,9 @@ export function uttoriInline(state) {
                 ];
               } else {
                 // Prefix for relative URLs
-
-                if (state.md.options?.uttori?.baseUrl) {
+                if (options?.uttori?.baseUrl) {
                   // Check for opening slash
-                  updateValue(token, 'href', `${state.md.options.uttori.baseUrl}/${href.startsWith('/') ? href.substring(1) : href}`);
+                  updateValue(token, 'href', `${options.uttori.baseUrl}/${href.startsWith('/') ? href.substring(1) : href}`);
                 }
               }
             }
