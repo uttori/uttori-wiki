@@ -90,7 +90,10 @@ class SearchProvider {
     }
 
     this.index = lunr(function lunrSetup() {
+      // @ts-expect-error multiLanguage is not typed
       if (Array.isArray(lunr_locales) && lunr_locales.length > 0 && lunr?.multiLanguage) {
+        // @ts-expect-error multiLanguage is not typed
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         this.use(lunr.multiLanguage(...lunr_locales));
       }
 

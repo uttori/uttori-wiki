@@ -170,6 +170,7 @@ class SqlWhereParser {
               throw new SyntaxError('Unknow Error: operatorStack empty?');
             }
             const operator = this.operators[value];
+            /** @type {Array<import('../../../dist/custom.d.ts').ParserOperand>} */
             const operands = [];
             let numOperands = operator.type;
             if (typeof numOperands === 'number') {

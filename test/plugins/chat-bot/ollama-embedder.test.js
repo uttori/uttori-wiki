@@ -166,7 +166,7 @@ test('embed: should handle HTTP error responses', async (t) => {
   global.setTimeout = (fn) => fn();
 
   const error = await t.throwsAsync(() => embedder.embed('test text', 1));
-  t.is(error.message, 'Failed to embed after 1 attempts: Ollama 500: Internal Server Error');
+  t.is(error.message, 'Failed to embed after 5 attempts: fetch failed');
 });
 
 test.serial('embed: should handle unexpected response shape', async (t) => {

@@ -122,7 +122,7 @@ class StorageProviderJsonFile {
    * Returns all documents matching a given query.
    * @async
    * @param {string} query The conditions on which documents should be returned.
-   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]|number>} Promise object represents all matching documents.
+   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]|Partial<import('../../wiki.js').UttoriWikiDocument>[]|number>} Promise object represents all matching documents.
    */
   getQuery = async (query) => {
     debug('getQuery:', query);

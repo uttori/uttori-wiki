@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v8.0.0) - 2025-10-10)
+
+- 💥 BREAKING CHANGES!
+- 💥 Remove `middleware`, server setup becomes so much more flexible
+- 🛠 Convert `AIChatBot` to use WebSockets, use `tools`, added custom embedding prompts, removed `entities`, `rewriter` and `rerank` options.
+- 🛠 Clean up many types
+- 🎁 Update dependencies
+- 🎁 Update dev dependencies
+
+## [7.0.2](https://github.com/uttori/uttori-wiki/compare/v7.0.0...v7.0.2) - 2025-10-05)
+
+- 🪲 Fix analytics plugin with popular documents not working with limit
+- 🛠 New type & docs build system
+- 🛠 Clean up many types
+- 🎁 Update dependencies
+- 🎁 Update dev dependencies
+- 🦤 Test failed during 7.0.1, thus this version
+
 ## [7.0.0](https://github.com/uttori/uttori-wiki/compare/v6.1.3...v7.0.0) - 2025-10-04)
 
 - 💥 BREAKING CHANGES!

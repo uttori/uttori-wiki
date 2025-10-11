@@ -1,17 +1,18 @@
 /**
  * @typedef {object} AIChatBotConfig
  * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} apiRoute The API route for streaming to and from the chat bot interface.
+ * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
  * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
  * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
- * @property {import('express').RequestHandler[]} middlewareApiRoute Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
  * @property {string} databasePath The path to the database.
  * @property {Database.Options} databseOptions The options for the database.
  * @property {string} ollamaBaseUrl The base URL for the Ollama server.
  * @property {string} embedModel The model to use for the embedder.
+ * @property {function(string, string): string} [embedPrompt] The prompt to use for the embedder.
+ * @property {object[]} tools The tools to use for the chat.
  * @property {string} chatModel The model to use for the chat.
  * @property {number} maxTokens The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window.
  * @property {number} temperature The temperature for the model.
@@ -33,23 +34,6 @@
  * @property {number} chunkTokens Used during indexing, the number of tokens per chunk.
  * @property {number} overlapTokens Used during indexing, the number of tokens to overlap between chunks.
  * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
- * @property {object} entities The entities configuration.
- * @property {boolean} entities.enabled Whether to use the entities.
- * @property {string} entities.baseUrl The base URL for the entities server.
- * @property {string} entities.model The model to use for the entities.
- * @property {number} entities.max The maximum number of entities to return.
- * @property {object} rewriter The rewriter configuration.
- * @property {boolean} rewriter.enabled Whether to use the rewriter.
- * @property {string} rewriter.baseUrl The base URL for the rewriter.
- * @property {string} rewriter.model The model to use for the rewriter.
- * @property {number} rewriter.numberOfQueries The number of queries to use for the rewriter.
- * @property {boolean} rewriter.includeOriginal Whether to include the original query in the rewriter.
- * @property {number} rewriter.temperature The temperature for the rewriter.
- * @property {object} rerank The rerank configuration.
- * @property {boolean} rerank.enabled Whether to use the rerank.
- * @property {string} rerank.baseUrl The base URL for the rerank.
- * @property {string} rerank.model The model to use for the rerank.
- * @property {number} rerank.topN The top N to use for the rerank.
  * @property {object} summary The summary configuration.
  * @property {boolean} summary.enabled Whether to use the summary.
  * @property {string} summary.baseUrl The base URL for the summary.
@@ -76,9 +60,9 @@ export type AIChatBotConfig = {
      */
     events?: Record<string, string[]>;
     /**
-     * The API route for streaming to and from the chat bot interface.
+     * The WebSocket route for streaming to and from the chat bot interface.
      */
-    apiRoute: string;
+    websocketRoute: string;
     /**
      * Server route to show the chat bot interface.
      */
@@ -95,10 +79,6 @@ export type AIChatBotConfig = {
      * A request handler for the interface route.
      */
     interfaceRequestHandler?: (arg0: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>) => import("express").RequestHandler;
-    /**
-     * Custom Middleware for the API route.
-     */
-    middlewareApiRoute: import("express").RequestHandler[];
     /**
      * Custom Middleware for the public route.
      */
@@ -119,6 +99,14 @@ export type AIChatBotConfig = {
      * The model to use for the embedder.
      */
     embedModel: string;
+    /**
+     * The prompt to use for the embedder.
+     */
+    embedPrompt?: (arg0: string, arg1: string) => string;
+    /**
+     * The tools to use for the chat.
+     */
+    tools: object[];
     /**
      * The model to use for the chat.
      */
@@ -203,35 +191,6 @@ export type AIChatBotConfig = {
      * The markdown-it plugin configuration.
      */
     markdownItPluginConfig: import("./renderer-markdown-it.js").MarkdownItRendererConfig;
-    /**
-     * The entities configuration.
-     */
-    entities: {
-        enabled: boolean;
-        baseUrl: string;
-        model: string;
-        max: number;
-    };
-    /**
-     * The rewriter configuration.
-     */
-    rewriter: {
-        enabled: boolean;
-        baseUrl: string;
-        model: string;
-        numberOfQueries: number;
-        includeOriginal: boolean;
-        temperature: number;
-    };
-    /**
-     * The rerank configuration.
-     */
-    rerank: {
-        enabled: boolean;
-        baseUrl: string;
-        model: string;
-        topN: number;
-    };
     /**
      * The summary configuration.
      */
@@ -442,6 +401,14 @@ export type ChatBotMessage = {
      * The content of the message.
      */
     content: string;
+    /**
+     * The name of the tool.
+     */
+    name?: string;
+    /**
+     * The slugs of the sources to use as context.
+     */
+    slugs?: string[];
 };
 /**
  * Uttori AI Chat Bot
@@ -505,7 +472,6 @@ declare class AIChatBot {
      * const context = {
      *   config: {
      *     [AIChatBot.configKey]: {
-     *       middlewareApiRoute: [],
      *       middlewarePublicRoute: [],
      *     },
      *   },
@@ -515,6 +481,29 @@ declare class AIChatBot {
      */
     static bindRoutes(server: import("express").Application, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): void;
     /**
+     * Bind the WebSocket server to the server object.
+     * @param {import('http').Server} server An Express server instance.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+     * @example <caption>AIChatBot.bindWebSocket(server, context)</caption>
+     * AIChatBot.bindWebSocket(server, context);
+     * @static
+     */
+    static bindWebSocket(server: import("http").Server, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): void;
+    /**
+     * Helper: stream one /api/chat call and forward chunks to client,
+     * intercepting tool calls. Returns {messages, finished}
+     * messages: updated transcript to continue if tool used
+     * finished: true once an assistant final turn is produced
+     * @param {import('ws').WebSocket} ws The WebSocket instance.
+     * @param {ChatBotMessage[]} messages The messages.
+     * @param {AIChatBotConfig} config The configuration.
+     * @returns {Promise<{messages: ChatBotMessage[], finished: boolean}>} The messages and finished status.
+     */
+    static runChatPass(ws: import("ws").WebSocket, messages: ChatBotMessage[], config: AIChatBotConfig): Promise<{
+        messages: ChatBotMessage[];
+        finished: boolean;
+    }>;
+    /**
      * Handle requests to fetch available documents for the document selector.
      * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
      * @returns {import('express').RequestHandler} The function to pass to Express.
@@ -522,37 +511,16 @@ declare class AIChatBot {
      */
     static documentsHandler(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): import("express").RequestHandler;
     /**
-     * The Express route method to process the upload request and provide a response.
-     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-     * @returns {import('express').RequestHandler<{}, { error: string }, AIChatBotApiRequestBody>} The function to pass to Express.
-     * @example <caption>AIChatBot.apiRequestHandler(context)(request, response, _next)</caption>
-     * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
-     * @static
-     */
-    static apiRequestHandler(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): import("express").RequestHandler<{}, {
-        error: string;
-    }, AIChatBotApiRequestBody>;
-    /**
      * Build messages for the AI chat bot.
      * @param {string} userQuestion The user's question.
-     * @param {RetrievedChunk[]} chunks The chunks of text to use as context.
+     * @param {string[]} slugs The slugs of the sources to use as context.
      * @param {object} opts The options for the prompt.
      * @param {number} opts.maxContextCharacters The maximum number of characters to include in the context.
      * @returns {ChatBotMessage[]} The messages for the AI chat bot.
      */
-    static buildPromptMessages(userQuestion: string, chunks: RetrievedChunk[], opts: {
+    static buildPromptMessages(userQuestion: string, slugs: string[], opts: {
         maxContextCharacters: number;
     }): ChatBotMessage[];
-    /**
-     * Rewrite the user's question into diverse, self-contained search queries for a documentation/wiki RAG system.
-     * @param {string} baseUrl The base URL of the API.
-     * @param {string} model The model to use for the rewriter.
-     * @param {string} userQuery The user's question.
-     * @param {number} numberOfQueries The number of queries to generate.
-     * @param {number} temperature The temperature for the rewriter.
-     * @returns {Promise<string[]>} The rewritten queries.
-     */
-    static rewriteQueries(baseUrl: string, model: string, userQuery: string, numberOfQueries: number, temperature: number): Promise<string[]>;
     /**
      * Summarize the conversation between the user and the assistant.
      * @param {string} baseUrl The base URL of the API.
@@ -565,49 +533,20 @@ declare class AIChatBot {
      */
     static summarizeTurn(baseUrl: string, model: string, prevSummary: string, lastTurns: object[], newUser: string, newAssistant: string): Promise<string>;
     /**
-     * Stream the response from the AI chat bot.
-     * @param {string} baseUrl The base URL of the API.
-     * @param {string} model The model to use for the chat bot.
-     * @param {number} temperature The temperature for the chat bot.
-     * @param {number} maxTokens The maximum number of tokens to generate.
-     * @param {ChatBotMessage[]} messages The messages to send to the chat bot.
-     * @param {StreamHandlers} handler The handler for the chat bot.
-     * @returns {Promise<void>} The response from the chat bot.
-     */
-    static stream(baseUrl: string, model: string, temperature: number, maxTokens: number, messages: ChatBotMessage[], handler: StreamHandlers): Promise<void>;
-    /**
      * Open the database and create the necessary tables if they don't exist.
      * @param {Partial<AIChatBotConfig>} config The configuration.
      * @returns {import('better-sqlite3').Database} The database.
      */
     static openDatabase(config: Partial<AIChatBotConfig>): import("better-sqlite3").Database;
     /**
-     * Extract 1 to 6 short entities/concepts from the question.
-     * Returns a lowercase array; strictly JSON (no prose).
-     * @param {string} baseUrl The base URL of the Ollama server.
-     * @param {string} model The model to use for entity extraction.
-     * @param {string} question The question to extract entities from.
-     * @param {number} max The maximum number of entities to extract, defaults to 5.
-     * @returns {Promise<string[]>} A lowercase array of entities.
-     */
-    static extractEntities(baseUrl: string, model: string, question: string, max?: number): Promise<string[]>;
-    /**
      * Embed a query using the Ollama API.
      * @param {string} baseUrl The base URL of the Ollama server.
      * @param {string} model The model to use for embedding.
-     * @param {string} text The text to embed.
+     * @param {string} input The text to embed.
+     * @param {string} [prompt] The prompt to embed.
      * @returns {Promise<Float32Array>} The embedded query.
      */
-    static embedQuery(baseUrl: string, model: string, text: string): Promise<Float32Array>;
-    /**
-     * Rerank the chunks using a local LLM (0=irrelevant..3=high)
-     * @param {string} baseUrl The base URL of the Ollama server.
-     * @param {string} model The model to use for reranking.
-     * @param {string} query The query to rerank the chunks for.
-     * @param {RetrievedChunk[]} chunks The chunks to rerank.
-     * @returns {Promise<RetrievedChunk[]>} The reranked chunks.
-     */
-    static localRerank(baseUrl: string, model: string, query: string, chunks: RetrievedChunk[]): Promise<RetrievedChunk[]>;
+    static embedQuery(baseUrl: string, model: string, input: string, prompt?: string): Promise<Float32Array>;
     /**
      * Retrieve chunks from the database.
      * @param {string} query The query to retrieve chunks for.

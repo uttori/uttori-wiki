@@ -191,13 +191,16 @@ export function definitionOpenTag({ id, label }) {
  * Creates the tag for the Footnote reference.
  * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens to render.
  * @param {number} index The index of the current token in the Tokens array.
- * @param {import('markdown-it/index.js').Options} options Option parameters of the parser instance.
+ * @param {import('markdown-it/index.js').Options | { uttori: { footnotes: { referenceTag: Function } } }} options Option parameters of the parser instance.
  * @param {object} _env Additional data from parsed input (references, for example).
  * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
  * @returns {string} The tag for the Footnote reference.
  */
 export function configFootnoteReference(tokens, index, options, _env, _slf) {
-  return options.uttori.footnotes.referenceTag(tokens[index].meta);
+  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { referenceTag: Function } } }} */
+  const opts = { uttori: { footnotes: { referenceTag: () => '' } }, ...options };
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return opts.uttori.footnotes.referenceTag(tokens[index].meta);
 }
 
 /**
@@ -210,7 +213,10 @@ export function configFootnoteReference(tokens, index, options, _env, _slf) {
  * @returns {string} The opening tag of the Footnote items block.
  */
 export function configFootnoteOpen(tokens, index, options, _env, _slf) {
-  return options.uttori.footnotes.definitionOpenTag(tokens[index].meta);
+  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { definitionOpenTag: Function } } }} */
+  const opts = { uttori: { footnotes: { definitionOpenTag: () => '' } }, ...options };
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return opts.uttori.footnotes.definitionOpenTag(tokens[index].meta);
 }
 
 /**
@@ -223,7 +229,9 @@ export function configFootnoteOpen(tokens, index, options, _env, _slf) {
  * @returns {string} The closing tag of the Footnote section block.
  */
 export function configFootnoteClose(_tokens, _index, options, _env, _slf) {
-  return options.uttori.footnotes.definitionCloseTag;
+  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { definitionCloseTag: string } } }} */
+  const opts = { uttori: { footnotes: { definitionCloseTag: '' } }, ...options };
+  return opts.uttori.footnotes.definitionCloseTag;
 }
 
 export default {

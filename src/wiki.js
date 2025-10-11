@@ -359,7 +359,7 @@ class UttoriWiki {
       document,
       meta,
       basePath: request.baseUrl,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
@@ -412,7 +412,7 @@ class UttoriWiki {
       searchResults: [],
       meta,
       basePath: request.baseUrl,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
 
     if (request.query && request.query.s) {
@@ -509,7 +509,7 @@ class UttoriWiki {
       meta,
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
@@ -732,7 +732,7 @@ class UttoriWiki {
       session: request.session,
       basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/new`,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
@@ -811,7 +811,7 @@ class UttoriWiki {
       document,
       meta,
       basePath: request.baseUrl,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
@@ -937,7 +937,7 @@ class UttoriWiki {
       session: request.session,
       meta,
       basePath: request.baseUrl,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
@@ -1014,7 +1014,7 @@ class UttoriWiki {
       meta,
       revision,
       slug,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
@@ -1090,7 +1090,7 @@ class UttoriWiki {
       meta,
       revision,
       slug,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
@@ -1131,7 +1131,7 @@ class UttoriWiki {
       slug: request.params.slug || '404',
       meta,
       basePath: request.baseUrl,
-      flash: request.wikiFlash(),
+      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 

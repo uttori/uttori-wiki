@@ -263,7 +263,11 @@ export async function indexAllDocuments (fullConfig, context) {
     const embeddings = [];
     for (let i = 0; i < chunks.length; i += batchSize) {
       const slice = chunks.slice(i, i + batchSize);
-      const vecs = await embedder.embedBatch(slice.map(s => s.text), Math.min(8, slice.length));
+      const vecs = await embedder.embedBatch(
+        slice.map(s => s.text),
+        config.embedPrompt('Represent the document for retrieval.', slice.map(s => s.text).join('\n\n')),
+        Math.min(8, slice.length),
+      );
       embeddings.push(...vecs);
       debug(`indexAllDocuments: embedded ${Math.min(i + batchSize, chunks.length)}/${chunks.length}`);
     }

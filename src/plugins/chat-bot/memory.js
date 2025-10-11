@@ -9,7 +9,7 @@
  * @typedef {object} Memory
  * @property {string} summary The summary of the memory, rolling 1 to 3 sentences.
  * @property {Turn[]} last The last N turns.
- * @property {Record<string,string>} [entities] The optional entities.
+ * @property {Record<string, string>} [entities] The optional entities.
  */
 
 /**
@@ -84,7 +84,10 @@ export class MemoryStore {
    * @param {Memory} mem The memory.
    */
   set(id, mem) {
-    this.memories.set(id, { mem: this.clip(mem), expires: this.now() + this.ttlMs });
+    this.memories.set(id, {
+      mem: this.clip(mem),
+      expires: this.now() + this.ttlMs,
+    });
   }
 
   /**

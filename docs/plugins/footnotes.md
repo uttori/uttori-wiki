@@ -94,10 +94,14 @@ Creates the tag for the Footnote reference.
 | --- | --- | --- |
 | tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens to render. |
 | index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it/index.js~Options</code> | Option parameters of the parser instance. |
+| options | <code>module:markdown-it/index.js~Options</code> \| <code>Object</code> | Option parameters of the parser instance. |
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
 | _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
 
+<a name="configFootnoteReference..opts"></a>
+
+### configFootnoteReference~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+**Kind**: inner constant of [<code>configFootnoteReference</code>](#configFootnoteReference)  
 <a name="configFootnoteOpen"></a>
 
 ## configFootnoteOpen(tokens, index, options, _env, _slf) ⇒ <code>string</code>
@@ -114,6 +118,10 @@ Creates the opening tag of the Footnote items block.
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
 | _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
 
+<a name="configFootnoteOpen..opts"></a>
+
+### configFootnoteOpen~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+**Kind**: inner constant of [<code>configFootnoteOpen</code>](#configFootnoteOpen)  
 <a name="configFootnoteClose"></a>
 
 ## configFootnoteClose(_tokens, _index, options, _env, _slf) ⇒ <code>string</code>
@@ -130,3 +138,7 @@ Creates the closing tag of the Footnote items block.
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
 | _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
 
+<a name="configFootnoteClose..opts"></a>
+
+### configFootnoteClose~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+**Kind**: inner constant of [<code>configFootnoteClose</code>](#configFootnoteClose)  
