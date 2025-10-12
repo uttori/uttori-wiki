@@ -455,12 +455,10 @@ test('consolidateNestedItems: should consolidate tables', (t) => {
       },
     ],
   }];
-  const result = consolidateNestedItems(items);
-  t.is(result[0].type, 'table');
-  t.true(result[0].content[0].includes('Table as CSV:'));
-  t.true(result[0].content[1].includes('"Header 1","Header 2"'));
-  t.true(result[0].content[1].includes('"Cell 1","Cell 2"'));
-  t.deepEqual(result[0].children, []);
+  let result = consolidateNestedItems(items, { tableToCSV: false });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as Markdown:\\n| Header 1 | Header 2 |\\n| --- | --- |\\n| Cell 1 | Cell 2 |"],"children":[],"headers":[]}]');
+  result = consolidateNestedItems(items, { tableToCSV: true });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as CSV:\\n\\"Header 1\\",\\"Header 2\\"\\n\\"Cell 1\\",\\"Cell 2\\""],"children":[],"headers":[]}]');
 });
 
 test('consolidateNestedItems: should consolidate footnotes', (t) => {
@@ -524,12 +522,10 @@ test('consolidateNestedItems: should handle table headers with children', (t) =>
       },
     ],
   }];
-  const result = consolidateNestedItems(items);
-  t.is(result[0].type, 'table');
-  t.true(result[0].content[0].includes('Table as CSV:'));
-  t.true(result[0].content[1].includes('"Header 1","Header 2"'));
-  t.true(result[0].content[1].includes('"Cell 1","Cell 2"'));
-  t.deepEqual(result[0].children, []);
+  let result = consolidateNestedItems(items, { tableToCSV: false });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as Markdown:\\n| Header 1 | Header 2 |\\n| --- | --- |\\n| Cell 1 | Cell 2 |"],"children":[],"headers":[]}]');
+  result = consolidateNestedItems(items, { tableToCSV: true });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as CSV:\\n\\"Header 1\\",\\"Header 2\\"\\n\\"Cell 1\\",\\"Cell 2\\""],"children":[],"headers":[]}]');
 });
 
 test('consolidateNestedItems: should handle table cells with children', (t) => {
@@ -565,12 +561,10 @@ test('consolidateNestedItems: should handle table cells with children', (t) => {
       },
     ],
   }];
-  const result = consolidateNestedItems(items);
-  t.is(result[0].type, 'table');
-  t.true(result[0].content[0].includes('Table as CSV:'));
-  t.true(result[0].content[1].includes('"Header 1","Header 2"'));
-  t.true(result[0].content[1].includes('"Cell 1","Cell 2"'));
-  t.deepEqual(result[0].children, []);
+  let result = consolidateNestedItems(items, { tableToCSV: false });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as Markdown:\\n| Header 1 | Header 2 |\\n| --- | --- |\\n| Cell 1 | Cell 2 |"],"children":[],"headers":[]}]');
+  result = consolidateNestedItems(items, { tableToCSV: true });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as CSV:\\n\\"Header 1\\",\\"Header 2\\"\\n\\"Cell 1\\",\\"Cell 2\\""],"children":[],"headers":[]}]');
 });
 
 test('consolidateNestedItems: should handle unknown table child types', (t) => {
@@ -605,12 +599,10 @@ test('consolidateNestedItems: should handle unknown table child types', (t) => {
       },
     ],
   }];
-  const result = consolidateNestedItems(items);
-  t.is(result[0].type, 'table');
-  t.true(result[0].content[0].includes('Table as CSV:'));
-  t.true(result[0].content[1].includes('"Header 1","Header 2"'));
-  t.true(result[0].content[1].includes('"Cell 1","Cell 2"'));
-  t.deepEqual(result[0].children, []);
+  let result = consolidateNestedItems(items, { tableToCSV: false });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as Markdown:\\n| Header 1 | Header 2 |\\n| --- | --- |\\n| Cell 1 | Cell 2 |"],"children":[],"headers":[]}]');
+  result = consolidateNestedItems(items, { tableToCSV: true });
+  t.is(JSON.stringify(result), '[{"type":"table","content":["Table as CSV:\\n\\"Header 1\\",\\"Header 2\\"\\n\\"Cell 1\\",\\"Cell 2\\""],"children":[],"headers":[]}]');
 });
 
 test('removeEmptyItems: should remove items with no content and no children', (t) => {

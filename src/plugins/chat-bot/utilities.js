@@ -38,6 +38,124 @@ export const toCSV = (table, seperator = ',', newLine = '\n', alwaysDoubleQuote 
   .join(newLine);
 
 /**
+ * Takes an array of arrays and returns a Markdown table.
+ * @param {string[][]} table The array of arrays of strings to join.
+ * @param {string} [newLine] The seperator to use when joining the rows, defaults to `\n`.
+ * @returns {string} The Markdown table string.
+ */
+export const toMarkdown = (table, newLine = '\n') => {
+  if (!table || table.length === 0) {
+    return '';
+  }
+
+  // First row is the header
+  const [header, ...bodyRows] = table;
+
+  // Escape pipe characters in cells and handle newlines within cells
+  const escapeCell = (cell) => {
+    const cellStr = String(cell);
+    return cellStr
+      .replace(/\|/g, '\\|')
+      .replace(/\n/g, ' ');
+  };
+
+  // Format a row with pipes
+  /**
+   * Format a row with pipes.
+   * @param {string[]} row The row to format.
+   * @returns {string} The formatted row.
+   */
+  const formatRow = (row) => `| ${row.map(escapeCell).join(' | ')} |`;
+
+  // Create separator row with appropriate number of columns
+  const separator = `| ${header.map(() => '---').join(' | ')} |`;
+
+  // Build the table
+  const rows = [
+    formatRow(header),
+    separator,
+    ...bodyRows.map(formatRow),
+  ];
+
+  return rows.join(newLine);
+};
+
+/**
+ * Estimate token count for text using word count approximation.
+ * @param {string} text The text to estimate tokens for.
+ * @returns {number} The estimated token count.
+ */
+export const estimateTokenCount = (text) => {
+  const words = text.split(/\s+/).filter(w => w.length > 0);
+  return Math.ceil(words.length * 0.75);
+};
+
+/**
+ * Split table rows into chunks based on row count or token size.
+ * @param {string[]} header The table header row.
+ * @param {string[][]} bodyRows The table body rows.
+ * @param {object} options Chunking options.
+ * @param {number} [options.maxRowsPerChunk] Maximum number of rows per chunk.
+ * @param {number} [options.maxTokensPerChunk] Maximum estimated tokens per chunk.
+ * @returns {Array<{header: string[], rows: string[][], chunkIndex: number, totalChunks: number}>} Array of table chunks.
+ */
+export function chunkTable(header, bodyRows, options = {}) {
+  const { maxRowsPerChunk, maxTokensPerChunk } = options;
+
+  // If no chunking limits specified, return entire table as single chunk
+  if (!maxRowsPerChunk && !maxTokensPerChunk) {
+    return [{
+      header,
+      rows: bodyRows,
+      chunkIndex: 1,
+      totalChunks: 1,
+    }];
+  }
+
+  const chunks = [];
+  let currentChunk = [];
+  let currentTokenCount = 0;
+
+  // Calculate header token count once
+  const headerCSV = toCSV([header]);
+  const headerTokens = estimateTokenCount(headerCSV);
+
+  for (const row of bodyRows) {
+    const rowCSV = toCSV([row]);
+    const rowTokens = estimateTokenCount(rowCSV);
+
+    // Check if we should start a new chunk
+    const shouldChunkByRows = maxRowsPerChunk && currentChunk.length >= maxRowsPerChunk;
+    const shouldChunkByTokens = maxTokensPerChunk &&
+      (currentTokenCount + headerTokens + rowTokens) > maxTokensPerChunk;
+
+    if (currentChunk.length > 0 && (shouldChunkByRows || shouldChunkByTokens)) {
+      // Save current chunk
+      chunks.push([...currentChunk]);
+      currentChunk = [];
+      currentTokenCount = 0;
+    }
+
+    currentChunk.push(row);
+    currentTokenCount += rowTokens;
+  }
+
+  // Add the last chunk if it has rows
+  if (currentChunk.length > 0) {
+    chunks.push(currentChunk);
+  }
+
+  // Format chunks with metadata
+  const totalChunks = chunks.length;
+  return chunks.map((rows, index) => ({
+    header,
+    rows,
+    chunkIndex: index + 1,
+    totalChunks,
+  }));
+}
+
+/**
  * Create a node from a MarkdownIt Token.
  * @param {import('markdown-it/index.js').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
@@ -82,11 +200,12 @@ export function stripImagesFromMarkdown(text) {
 }
 
 /**
- * Consolidate header objects to their text content.
+ * Join the content of an item into a single string.
  * @param {MarkdownASTNode[]} items The array of itens to check.
- * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
+ * @returns {MarkdownASTNode[]} The array of items with the content joined into a single string.
  */
 export function joinContent(items) {
+  // debug('joinContent: items:', items);
   return items.map((item) => {
     if (item.content && item.content.length > 0) {
       item.content = [item.content.join(' ')];
@@ -106,6 +225,7 @@ export function joinContent(items) {
  * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
  */
 export function consolidateHeaders(items) {
+  // debug('consolidateHeaders: items:', items);
   return items.map((item) => {
     if (item.headers && item.headers.length > 0) {
       item.headers = item.headers.map((header) => {
@@ -203,10 +323,14 @@ export function consolidateParagraph(token) {
 /**
  * Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote
  * @param {MarkdownASTNode[]} items The array of itens to consolidate.
+ * @param {object} options The options for the consolidation.
+ * @param {boolean} [options.tableToCSV] Whether to convert the table to CSV.
+ * @param {number} [options.tableMaxRowsPerChunk] The maximum number of rows per chunk for tables.
+ * @param {number} [options.tableMaxTokensPerChunk] The maximum number of tokens per chunk for tables.
  * @returns {MarkdownASTNode[]} The array of items with flattened structures.
  */
-export function consolidateNestedItems(items) {
-  return items.map((item) => {
+export function consolidateNestedItems(items, options = {}) {
+  return items.flatMap((item) => {
     if (![
       'blockquote',
       'bullet_list',
@@ -256,17 +380,54 @@ export function consolidateNestedItems(items) {
         }
       }
 
-      // Convert Table to CSV
-      const content = [
-        'Table as CSV:\n',
-        toCSV([
-          header,
-          ...bodyRows,
-        ]),
-      ];
+      // Chunk the table if needed based on options
+      const chunks = chunkTable(header, bodyRows, {
+        maxRowsPerChunk: options.tableMaxRowsPerChunk,
+        maxTokensPerChunk: options.tableMaxTokensPerChunk,
+      });
 
-      item.content = content;
-      item.children = [];
+      // Return separate items for each chunk instead of combining them
+      return chunks.map(chunk => {
+        let content;
+
+        // Convert table into Markdown for embedding
+        if (!options.tableToCSV) {
+          const chunkInfo = chunk.totalChunks > 1
+            ? `Table as Markdown (Chunk ${chunk.chunkIndex} of ${chunk.totalChunks}):\n`
+            : 'Table as Markdown:\n';
+
+          content = [chunkInfo + toMarkdown([
+            chunk.header,
+            ...chunk.rows,
+          ])];
+        } else {
+          // Convert Table chunk to CSV with metadata
+          const chunkInfo = chunk.totalChunks > 1
+            ? `Table as CSV (Chunk ${chunk.chunkIndex} of ${chunk.totalChunks}):\n`
+            : 'Table as CSV:\n';
+
+          content = [chunkInfo + toCSV([
+            chunk.header,
+            ...chunk.rows,
+          ])];
+        }
+
+        // Create a unique header path for multi-chunk tables
+        // Headers are tuples of [content, level], so we need to add a proper tuple
+        let headers = item.headers;
+        if (chunk.totalChunks > 1) {
+          const lastHeaderLevel = item.headers[item.headers.length - 1]?.[1];
+          const newLevel = typeof lastHeaderLevel === 'number' ? lastHeaderLevel + 1 : 2;
+          headers = [...item.headers, [`Table Part ${chunk.chunkIndex}`, newLevel]];
+        }
+
+        return {
+          type: item.type,
+          content,
+          children: [],
+          headers,
+        };
+      });
     }
 
     // Unordered List
@@ -475,9 +636,13 @@ export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity,
  * Convert MarkdownIt Tokens to an AST.
  * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
  * @param {string} title The document title used as the H1 in the header stack.
+ * @param {object} options The options for the conversion.
+ * @param {boolean} [options.tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead.
+ * @param {number} [options.tableMaxRowsPerChunk] The maximum number of rows per chunk for tables.
+ * @param {number} [options.tableMaxTokensPerChunk] The maximum number of tokens per chunk for tables.
  * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
  */
-export function markdownItAST(tokens, title) {
+export function markdownItAST(tokens, title, options = {}) {
   const rootNode = genTreeNode();
   let current = rootNode;
   /** @type {Array<Array<string | MarkdownASTNode | number>>} */
@@ -623,7 +788,7 @@ export function markdownItAST(tokens, title) {
       if (token.type === 'fence' || token.type === 'code_block') {
         current.children.push({
           type: 'code',
-          content: [`\n\`\`\`${token.info}\n${token.content.trim()}\n\`\`\``],
+          content: [`\n\n\`\`\`${token.info}\n${token.content.trim()}\n\`\`\`\n\n`],
           children: [],
           headers: [...headersStack],
           // open: token,
@@ -655,7 +820,7 @@ export function markdownItAST(tokens, title) {
 
   // Clean up nested objects like lists
   rootNode.children = removeEmptyItems(rootNode.children);
-  rootNode.children = consolidateNestedItems(rootNode.children);
+  rootNode.children = consolidateNestedItems(rootNode.children, options);
   rootNode.children = joinContent(rootNode.children);
   rootNode.children = removeEmptyItems(rootNode.children);
   rootNode.children = consolidateHeaders(rootNode.children);

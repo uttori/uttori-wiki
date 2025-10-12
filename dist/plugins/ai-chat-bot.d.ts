@@ -4,7 +4,6 @@
  * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
- * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
  * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
  * @property {string} databasePath The path to the database.
@@ -31,9 +30,10 @@
  * @property {string} attachmentsRoot The root path to the attachments.
  * @property {boolean} includeAttachments Whether to include attachments.
  * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
- * @property {number} chunkTokens Used during indexing, the number of tokens per chunk.
- * @property {number} overlapTokens Used during indexing, the number of tokens to overlap between chunks.
  * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
+ * @property {boolean} [tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false.
+ * @property {number} [tableMaxRowsPerChunk] Maximum number of rows per table chunk for embedding.
+ * @property {number} [tableMaxTokensPerChunk] Maximum estimated tokens per table chunk for embedding.
  * @property {object} summary The summary configuration.
  * @property {boolean} summary.enabled Whether to use the summary.
  * @property {string} summary.baseUrl The base URL for the summary.
@@ -71,10 +71,6 @@ export type AIChatBotConfig = {
      * Server route to fetch available documents for the document selector.
      */
     documentsRoute: string;
-    /**
-     * When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
-     */
-    allowedReferrers: string[];
     /**
      * A request handler for the interface route.
      */
@@ -180,17 +176,21 @@ export type AIChatBotConfig = {
      */
     extractAttachmentText?: (arg0: AIChatBotConfig, arg1: import("../wiki.js").UttoriWikiDocumentAttachment) => Promise<string>;
     /**
-     * Used during indexing, the number of tokens per chunk.
-     */
-    chunkTokens: number;
-    /**
-     * Used during indexing, the number of tokens to overlap between chunks.
-     */
-    overlapTokens: number;
-    /**
      * The markdown-it plugin configuration.
      */
     markdownItPluginConfig: import("./renderer-markdown-it.js").MarkdownItRendererConfig;
+    /**
+     * Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false.
+     */
+    tableToCSV?: boolean;
+    /**
+     * Maximum number of rows per table chunk for embedding.
+     */
+    tableMaxRowsPerChunk?: number;
+    /**
+     * Maximum estimated tokens per table chunk for embedding.
+     */
+    tableMaxTokensPerChunk?: number;
     /**
      * The summary configuration.
      */
@@ -213,16 +213,6 @@ export type AIChatBotApiRequestBody = {
      * The slugs.
      */
     slugs: string[];
-};
-export type StreamHandlers = {
-    /**
-     * The function to call when a token is received.
-     */
-    onToken: (arg0: string) => void | Promise<void>;
-    /**
-     * The function to call when the stream is done.
-     */
-    onDone: () => void | Promise<void>;
 };
 export type RetrievedChunk = {
     /**
@@ -412,6 +402,7 @@ export type ChatBotMessage = {
 };
 /**
  * Uttori AI Chat Bot
+ * Search a UttoriWiki database using LLMs.
  * @example <caption>AIChatBot</caption>
  * const content = AIChatBot.chat(context);
  * @class

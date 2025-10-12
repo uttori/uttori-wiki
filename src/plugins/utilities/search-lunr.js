@@ -30,7 +30,7 @@ class SearchProvider {
    * @param {import('../search-provider-lunr.js').SearchLunrConfig} [config] - Configuration object for the class.
    */
   constructor(config = {}) {
-    debug('constructor', config);
+    debug('constructor');
     this.searchTerms = {};
     /** @type {lunr.Index} */
     this.index = undefined;

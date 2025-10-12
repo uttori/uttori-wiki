@@ -22,7 +22,11 @@ export async function buildBlocks(document, config) {
   const output = [];
 
   const tokens = MarkdownItRenderer.parse(document.content, config.markdownItPluginConfig);
-  const sections = markdownItAST(tokens, document.title);
+  const sections = markdownItAST(tokens, document.title, {
+    tableToCSV: config.tableToCSV,
+    tableMaxRowsPerChunk: config.tableMaxRowsPerChunk,
+    tableMaxTokensPerChunk: config.tableMaxTokensPerChunk,
+  });
 
   const sectionHash = {};
   for (const section of sections) {
@@ -50,15 +54,32 @@ export async function buildBlocks(document, config) {
   }
 
   // Loop through and create sections with title, headings & tags prepend to the content.
+  /** @type {import('../../../src/plugins/chat-bot/utilities.js').MarkdownASTNode[]} */
   const sectionz = Object.values(sectionHash);
 
   for (const section of sectionz) {
+    if (!Array.isArray(section.content)) {
+      console.warn('🐛 section.content is not an array:', section);
+    }
     const content = Array.isArray(section.content) ? section.content.join(' ').trim() : section.content.trim();
+    if (typeof content !== 'string') {
+      console.warn('🐛 Content is not a string:', section);
+      continue;
+    }
     const tokenCount = Object.keys(countWords(content)).length * 0.75;
 
     // Skip empty sections.
     if (!tokenCount) {
+      console.warn('🐛 tokenCount is 0:', tokenCount);
       continue;
+    }
+
+    // Assert that the headers are an array of strings.
+    if (!Array.isArray(section.headers)) {
+      console.warn('🐛 section.headers is not an array:', section.headers);
+    }
+    if (Array.isArray(section.headers) && section.headers.some(header => typeof header !== 'string')) {
+      console.warn('🐛 section.headers is not an array of strings:', section.headers);
     }
 
     output.push({
@@ -72,6 +93,7 @@ export async function buildBlocks(document, config) {
 
   // Add attachments to the output
   if (config.includeAttachments && Array.isArray(document.attachments) && document.attachments.length > 0) {
+    debug('buildBlocks: including attachments');
     for (const attachment of document.attachments) {
       if (attachment.skip) {
         debug('buildBlocks: skipping attachment:', attachment.path);
@@ -159,13 +181,14 @@ export async function buildBlocks(document, config) {
   }
 
   debug('buildBlocks: total sections per-merge:', output.length);
+  /** @type {import('../ai-chat-bot.js').Block[]} */
   const newItems = consolidateSectionsByHeader(output, 500, 600);
   debug('buildBlocks: total sections after merge:', newItems.length);
-  debug('buildBlocks: sections:', newItems.map((section) => ( {
-    tokenCount: section.tokenCount,
-    sectionPath: section.sectionPath,
-    slug: section.slug,
-  })));
+  // debug('buildBlocks: sections:', newItems.map((section) => ( {
+  //   tokenCount: section.tokenCount,
+  //   sectionPath: section.sectionPath,
+  //   slug: section.slug,
+  // })));
   return newItems;
 }
 
@@ -238,6 +261,7 @@ export async function indexAllDocuments (fullConfig, context) {
 
   let totalChunks = 0;
   let skipped = 0;
+  let errored = 0;
   for (const document of documents) {
     if (!document) continue;
 
@@ -249,7 +273,7 @@ export async function indexAllDocuments (fullConfig, context) {
     const row = /** @type {Record<string, string>} */
       (db.prepare('SELECT content_hash FROM uttori_sources WHERE id = ?').get(document.slug));
     if (row?.content_hash === contentHash) {
-      debug(`indexAllDocuments: ${document.slug} (${document.title}) has not changed`);
+      debug(`indexAllDocuments: ♾️️ ${document.slug} (${document.title}) has not changed`, contentHash);
       skipped++;
       continue;
     }
@@ -263,13 +287,22 @@ export async function indexAllDocuments (fullConfig, context) {
     const embeddings = [];
     for (let i = 0; i < chunks.length; i += batchSize) {
       const slice = chunks.slice(i, i + batchSize);
+      const sectionPath = slice.map(s => s.sectionPath.join(' > ')).join(' > ');
+
+      // Start a timer
+      const start = Date.now();
+      debug(`indexAllDocuments: embedding ${slice.length} chunks for ${document.slug} ${sectionPath}`);
       const vecs = await embedder.embedBatch(
         slice.map(s => s.text),
         config.embedPrompt('Represent the document for retrieval.', slice.map(s => s.text).join('\n\n')),
         Math.min(8, slice.length),
       );
+
+      // Log the time it took to insert the source
+      const end = Date.now();
+      debug(`indexAllDocuments: time to embed: ${sectionPath} ${end - start}ms`);
       embeddings.push(...vecs);
-      debug(`indexAllDocuments: embedded ${Math.min(i + batchSize, chunks.length)}/${chunks.length}`);
+      debug(`indexAllDocuments: embedded ${Math.min(i + batchSize, chunks.length)}/${chunks.length} chunks for ${document.slug} ${sectionPath}`);
     }
 
     // upsert source, delete old chunks, insert new
@@ -319,6 +352,7 @@ export async function indexAllDocuments (fullConfig, context) {
       sectionPath: c.sectionPath,
       embedding: embeddings[i],
     }));
+    debug('indexAllDocuments: chunksWithVectors:', chunksWithVectors.length);
     const insertChunk = db.prepare(`
       INSERT INTO uttori_chunks(source_id, idx, text, token_count, meta_json)
       VALUES (@source_id, @idx, @text, @token_count, @meta_json)
@@ -346,12 +380,28 @@ export async function indexAllDocuments (fullConfig, context) {
           throw new Error(`Unexpected non-integer rowid: ${String(info.lastInsertRowid)}`);
         }
 
-        // sqlite-vec accepts Float32Array or a Buffer of f32s
-        const f32 = new Float32Array(c.embedding);
-        insertVec.run(BigInt(rowid), Buffer.from(f32.buffer), c.source_id);
         if (insertFts) {
           insertFts.run(rowid, c.text);
         }
+
+        // Validate embedding exists and has length before inserting into vec table
+        if (!c.embedding || !Array.isArray(c.embedding) || c.embedding.length === 0) {
+          debug(`💀 Skipping vec insert for chunk with empty embedding: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
+          debug(`Text preview: ${c.text.substring(0, 100)}...`);
+          errored++;
+          continue;
+        }
+
+        // sqlite-vec accepts Float32Array or a Buffer of f32s
+        const f32 = new Float32Array(c.embedding);
+        // Safety check: ensure the Float32Array is valid and non-empty
+        if (!f32 || f32.length === 0) {
+          debug(`💀 Invalid Float32Array for chunk: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
+          errored++;
+          // throw new Error(`Invalid embedding vector (length: ${f32.length}) for chunk: ${c.source_id}`);
+          continue;
+        }
+        insertVec.run(BigInt(rowid), Buffer.from(f32.buffer), c.source_id);
       }
     });
     tx();
@@ -359,6 +409,6 @@ export async function indexAllDocuments (fullConfig, context) {
     totalChunks += chunks.length;
   }
 
-  debug(`indexAllDocuments: Done. Chunks indexed: ${totalChunks}. Unchanged skipped: ${skipped}.`);
+  debug(`indexAllDocuments: Done. Chunks indexed: ${totalChunks}. Unchanged skipped: ${skipped}. Errored: ${errored}.`);
   db.close();
 }

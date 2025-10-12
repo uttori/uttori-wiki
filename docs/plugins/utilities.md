@@ -7,11 +7,20 @@
 <dt><a href="#toCSV">toCSV</a> ⇒ <code>string</code></dt>
 <dd><p>Takes an array of arrays and returns a <code>,</code> sparated csv file.</p>
 </dd>
+<dt><a href="#toMarkdown">toMarkdown</a> ⇒ <code>string</code></dt>
+<dd><p>Takes an array of arrays and returns a Markdown table.</p>
+</dd>
+<dt><a href="#estimateTokenCount">estimateTokenCount</a> ⇒ <code>number</code></dt>
+<dd><p>Estimate token count for text using word count approximation.</p>
+</dd>
 </dl>
 
 ## Functions
 
 <dl>
+<dt><a href="#chunkTable">chunkTable(header, bodyRows, options)</a> ⇒ <code>Array.&lt;{header: Array.&lt;string&gt;, rows: Array.&lt;Array.&lt;string&gt;&gt;, chunkIndex: number, totalChunks: number}&gt;</code></dt>
+<dd><p>Split table rows into chunks based on row count or token size.</p>
+</dd>
 <dt><a href="#genTreeNode">genTreeNode([token])</a> ⇒ <code><a href="#MarkdownASTNode">MarkdownASTNode</a></code></dt>
 <dd><p>Create a node from a MarkdownIt Token.</p>
 </dd>
@@ -19,7 +28,7 @@
 <dd><p>Strip images from markdown text, leaving only the text content.</p>
 </dd>
 <dt><a href="#joinContent">joinContent(items)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
-<dd><p>Consolidate header objects to their text content.</p>
+<dd><p>Join the content of an item into a single string.</p>
 </dd>
 <dt><a href="#consolidateHeaders">consolidateHeaders(items)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
 <dd><p>Consolidate header objects to their text content.</p>
@@ -27,7 +36,7 @@
 <dt><a href="#consolidateParagraph">consolidateParagraph(token)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
 <dd><p>Consolidate a Token&#39;s children to plain text.</p>
 </dd>
-<dt><a href="#consolidateNestedItems">consolidateNestedItems(items)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
+<dt><a href="#consolidateNestedItems">consolidateNestedItems(items, options)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
 <dd><p>Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote</p>
 </dd>
 <dt><a href="#removeEmptyItems">removeEmptyItems(items)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
@@ -42,7 +51,7 @@
 <dt><a href="#consolidateSectionsByHeader">consolidateSectionsByHeader(items, [maximumTokenCount], [softMinTokens], [minAnchorDecrease])</a> ⇒ <code>Array.&lt;object&gt;</code></dt>
 <dd><p>Consolidate like sub-sections by their headers.</p>
 </dd>
-<dt><a href="#markdownItAST">markdownItAST(tokens, title)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
+<dt><a href="#markdownItAST">markdownItAST(tokens, title, options)</a> ⇒ <code><a href="#MarkdownASTNode">Array.&lt;MarkdownASTNode&gt;</a></code></dt>
 <dd><p>Convert MarkdownIt Tokens to an AST.</p>
 </dd>
 </dl>
@@ -82,6 +91,59 @@ Takes an array of arrays and returns a `,` sparated csv file.
 | [newLine] | <code>string</code> | The seperator to use when joining the rows, defaults to `\n`. |
 | [alwaysDoubleQuote] | <code>boolean</code> | Always double quote the cell, defaults to true. |
 
+<a name="toMarkdown"></a>
+
+## toMarkdown ⇒ <code>string</code>
+Takes an array of arrays and returns a Markdown table.
+
+**Kind**: global constant  
+**Returns**: <code>string</code> - The Markdown table string.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| table | <code>Array.&lt;Array.&lt;string&gt;&gt;</code> | The array of arrays of strings to join. |
+| [newLine] | <code>string</code> | The seperator to use when joining the rows, defaults to `\n`. |
+
+<a name="toMarkdown..formatRow"></a>
+
+### toMarkdown~formatRow(row) ⇒ <code>string</code>
+Format a row with pipes.
+
+**Kind**: inner method of [<code>toMarkdown</code>](#toMarkdown)  
+**Returns**: <code>string</code> - The formatted row.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| row | <code>Array.&lt;string&gt;</code> | The row to format. |
+
+<a name="estimateTokenCount"></a>
+
+## estimateTokenCount ⇒ <code>number</code>
+Estimate token count for text using word count approximation.
+
+**Kind**: global constant  
+**Returns**: <code>number</code> - The estimated token count.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| text | <code>string</code> | The text to estimate tokens for. |
+
+<a name="chunkTable"></a>
+
+## chunkTable(header, bodyRows, options) ⇒ <code>Array.&lt;{header: Array.&lt;string&gt;, rows: Array.&lt;Array.&lt;string&gt;&gt;, chunkIndex: number, totalChunks: number}&gt;</code>
+Split table rows into chunks based on row count or token size.
+
+**Kind**: global function  
+**Returns**: <code>Array.&lt;{header: Array.&lt;string&gt;, rows: Array.&lt;Array.&lt;string&gt;&gt;, chunkIndex: number, totalChunks: number}&gt;</code> - Array of table chunks.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| header | <code>Array.&lt;string&gt;</code> | The table header row. |
+| bodyRows | <code>Array.&lt;Array.&lt;string&gt;&gt;</code> | The table body rows. |
+| options | <code>object</code> | Chunking options. |
+| [options.maxRowsPerChunk] | <code>number</code> | Maximum number of rows per chunk. |
+| [options.maxTokensPerChunk] | <code>number</code> | Maximum estimated tokens per chunk. |
+
 <a name="genTreeNode"></a>
 
 ## genTreeNode([token]) ⇒ [<code>MarkdownASTNode</code>](#MarkdownASTNode)
@@ -109,10 +171,10 @@ Strip images from markdown text, leaving only the text content.
 <a name="joinContent"></a>
 
 ## joinContent(items) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
-Consolidate header objects to their text content.
+Join the content of an item into a single string.
 
 **Kind**: global function  
-**Returns**: [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) - The array of items with consolidated text headers.  
+**Returns**: [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) - The array of items with the content joined into a single string.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -144,7 +206,7 @@ Consolidate a Token's children to plain text.
 
 <a name="consolidateNestedItems"></a>
 
-## consolidateNestedItems(items) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
+## consolidateNestedItems(items, options) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
 Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote
 
 **Kind**: global function  
@@ -153,6 +215,10 @@ Flatten the tree structure for known types: bullet_list, ordered_list, table, fo
 | Param | Type | Description |
 | --- | --- | --- |
 | items | [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) | The array of itens to consolidate. |
+| options | <code>object</code> | The options for the consolidation. |
+| [options.tableToCSV] | <code>boolean</code> | Whether to convert the table to CSV. |
+| [options.tableMaxRowsPerChunk] | <code>number</code> | The maximum number of rows per chunk for tables. |
+| [options.tableMaxTokensPerChunk] | <code>number</code> | The maximum number of tokens per chunk for tables. |
 
 <a name="removeEmptyItems"></a>
 
@@ -220,7 +286,7 @@ Consolidate like sub-sections by their headers.
 **Kind**: inner constant of [<code>consolidateSectionsByHeader</code>](#consolidateSectionsByHeader)  
 <a name="markdownItAST"></a>
 
-## markdownItAST(tokens, title) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
+## markdownItAST(tokens, title, options) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
 Convert MarkdownIt Tokens to an AST.
 
 **Kind**: global function  
@@ -230,9 +296,13 @@ Convert MarkdownIt Tokens to an AST.
 | --- | --- | --- |
 | tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Tokens to convert. |
 | title | <code>string</code> | The document title used as the H1 in the header stack. |
+| options | <code>object</code> | The options for the conversion. |
+| [options.tableToCSV] | <code>boolean</code> | Whether to convert tables to CSV format. If false, converts to Markdown format instead. |
+| [options.tableMaxRowsPerChunk] | <code>number</code> | The maximum number of rows per chunk for tables. |
+| [options.tableMaxTokensPerChunk] | <code>number</code> | The maximum number of tokens per chunk for tables. |
 
 
-* [markdownItAST(tokens, title)](#markdownItAST) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
+* [markdownItAST(tokens, title, options)](#markdownItAST) ⇒ [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode)
     * [~headerLevel](#markdownItAST..headerLevel) : <code>number</code>
     * [~headersStack](#markdownItAST..headersStack) : <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code>
 

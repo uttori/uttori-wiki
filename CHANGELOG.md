@@ -2,7 +2,24 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v8.0.0) - 2025-10-10)
+## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2025-10-11)
+
+- 🪲 Fix analytics plugin validation function
+- 🪲 Fix some embedding retruns could fail due to different than expected keys
+- 🪲 Fix case where if embedding errored we would not add full text search (FTS) to the database
+- 🛠 Update indexing to always include FTS even when embedding failsplugins/chat-bot/utilities.d.ts
+- 🛠 Clean up many types
+- 🛠 Add `tableToCSV`, `tableMaxRowsPerChunk`, `tableMaxTokensPerChunk` for more table indexing control to use CSV or Markdown
+- 🛠 Added `chunkTable` utility to split large tables by row or chunk size
+- 🛠 Added `toMarkdown` utility to convert AST table back to Markdown text
+- 🛠 Indexing documents debugging logs greatly improved for detecting issues
+- 🛠 Add error checking for inserting bad vectors to the database
+- 🛠 Update `consolidateNestedItems` to split large tables
+- 🎁 Update dependencies
+- 🎁 Update dev dependencies
+- 🧰 Added embedding helper to test embeddings that cause errors
+
+## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
 
 - 💥 BREAKING CHANGES!
 - 💥 Remove `middleware`, server setup becomes so much more flexible

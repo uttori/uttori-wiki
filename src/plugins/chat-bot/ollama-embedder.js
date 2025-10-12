@@ -1,6 +1,6 @@
 let debug = (..._) => {};
 /* c8 ignore next 3 */
-try { const { default: d } = await import('debug'); debug = d('OllamaEmbedder'); } catch {}
+try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ChatBot.OllamaEmbedder'); } catch {}
 
 class OllamaEmbedder {
   /** The base URL of the Ollama server. */
@@ -25,7 +25,7 @@ class OllamaEmbedder {
    * @returns {Promise<number[]>} The embedding vector.
    */
   async embed(input, prompt, numAttempts = 5) {
-    debug('embed:', { input: input.length, prompt });
+    debug('embed: input:', input);
     let lastError = null;
     /** Some versions expect "input", others "prompt". We'll send both. */
     for (let attempt = 0; attempt < numAttempts; attempt++) {
@@ -37,31 +37,59 @@ class OllamaEmbedder {
         });
         if (!response.ok) {
           const msg = await response.text();
-          debug('Ollama embedding error:', msg);
-          throw new Error(`Ollama ${response.status}: ${msg} ${this.model} ${input} ${prompt}`);
+          debug(`embed: ❌ Ollama ${response.status}: ${msg}`);
+          throw new Error(`Ollama ${response.status}: ${msg}`);
         }
+
         const data = await response.json();
+        // debug('Ollama embedding data:', data);
         // Common shapes: { embedding: number[] } or { data:[{embedding:[]}] }
         /** @type {number[]} */
         let vec = [];
         if (Array.isArray(data?.embedding)) {
           vec = data.embedding;
+        } else if (Array.isArray(data?.embeddings)) {
+          vec = data.embeddings;
         } else if (Array.isArray(data?.data?.[0]?.embedding)) {
           vec = data.data[0].embedding;
         } else {
-          debug('Ollama embedding error:', data);
+          debug('Unexpected embedding response shape:', data);
           throw new Error('Unexpected embedding response shape');
         }
+
+        // Validate embedding vector for invalid values
+        if (!Array.isArray(vec) || vec.length === 0) {
+          throw new Error('Empty or invalid embedding vector');
+        }
+
+        // Check for -Inf, +Inf, or NaN values
+        const hasInvalidValues = vec.some((val) => val === Infinity || val === -Infinity || Number.isNaN(val));
+        if (hasInvalidValues) {
+          debug('Ollama embedding contains invalid values:', vec.filter((val) => val === Infinity || val === -Infinity || Number.isNaN(val)));
+          throw new Error('Embedding vector contains invalid values (-Inf, +Inf, or NaN)');
+        }
+
+        debug('embed: ✅ success:', vec.length);
         return vec;
       } catch (err) {
+        // Check for unembedable content, needs to be debugged and no retry
+        if (err.message.includes('unsupported value: -Inf')) {
+          debug('embed: 💀 unsupported value: -Inf, skipping retry:', err.message);
+          return [];
+        }
+
+        // Retry other errors
         const backoff = 250 * Math.pow(2, attempt);
-        debug('embed: attempt failed:', { attempt: attempt + 1, message: err.message, backoff });
+        debug(`embed: 🔄 attempt ${attempt + 1} failed, retrying in ${backoff}ms:`, err.message);
+
         // Sleep for the backoff time.
         await new Promise(resolve => setTimeout(resolve, backoff));
         lastError = err;
       }
     }
-    throw new Error(`Failed to embed after ${numAttempts} attempts: ${lastError?.message}`);
+    debug('embed: 💀 failed to embed after', numAttempts, 'attempts:', lastError?.message);
+    // throw new Error(`Failed to embed after ${numAttempts} attempts: ${lastError?.message}`);
+    return [];
   }
 
   /**
@@ -72,7 +100,6 @@ class OllamaEmbedder {
    * @returns {Promise<number[][]>} The embedding vectors.
    */
   async embedBatch(texts, prompt, concurrency = 8) {
-    debug('embedBatch:', { texts: texts.length, concurrency });
     /** @type {number[][]} */
     const out = new Array(texts.length);
     let i = 0;
@@ -102,7 +129,7 @@ class OllamaEmbedder {
   async probeDimension() {
     debug('probeDimension');
     const v = await this.embed('probe');
-    debug('probeDimension:', v.length);
+    debug('probeDimension: got', v.length);
     return v.length;
   }
 

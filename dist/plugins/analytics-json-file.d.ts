@@ -71,13 +71,12 @@ declare class AnalyticsPlugin {
     static defaultConfig(): AnalyticsPluginConfig;
     /**
      * Validates the provided configuration for required entries.
-     * @param {Record<string, AnalyticsPluginConfig>} config A configuration object.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} _context - A Uttori-like context (unused).
+     * @param {AnalyticsPlugin} _analytics - An AnalyticsProvider instance (unused).
      * @example <caption>AnalyticsPlugin.validateConfig(config, _context)</caption>
      * AnalyticsPlugin.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, AnalyticsPluginConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>): void;
+    static validateConfig(_analytics: AnalyticsPlugin): (config: Record<string, AnalyticsPluginConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} context A Uttori-like context.

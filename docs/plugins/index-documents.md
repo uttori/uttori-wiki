@@ -22,9 +22,23 @@ Build blocks from a document.
 | document | <code>UttoriWikiDocument</code> | The document to build blocks from. |
 | config | <code>AIChatBotConfig</code> | The options. |
 
+
+* [buildBlocks(document, config)](#buildBlocks) ⇒ <code>Promise.&lt;Array.&lt;Block&gt;&gt;</code>
+    * [~output](#buildBlocks..output) : <code>Array.&lt;Block&gt;</code>
+    * [~sectionz](#buildBlocks..sectionz) : <code>Array.&lt;MarkdownASTNode&gt;</code>
+    * [~newItems](#buildBlocks..newItems) : <code>Array.&lt;Block&gt;</code>
+
 <a name="buildBlocks..output"></a>
 
 ### buildBlocks~output : <code>Array.&lt;Block&gt;</code>
+**Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
+<a name="buildBlocks..sectionz"></a>
+
+### buildBlocks~sectionz : <code>Array.&lt;MarkdownASTNode&gt;</code>
+**Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
+<a name="buildBlocks..newItems"></a>
+
+### buildBlocks~newItems : <code>Array.&lt;Block&gt;</code>
 **Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
 <a name="indexAllDocuments"></a>
 

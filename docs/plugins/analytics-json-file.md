@@ -32,7 +32,7 @@ Page view analytics for Uttori documents using JSON files stored on the local fi
     * [new AnalyticsPlugin()](#new_AnalyticsPlugin_new)
     * [.configKey](#AnalyticsPlugin.configKey) ⇒ <code>string</code>
     * [.defaultConfig()](#AnalyticsPlugin.defaultConfig) ⇒ [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig)
-    * [.validateConfig(config, _context)](#AnalyticsPlugin.validateConfig)
+    * [.validateConfig(_analytics)](#AnalyticsPlugin.validateConfig)
     * [.register(context)](#AnalyticsPlugin.register)
     * [.updateDocument(analytics)](#AnalyticsPlugin.updateDocument) ⇒ <code>function</code>
     * [.getCount(analytics)](#AnalyticsPlugin.getCount) ⇒ <code>function</code>
@@ -69,15 +69,14 @@ const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[Analytics
 ```
 <a name="AnalyticsPlugin.validateConfig"></a>
 
-### AnalyticsPlugin.validateConfig(config, _context)
+### AnalyticsPlugin.validateConfig(_analytics)
 Validates the provided configuration for required entries.
 
 **Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>Record.&lt;string, AnalyticsPluginConfig&gt;</code> | A configuration object. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code> | A Uttori-like context (unused). |
+| _analytics | [<code>AnalyticsPlugin</code>](#AnalyticsPlugin) | An AnalyticsProvider instance (unused). |
 
 **Example** *(AnalyticsPlugin.validateConfig(config, _context))*  
 ```js

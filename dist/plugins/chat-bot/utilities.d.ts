@@ -1,4 +1,22 @@
 /**
+ * Split table rows into chunks based on row count or token size.
+ * @param {string[]} header The table header row.
+ * @param {string[][]} bodyRows The table body rows.
+ * @param {object} options Chunking options.
+ * @param {number} [options.maxRowsPerChunk] Maximum number of rows per chunk.
+ * @param {number} [options.maxTokensPerChunk] Maximum estimated tokens per chunk.
+ * @returns {Array<{header: string[], rows: string[][], chunkIndex: number, totalChunks: number}>} Array of table chunks.
+ */
+export function chunkTable(header: string[], bodyRows: string[][], options?: {
+    maxRowsPerChunk?: number;
+    maxTokensPerChunk?: number;
+}): Array<{
+    header: string[];
+    rows: string[][];
+    chunkIndex: number;
+    totalChunks: number;
+}>;
+/**
  * Create a node from a MarkdownIt Token.
  * @param {import('markdown-it/index.js').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
@@ -11,9 +29,9 @@ export function genTreeNode(token?: import("markdown-it/index.js").Token): Markd
  */
 export function stripImagesFromMarkdown(text: string): string;
 /**
- * Consolidate header objects to their text content.
+ * Join the content of an item into a single string.
  * @param {MarkdownASTNode[]} items The array of itens to check.
- * @returns {MarkdownASTNode[]} The array of items with consolidated text headers.
+ * @returns {MarkdownASTNode[]} The array of items with the content joined into a single string.
  */
 export function joinContent(items: MarkdownASTNode[]): MarkdownASTNode[];
 /**
@@ -31,9 +49,17 @@ export function consolidateParagraph(token: MarkdownASTNode): string[];
 /**
  * Flatten the tree structure for known types: bullet_list, ordered_list, table, footnote, blockquote
  * @param {MarkdownASTNode[]} items The array of itens to consolidate.
+ * @param {object} options The options for the consolidation.
+ * @param {boolean} [options.tableToCSV] Whether to convert the table to CSV.
+ * @param {number} [options.tableMaxRowsPerChunk] The maximum number of rows per chunk for tables.
+ * @param {number} [options.tableMaxTokensPerChunk] The maximum number of tokens per chunk for tables.
  * @returns {MarkdownASTNode[]} The array of items with flattened structures.
  */
-export function consolidateNestedItems(items: MarkdownASTNode[]): MarkdownASTNode[];
+export function consolidateNestedItems(items: MarkdownASTNode[], options?: {
+    tableToCSV?: boolean;
+    tableMaxRowsPerChunk?: number;
+    tableMaxTokensPerChunk?: number;
+}): MarkdownASTNode[];
 /**
  * Remove any items with no content and no children.
  * @param {MarkdownASTNode[]} items The array of itens to check.
@@ -65,11 +91,21 @@ export function consolidateSectionsByHeader(items: import("../ai-chat-bot.js").B
  * Convert MarkdownIt Tokens to an AST.
  * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
  * @param {string} title The document title used as the H1 in the header stack.
+ * @param {object} options The options for the conversion.
+ * @param {boolean} [options.tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead.
+ * @param {number} [options.tableMaxRowsPerChunk] The maximum number of rows per chunk for tables.
+ * @param {number} [options.tableMaxTokensPerChunk] The maximum number of tokens per chunk for tables.
  * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
  */
-export function markdownItAST(tokens: import("markdown-it/index.js").Token[], title: string): MarkdownASTNode[];
+export function markdownItAST(tokens: import("markdown-it/index.js").Token[], title: string, options?: {
+    tableToCSV?: boolean;
+    tableMaxRowsPerChunk?: number;
+    tableMaxTokensPerChunk?: number;
+}): MarkdownASTNode[];
 export function oneLine(text: string, replace?: string): string;
 export function toCSV(table: string[][], seperator?: string, newLine?: string, alwaysDoubleQuote?: boolean): string;
+export function toMarkdown(table: string[][], newLine?: string): string;
+export function estimateTokenCount(text: string): number;
 export type MarkdownASTNode = {
     /**
      * The type of node.

@@ -36,7 +36,7 @@ class StorageProviderJsonFile {
  * @class
  */
   constructor(config) {
-    debug('constructor', config);
+    debug('constructor');
     if (!config) {
       debug('No config provided.');
       throw new Error('No config provided.');

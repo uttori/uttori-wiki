@@ -58,27 +58,33 @@ class AnalyticsPlugin {
 
   /**
    * Validates the provided configuration for required entries.
-   * @param {Record<string, AnalyticsPluginConfig>} config A configuration object.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} _context - A Uttori-like context (unused).
+   * @param {AnalyticsPlugin} _analytics - An AnalyticsProvider instance (unused).
    * @example <caption>AnalyticsPlugin.validateConfig(config, _context)</caption>
    * AnalyticsPlugin.validateConfig({ ... });
    * @static
    */
-  static validateConfig(config, _context) {
-    debug('Validating config...');
-    if (!config[AnalyticsPlugin.configKey]) {
-      debug(`Config Error: '${AnalyticsPlugin.configKey}' configuration key is missing.`);
-      throw new Error(`Config Error: '${AnalyticsPlugin.configKey}' configuration key is missing.`);
-    }
-    if (!config[AnalyticsPlugin.configKey].directory || typeof config[AnalyticsPlugin.configKey].directory !== 'string') {
-      debug('Config Error: `directory` is required should be the path to the location you want the JSON file to be writtent to.');
-      throw new Error('directory is required should be the path to the location you want the JSON file to be writtent to.');
-    }
-    if (!config[AnalyticsPlugin.configKey].limit || typeof config[AnalyticsPlugin.configKey].limit !== 'number') {
-      debug('Config Error: `limit` is required should be the number of documents to return.');
-      throw new Error('limit is required should be the number of documents to return.');
-    }
-    debug('Validated config.');
+  static validateConfig(_analytics) {
+    /**
+     * @param {Record<string, AnalyticsPluginConfig>} config A configuration object.
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} _context - A Uttori-like context (unused).
+     */
+    const validateConfig = (config, _context) => {
+      debug('Validating config...');
+      if (!config || !config[AnalyticsPlugin.configKey]) {
+        debug(`Config Error: '${AnalyticsPlugin.configKey}' configuration key is missing.`);
+        throw new Error(`Config Error: '${AnalyticsPlugin.configKey}' configuration key is missing.`);
+      }
+      if (!config[AnalyticsPlugin.configKey].directory || typeof config[AnalyticsPlugin.configKey].directory !== 'string') {
+        debug('Config Error: `directory` is required should be the path to the location you want the JSON file to be writtent to.');
+        throw new Error('directory is required should be the path to the location you want the JSON file to be writtent to.');
+      }
+      if (!config[AnalyticsPlugin.configKey].limit || typeof config[AnalyticsPlugin.configKey].limit !== 'number') {
+        debug('Config Error: `limit` is required should be the number of documents to return.');
+        throw new Error('limit is required should be the number of documents to return.');
+      }
+      debug('Validated config.');
+    };
+    return validateConfig;
   }
 
   /**
@@ -111,6 +117,8 @@ class AnalyticsPlugin {
     if (!config.events) {
       throw new Error('Missing events to listen to for in \'config.events\'.');
     }
+
+    // Bind events
     const analytics = new AnalyticsProvider(config);
     for (const [method, eventNames] of Object.entries(config.events)) {
       if (typeof AnalyticsPlugin[method] === 'function') {

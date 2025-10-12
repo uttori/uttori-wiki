@@ -16,13 +16,13 @@ test('AnalyticsPlugin.defaultConfig(): can return a default config', (t) => {
 
 test('AnalyticsPlugin.validateConfig(config, _context): throws when sitemaps key is missing', (t) => {
   t.throws(() => {
-    AnalyticsPlugin.validateConfig({});
+    AnalyticsPlugin.validateConfig()({});
   }, { message: 'Config Error: \'uttori-plugin-analytics-json-file\' configuration key is missing.' });
 });
 
 test('AnalyticsPlugin.validateConfig(config, _context): throws when directory is missing', (t) => {
   t.throws(() => {
-    AnalyticsPlugin.validateConfig({
+    AnalyticsPlugin.validateConfig()({
       [AnalyticsPlugin.configKey]: {},
     });
   }, { message: 'directory is required should be the path to the location you want the JSON file to be writtent to.' });
@@ -30,7 +30,7 @@ test('AnalyticsPlugin.validateConfig(config, _context): throws when directory is
 
 test('AnalyticsPlugin.validateConfig(config, _context): throws when directory is not a string', (t) => {
   t.throws(() => {
-    AnalyticsPlugin.validateConfig({
+    AnalyticsPlugin.validateConfig()({
       [AnalyticsPlugin.configKey]: {
         directory: {},
       },
@@ -40,7 +40,7 @@ test('AnalyticsPlugin.validateConfig(config, _context): throws when directory is
 
 test('AnalyticsPlugin.validateConfig(config, _context): throws when limit is not a number', (t) => {
   t.throws(() => {
-    AnalyticsPlugin.validateConfig({
+    AnalyticsPlugin.validateConfig()({
       [AnalyticsPlugin.configKey]: {
         directory: './',
         limit: 'a',
@@ -51,7 +51,7 @@ test('AnalyticsPlugin.validateConfig(config, _context): throws when limit is not
 
 test('AnalyticsPlugin.validateConfig(config, _context): can validate', (t) => {
   t.notThrows(() => {
-    AnalyticsPlugin.validateConfig({
+    AnalyticsPlugin.validateConfig()({
       [AnalyticsPlugin.configKey]: {
         directory: './',
         limit: 10,

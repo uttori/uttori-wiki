@@ -21,12 +21,6 @@ import { indexAllDocuments } from './chat-bot/index-documents.js';
  */
 
 /**
- * @typedef {object} StreamHandlers
- * @property {function(string): void | Promise<void>} onToken The function to call when a token is received.
- * @property {function(): void | Promise<void>} onDone The function to call when the stream is done.
- */
-
-/**
  * @typedef {object} RetrievedChunk
  * @property {number} rowid The rowid of the chunk.
  * @property {string} source_id The source id of the chunk.
@@ -47,7 +41,6 @@ import { indexAllDocuments } from './chat-bot/index-documents.js';
  * @property {RetrievedChunk[]} chunks The chunks.
  * @property {any[]} citations The citations.
  */
-
 
 /**
  * @typedef {object} FtsRow
@@ -115,7 +108,6 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
- * @property {string[]} allowedReferrers When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an rmpty array don't check at all.
  * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
  * @property {string} databasePath The path to the database.
@@ -142,9 +134,10 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} attachmentsRoot The root path to the attachments.
  * @property {boolean} includeAttachments Whether to include attachments.
  * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
- * @property {number} chunkTokens Used during indexing, the number of tokens per chunk.
- * @property {number} overlapTokens Used during indexing, the number of tokens to overlap between chunks.
  * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
+ * @property {boolean} [tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false.
+ * @property {number} [tableMaxRowsPerChunk] Maximum number of rows per table chunk for embedding.
+ * @property {number} [tableMaxTokensPerChunk] Maximum estimated tokens per table chunk for embedding.
  * @property {object} summary The summary configuration.
  * @property {boolean} summary.enabled Whether to use the summary.
  * @property {string} summary.baseUrl The base URL for the summary.
@@ -157,7 +150,6 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} query The query.
  * @property {string[]} slugs The slugs.
  */
-
 
 /**
  * Extract text from an attachment.
@@ -243,6 +235,7 @@ let wss = new WebSocketServer({ noServer: true });
 
 /**
  * Uttori AI Chat Bot
+ * Search a UttoriWiki database using LLMs.
  * @example <caption>AIChatBot</caption>
  * const content = AIChatBot.chat(context);
  * @class
@@ -275,7 +268,6 @@ class AIChatBot {
       middlewarePublicRoute: [],
       interfaceRequestHandler: undefined,
 
-      allowedReferrers: [],
       ignoreSlugs: [],
       ignoreTags: [],
 
@@ -307,8 +299,6 @@ class AIChatBot {
       attachmentsRoot: './site/uploads',
       includeAttachments: true,
       extractAttachmentText,
-      chunkTokens: 900,
-      overlapTokens: 150,
 
       markdownItPluginConfig: {
         events: {},
@@ -358,6 +348,9 @@ class AIChatBot {
           },
         },
       },
+      tableToCSV: false,
+      tableMaxRowsPerChunk: Infinity,
+      tableMaxTokensPerChunk: 1000,
 
       summary: {
         enabled: false,
@@ -389,11 +382,6 @@ class AIChatBot {
     }
     if (typeof config[AIChatBot.configKey].publicRoute !== 'string') {
       const error = 'Config Error: `publicRoute` should be a string server route to show the chat bot interface.';
-      debug(error);
-      throw new Error(error);
-    }
-    if (!Array.isArray(config[AIChatBot.configKey].allowedReferrers)) {
-      const error = 'Config Error: `allowedReferrers` should be an array of URLs or a blank array.';
       debug(error);
       throw new Error(error);
     }
@@ -470,6 +458,7 @@ class AIChatBot {
     if (rows.length === 0) {
       // Pass the full config to indexAllDocuments to ensure the same shape as event handlers
       // TODO Refactor indexAllDocuments to actually just index a single document, and bring the logic into static methods here to bind
+      debug('Indexing documents...', config.embedModel);
       await indexAllDocuments({ [AIChatBot.configKey]: config }, context);
     }
     db.close();
@@ -692,9 +681,10 @@ class AIChatBot {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
-    let assistantAccumulated = ''; // for the assistant content this pass
+    /** The assistant content this pass */
+    let assistantAccumulated = '';
     /** @type {Record<string, any>[]} */
-    let pendingToolCalls = [];     // collect tool calls observed in this pass
+    let pendingToolCalls = []; // collect tool calls observed in this pass
 
     for (;;) {
       const { value, done } = await reader.read();
@@ -725,6 +715,7 @@ class AIChatBot {
         }
 
         // tool calls may appear in-stream
+        /** @type {Record<string, any>[]} */
         const calls = obj?.message?.tool_calls;
         if (Array.isArray(calls) && calls.length) {
           // Stop forwarding (optional) and collect calls
@@ -759,7 +750,7 @@ class AIChatBot {
           }
           toolResult = blocks.join('\n\n====\n\n');
         } else {
-          toolResult = { error: `Unknown tool: ${name}` };
+          toolResult = { error: `Unknown Tool: ${name}` };
         }
 
         // Append the tool response as a new message for the next pass
@@ -1018,6 +1009,8 @@ Write the new summary (<= 60 words).`;
       let vec;
       if (Array.isArray(data?.embedding)) {
         vec = data.embedding;
+      } else if (Array.isArray(data?.embeddings)) {
+        vec = data.embeddings;
       } else if (Array.isArray(data?.data?.[0]?.embedding)) {
         vec = data.data[0].embedding;
       } else {
