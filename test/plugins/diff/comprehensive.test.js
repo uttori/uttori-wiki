@@ -1,8 +1,8 @@
 import test from 'ava';
 import { hunks, edits } from '../../../src/plugins/diff/diff.js';
-import { Op } from '../../../src/plugins/diff/types.js';
+import { Op } from '../../../src/plugins/diff/diff.js';
 
-test('Hunks: identical arrays should return empty result', (t) => {
+test('hunks: identical arrays should return empty result', (t) => {
   const x = ['foo', 'bar', 'baz'];
   const y = ['foo', 'bar', 'baz'];
 
@@ -11,7 +11,7 @@ test('Hunks: identical arrays should return empty result', (t) => {
   t.is(result.length, 0);
 });
 
-test('Hunks: empty arrays should return empty result', (t) => {
+test('hunks: empty arrays should return empty result', (t) => {
   const x = [];
   const y = [];
 
@@ -20,7 +20,7 @@ test('Hunks: empty arrays should return empty result', (t) => {
   t.is(result.length, 0);
 });
 
-test('Hunks: x-empty should return insertion hunk', (t) => {
+test('hunks: x-empty should return insertion hunk', (t) => {
   const x = [];
   const y = ['foo', 'bar', 'baz'];
 
@@ -37,7 +37,7 @@ test('Hunks: x-empty should return insertion hunk', (t) => {
   t.is(result[0].edits[2].op, Op.Insert);
 });
 
-test('Hunks: y-empty should return deletion hunk', (t) => {
+test('hunks: y-empty should return deletion hunk', (t) => {
   const x = ['foo', 'bar', 'baz'];
   const y = [];
 
@@ -54,7 +54,7 @@ test('Hunks: y-empty should return deletion hunk', (t) => {
   t.is(result[0].edits[2].op, Op.Delete);
 });
 
-test('Hunks: same-prefix should return single hunk', (t) => {
+test('hunks: same-prefix should return single hunk', (t) => {
   const x = ['foo', 'bar'];
   const y = ['foo', 'baz'];
 
@@ -71,7 +71,7 @@ test('Hunks: same-prefix should return single hunk', (t) => {
   t.is(result[0].edits[2].op, Op.Insert);
 });
 
-test('Hunks: same-suffix should return single hunk', (t) => {
+test('hunks: same-suffix should return single hunk', (t) => {
   const x = ['foo', 'bar'];
   const y = ['loo', 'bar'];
 
@@ -88,7 +88,7 @@ test('Hunks: same-suffix should return single hunk', (t) => {
   t.is(result[0].edits[2].op, Op.Match);
 });
 
-test('Hunks: ABCABBA_to_CBABAC should return correct diff', (t) => {
+test('hunks: ABCABBA_to_CBABAC should return correct diff', (t) => {
   const x = 'ABCABBA'.split('');
   const y = 'CBABAC'.split('');
 
@@ -116,7 +116,7 @@ test('Hunks: ABCABBA_to_CBABAC should return correct diff', (t) => {
   ]);
 });
 
-test('Hunks: ABCABBA_to_CBABAC with no context should return same result', (t) => {
+test('hunks: ABCABBA_to_CBABAC with no context should return same result', (t) => {
   const x = 'ABCABBA'.split('');
   const y = 'CBABAC'.split('');
 
@@ -130,7 +130,7 @@ test('Hunks: ABCABBA_to_CBABAC with no context should return same result', (t) =
   t.is(result[0].edits.length, 9);
 });
 
-test('Edits: identical arrays should return all matches', (t) => {
+test('edits: identical arrays should return all matches', (t) => {
   const x = ['foo', 'bar', 'baz'];
   const y = ['foo', 'bar', 'baz'];
 
@@ -140,7 +140,7 @@ test('Edits: identical arrays should return all matches', (t) => {
   t.true(result.every(edit => edit.op === Op.Match));
 });
 
-test('Edits: empty arrays should return empty result', (t) => {
+test('edits: empty arrays should return empty result', (t) => {
   const x = [];
   const y = [];
 
@@ -149,7 +149,7 @@ test('Edits: empty arrays should return empty result', (t) => {
   t.is(result.length, 0);
 });
 
-test('Edits: x-empty should return all insertions', (t) => {
+test('edits: x-empty should return all insertions', (t) => {
   const x = [];
   const y = ['foo', 'bar', 'baz'];
 
@@ -159,7 +159,7 @@ test('Edits: x-empty should return all insertions', (t) => {
   t.true(result.every(edit => edit.op === Op.Insert));
 });
 
-test('Edits: y-empty should return all deletions', (t) => {
+test('edits: y-empty should return all deletions', (t) => {
   const x = ['foo', 'bar', 'baz'];
   const y = [];
 
@@ -169,7 +169,7 @@ test('Edits: y-empty should return all deletions', (t) => {
   t.true(result.every(edit => edit.op === Op.Delete));
 });
 
-test('Edits: ABCABBA_to_CBABAC should return correct edit sequence', (t) => {
+test('edits: ABCABBA_to_CBABAC should return correct edit sequence', (t) => {
   const x = 'ABCABBA'.split('');
   const y = 'CBABAC'.split('');
 
@@ -192,7 +192,7 @@ test('Edits: ABCABBA_to_CBABAC should return correct edit sequence', (t) => {
   ]);
 });
 
-test('Edge Cases: single element arrays', (t) => {
+test('edits: single element arrays', (t) => {
   const x = ['a'];
   const y = ['b'];
 
@@ -203,7 +203,7 @@ test('Edge Cases: single element arrays', (t) => {
   t.is(result[1].op, Op.Insert);
 });
 
-test('Edge Cases: arrays with repeated elements', (t) => {
+test('edits: arrays with repeated elements', (t) => {
   const x = ['a', 'a', 'a'];
   const y = ['a', 'b', 'a'];
 
@@ -216,7 +216,7 @@ test('Edge Cases: arrays with repeated elements', (t) => {
   t.is(result[3].op, Op.Match);  // Match 'a'
 });
 
-test('Edge Cases: moderate length arrays', (t) => {
+test('edits: moderate length arrays', (t) => {
   const x = Array.from({ length: 10 }, (_, i) => `item${i}`);
   const y = Array.from({ length: 10 }, (_, i) => `item${i}`);
 

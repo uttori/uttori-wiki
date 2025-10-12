@@ -1,6 +1,7 @@
 import { EventDispatcher } from '@uttori/event-dispatcher';
 import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
+import { htmlTable } from './plugins/diff/textdiff.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
 
@@ -26,6 +27,8 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
  * @property {string} [action] The action to be used in the form.
  * @property {string} [revision] The revision of the document.
  * @property {Record<string, string[]>} [historyByDay] An object of history by day.
+ * @property {UttoriWikiDocument} [currentDocument] The current version of the document for comparison.
+ * @property {Record<string, string>} [diffs] An object containing HTML table diffs for changed fields.
  */
 
 /**
@@ -999,6 +1002,45 @@ class UttoriWiki {
 
     document.html = await this.hooks.filter('render-content', document.content, this);
 
+    // Fetch current version of the document to compare with the revision
+    /** @type {UttoriWikiDocument | undefined} */
+    let currentDocument;
+    try {
+      [currentDocument] = await this.hooks.fetch('storage-get', slug, this);
+    /* c8 ignore next 3 */
+    } catch (error) {
+      debug('Error fetching current document:', error);
+    }
+
+    // Generate diffs for fields that have changed
+    /** @type {Record<string, string>} */
+    const diffs = {};
+    if (currentDocument) {
+      const fieldsToCompare = ['title', 'excerpt', 'content', 'image', 'layout'];
+      for (const field of fieldsToCompare) {
+        const oldValue = String(document[field] || '');
+        const newValue = String(currentDocument[field] || '');
+        if (oldValue !== newValue) {
+          diffs[field] = htmlTable(oldValue, newValue);
+        }
+      }
+
+      // Compare tags array
+      const oldTags = Array.isArray(document.tags) ? document.tags.join(', ') : String(document.tags || '');
+      const newTags = Array.isArray(currentDocument.tags) ? currentDocument.tags.join(', ') : String(currentDocument.tags || '');
+      if (oldTags !== newTags) {
+        diffs.tags = htmlTable(oldTags, newTags);
+      }
+
+      // Compare redirects array
+      const oldRedirects = Array.isArray(document.redirects) ? document.redirects.join('\n') : String(document.redirects || '');
+      const newRedirects = Array.isArray(currentDocument.redirects) ? currentDocument.redirects.join('\n') : String(currentDocument.redirects || '');
+      if (oldRedirects !== newRedirects) {
+        diffs.redirects = htmlTable(oldRedirects, newRedirects);
+      }
+    }
+    debug('diffs:', diffs);
+
     const meta = await this.buildMetadata({
       ...document,
       title: `${document.title} Revision ${revision}`,
@@ -1011,6 +1053,8 @@ class UttoriWiki {
       session: request.session,
       title: `${document.title} Revision ${revision}`,
       document,
+      currentDocument,
+      diffs,
       meta,
       revision,
       slug,
@@ -1022,8 +1066,8 @@ class UttoriWiki {
     if (this.config.useCache) {
       response.set('Cache-control', `public, max-age=${this.config.cacheLong}`);
     }
-    debug('layout:', document.layout ?? 'detail');
-    response.render(document.layout ?? 'detail', viewModel);
+    debug('layout:', document.layout ?? 'history_detail');
+    response.render(document.layout ?? 'history_detail', viewModel);
   };
 
   /**

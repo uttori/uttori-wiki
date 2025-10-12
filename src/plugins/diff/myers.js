@@ -10,7 +10,7 @@ const goodDiagMagic = 4;       // Magic number for diagonal selection.
  * by Eugene W. Myers.
  * @template T
  */
-export class Myers {
+class Myers {
   // Inputs to compare.
   /** @type {T[]} */
   x = [];
@@ -45,23 +45,38 @@ export class Myers {
   resultVectorY = [];
 
   /**
-   * @param {T[]} x The first array to compare
-   * @param {T[]} y The second array to compare
+   * @param {number[]} xidx
+   * @param {number[]} yidx
+   * @param {T[]} x
+   * @param {T[]} y
+   */
+  constructor(xidx, yidx, x, y) {
+    this.xidx = xidx;
+    this.yidx = yidx;
+    this.resultVectorX = new Array(x.length + 1).fill(false);
+    this.resultVectorY = new Array(y.length + 1).fill(false);
+  }
+
+  /**
+   * @param {T[]} x0 The first array to compare
+   * @param {T[]} y0 The second array to compare
    * @param {function(T, T): boolean} eq Equality function to compare elements
    * @returns {[number, number, number, number]}
    */
-  init(x, y, eq) {
-    let smin = 0, tmin = 0;
-    let smax = x.length, tmax = y.length;
+  init(x0, y0, eq) {
+    let smin = 0;
+    let tmin = 0;
+    let smax = x0.length;
+    let tmax = y0.length;
 
     // Strip common prefix.
-    while (smin < smax && tmin < tmax && eq(x[smin], y[tmin])) {
+    while (smin < smax && tmin < tmax && eq(x0[smin], y0[tmin])) {
       smin++;
       tmin++;
     }
 
     // Strip common suffix.
-    while (smax > smin && tmax > tmin && eq(x[smax - 1], y[tmax - 1])) {
+    while (smax > smin && tmax > tmin && eq(x0[smax - 1], y0[tmax - 1])) {
       smax--;
       tmax--;
     }
@@ -69,14 +84,17 @@ export class Myers {
     const N = smax - smin;
     const M = tmax - tmin;
     const diagonals = N + M;
-    const vlen = 2 * diagonals + 3;    // +1 for the middle point and +2 for the borders
-    const buf = new Array(2 * vlen).fill(0); // allocate space for vf and vb with a single allocation
+    // +1 for the middle point and +2 for the borders
+    const vlen = 2 * diagonals + 3;
+    // allocate space for vf and vb with a single allocation
+    const buf = new Array(2 * vlen).fill(0);
 
-    this.x = x;
-    this.y = y;
+    this.x = x0;
+    this.y = y0;
     this.vf = buf.slice(0, vlen);
     this.vb = buf.slice(vlen);
-    this.v0 = diagonals + 1; // +1 for the middle point
+    // +1 for the middle point
+    this.v0 = diagonals + 1;
 
     // Set the costLimit to the approximate square root of the number of diagonals bounded by minCostLimit.
     let costLimit = 1;
@@ -84,9 +102,6 @@ export class Myers {
       costLimit <<= 1;
     }
     this.costLimit = Math.max(minCostLimit, costLimit);
-
-    // Don't reinitialize xidx, yidx, rx, ry if they're already set by the caller
-    // This is handled in the API layer
 
     return [smin, smax, tmin, tmax];
   }
@@ -188,12 +203,11 @@ export class Myers {
       //
       // First determine which diagonals k to search. Originally, we would search k = [fmid-d,
       // fmid+d] in steps of 2, but that would lead us to move outside the edit grid and would
-      // require more memory, more work, and special handling for s and t coordinates outside x
-      // and y.
+      // require more memory, more work, and special handling for s and t coordinates outside x and y.
       //
-      // Instead we put a few tighter bounds on k. We need to make sure to pick a start and end
-      // point in the original search space. Since we're searching in steps of 2, this requires
-      // changing the min and max for k when outside the boundary.
+      // Instead we put a few tighter bounds on k.
+      // We need to make sure to pick a start and end point in the original search space.
+      // Since we're searching in steps of 2, this requires changing the min and max for k when outside the boundary.
       //
       // Additionally, we're also initializing the v-array such that we can avoid a special case
       // in the k-loop below (for that we allocated an extra two elements up front): It let's us
@@ -247,15 +261,13 @@ export class Myers {
           t++;
         }
 
-        // If we have found a long diagonal, we may be able to apply the GOOD_DIAGONAL
-        // heuristic (see below).
+        // If we have found a long diagonal, we may be able to apply the GOOD_DIAGONAL heuristic (see below).
         longestDiag = Math.max(longestDiag, s - s0);
 
         // Then store the endpoint of the furthest reaching d-path.
         vf[k0] = s;
 
-        // Potentially, check for an overlap with a backwards d-path. We're done when we found
-        // it.
+        // Potentially, check for an overlap with a backwards d-path. We're done when we found it.
         if (odd && bmin <= k && k <= bmax && s >= vb[k0]) {
           return [s0, s, t0, t, true, true];
         }
@@ -306,11 +318,9 @@ export class Myers {
         continue;
       }
 
-      // Heuristic (GOOD_DIAGONAL): If we're over the cost limit for this heuristic, we accept a
-      // good diagonal to split the search space instead of searching for the optimal split point.
-      //
-      // A good diagonal is one that's longer than goodDiagMinLen, not too far from a corner and
-      // not too far from the middle diagonal.
+      // Heuristic (GOOD_DIAGONAL):
+      // If we're over the cost limit for this heuristic, we accept a good diagonal to split the search space instead of searching for the optimal split point.
+      // A good diagonal is one that's longer than goodDiagMinLen, not too far from a corner and not too far from the middle diagonal.
       if (longestDiag >= goodDiagMinLen && d >= goodDiagCostLimit) {
         const best = {
           v: 0,
@@ -330,10 +340,9 @@ export class Myers {
             continue; // not good enough, check next diagonal
           }
 
-          // Find the previous k, by doing the decision as in the forward iteration. And
-          // use it to reconstruct the middle diagonal: By construction, the path from (s,t)
-          // to (ps, pt) consists of horizontal or vertical step plus a possibly empty
-          // sequence of diagonals.
+          // Find the previous k, by doing the decision as in the forward iteration.
+          // And use it to reconstruct the middle diagonal: By construction, the path from (s,t)
+          // to (ps, pt) consists of horizontal or vertical step plus a possibly empty sequence of diagonals.
           /** @type {number} */
           let pk;
           if (vf[k0 - 1] < vf[k0 + 1]) {
@@ -343,7 +352,8 @@ export class Myers {
           }
           const ps = vf[pk + v0];
           const pt = ps - pk;
-          const diag = Math.min(s - ps, t - pt); // number of diagonal steps
+          // Number of diagonal steps.
+          const diag = Math.min(s - ps, t - pt);
           if (diag >= goodDiagMinLen) {
             best.v = v;
             best.s0 = s - diag;
@@ -376,7 +386,8 @@ export class Myers {
           }
           const ps = vb[pk + v0];
           const pt = ps - pk;
-          const diag = Math.min(ps - s, pt - t); // number of diagonal steps
+          // Number of diagonal steps.
+          const diag = Math.min(ps - s, pt - t);
           if (diag >= goodDiagMinLen) {
             best.v = v;
             best.s0 = s;
@@ -392,8 +403,8 @@ export class Myers {
         }
       }
 
-      // Heuristic (TOO_EXPENSIVE): Limit the amount of work to find an optimal path by picking
-      // a good-enough middle diagonal if we're over the cost limit.
+      // Heuristic (TOO_EXPENSIVE):
+      // Limit the amount of work to find an optimal path by picking a good-enough middle diagonal if we're over the cost limit.
       if (d >= this.costLimit) {
         // Find endpoint of the furthest reaching forward d-path that maximizes x+y.
         let fbest = Number.MIN_SAFE_INTEGER, fbestk = Number.MIN_SAFE_INTEGER;
@@ -436,8 +447,11 @@ export class Myers {
           }
           const ps = vf[pk + v0];
           const pt = ps - pk;
-          const diag = Math.min(s - ps, t - pt);  // number of diagonal steps
-          const s0 = s - diag, t0 = t - diag; // start of diagonal
+          // Number of diagonal steps.
+          const diag = Math.min(s - ps, t - pt);
+          // Start of diagonal.
+          const s0 = s - diag;
+          const t0 = t - diag;
           return [s0, s, t0, t, true, false];
         } else if (bbest !== Number.MAX_SAFE_INTEGER) {
           const k = bbestk;
@@ -455,8 +469,11 @@ export class Myers {
           }
           const ps = vb[pk + v0];
           const pt = ps - pk;
-          const diag = Math.min(ps - s, pt - t);  // number of diagonal steps
-          const s0 = s + diag, t0 = t + diag; // end of diagonal
+          // Number of diagonal steps.
+          const diag = Math.min(ps - s, pt - t);
+          // End of diagonal.
+          const s0 = s + diag;
+          const t0 = t + diag;
           return [s, s0, t, t0, false, true];
         } else {
           throw new Error('no best path found');
@@ -465,3 +482,5 @@ export class Myers {
     }
   }
 }
+
+export default  Myers;

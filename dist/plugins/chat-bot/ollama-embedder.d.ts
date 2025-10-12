@@ -34,6 +34,7 @@ declare class OllamaEmbedder {
      * @param {string} [prompt] The prompt to embed.
      * @param {number} [numAttempts] The number of attempts to make. Defaults to 5.
      * @returns {Promise<number[]>} The embedding vector.
+     * @see {@link https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings} Ollama API documentation.
      */
     embed(input: string, prompt?: string, numAttempts?: number): Promise<number[]>;
     /**

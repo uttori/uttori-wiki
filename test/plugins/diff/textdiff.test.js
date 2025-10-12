@@ -1,8 +1,8 @@
 import test from 'ava';
-import { textEdits, unified } from '../../../src/plugins/diff/textdiff/textdiff.js';
-import { Op } from '../../../src/plugins/diff/types.js';
+import { textEdits, unified, htmlTable } from '../../../src/plugins/diff/textdiff.js';
+import { Op } from '../../../src/plugins/diff/diff.js';
 
-test('should find differences between strings', (t) => {
+test('textEdits: should find differences between strings', (t) => {
   const x = 'line1\nline2\nline3';
   const y = 'line1\nmodified\nline3';
 
@@ -15,7 +15,7 @@ test('should find differences between strings', (t) => {
   t.is(result[3].op, Op.Match);   // line3 matches
 });
 
-test('should generate unified diff format', (t) => {
+test('unified: should generate unified diff format', (t) => {
   const x = 'line1\nline2\nline3';
   const y = 'line1\nmodified\nline3';
 
@@ -27,7 +27,7 @@ test('should generate unified diff format', (t) => {
   t.true(result.includes('+'));
 });
 
-test('should handle identical strings', (t) => {
+test('textEdits: should handle identical strings', (t) => {
   const x = 'line1\nline2\nline3';
   const y = 'line1\nline2\nline3';
 
@@ -35,4 +35,25 @@ test('should handle identical strings', (t) => {
 
   t.is(result.length, 3);
   t.true(result.every(edit => edit.op === Op.Match));
+});
+
+test('htmlTable: should generate HTML table diff', (t) => {
+  const x = 'line1\nline2\nline3';
+  const y = 'line1\nmodified\nline3';
+
+  const result = htmlTable(x, y);
+
+  t.is(typeof result, 'string');
+  t.true(result.includes('<table class="diff">'));
+  t.true(result.includes('<tbody>'));
+  t.true(result.includes('</tbody>'));
+  t.true(result.includes('</table>'));
+  t.true(result.includes('class="src delete"'));
+  t.true(result.includes('class="src insert"'));
+  t.true(result.includes('class="src match"'));
+  t.true(result.includes('data-op="delete"'));
+  t.true(result.includes('data-op="insert"'));
+  t.true(result.includes('data-op="match"'));
+  t.true(result.includes('data-block-start'));
+  t.true(result.includes('data-block-end'));
 });

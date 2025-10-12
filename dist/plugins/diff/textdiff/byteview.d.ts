@@ -35,12 +35,12 @@ export class ByteView {
      */
     bytes(): IterableIterator<number>;
     /**
-     * UnsafeAs converts a ByteView to type T independently of what it was originally. This is
-     * only safe if the type is the same one used for From and either the result is not modified
-     * or the ByteView is no longer used.
+     * renderAs converts a ByteView to the provided type independently of what it was originally.
+     * This is only safe if the type is the same one used for From and either the result is not modified or the ByteView is no longer used.
+     * @param {string} [type] The type to convert to.
      * @returns {string | Uint8Array}
      */
-    unsafeAs(): string | Uint8Array;
+    renderAs(type?: string): string | Uint8Array;
 }
 /**
  */
@@ -49,10 +49,6 @@ export class Builder {
     buf: string;
     /** @type {boolean} */
     isString: boolean;
-    /**
-     * @param {number} _n
-     */
-    grow(_n: number): void;
     /**
      * @param {number[]} v
      * @returns {number}

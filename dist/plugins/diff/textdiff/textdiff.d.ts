@@ -11,10 +11,8 @@
  */
 export function textHunks(x: string | Uint8Array, y: string | Uint8Array, context?: number): import("./types.js").TextHunk[];
 /**
- * textEdits compares the lines in x and y and returns the changes necessary to convert from one to the
- * other.
- * textEdits returns edits for every element in the input. If x and y are identical, the output will
- * consist of a match edit for every input element.
+ * textEdits compares the lines in x and y and returns the changes necessary to convert from one to the other.
+ * textEdits returns edits for every element in the input. If x and y are identical, the output will consist of a match edit for every input element.
  * @param {string | Uint8Array} x The first text to compare
  * @param {string | Uint8Array} y The second text to compare
  * @returns {import('./types.js').TextEdit[]}
@@ -29,4 +27,13 @@ export function textEdits(x: string | Uint8Array, y: string | Uint8Array): impor
  * @returns {string | Uint8Array}
  */
 export function unified(x: string | Uint8Array, y: string | Uint8Array, context?: number): string | Uint8Array;
+/**
+ * htmlTable compares the lines in x and y and returns an HTML table showing the differences.
+ *
+ * @param {string | Uint8Array} x The first text to compare (old version)
+ * @param {string | Uint8Array} y The second text to compare (new version)
+ * @param {number} context Number of matching lines to include around changes (default: 3)
+ * @returns {string} HTML table string
+ */
+export function htmlTable(x: string | Uint8Array, y: string | Uint8Array, context?: number): string;
 //# sourceMappingURL=textdiff.d.ts.map

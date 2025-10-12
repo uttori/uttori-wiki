@@ -1,5 +1,5 @@
 import test from 'ava';
-import { unified } from '../../../src/plugins/diff/textdiff/textdiff.js';
+import { unified } from '../../../src/plugins/diff/textdiff.js';
 import * as fs from 'fs';
 import * as path from 'path';
 

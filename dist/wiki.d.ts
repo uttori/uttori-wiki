@@ -85,6 +85,14 @@ export type UttoriWikiViewModel = {
      * An object of history by day.
      */
     historyByDay?: Record<string, string[]>;
+    /**
+     * The current version of the document for comparison.
+     */
+    currentDocument?: UttoriWikiDocument;
+    /**
+     * An object containing HTML table diffs for changed fields.
+     */
+    diffs?: Record<string, string>;
 };
 export type UttoriWikiDocument = {
     /**
@@ -170,6 +178,8 @@ export type UttoriWikiDocumentAttachment = {
  * @property {string} [action] The action to be used in the form.
  * @property {string} [revision] The revision of the document.
  * @property {Record<string, string[]>} [historyByDay] An object of history by day.
+ * @property {UttoriWikiDocument} [currentDocument] The current version of the document for comparison.
+ * @property {Record<string, string>} [diffs] An object containing HTML table diffs for changed fields.
  */
 /**
  * @typedef {object} UttoriWikiDocument
