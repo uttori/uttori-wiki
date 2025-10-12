@@ -1319,6 +1319,8 @@ Hooks:
 | [action] | <code>string</code> | The action to be used in the form. |
 | [revision] | <code>string</code> | The revision of the document. |
 | [historyByDay] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object of history by day. |
+| [currentDocument] | [<code>UttoriWikiDocument</code>](#UttoriWikiDocument) | The current version of the document for comparison. |
+| [diffs] | <code>Record.&lt;string, string&gt;</code> | An object containing HTML table diffs for changed fields. |
 
 <a name="UttoriWikiDocument"></a>
 

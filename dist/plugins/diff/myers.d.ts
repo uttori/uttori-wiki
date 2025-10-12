@@ -1,10 +1,18 @@
+export default Myers;
 /**
  * Myers algorithm implementation for diff computation.
  * This is a full implementation based on "An O(ND) Difference Algorithm and its Variations"
  * by Eugene W. Myers.
  * @template T
  */
-export class Myers<T> {
+declare class Myers<T> {
+    /**
+     * @param {number[]} xidx
+     * @param {number[]} yidx
+     * @param {T[]} x
+     * @param {T[]} y
+     */
+    constructor(xidx: number[], yidx: number[], x: T[], y: T[]);
     /** @type {T[]} */
     x: T[];
     /** @type {T[]} */
@@ -26,12 +34,12 @@ export class Myers<T> {
     /** @type {boolean[]} */
     resultVectorY: boolean[];
     /**
-     * @param {T[]} x The first array to compare
-     * @param {T[]} y The second array to compare
+     * @param {T[]} x0 The first array to compare
+     * @param {T[]} y0 The second array to compare
      * @param {function(T, T): boolean} eq Equality function to compare elements
-     * @returns {[number, number, number, number]}
+     * @returns {Array<number, number, number, number>}
      */
-    init(x: T[], y: T[], eq: (arg0: T, arg1: T) => boolean): [number, number, number, number];
+    init(x0: T[], y0: T[], eq: (arg0: T, arg1: T) => boolean): Array<number, number, number, number>;
     /**
      * compare finds an optimal d-path from (smin, tmin) to (smax, tmax).
      * Important: x[smin:smax] and y[tmin:tmax] must not have a common prefix or a common suffix.

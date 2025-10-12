@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2025-10-11)
 
+- 💥 BREAKING CHANGES!
+- 💥 New `history_detail` theme is expected to exist
 - 🪲 Fix analytics plugin validation function
 - 🪲 Fix some embedding retruns could fail due to different than expected keys
 - 🪲 Fix case where if embedding errored we would not add full text search (FTS) to the database
@@ -18,6 +20,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors
+- 🧰 Added Myers `diff` library and line by line diff for history detail pages
 
 ## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
 

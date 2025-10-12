@@ -58,6 +58,7 @@ Embed a text string with Ollama via the embeddings API.
 
 **Kind**: instance method of [<code>OllamaEmbedder</code>](#OllamaEmbedder)  
 **Returns**: <code>Promise.&lt;Array.&lt;number&gt;&gt;</code> - The embedding vector.  
+**See**: [https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings](https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings) Ollama API documentation.  
 
 | Param | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -61,7 +61,7 @@ class Myers {
    * @param {T[]} x0 The first array to compare
    * @param {T[]} y0 The second array to compare
    * @param {function(T, T): boolean} eq Equality function to compare elements
-   * @returns {[number, number, number, number]}
+   * @returns {Array<number, number, number, number>}
    */
   init(x0, y0, eq) {
     let smin = 0;
