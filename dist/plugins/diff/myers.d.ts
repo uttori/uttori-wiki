@@ -1,4 +1,34 @@
 export default Myers;
+export type SplitResult = {
+    s0: number;
+    s1: number;
+    t0: number;
+    t1: number;
+    opt0: boolean;
+    opt1: boolean;
+};
+export type InitResult = {
+    smin: number;
+    smax: number;
+    tmin: number;
+    tmax: number;
+};
+/**
+ * @typedef {object} SplitResult
+ * @property {number} s0
+ * @property {number} s1
+ * @property {number} t0
+ * @property {number} t1
+ * @property {boolean} opt0
+ * @property {boolean} opt1
+ */
+/**
+ * @typedef {object} InitResult
+ * @property {number} smin
+ * @property {number} smax
+ * @property {number} tmin
+ * @property {number} tmax
+ */
 /**
  * Myers algorithm implementation for diff computation.
  * This is a full implementation based on "An O(ND) Difference Algorithm and its Variations"
@@ -37,9 +67,9 @@ declare class Myers<T> {
      * @param {T[]} x0 The first array to compare
      * @param {T[]} y0 The second array to compare
      * @param {function(T, T): boolean} eq Equality function to compare elements
-     * @returns {Array<number, number, number, number>}
+     * @returns {InitResult}
      */
-    init(x0: T[], y0: T[], eq: (arg0: T, arg1: T) => boolean): Array<number, number, number, number>;
+    init(x0: T[], y0: T[], eq: (arg0: T, arg1: T) => boolean): InitResult;
     /**
      * compare finds an optimal d-path from (smin, tmin) to (smax, tmax).
      * Important: x[smin:smax] and y[tmin:tmax] must not have a common prefix or a common suffix.
@@ -63,8 +93,8 @@ declare class Myers<T> {
      * @param {number} tmax
      * @param {boolean} optimal
      * @param {function(T, T): boolean} eq Equality function to compare elements
-     * @returns {[number, number, number, number, boolean, boolean]}
+     * @returns {SplitResult}
      */
-    split(smin: number, smax: number, tmin: number, tmax: number, optimal: boolean, eq: (arg0: T, arg1: T) => boolean): [number, number, number, number, boolean, boolean];
+    split(smin: number, smax: number, tmin: number, tmax: number, optimal: boolean, eq: (arg0: T, arg1: T) => boolean): SplitResult;
 }
 //# sourceMappingURL=myers.d.ts.map

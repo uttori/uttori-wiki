@@ -60,7 +60,7 @@ class StorageProvider {
   /**
    * Returns all documents matching a given query.
    * @param {string} query The conditions on which documents should be returned.
-   * @returns {Promise<number | import('../../wiki.js').UttoriWikiDocument[] | Partial<import('../../wiki.js').UttoriWikiDocument>[]>} The items matching the supplied query.
+   * @returns {Promise<number | import('../../wiki.js').UttoriWikiDocument[]>} The items matching the supplied query.
    */
   getQuery = async (query) => {
     debug('getQuery:', query);

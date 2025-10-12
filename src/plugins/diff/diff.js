@@ -33,6 +33,19 @@ export const Op = {
  */
 
 /**
+ * @typedef {function} EqualityFunction
+ * @param {string | Uint8Array} a The first element to compare
+ * @param {string | Uint8Array} b The second element to compare
+ * @returns {boolean} Whether the two elements are equal
+ */
+
+/**
+ * @typedef {object} DiffResult
+ * @property {boolean[]} rx The first array of booleans
+ * @property {boolean[]} ry The second array of booleans
+ */
+
+/**
  * Compares the contents of x and y using the provided equality comparison and returns the
  * changes necessary to convert from one to the other.
  * The output is a sequence of hunks that each describe a number of consecutive edits.
@@ -41,12 +54,12 @@ export const Op = {
  * Note that this function has generally worse performance than [Hunks] for diffs with many changes.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
+ * @param {EqualityFunction} eq Equality function to compare elements
  * @param {number} context Number of matching elements to include around changes (default: 3)
  * @returns {Hunk[]}
  */
 export function hunks(x, y, eq = (a, b) => a === b, context = DEFAULT_CONTEXT) {
-  const [rx, ry] = diff(x, y, eq);
+  const { rx, ry } = diff(x, y, eq);
   return createHunks(x, y, rx, ry, context);
 }
 
@@ -58,11 +71,11 @@ export function hunks(x, y, eq = (a, b) => a === b, context = DEFAULT_CONTEXT) {
  * Note that this function has generally worse performance than [Edits] for diffs with many changes.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
+ * @param {EqualityFunction} eq Equality function to compare elements
  * @returns {Edit[]}
  */
 export function edits(x, y, eq = (a, b) => a === b) {
-  const [rx, ry] = diff(x, y, eq);
+  const { rx, ry } = diff(x, y, eq);
   return createEdits(x, y, rx, ry);
 }
 
@@ -241,8 +254,8 @@ function createEdits(x, y, rx, ry) {
  * Simple implementation of findChangeBounds that strips common prefix and suffix.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
- * @returns {[number, number, number, number]}
+ * @param {EqualityFunction} eq Equality function to compare elements
+ * @returns {import('./myers.js').InitResult}
  */
 export function findChangeBounds(x, y, eq = (a, b) => a === b) {
   let smin = 0;
@@ -262,15 +275,15 @@ export function findChangeBounds(x, y, eq = (a, b) => a === b) {
     tmax--;
   }
 
-  return [smin, smax, tmin, tmax];
+  return { smin, smax, tmin, tmax };
 }
 
 /**
  * Main diff function.
  * @param {string[] | Uint8Array[]} x The first array to compare
  * @param {string[] | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
- * @returns {[boolean[], boolean[]]}
+ * @param {EqualityFunction} eq Equality function to compare elements
+ * @returns {DiffResult}
  */
 export function diff(x, y, eq = (a, b) => a === b) {
   /** @type {number[]} */
@@ -324,8 +337,8 @@ export function diff(x, y, eq = (a, b) => a === b) {
 
   /** @type {Myers<string | Uint8Array>} */
   const m = new Myers(xidx, yidx, x, y);
-  const [smin0, smax0, tmin0, tmax0] = m.init(x0, y0, (a, b) => a === b);
-  m.compare(smin0, smax0, tmin0, tmax0, true, (a, b) => a === b);
+  const { smin, smax, tmin, tmax } = m.init(x0, y0, (a, b) => a === b);
+  m.compare(smin, smax, tmin, tmax, true, (a, b) => a === b);
 
-  return [m.resultVectorX, m.resultVectorY];
+  return { rx: m.resultVectorX, ry: m.resultVectorY };
 }

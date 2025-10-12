@@ -71,9 +71,9 @@ declare class StorageProvider {
     /**
      * Returns all documents matching a given query.
      * @param {string} query The conditions on which documents should be returned.
-     * @returns {Promise<number | import('../../wiki.js').UttoriWikiDocument[] | Partial<import('../../wiki.js').UttoriWikiDocument>[]>} The items matching the supplied query.
+     * @returns {Promise<number | import('../../wiki.js').UttoriWikiDocument[]>} The items matching the supplied query.
      */
-    getQuery: (query: string) => Promise<number | import("../../wiki.js").UttoriWikiDocument[] | Partial<import("../../wiki.js").UttoriWikiDocument>[]>;
+    getQuery: (query: string) => Promise<number | import("../../wiki.js").UttoriWikiDocument[]>;
     /**
      * Returns a document for a given slug.
      * @param {string} slug The slug of the document to be returned.

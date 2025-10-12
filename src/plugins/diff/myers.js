@@ -5,6 +5,24 @@ const goodDiagCostLimit = 256; // The Heuristic is only applied if the cost exce
 const goodDiagMagic = 4;       // Magic number for diagonal selection.
 
 /**
+ * @typedef {object} SplitResult
+ * @property {number} s0
+ * @property {number} s1
+ * @property {number} t0
+ * @property {number} t1
+ * @property {boolean} opt0
+ * @property {boolean} opt1
+ */
+
+/**
+ * @typedef {object} InitResult
+ * @property {number} smin
+ * @property {number} smax
+ * @property {number} tmin
+ * @property {number} tmax
+ */
+
+/**
  * Myers algorithm implementation for diff computation.
  * This is a full implementation based on "An O(ND) Difference Algorithm and its Variations"
  * by Eugene W. Myers.
@@ -61,7 +79,7 @@ class Myers {
    * @param {T[]} x0 The first array to compare
    * @param {T[]} y0 The second array to compare
    * @param {function(T, T): boolean} eq Equality function to compare elements
-   * @returns {Array<number, number, number, number>}
+   * @returns {InitResult}
    */
   init(x0, y0, eq) {
     let smin = 0;
@@ -103,7 +121,7 @@ class Myers {
     }
     this.costLimit = Math.max(minCostLimit, costLimit);
 
-    return [smin, smax, tmin, tmax];
+    return { smin, smax, tmin, tmax };
   }
 
   /**
@@ -135,7 +153,7 @@ class Myers {
       //   (3) A, possibly empty, rect (s1, t1) to (smax, tmax)
       //
       // (1) and (3) will not have a common suffix or a common prefix, so we can use them directly as inputs to compare.
-      const [s0, s1, t0, t1, opt0, opt1] = this.split(smin, smax, tmin, tmax, optimal, eq);
+      const { s0, s1, t0, t1, opt0, opt1 } = this.split(smin, smax, tmin, tmax, optimal, eq);
 
       // Recurse into (1) and (3).
       this.compare(smin, s0, tmin, t0, opt0, eq);
@@ -155,7 +173,7 @@ class Myers {
    * @param {number} tmax
    * @param {boolean} optimal
    * @param {function(T, T): boolean} eq Equality function to compare elements
-   * @returns {[number, number, number, number, boolean, boolean]}
+   * @returns {SplitResult}
    */
   split(smin, smax, tmin, tmax, optimal, eq) {
     const N = smax - smin;
@@ -269,7 +287,14 @@ class Myers {
 
         // Potentially, check for an overlap with a backwards d-path. We're done when we found it.
         if (odd && bmin <= k && k <= bmax && s >= vb[k0]) {
-          return [s0, s, t0, t, true, true];
+          return {
+            s0: s0,
+            s1: s,
+            t0: t0,
+            t1: t,
+            opt0: true,
+            opt1: true,
+          };
         }
       }
 
@@ -310,7 +335,14 @@ class Myers {
         vb[k0] = s;
 
         if (!odd && fmin <= k && k <= fmax && s <= vf[v0 + k]) {
-          return [s, s0, t, t0, true, true];
+          return {
+            s0: s,
+            s1: s0,
+            t0: t,
+            t1: t0,
+            opt0: true,
+            opt1: true,
+          };
         }
       }
 
@@ -399,7 +431,14 @@ class Myers {
           }
         }
         if (best.v > 0) {
-          return [best.s0, best.s1, best.t0, best.t1, best.opt0, best.opt1];
+          return {
+            s0: best.s0,
+            s1: best.s1,
+            t0: best.t0,
+            t1: best.t1,
+            opt0: best.opt0,
+            opt1: best.opt1,
+          };
         }
       }
 
@@ -452,7 +491,14 @@ class Myers {
           // Start of diagonal.
           const s0 = s - diag;
           const t0 = t - diag;
-          return [s0, s, t0, t, true, false];
+          return {
+            s0: s0,
+            s1: s,
+            t0: t0,
+            t1: t,
+            opt0: true,
+            opt1: false,
+          };
         } else if (bbest !== Number.MAX_SAFE_INTEGER) {
           const k = bbestk;
           const k0 = k + v0;
@@ -474,7 +520,14 @@ class Myers {
           // End of diagonal.
           const s0 = s + diag;
           const t0 = t + diag;
-          return [s, s0, t, t0, false, true];
+          return {
+            s0: s0,
+            s1: s,
+            t0: t0,
+            t1: t,
+            opt0: false,
+            opt1: true,
+          };
         } else {
           throw new Error('no best path found');
         }

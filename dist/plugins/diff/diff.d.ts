@@ -18,6 +18,17 @@
  * @property {Edit[]} edits The edits to transform x[PosX:EndX] to y[PosY:EndY].
  */
 /**
+ * @typedef {function} EqualityFunction
+ * @param {string | Uint8Array} a The first element to compare
+ * @param {string | Uint8Array} b The second element to compare
+ * @returns {boolean} Whether the two elements are equal
+ */
+/**
+ * @typedef {object} DiffResult
+ * @property {boolean[]} rx The first array of booleans
+ * @property {boolean[]} ry The second array of booleans
+ */
+/**
  * Compares the contents of x and y using the provided equality comparison and returns the
  * changes necessary to convert from one to the other.
  * The output is a sequence of hunks that each describe a number of consecutive edits.
@@ -26,11 +37,11 @@
  * Note that this function has generally worse performance than [Hunks] for diffs with many changes.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
+ * @param {EqualityFunction} eq Equality function to compare elements
  * @param {number} context Number of matching elements to include around changes (default: 3)
  * @returns {Hunk[]}
  */
-export function hunks(x: string | Uint8Array[], y: string | Uint8Array[], eq?: (arg0: string | Uint8Array, arg1: string | Uint8Array) => boolean, context?: number): Hunk[];
+export function hunks(x: string | Uint8Array[], y: string | Uint8Array[], eq?: EqualityFunction, context?: number): Hunk[];
 /**
  * Compares the contents of x and y using the provided equality comparison and returns the
  * changes necessary to convert from one to the other.
@@ -39,26 +50,26 @@ export function hunks(x: string | Uint8Array[], y: string | Uint8Array[], eq?: (
  * Note that this function has generally worse performance than [Edits] for diffs with many changes.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
+ * @param {EqualityFunction} eq Equality function to compare elements
  * @returns {Edit[]}
  */
-export function edits(x: string | Uint8Array[], y: string | Uint8Array[], eq?: (arg0: string | Uint8Array, arg1: string | Uint8Array) => boolean): Edit[];
+export function edits(x: string | Uint8Array[], y: string | Uint8Array[], eq?: EqualityFunction): Edit[];
 /**
  * Simple implementation of findChangeBounds that strips common prefix and suffix.
  * @param {string | Uint8Array[]} x The first array to compare
  * @param {string | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
- * @returns {[number, number, number, number]}
+ * @param {EqualityFunction} eq Equality function to compare elements
+ * @returns {import('./myers.js').InitResult}
  */
-export function findChangeBounds(x: string | Uint8Array[], y: string | Uint8Array[], eq?: (arg0: string | Uint8Array, arg1: string | Uint8Array) => boolean): [number, number, number, number];
+export function findChangeBounds(x: string | Uint8Array[], y: string | Uint8Array[], eq?: EqualityFunction): import("./myers.js").InitResult;
 /**
  * Main diff function.
  * @param {string[] | Uint8Array[]} x The first array to compare
  * @param {string[] | Uint8Array[]} y The second array to compare
- * @param {function(string | Uint8Array, string | Uint8Array): boolean} eq Equality function to compare elements
- * @returns {[boolean[], boolean[]]}
+ * @param {EqualityFunction} eq Equality function to compare elements
+ * @returns {DiffResult}
  */
-export function diff(x: string[] | Uint8Array[], y: string[] | Uint8Array[], eq?: (arg0: string | Uint8Array, arg1: string | Uint8Array) => boolean): [boolean[], boolean[]];
+export function diff(x: string[] | Uint8Array[], y: string[] | Uint8Array[], eq?: EqualityFunction): DiffResult;
 export const DEFAULT_CONTEXT: 3;
 export namespace Op {
     let Match: number;
@@ -109,5 +120,16 @@ export type Hunk = {
      * The edits to transform x[PosX:EndX] to y[PosY:EndY].
      */
     edits: Edit[];
+};
+export type EqualityFunction = Function;
+export type DiffResult = {
+    /**
+     * The first array of booleans
+     */
+    rx: boolean[];
+    /**
+     * The second array of booleans
+     */
+    ry: boolean[];
 };
 //# sourceMappingURL=diff.d.ts.map

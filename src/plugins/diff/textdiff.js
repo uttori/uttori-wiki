@@ -59,7 +59,7 @@ export function textHunks(x, y, context = DEFAULT_CONTEXT) {
   const xlines = splitLines(x);
   const ylines = splitLines(y);
 
-  const [rx, ry] = diff(xlines, ylines);
+  const { rx, ry } = diff(xlines, ylines);
 
   return createTextHunks(xlines, ylines, rx, ry, context);
 }
@@ -75,7 +75,7 @@ export function textEdits(x, y) {
   const xlines = splitLines(x);
   const ylines = splitLines(y);
 
-  const [rx, ry] = diff(xlines, ylines);
+  const { rx, ry } = diff(xlines, ylines);
 
   return createTextEdits(xlines, ylines, rx, ry);
 }
@@ -96,7 +96,7 @@ export function unified(x, y, context = DEFAULT_CONTEXT) {
   const xlines = splitLines(x);
   const ylines = splitLines(y);
 
-  const [rx, ry] = diff(xlines, ylines);
+  const { rx, ry } = diff(xlines, ylines);
 
   /** @type {TextHunk[]} */
   const hunks = createTextHunks(xlines, ylines, rx, ry, context);

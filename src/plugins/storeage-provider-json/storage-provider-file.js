@@ -61,7 +61,8 @@ class StorageProviderJsonFile {
     };
 
     this.refresh = true;
-    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of documents where the slug is the key and the value is the document. */
+    // The collection of documents where the slug is the key and the value is the document.
+    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} */
     this.documents = {};
 
     // Ensure the directories exist.
@@ -122,7 +123,7 @@ class StorageProviderJsonFile {
    * Returns all documents matching a given query.
    * @async
    * @param {string} query The conditions on which documents should be returned.
-   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]|Partial<import('../../wiki.js').UttoriWikiDocument>[]|number>} Promise object represents all matching documents.
+   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]|number>} Promise object represents all matching documents.
    */
   getQuery = async (query) => {
     debug('getQuery:', query);
