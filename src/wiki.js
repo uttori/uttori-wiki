@@ -1,7 +1,8 @@
+import { htmlTable } from '@uttori/data-tools/diff/textdiff';
 import { EventDispatcher } from '@uttori/event-dispatcher';
+
 import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
-import { htmlTable } from './plugins/diff/textdiff.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
 

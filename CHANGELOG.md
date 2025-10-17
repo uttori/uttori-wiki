@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2025-10-11)
+## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2025-10-17)
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist
@@ -17,10 +17,10 @@ All notable changes to this project will be documented in this file. This projec
 - 🛠 Indexing documents debugging logs greatly improved for detecting issues
 - 🛠 Add error checking for inserting bad vectors to the database
 - 🛠 Update `consolidateNestedItems` to split large tables
+- 🛠 Use `@uttori/data-tools` for text diffing
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors
-- 🧰 Added Myers `diff` library and line by line diff for history detail pages
 
 ## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
 

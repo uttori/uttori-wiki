@@ -35,15 +35,15 @@ import xss from "eslint-plugin-xss";
 
 export default defineConfig([
   globalIgnores([
-      "**/.nyc_output",
-      "**/convert",
-      "**/coverage",
-      "**/node_modules",
-      "build/**/*",
-      "dist/*",
-      "eslint.config.js",
-      "site/themes/*",
-      "src/**/*.png",
+    "**/.nyc_output",
+    "**/convert",
+    "**/coverage",
+    "**/node_modules",
+    "build/**/*",
+    "dist/*",
+    "eslint.config.js",
+    "site/themes/*",
+    "src/**/*.png",
   ]),
 
   security.configs.recommended,
@@ -63,8 +63,8 @@ export default defineConfig([
       ecmaVersion: "latest",
       sourceType: "module",
       parserOptions: {
-          project: "./tsconfig.json",
-          requireConfigFile: false,
+        project: "./tsconfig.json",
+        requireConfigFile: false,
       },
     },
     plugins: {
@@ -121,7 +121,6 @@ export default defineConfig([
       "no-return-await": "off",
       "no-underscore-dangle": "off",
       "no-unused-vars": "off",
-
       "no-restricted-syntax": ["error", {
         selector: "ForInStatement",
         message: "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array.",

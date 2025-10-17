@@ -24,6 +24,7 @@
     "node": ">= 24"
   },
   "dependencies": {
+    "@uttori/data-tools": "^3.2.0",
     "@uttori/event-dispatcher": "^3.0.2"
   },
   "optionalDependencies": {
