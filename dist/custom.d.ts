@@ -49,6 +49,7 @@ export type KnownPluginConfigs = {
   'uttori-plugin-storage-provider-json-memory': import('./plugins/storage-provider-json-memory.js').StorageProviderJsonMemoryConfig;
   'uttori-plugin-tag-routes': import('./plugins/tag-routes.js').TagRoutesPluginConfig;
   'uttori-plugin-upload-multer': import('./plugins/upload-multer.js').MulterUploadConfig;
+  'uttori-plugin-category-routes': import('./plugins/category-routes.js').CategoryRoutesPluginConfig;
 }
 
 export type UttoriContext = {
@@ -70,6 +71,8 @@ export type UttoriContextWithPluginConfig<K extends string, CustomPluginConfig> 
   Omit<UttoriContext, 'config'> & {
     config: UttoriWikiConfig & KnownPluginConfigs & Record<string, UttoriPluginConfig> & Record<K, CustomPluginConfig>;
   };
+
+
 
 export type UttoriMiddleware = (string | Function | boolean)[]
 
@@ -94,6 +97,27 @@ export interface SaveParams {
   /** The slug to save to. */
   slug?: string
 }
+
+/**
+ * Base interface for extending UttoriWikiDocument with plugin-specific fields.
+ * Plugins can extend this interface to add their own document fields.
+ *
+ * @example
+ * ```typescript
+ * declare module './custom.d.ts' {
+ *   interface UttoriWikiDocumentExtensions {
+ *     categories?: string[];
+ *   }
+ * }
+ * ```
+ */
+export interface UttoriWikiDocumentExtensions {}
+
+/**
+ * Extended UttoriWikiDocument type that includes plugin-specific fields.
+ * This type automatically includes all fields from UttoriWikiDocumentExtensions.
+ */
+export interface UttoriWikiDocumentExtended extends UttoriWikiDocument, UttoriWikiDocumentExtensions {}
 
 export interface UttoriWikiPlugin {
   /** The config key the plugin will search for in the larger config object. */

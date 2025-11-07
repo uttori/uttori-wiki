@@ -69,7 +69,7 @@ export type UttoriWikiConfig = {
      */
     handleNotFound?: boolean;
     /**
-     * =[] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
+     * List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
      */
     allowedDocumentKeys: string[];
     /**
@@ -177,7 +177,7 @@ export type UttoriWikiConfig = {
  * @property {string|undefined} [editKey] Key used for verifying document modification.
  * @property {boolean} [publicHistory=true] Allow access to history URLs.
  * @property {boolean} [handleNotFound=true] Allows the middleware to capture fall through routes as a `404 not found` handler when enabled.
- * @property {string[]} allowedDocumentKeys=[] List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
+ * @property {string[]} allowedDocumentKeys List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
  * @property {boolean} [useCache=true] Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
  * @property {number} [cacheShort=(60 * 60)] Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
  * @property {number} [cacheLong=(60 * 60 * 24)] Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore

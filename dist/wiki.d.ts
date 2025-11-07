@@ -158,6 +158,24 @@ export type UttoriWikiDocumentAttachment = {
      */
     type: string;
     /**
+     * The size of the attachment in bytes.
+     */
+    size: number;
+    /**
+     * The metadata of the attachment.
+     */
+    metadata: {
+        gps?: string;
+    };
+    /**
+     * The latitude of the GPS coordinates.
+     */
+    lat?: number;
+    /**
+     * The longitude of the GPS coordinates.
+     */
+    lon?: number;
+    /**
      * Whether to skip the attachment. Used to control whether to index the attachment.
      */
     skip?: boolean;
@@ -202,12 +220,17 @@ export type UttoriWikiDocumentAttachment = {
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
+ * @property {number} size The size of the attachment in bytes.
+ * @property {object} metadata The metadata of the attachment.
+ * @property {string} [metadata.gps] The GPS coordinates of the attachment.
+ * @property {number} [metadata.gps.lat] The latitude of the GPS coordinates.
+ * @property {number} [metadata.gps.lon] The longitude of the GPS coordinates.
  * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
  */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
- * @property {import('./config.js').UttoriWikiConfig} config - The configuration object.
- * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks - The hook / event dispatching object.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks The hook / event dispatching object.
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
@@ -217,8 +240,8 @@ export type UttoriWikiDocumentAttachment = {
 declare class UttoriWiki {
     /**
      * Creates an instance of UttoriWiki.
-     * @param {import('./config.js').UttoriWikiConfig} config - A configuration object.
-     * @param {import('express').Application} server - The Express server instance.
+     * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
+     * @param {import('express').Application} server The Express server instance.
      * @class
      */
     constructor(config: import("./config.js").UttoriWikiConfig, server: import("express").Application);
@@ -228,7 +251,7 @@ declare class UttoriWiki {
     hooks: import("@uttori/event-dispatcher").EventDispatcher;
     /**
      * Registers plugins with the Event Dispatcher.
-     * @param {import('./config.js').UttoriWikiConfig} config - A configuration object.
+     * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
      */
     registerPlugins(config: import("./config.js").UttoriWikiConfig): void;
     /**
