@@ -5,12 +5,12 @@ import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
+// TODO Standardize the view model so it is consistent across all the routes.
+// TODO: Require document.image to be an image from the attachments.
 
 let debug = (..._) => {};
 /* c8 ignore next */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
-
-// TODO Standardize the view model so it is consistent across all the routes.
 
 /**
  * @typedef {object} UttoriWikiViewModel
@@ -54,13 +54,18 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
+ * @property {number} size The size of the attachment in bytes.
+ * @property {object} metadata The metadata of the attachment.
+ * @property {string} [metadata.gps] The GPS coordinates of the attachment.
+ * @property {number} [metadata.gps.lat] The latitude of the GPS coordinates.
+ * @property {number} [metadata.gps.lon] The longitude of the GPS coordinates.
  * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
  */
 
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
- * @property {import('./config.js').UttoriWikiConfig} config - The configuration object.
- * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks - The hook / event dispatching object.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks The hook / event dispatching object.
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
@@ -70,8 +75,8 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
 class UttoriWiki {
 /**
  * Creates an instance of UttoriWiki.
- * @param {import('./config.js').UttoriWikiConfig} config - A configuration object.
- * @param {import('express').Application} server - The Express server instance.
+ * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
+ * @param {import('express').Application} server The Express server instance.
  * @class
  */
   constructor(config, server) {
@@ -107,7 +112,7 @@ class UttoriWiki {
 
   /**
    * Registers plugins with the Event Dispatcher.
-   * @param {import('./config.js').UttoriWikiConfig} config - A configuration object.
+   * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
    */
   registerPlugins(config) {
     if (!config.plugins || !Array.isArray(config.plugins) || config.plugins.length <= 0) {
@@ -370,6 +375,7 @@ class UttoriWiki {
     if (this.config.useCache) {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
+    debug('Rendering home template:', viewModel);
     response.render('home', viewModel);
   };
 
@@ -1243,7 +1249,9 @@ class UttoriWiki {
       }
       return output;
     }, {});
+    debug('custom keys:', custom);
 
+    // TODO Move this to tag routes as a pre-save filter with `document-save` event
     // Normalize tags before save
     /** @type {string[]} */
     let tags = [];
@@ -1269,6 +1277,22 @@ class UttoriWiki {
     debug('attachments:', request.body.attachments);
     if (Array.isArray(request.body.attachments)) {
       attachments = request.body.attachments;
+      // Ensure the attachments key metadata is an object
+      attachments = attachments.map((attachment) => {
+        if (typeof attachment?.metadata === 'string') {
+          try {
+            attachment.metadata = JSON.parse(attachment.metadata);
+          } catch (error) {
+            attachment.metadata = {};
+            debug('Error parsing attachment metadata, setting to empty object:', error);
+          }
+        }
+        // Fallback incase the metadata is not an object
+        if (typeof attachment.metadata !== 'object') {
+          attachment.metadata = {};
+        }
+        return attachment;
+      });
     }
 
     /** @type {UttoriWikiDocument} */
