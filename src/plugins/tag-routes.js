@@ -258,13 +258,8 @@ class TagRoutesPlugin {
 
       /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
-        title: context.config[TagRoutesPlugin.configKey].title,
-        config: context.config,
-        session: request.session,
+        ...context.buildViewModelBase(request, { title: context.config[TagRoutesPlugin.configKey].title, meta }),
         taggedDocuments,
-        meta,
-        basePath: request.baseUrl,
-        flash: request.wikiFlash(),
       };
       viewModel = await context.hooks.filter('view-model-tag-index', viewModel, context);
       if (context.config.useCache) {
@@ -301,13 +296,8 @@ class TagRoutesPlugin {
 
       /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
-        title,
-        config: context.config,
-        session: request.session,
+        ...context.buildViewModelBase(request, { title, meta }),
         taggedDocuments,
-        meta,
-        basePath: request.baseUrl,
-        flash: request.wikiFlash(),
       };
       viewModel = await context.hooks.filter('view-model-tag', viewModel, context);
       if (context.config.useCache) {

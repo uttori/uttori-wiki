@@ -187,4 +187,22 @@ export default defineConfig([
       "jsdoc/no-undefined-types": "off",
     },
   },
+
+  // Upcoming JS files without TS project
+  {
+    files: ["upcoming/**/*.js", "upcoming/**/*.test.js"],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/unbound-method": "off",
+    },
+  },
 ]);

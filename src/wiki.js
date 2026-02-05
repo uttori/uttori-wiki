@@ -6,7 +6,6 @@ import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
-// TODO: Standardize the view model so it is consistent across all the routes.
 // TODO: Require document.image to be an image from the attachments.
 
 let debug = (..._) => {};
@@ -232,6 +231,25 @@ class UttoriWiki {
   }
 
   /**
+   * Builds the base view model object for all routes.
+   * @param {import('express').Request} request The Express Request object.
+   * @param {{ title?: string, meta?: UttoriWikiDocumentMetaData, slug?: string }} [options] Base view model values.
+   * @returns {Pick<UttoriWikiViewModel, 'title' | 'config' | 'session' | 'meta' | 'basePath' | 'flash' | 'slug'>} Base view model.
+   */
+  buildViewModelBase(request, options = {}) {
+    const { title = '', meta, slug } = options;
+    return {
+      title,
+      config: this.config,
+      session: request.session,
+      meta,
+      basePath: request.baseUrl,
+      flash: request?.wikiFlash?.() || {},
+      slug: typeof slug === 'string' ? slug : request.params?.slug,
+    };
+  }
+
+  /**
    * Bind the routes to the server.
    * Routes are bound in the order of Home, Tags, Search, Not Found Placeholder, Document, Plugins, Not Found - Catch All
    *
@@ -370,13 +388,8 @@ class UttoriWiki {
 
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: document.title,
-      config: this.config,
-      session: request.session,
+      ...this.buildViewModelBase(request, { title: document.title, meta }),
       document,
-      meta,
-      basePath: request.baseUrl,
-      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-home', viewModel, this);
@@ -423,14 +436,9 @@ class UttoriWiki {
     const meta = await this.buildMetadata({ title: 'Search' }, '/search');
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: 'Search',
-      config: this.config,
-      session: request.session,
+      ...this.buildViewModelBase(request, { title: 'Search', meta }),
       searchTerm: '',
       searchResults: [],
-      meta,
-      basePath: request.baseUrl,
-      flash: request?.wikiFlash?.() || {},
     };
 
     if (request.query && request.query.s) {
@@ -520,14 +528,9 @@ class UttoriWiki {
     const meta = await this.buildMetadata({ ...document, title: `Editing ${document.title}` }, `/${request.params.slug}/edit`);
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: `Editing ${document.title}`,
+      ...this.buildViewModelBase(request, { title: `Editing ${document.title}`, meta }),
       document,
-      config: this.config,
-      session: request.session,
-      meta,
-      basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/${document.slug}/save`,
-      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-edit', viewModel, this);
     response.set('X-Robots-Tag', 'noindex');
@@ -743,14 +746,9 @@ class UttoriWiki {
     const meta = await this.buildMetadata(document, '/new');
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
+      ...this.buildViewModelBase(request, { title, meta }),
       document,
-      title,
-      meta,
-      config: this.config,
-      session: request.session,
-      basePath: request.baseUrl,
       action: `${request.baseUrl || ''}/new`,
-      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-new', viewModel, this);
@@ -823,13 +821,8 @@ class UttoriWiki {
 
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: document.title,
-      config: this.config,
-      session: request.session,
+      ...this.buildViewModelBase(request, { title: document.title, meta }),
       document,
-      meta,
-      basePath: request.baseUrl,
-      flash: request?.wikiFlash?.() || {},
     };
 
     viewModel = await this.hooks.filter('view-model-detail', viewModel, this);
@@ -948,14 +941,9 @@ class UttoriWiki {
     debug('document.title:', document.title);
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: `${document.title} Revision History`,
+      ...this.buildViewModelBase(request, { title: `${document.title} Revision History`, meta }),
       document,
       historyByDay,
-      config: this.config,
-      session: request.session,
-      meta,
-      basePath: request.baseUrl,
-      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-index', viewModel, this);
 
@@ -1084,17 +1072,11 @@ class UttoriWiki {
 
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      basePath: request.baseUrl,
-      config: this.config,
-      session: request.session,
-      title: `${document.title} Revision ${revision}`,
+      ...this.buildViewModelBase(request, { title: `${document.title} Revision ${revision}`, meta, slug }),
       document,
       currentDocument,
       diffs,
-      meta,
       revision,
-      slug,
-      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-detail', viewModel, this);
 
@@ -1161,16 +1143,10 @@ class UttoriWiki {
 
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      basePath: request.baseUrl,
-      config: this.config,
-      session: request.session,
-      title: `Editing ${document.title} from Revision ${revision}`,
+      ...this.buildViewModelBase(request, { title: `Editing ${document.title} from Revision ${revision}`, meta, slug }),
       action: `${request.baseUrl || ''}/${document.slug}/save`,
       document,
-      meta,
       revision,
-      slug,
-      flash: request?.wikiFlash?.() || {},
     };
     viewModel = await this.hooks.filter('view-model-history-restore', viewModel, this);
 
@@ -1205,13 +1181,7 @@ class UttoriWiki {
     const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      title: '404 Not Found',
-      config: this.config,
-      session: request.session,
-      slug: request.params.slug || '404',
-      meta,
-      basePath: request.baseUrl,
-      flash: request?.wikiFlash?.() || {},
+      ...this.buildViewModelBase(request, { title: '404 Not Found', meta, slug: request.params.slug || '404' }),
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 
