@@ -41,7 +41,7 @@
 | [editKey] | <code>string</code> \| <code>undefined</code> |  | Key used for verifying document modification. |
 | [publicHistory] | <code>boolean</code> | <code>true</code> | Allow access to history URLs. |
 | [handleNotFound] | <code>boolean</code> | <code>true</code> | Allows the middleware to capture fall through routes as a `404 not found` handler when enabled. |
-| allowedDocumentKeys | <code>Array.&lt;string&gt;</code> | <code>[</code> | List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed. |
+| allowedDocumentKeys | <code>Array.&lt;string&gt;</code> |  | List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed. |
 | [useCache] | <code>boolean</code> | <code>true</code> | Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes. |
 | [cacheShort] | <code>number</code> | <code>(60 * 60)</code> | Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index |
 | [cacheLong] | <code>number</code> | <code>(60 * 60 * 24)</code> | Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore |

@@ -1,11 +1,12 @@
 import { htmlTable } from '@uttori/data-tools/diff/textdiff';
 import { EventDispatcher } from '@uttori/event-dispatcher';
+import crypto from 'node:crypto';
 
 import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
-// TODO Standardize the view model so it is consistent across all the routes.
+// TODO: Standardize the view model so it is consistent across all the routes.
 // TODO: Require document.image to be an image from the attachments.
 
 let debug = (..._) => {};
@@ -36,7 +37,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
  * @typedef {object} UttoriWikiDocument
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
- * @property {string} [image] An image to represent the document in Open Graph or elsewhere.
+ * @property {string} [image] An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
  * @property {string} [excerpt] A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
@@ -51,6 +52,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
 /**
  * @typedef UttoriWikiDocumentAttachment
  * @type {object}
+ * @property {string} id The unique identifier of the attachment.
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
@@ -206,7 +208,13 @@ class UttoriWiki {
       modified = document.updateDate ? new Date(document.updateDate).toISOString() : '';
       published = document.createDate ? new Date(document.createDate).toISOString() : '';
       title = document.title ? document.title : '';
-      image = document.image ? document.image : '';
+      // Handle image as an ID reference to an attachment
+      if (document.image && document.attachments && Array.isArray(document.attachments)) {
+        const imageAttachment = document.attachments.find((att) => att.id === document.image);
+        if (imageAttachment && imageAttachment.path) {
+          image = imageAttachment.path;
+        }
+      }
     }
 
     let metadata = {
@@ -1023,13 +1031,34 @@ class UttoriWiki {
     /** @type {Record<string, string>} */
     const diffs = {};
     if (currentDocument) {
-      const fieldsToCompare = ['title', 'excerpt', 'content', 'image', 'layout'];
+      const fieldsToCompare = ['title', 'excerpt', 'content', 'layout'];
       for (const field of fieldsToCompare) {
         const oldValue = String(document[field] || '');
         const newValue = String(currentDocument[field] || '');
         if (oldValue !== newValue) {
           diffs[field] = htmlTable(oldValue, newValue);
         }
+      }
+
+      // Compare image field (which is an ID reference to an attachment)
+      const oldImageId = document.image;
+      const newImageId = currentDocument.image;
+      let oldImageValue = '';
+      let newImageValue = '';
+      if (oldImageId && document.attachments && Array.isArray(document.attachments)) {
+        const oldImageAttachment = document.attachments.find((att) => att.id === oldImageId);
+        oldImageValue = oldImageAttachment?.path || oldImageId;
+      } else if (oldImageId) {
+        oldImageValue = oldImageId;
+      }
+      if (newImageId && currentDocument.attachments && Array.isArray(currentDocument.attachments)) {
+        const newImageAttachment = currentDocument.attachments.find((att) => att.id === newImageId);
+        newImageValue = newImageAttachment?.path || newImageId;
+      } else if (newImageId) {
+        newImageValue = newImageId;
+      }
+      if (oldImageValue !== newImageValue) {
+        diffs.image = htmlTable(oldImageValue, newImageValue);
       }
 
       // Compare tags array
@@ -1189,7 +1218,7 @@ class UttoriWiki {
     response.status(404);
     response.set('X-Robots-Tag', 'noindex');
 
-    // /* c8 ignore next 5 */
+    /* c8 ignore next 5 */
     if (request.accepts('html')) {
       response.render('404', viewModel);
       return;
@@ -1277,8 +1306,12 @@ class UttoriWiki {
     debug('attachments:', request.body.attachments);
     if (Array.isArray(request.body.attachments)) {
       attachments = request.body.attachments;
-      // Ensure the attachments key metadata is an object
+      // Ensure the attachments key metadata is an object and generate IDs for attachments without them
       attachments = attachments.map((attachment) => {
+        // Generate ID if missing
+        if (!attachment.id) {
+          attachment.id = crypto.randomUUID();
+        }
         if (typeof attachment?.metadata === 'string') {
           try {
             attachment.metadata = JSON.parse(attachment.metadata);
@@ -1295,17 +1328,64 @@ class UttoriWiki {
       });
     }
 
+    // Handle image - it should be an ID reference to an attachment
+    let imageId = null;
+    if (image) {
+      // If image is a string, it might be an attachment ID - verify it exists in attachments
+      const imageAttachment = attachments.find((att) => att.id === image);
+      if (imageAttachment) {
+        imageId = image;
+      } else {
+        // If not found by ID, try to find by path (for backward compatibility)
+        const imageAttachmentByPath = attachments.find((att) => att.path === image);
+        if (imageAttachmentByPath) {
+          imageId = imageAttachmentByPath.id;
+        } /* c8 ignore next 3 */ else {
+          debug('Image not found by ID or path:', image);
+        }
+      }
+    }
+
+    // If we're updating an existing document, preserve createDate and ensure attachments have IDs
+    let createDate = Date.now();
+    if (request.params.slug) {
+      try {
+        /** @type {UttoriWikiDocument[]} */
+        const results = await this.hooks.fetch('storage-get', request.params.slug, this);
+        const existingDocument = results?.[0];
+        if (existingDocument) {
+          createDate = existingDocument.createDate || createDate;
+          // Ensure existing attachments in the document have IDs if they don't
+          if (existingDocument.attachments && Array.isArray(existingDocument.attachments)) {
+            existingDocument.attachments.forEach((existingAtt) => {
+              if (!existingAtt.id) {
+                existingAtt.id = crypto.randomUUID();
+              }
+            });
+            // Merge with new attachments, preserving IDs from existing ones
+            attachments = attachments.map((newAtt) => {
+              const existingAtt = existingDocument.attachments.find((e) => e.path === newAtt.path);
+              newAtt.id = existingAtt.id || crypto.randomUUID();
+              return newAtt;
+            });
+          }
+        }
+      } /* c8 ignore next 3 */ catch (error) {
+        debug('Error fetching existing document for update:', error);
+      }
+    }
+
     /** @type {UttoriWikiDocument} */
     let document = {
       ...custom,
       title,
-      image,
+      image: imageId || undefined,
       excerpt,
       content,
       tags,
       redirects,
       slug,
-      createDate: Date.now(),
+      createDate,
       updateDate: Date.now(),
       attachments,
     };

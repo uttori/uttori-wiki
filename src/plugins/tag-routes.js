@@ -179,7 +179,7 @@ class TagRoutesPlugin {
     debug('bindRoutes');
     /** @type {TagRoutesPluginConfig} */
     const { tagRoute, tagIndexRoute, apiRoute, middleware, tagIndexRequestHandler, tagRequestHandler, apiRequestHandler } = TagRoutesPlugin.extendConfig(context.config[TagRoutesPlugin.configKey]);
-    debug('bindRoutes:', { tagRoute, tagIndexRoute });
+    debug('bindRoutes:', { tagRoute, tagIndexRoute, apiRoute });
 
     server.get(`/${tagIndexRoute}`, ...middleware.tagIndex, tagIndexRequestHandler(context));
     server.get(`/${tagRoute}/:tag`, ...middleware.tag, tagRequestHandler(context));

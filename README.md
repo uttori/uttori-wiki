@@ -1354,6 +1354,11 @@ Hooks:
 | name | <code>string</code> | The display name of the attachment. |
 | path | <code>string</code> | The path to the attachment. |
 | type | <code>string</code> | The MIME type of the attachment. |
+| size | <code>number</code> | The size of the attachment in bytes. |
+| metadata | <code>object</code> | The metadata of the attachment. |
+| [metadata.gps] | <code>string</code> | The GPS coordinates of the attachment. |
+| [metadata.gps.lat] | <code>number</code> | The latitude of the GPS coordinates. |
+| [metadata.gps.lon] | <code>number</code> | The longitude of the GPS coordinates. |
 | [skip] | <code>boolean</code> | Whether to skip the attachment. Used to control whether to index the attachment. |
 
 <a name="UttoriWikiDocumentMetaData"></a>

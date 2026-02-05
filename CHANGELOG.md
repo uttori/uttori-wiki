@@ -2,14 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2025-10-17)
+## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2026-02-05)
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist
 - 🪲 Fix analytics plugin validation function
 - 🪲 Fix some embedding retruns could fail due to different than expected keys
 - 🪲 Fix case where if embedding errored we would not add full text search (FTS) to the database
-- 🛠 Update indexing to always include FTS even when embedding failsplugins/chat-bot/utilities.d.ts
+- 🛠 Add `id`, `size` and `metadata` to attachments
+- 🛠 Update indexing to always include FTS even when embedding fails
 - 🛠 Clean up many types
 - 🛠 Add `tableToCSV`, `tableMaxRowsPerChunk`, `tableMaxTokensPerChunk` for more table indexing control to use CSV or Markdown
 - 🛠 Added `chunkTable` utility to split large tables by row or chunk size
@@ -21,6 +22,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors
+- 🧰 Add `CategoryRoutesPlugin` plugin for adding category data to documents that supports  sub-categories
 
 ## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
 
