@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file. This projec
 - 🛠 Add error checking for inserting bad vectors to the database
 - 🛠 Update `consolidateNestedItems` to split large tables
 - 🛠 Use `@uttori/data-tools` for text diffing
+- 🛠 Harden `ImportDocument` fetching
+- 🛠 Harden upload path checking in `UploadMulter` uploading
+- 🛠 Harden `slug` processing
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors

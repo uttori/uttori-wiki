@@ -185,32 +185,13 @@ class MulterUpload {
       debug('upload');
       /** @type {MulterUploadConfig} */
       const config = { ...MulterUpload.defaultConfig(), ...context.config[MulterUpload.configKey] };
+      const baseDirectory = path.resolve(config.directory);
 
       /** @type {import('multer').StorageEngine} */
       const storage = multer.diskStorage({
-        destination: (destinationRequest, _file, callback) => {
-          // Check for subdirectories ignoring any malicious or weird paths.
-          if (destinationRequest.body.fullPath && !destinationRequest.body.fullPath.includes('..') && !destinationRequest.body.fullPath.includes('\0')) {
-            try {
-              // Extract the subdirectory from the fullPath.
-              const subdirectory = path.dirname(destinationRequest.body.fullPath);
-              const fullPath = path.join(config.directory, subdirectory);
-              // Create the subdirectory if it doesn't exist.
-              /* c8 ignore next 4 */
-              if (!fs.existsSync(fullPath)) {
-                debug('Subdirectory missing, creating:', fullPath);
-                fs.mkdirSync(fullPath, { recursive: true });
-              }
-              callback(null, fullPath);
-              return;
-            } catch (error) {
-              /* c8 ignore next 2 */
-              debug('Error creating subdirectory:', error);
-            }
-          }
-
-          // No subdirectory, just the file.
-          callback(null, config.directory);
+        destination: (_destinationRequest, _file, callback) => {
+          // Always store uploads at the base directory, no subdirectories.
+          callback(null, baseDirectory);
         },
         filename(_request, file, callback) {
           const { name, ext } = path.parse(file.originalname);

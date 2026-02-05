@@ -10,6 +10,15 @@ let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ImportDocument'); } catch {}
 
+const isHttpUrl = (value) => {
+  try {
+    const parsed = new URL(String(value));
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 /**
  * @typedef {object} ImportDocumentConfigPage
  * @property {string} url The URL of the page.
@@ -359,8 +368,11 @@ class ImportDocument {
 
           // Add to attachments
           attachments.push({
+            id: crypto.randomUUID(),
+            metadata: {},
             name: imageFileName,
             path: path.join(config.uploadPath, slug, imageFileName),
+            size: fs.statSync(path.join(config.uploadDirectory, slug, imageFileName)).size,
             type: `image/${imageExt.slice(1)}`,
           });
 
@@ -529,30 +541,39 @@ class ImportDocument {
       const binaryFileName = path.join(config.uploadDirectory, slug, page.name);
       await config.downloadFile({ url: page.url, fileName: binaryFileName, type: 'binary' });
       attachments.push({
+        id: crypto.randomUUID(),
+        metadata: {},
         name: page.name,
         path: path.join(config.uploadPath, slug, page.name),
+        size: fs.statSync(binaryFileName).size,
         type: path.extname(page.name).slice(1).toLowerCase() === 'pdf' ? 'application/pdf' : path.extname(page.name).slice(1).toLowerCase(),
       });
     }
 
     // Handle URL scraping
     if (page.type === 'scrape') {
-      const scrape = `wget \\
-      --no-parent \\
-      --convert-links \\
-      --html-extension \\
-      --adjust-extension \\
-      --no-host-directories \\
-      --directory-prefix=${uploadDir} \\
-      --page-requisites \\
-      --timestamping \\
-      --execute robots=off \\
-      --random-wait \\
-      --span-hosts \\
-      ${page.url}`;
       try {
-        debug('scraping page:', scrape);
-        await cmd(scrape, { log: () => {}, timeout: 60000 });
+        if (!isHttpUrl(page.url)) {
+          debug('scraping page: invalid url protocol:', page.url);
+          return { content, attachments };
+        }
+        const scrapeArgs = [
+          '--no-parent',
+          '--convert-links',
+          '--html-extension',
+          '--adjust-extension',
+          '--no-host-directories',
+          `--directory-prefix=${uploadDir}`,
+          '--page-requisites',
+          '--timestamping',
+          '--execute',
+          'robots=off',
+          '--random-wait',
+          '--span-hosts',
+          page.url,
+        ];
+        debug('scraping page:', { url: page.url, uploadDir });
+        await cmd({ file: 'wget', args: scrapeArgs }, { log: () => {}, timeout: 60000 });
       } catch (error) {
         debug('scrape page error:', error);
       }
@@ -571,17 +592,21 @@ class ImportDocument {
         }
         const baseName = path.parse(htmlFile).name;
         const mdFile = `${baseName}.md`;
-        const convert = `pandoc \\
-        --from=html \\
-        --wrap=none \\
-        --to=gfm+gfm_auto_identifiers+autolink_bare_uris-raw_html-fenced_divs-bracketed_spans \\
-        --output=${path.join(uploadDir, mdFile)} \\
-        ${path.join(uploadDir, htmlFile)}`;
+        const htmlFilePath = path.join(uploadDir, htmlFile);
+        const mdFilePath = path.join(uploadDir, mdFile);
+        const convertArgs = [
+          '--from=html',
+          '--wrap=none',
+          '--to=gfm+gfm_auto_identifiers+autolink_bare_uris-raw_html-fenced_divs-bracketed_spans',
+          '--output',
+          mdFilePath,
+          htmlFilePath,
+        ];
         try {
-          debug('converting page:', convert);
-          await cmd(convert);
+          debug('converting page:', { htmlFile: htmlFilePath, mdFile: mdFilePath });
+          await cmd({ file: 'pandoc', args: convertArgs });
           // Wait for the file to be written
-          await cmd('sleep 1');
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (error) {
           debug(`Failed to convert ${htmlFile}:`, error);
           continue;
@@ -589,7 +614,7 @@ class ImportDocument {
 
         // Read the markdown file
         try {
-          const pageContent = await fs.promises.readFile(path.join(uploadDir, mdFile), { encoding: 'utf-8' });
+          const pageContent = await fs.promises.readFile(mdFilePath, { encoding: 'utf-8' });
           debug('pageContent:', pageContent.length);
           content += `${pageContent}\n\n---\n\n`;
           hasContent = true;

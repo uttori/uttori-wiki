@@ -6,29 +6,28 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Utilities.
 
 /**
  * Runs a command and returns the result as a promise.
- * @param {string} command The command to run.
+ * Uses execFile to avoid shell interpolation.
+ * @param {{ file: string, args?: string[] }} command The command to run.
  * @param {object} [options] The options for the runner.
  * @param {Function} [options.log] If set, logs the output to the console.
  * @param {number} [options.timeout] Timeout in milliseconds (default: 30000).
  * @returns {Promise<string>} The result of the command as a string.
  * @see {@link https://nodejs.org/api/process.html#process_signal_events}
  * @example <caption>Cmd</caption>
- * const result = await cmd('ls -la');
+ * const result = await cmd({ file: 'wget', args: ['-O', localImagePath, imageURL] }, { log: (data) => console.log(data) });
  * console.log(result);
- * const result2 = await cmd('`wget -O "${localImagePath}" "${imageURL}"`', { log: (data) => console.log(data) });
- * console.log(result2);
  */
 export async function cmd (command, { log = () => {}, timeout = 30000 } = {}) {
   return new Promise(function(resolve, reject) {
     debug('cmd:', command);
-    if (!command || typeof command !== 'string') {
-      debug('cmd:', command, 'is not a string');
-      reject(new Error('Command must be a non-empty string'));
+    if (!command || typeof command !== 'object' || !command.file) {
+      debug('cmd:', command, 'is not a valid command');
+      reject(new Error('Command must be an object with a "file" property'));
       return;
     }
 
-    // eslint-disable-next-line security/detect-child-process
-    const commandProcess = child_process.exec(command);
+    const fileArgs = Array.isArray(command.args) ? command.args : [];
+    const commandProcess = child_process.execFile(command.file, fileArgs, { timeout, encoding: 'utf8' });
     // Special condition for tests
     if (`${commandProcess}` === 'TEST') {
       resolve('TEST');
@@ -109,7 +108,7 @@ export async function cmd (command, { log = () => {}, timeout = 30000 } = {}) {
       debug('uncaughtException:', error);
       if (!isResolved) {
         isResolved = true;
-        reject(new Error(error));
+        reject(error instanceof Error ? error : new Error(String(error)));
       }
     });
 

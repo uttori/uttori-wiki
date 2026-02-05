@@ -12,6 +12,8 @@ let debug = (..._) => {};
 /* c8 ignore next */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
 
+const escapeQueryValue = (value) => JSON.stringify(String(value)).slice(1, -1);
+
 /**
  * @typedef {object} UttoriWikiViewModel
  * @property {string} title The document title to be used anywhere a title may be needed.
@@ -680,9 +682,10 @@ class UttoriWiki {
       response.redirect(request.get('Referrer') || '/');
       return;
     }
-    const { slug } = request.body;
+    const slug = String(request.body.slug || '').trim();
     // Ensure the slug is unique and the redirects do not point to active URLs.
-    const query = `SELECT COUNT(*) FROM documents WHERE slug = "${slug}" OR redirects INCLUDES ("${slug}") ORDER BY slug ASC LIMIT -1`;
+    const safeSlug = escapeQueryValue(slug);
+    const query = `SELECT COUNT(*) FROM documents WHERE slug = "${safeSlug}" OR redirects INCLUDES ("${safeSlug}") ORDER BY slug ASC LIMIT -1`;
     let [count] = await this.hooks.fetch('storage-query', query, this);
     if (Array.isArray(count)) {
       const temp = count[0];
@@ -791,7 +794,8 @@ class UttoriWiki {
     try {
       // [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
       const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
-      const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${slug}" OR redirects INCLUDES ("${slug}")) ORDER BY slug ASC LIMIT 1`;
+      const safeSlug = escapeQueryValue(slug);
+      const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${safeSlug}" OR redirects INCLUDES ("${safeSlug}")) ORDER BY slug ASC LIMIT 1`;
       /** @type {UttoriWikiDocument[]} */
       const results = await this.hooks.fetch('storage-query', query, this);
       if (results) {
