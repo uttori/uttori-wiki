@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-possible-timing-attacks */
 import Operator from './operator.js';
 import { TokenizeThis } from './tokenizer.js';
 

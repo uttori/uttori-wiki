@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 
 import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
+import { sanitizeSearchQuery, sanitizeSlug } from './plugins/utilities/security.js';
 
 // TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
 // TODO: Require document.image to be an image from the attachments.
@@ -445,7 +446,19 @@ class UttoriWiki {
 
     if (request.query && request.query.s) {
       debug('search query:', request.query.s);
-      const query = decodeURIComponent(String(request.query.s));
+      let query = decodeURIComponent(String(request.query.s));
+      // Sanitize search query to prevent XSS and other attacks
+      query = sanitizeSearchQuery(query);
+      if (!query) {
+        // Empty query after sanitization, skip search
+        viewModel = await this.hooks.filter('view-model-search', viewModel, this);
+        response.set('X-Robots-Tag', 'noindex');
+        if (this.config.useCache) {
+          response.set('Cache-control', 'no-store, no-cache, max-age=0');
+        }
+        response.render('search', viewModel);
+        return;
+      }
       viewModel.title = `Search results for "${query}"`;
       viewModel.searchTerm = query;
 
@@ -782,9 +795,17 @@ class UttoriWiki {
       return;
     }
 
-    const slug = request.params.slug.trim();
+    let slug = request.params.slug.trim();
     if (!slug) {
       debug('Missing slug.');
+      next();
+      return;
+    }
+
+    // Sanitize slug to prevent path traversal
+    slug = sanitizeSlug(slug);
+    if (!slug) {
+      debug('Invalid slug after sanitization.');
       next();
       return;
     }

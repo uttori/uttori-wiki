@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [7.2.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v7.2.0) - 2026-02-05)
+## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-02-05)
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist
@@ -15,12 +15,14 @@ All notable changes to this project will be documented in this file. This projec
 - 🛠 Add `tableToCSV`, `tableMaxRowsPerChunk`, `tableMaxTokensPerChunk` for more table indexing control to use CSV or Markdown
 - 🛠 Added `chunkTable` utility to split large tables by row or chunk size
 - 🛠 Added `toMarkdown` utility to convert AST table back to Markdown text
+- 🛠 Added `allowedMimeTypes` and `maxFileSize` to `UploadMulter` options
 - 🛠 Indexing documents debugging logs greatly improved for detecting issues
 - 🛠 Add error checking for inserting bad vectors to the database
 - 🛠 Update `consolidateNestedItems` to split large tables
 - 🛠 Use `@uttori/data-tools` for text diffing
 - 🛠 Harden `ImportDocument` fetching
 - 🛠 Harden upload path checking in `UploadMulter` uploading
+- 🛠 Harden search queries
 - 🛠 Harden `slug` processing
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies

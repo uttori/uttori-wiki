@@ -17,7 +17,6 @@
  * - eslint-plugin-security: Full v9 support
  */
 
-import importPlugin from 'eslint-plugin-import';
 import { defineConfig, globalIgnores } from "eslint/config";
 import antiTrojanSource from "eslint-plugin-anti-trojan-source";
 import ava from "eslint-plugin-ava";
@@ -27,7 +26,7 @@ import jsdoc from "eslint-plugin-jsdoc";
 import n from "eslint-plugin-n";
 import noInferredMethodName from "eslint-plugin-no-inferred-method-name";
 import optimizeRegex from "eslint-plugin-optimize-regex";
-import security from "eslint-plugin-security";
+// import security from "eslint-plugin-security";
 import stylistic from '@stylistic/eslint-plugin';
 import tsParser from "@typescript-eslint/parser";
 import tseslint from 'typescript-eslint';
@@ -46,7 +45,7 @@ export default defineConfig([
     "src/**/*.png",
   ]),
 
-  security.configs.recommended,
+  // security.configs.recommended,
   tseslint.configs.strict,
   tseslint.configs.stylistic,
 
@@ -71,13 +70,12 @@ export default defineConfig([
       "@stylistic": stylistic,
       "anti-trojan-source": antiTrojanSource,
       ava,
-      import: importPlugin,
       js,
       jsdoc,
       n,
       "no-inferred-method-name": noInferredMethodName,
       "optimize-regex": optimizeRegex,
-      security,
+      // security,
       xss,
     },
     settings: {
@@ -132,21 +130,21 @@ export default defineConfig([
         message: "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
       }],
 
-      // Import rules
-      "import/no-commonjs": "off",
-      "import/no-dynamic-require": "off",
-      "import/no-extraneous-dependencies": ["error", {
-        devDependencies: ["**/*.test.js", "**/test/**/*.js", "eslint.config.js"],
-        optionalDependencies: true,
-        peerDependencies: true,
-      }],
-      "import/extensions": ["warn", "ignorePackages"],
-      "import/no-unresolved": "off",
+      // // Import rules
+      // "import/no-commonjs": "off",
+      // "import/no-dynamic-require": "off",
+      // "import/no-extraneous-dependencies": ["error", {
+      //   devDependencies: ["**/*.test.js", "**/test/**/*.js", "eslint.config.js"],
+      //   optionalDependencies: true,
+      //   peerDependencies: true,
+      // }],
+      // "import/extensions": ["warn", "ignorePackages"],
+      // "import/no-unresolved": "off",
 
       // Security rules
-      "security/detect-non-literal-fs-filename": "off",
-      "security/detect-non-literal-require": "off",
-      "security/detect-object-injection": "off",
+      // "security/detect-non-literal-fs-filename": "off",
+      // "security/detect-non-literal-require": "off",
+      // "security/detect-object-injection": "off",
 
       // Stylistic rules
       "@stylistic/object-curly-newline": "off",

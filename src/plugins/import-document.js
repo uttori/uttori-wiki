@@ -5,19 +5,11 @@ import { Readable } from 'node:stream';
 import { fileURLToPath } from 'node:url';
 
 import { cmd } from './utilities/cmd.js';
+import { sanitizeSlug, sanitizeFilename, validateAndSanitizeUrl } from './utilities/security.js';
 
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ImportDocument'); } catch {}
-
-const isHttpUrl = (value) => {
-  try {
-    const parsed = new URL(String(value));
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-};
 
 /**
  * @typedef {object} ImportDocumentConfigPage
@@ -340,8 +332,16 @@ class ImportDocument {
         return;
       }
 
+      // Sanitize slug to prevent path traversal
+      const sanitizedSlug = sanitizeSlug(slug);
+      if (!sanitizedSlug) {
+        debug('apiRequestHandler invalid slug:', slug);
+        response.status(400).send({ error: 'Invalid slug provided.' });
+        return;
+      }
+
       // Get the absolute path to the upload directory
-      const uploadDir = path.join(config.uploadDirectory, slug);
+      const uploadDir = path.join(config.uploadDirectory, sanitizedSlug);
 
       // Create directory for uploaded files
       await fs.promises.mkdir(uploadDir, { recursive: true });
@@ -356,13 +356,20 @@ class ImportDocument {
       if (image) {
         debug('apiRequestHandler image:', image);
         try {
-          const imageFileName = path.basename(image);
+          // Validate and sanitize the image URL
+          const validatedImageUrl = validateAndSanitizeUrl(image);
+          if (!validatedImageUrl) {
+            debug('apiRequestHandler invalid image URL:', image);
+            throw new Error('Invalid image URL');
+          }
+
+          const imageFileName = sanitizeFilename(path.basename(validatedImageUrl));
           const imageExt = path.extname(imageFileName).toLowerCase();
 
           // Download the image from URL to uploads directory
           await config.downloadFile({
-            url: image,
-            fileName: path.join(config.uploadDirectory, slug, imageFileName),
+            url: validatedImageUrl,
+            fileName: path.join(config.uploadDirectory, sanitizedSlug, imageFileName),
             type: 'image',
           });
 
@@ -371,12 +378,12 @@ class ImportDocument {
             id: crypto.randomUUID(),
             metadata: {},
             name: imageFileName,
-            path: path.join(config.uploadPath, slug, imageFileName),
-            size: fs.statSync(path.join(config.uploadDirectory, slug, imageFileName)).size,
+            path: path.join(config.uploadPath, sanitizedSlug, imageFileName),
+            size: fs.statSync(path.join(config.uploadDirectory, sanitizedSlug, imageFileName)).size,
             type: `image/${imageExt.slice(1)}`,
           });
 
-          importedImagePath = path.join(config.uploadPath, slug, imageFileName);
+          importedImagePath = path.join(config.uploadPath, sanitizedSlug, imageFileName);
         } catch (error) {
           debug('apiRequestHandler failed to import provided image:', error);
         }
@@ -405,8 +412,8 @@ class ImportDocument {
       const updateDate = Date.now();
       const createDate = updateDate;
 
-      // Use imported image if available, otherwise use provided image.
-      const documentImage = importedImagePath || image;
+      // Use imported image if available, otherwise use validated image URL.
+      const documentImage = importedImagePath || (image ? validateAndSanitizeUrl(image) : null);
 
       /** @type {import('../../src/wiki.js').UttoriWikiDocument} */
       let document = {
@@ -415,7 +422,7 @@ class ImportDocument {
         excerpt,
         content,
         tags,
-        slug,
+        slug: sanitizedSlug,
         redirects,
         createDate,
         updateDate,
@@ -485,12 +492,23 @@ class ImportDocument {
   static async downloadFile({ url, fileName, type }) {
     debug('downloadFile:', { url, fileName, type });
     try {
+      // Validate URL before fetching
+      const validatedUrl = validateAndSanitizeUrl(url);
+      if (!validatedUrl) {
+        throw new Error(`Invalid URL: ${url}`);
+      }
+
+      // Normalize and validate file path to prevent path traversal
+      const normalizedFileName = path.resolve(fileName);
+      const normalizedDir = path.resolve(path.dirname(normalizedFileName));
+
       // Ensure the directory exists before writing the file
-      await fs.promises.mkdir(path.dirname(fileName), { recursive: true });
-      const response = await fetch(url);
+      await fs.promises.mkdir(normalizedDir, { recursive: true });
+
+      const response = await fetch(validatedUrl);
       if (response.ok && response.body) {
-        debug('downloadFile: writing to file:', fileName);
-        let writer = createWriteStream(fileName);
+        debug('downloadFile: writing to file:', normalizedFileName);
+        let writer = createWriteStream(normalizedFileName);
         await new Promise((resolve, reject) => {
           // @ts-expect-error Readable.fromWeb is still experimental
 
@@ -499,7 +517,7 @@ class ImportDocument {
             .on('finish', () => resolve())
             .on('error', reject);
         });
-        debug('downloadFile: file written:', fileName);
+        debug('downloadFile: file written:', normalizedFileName);
       }
     } catch (error) {
       debug('downloadFile: error:', error);
@@ -517,8 +535,15 @@ class ImportDocument {
   static async processPage(config, slug, page) {
     debug('processPage:', page);
 
+    // Sanitize slug to prevent path traversal
+    const sanitizedSlug = sanitizeSlug(slug);
+    if (!sanitizedSlug) {
+      debug('processPage: invalid slug:', slug);
+      return { content: '', attachments: [] };
+    }
+
     /** @type {string} The absolute path to the upload directory */
-    const uploadDir = path.join(config.uploadDirectory, slug);
+    const uploadDir = path.join(config.uploadDirectory, sanitizedSlug);
 
     /** @type {boolean} Whether the page has content */
     let hasContent = false;
@@ -529,8 +554,15 @@ class ImportDocument {
 
     // Handle local files (markdown, PDF, and images)
     if (page.type === 'text') {
-      const markdownFileName = path.join(config.uploadDirectory, slug, page.name);
-      await config.downloadFile({ url: page.url, fileName: markdownFileName, type: 'text' });
+      // Validate URL and sanitize filename
+      const validatedUrl = validateAndSanitizeUrl(page.url);
+      if (!validatedUrl) {
+        debug('processPage: invalid URL for text type:', page.url);
+        return { content, attachments };
+      }
+      const sanitizedFileName = sanitizeFilename(page.name);
+      const markdownFileName = path.join(config.uploadDirectory, sanitizedSlug, sanitizedFileName);
+      await config.downloadFile({ url: validatedUrl, fileName: markdownFileName, type: 'text' });
       const markdownContent = await fs.promises.readFile(markdownFileName, { encoding: 'utf-8' });
       content += `${markdownContent}\n\n---\n\n`;
       hasContent = true;
@@ -538,48 +570,62 @@ class ImportDocument {
 
     // Store binary files as attachments
     if (page.type === 'binary') {
-      const binaryFileName = path.join(config.uploadDirectory, slug, page.name);
-      await config.downloadFile({ url: page.url, fileName: binaryFileName, type: 'binary' });
+      // Validate URL and sanitize filename
+      const validatedUrl = validateAndSanitizeUrl(page.url);
+      if (!validatedUrl) {
+        debug('processPage: invalid URL for binary type:', page.url);
+        return { content, attachments };
+      }
+      const sanitizedFileName = sanitizeFilename(page.name);
+      const binaryFileName = path.join(config.uploadDirectory, sanitizedSlug, sanitizedFileName);
+      await config.downloadFile({ url: validatedUrl, fileName: binaryFileName, type: 'binary' });
       attachments.push({
         id: crypto.randomUUID(),
         metadata: {},
-        name: page.name,
-        path: path.join(config.uploadPath, slug, page.name),
+        name: sanitizedFileName,
+        path: path.join(config.uploadPath, sanitizedSlug, sanitizedFileName),
         size: fs.statSync(binaryFileName).size,
-        type: path.extname(page.name).slice(1).toLowerCase() === 'pdf' ? 'application/pdf' : path.extname(page.name).slice(1).toLowerCase(),
+        type: path.extname(sanitizedFileName).slice(1).toLowerCase() === 'pdf' ? 'application/pdf' : path.extname(sanitizedFileName).slice(1).toLowerCase(),
       });
     }
 
     // Handle URL scraping
     if (page.type === 'scrape') {
       try {
-        if (!isHttpUrl(page.url)) {
-          debug('scraping page: invalid url protocol:', page.url);
+        // Validate and sanitize URL before passing to wget
+        const validatedUrl = validateAndSanitizeUrl(page.url);
+        if (!validatedUrl) {
+          debug('scraping page: invalid url:', page.url);
           return { content, attachments };
         }
+
+        // Ensure uploadDir is absolute and normalized to prevent path traversal
+        const normalizedUploadDir = path.resolve(uploadDir);
+
         const scrapeArgs = [
           '--no-parent',
           '--convert-links',
           '--html-extension',
           '--adjust-extension',
           '--no-host-directories',
-          `--directory-prefix=${uploadDir}`,
+          `--directory-prefix=${normalizedUploadDir}`,
           '--page-requisites',
           '--timestamping',
           '--execute',
           'robots=off',
           '--random-wait',
           '--span-hosts',
-          page.url,
+          validatedUrl,
         ];
-        debug('scraping page:', { url: page.url, uploadDir });
+        debug('scraping page:', { url: validatedUrl, uploadDir: normalizedUploadDir });
         await cmd({ file: 'wget', args: scrapeArgs }, { log: () => {}, timeout: 60000 });
       } catch (error) {
         debug('scrape page error:', error);
       }
 
       // Once we have the site fetched, we need to find all the HTML files in the directory
-      const htmlFiles = await fs.promises.readdir(uploadDir, { recursive: true });
+      const normalizedUploadDir = path.resolve(uploadDir);
+      const htmlFiles = await fs.promises.readdir(normalizedUploadDir, { recursive: true });
       // Loop over all found HTML files and convert each to markdown and add to content
       for (const htmlFile of htmlFiles) {
         // Skip non-HTML files
@@ -590,10 +636,21 @@ class ImportDocument {
         if (htmlFile.includes('favicon')) {
           continue;
         }
-        const baseName = path.parse(htmlFile).name;
+        // Sanitize file paths to prevent traversal
+        const sanitizedHtmlFile = sanitizeFilename(htmlFile);
+        if (!sanitizedHtmlFile) {
+          continue;
+        }
+        const baseName = path.parse(sanitizedHtmlFile).name;
         const mdFile = `${baseName}.md`;
-        const htmlFilePath = path.join(uploadDir, htmlFile);
-        const mdFilePath = path.join(uploadDir, mdFile);
+        const htmlFilePath = path.join(normalizedUploadDir, sanitizedHtmlFile);
+        const mdFilePath = path.join(normalizedUploadDir, mdFile);
+
+        // Ensure paths are within the upload directory (prevent path traversal)
+        if (!htmlFilePath.startsWith(normalizedUploadDir) || !mdFilePath.startsWith(normalizedUploadDir)) {
+          debug('processPage: path traversal detected:', { htmlFile, htmlFilePath, mdFilePath });
+          continue;
+        }
         const convertArgs = [
           '--from=html',
           '--wrap=none',

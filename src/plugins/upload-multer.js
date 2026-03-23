@@ -4,6 +4,8 @@ import express from 'express';
 
 import multer from 'multer';
 
+import { sanitizeFilename, validateMimeType } from './utilities/security.js';
+
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.MulterUpload'); } catch {}
@@ -15,6 +17,8 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Mul
  * @property {string} [route] Server route to POST uploads to. The default is '/upload'.
  * @property {string} [publicRoute] Server route to GET uploads from. The default is '/uploads'.
  * @property {import('express').RequestHandler[]} [middleware] Custom Middleware for the Upload route
+ * @property {string[]} [allowedMimeTypes] Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all.
+ * @property {number} [maxFileSize] Maximum file size in bytes. Default: 10MB (10485760).
  */
 
 /**
@@ -49,6 +53,8 @@ class MulterUpload {
       route: '/upload',
       publicRoute: '/uploads',
       middleware: [],
+      allowedMimeTypes: [],
+      maxFileSize: 10 * 1024 * 1024, // 10MB default
     };
   }
 
@@ -194,24 +200,46 @@ class MulterUpload {
           callback(null, baseDirectory);
         },
         filename(_request, file, callback) {
-          const { name, ext } = path.parse(file.originalname);
-          const filename = `${name}-${Date.now()}${ext}`;
+          // Sanitize filename to prevent path traversal
+          const sanitizedOriginalName = sanitizeFilename(file.originalname);
+          const { name, ext } = path.parse(sanitizedOriginalName);
+          // Ensure extension is safe
+          const safeExt = sanitizeFilename(ext) || ext;
+          const filename = `${sanitizeFilename(name)}-${Date.now()}${safeExt}`;
           callback(null, filename);
         },
       });
 
-      // Create Multer handler and run.
-      const handler = multer({ storage }).single('file');
+      // Create Multer handler with file validation
+      const handler = multer({
+        storage,
+        limits: {
+          fileSize: config.maxFileSize,
+        },
+        fileFilter: (_request, file, callback) => {
+          // Validate MIME type if restrictions are set
+          if (config.allowedMimeTypes && config.allowedMimeTypes.length > 0) {
+            if (!validateMimeType(file.mimetype, config.allowedMimeTypes)) {
+              const error = new Error(`File type ${file.mimetype} is not allowed. Allowed types: ${config.allowedMimeTypes.join(', ')}`);
+              debug('Upload Error - Invalid MIME type:', file.mimetype);
+              callback(error);
+              return;
+            }
+          }
+          callback(null, true);
+        },
+      }).single('file');
+
       handler(request, response, (error) => {
         let status = 200;
-        // Respond with the relatize path to the file.
+        // Respond with the relative path to the file.
         /** @type {string} */
         let send = request.file?.path.replace(config.directory, config.publicRoute);
         /* c8 ignore next 5 */
         if (error) {
           debug('Upload Error:', error);
           status = 422;
-          send = error;
+          send = error.message || String(error);
         }
         return response.status(status).send(send);
       });

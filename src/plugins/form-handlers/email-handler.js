@@ -104,7 +104,6 @@ class EmailHandler {
 
     // Replace field placeholders
     for (const [key, value] of Object.entries(formData)) {
-      // eslint-disable-next-line security/detect-non-literal-regexp
       const placeholder = new RegExp(`\\{${key}\\}`, 'g');
       subject = subject.replace(placeholder, String(value));
     }
@@ -130,7 +129,6 @@ class EmailHandler {
 
       // Replace field placeholders
       for (const [key, value] of Object.entries(formData)) {
-        // eslint-disable-next-line security/detect-non-literal-regexp
         const placeholder = new RegExp(`\\{${key}\\}`, 'g');
         body = body.replace(placeholder, String(value));
       }

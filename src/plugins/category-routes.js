@@ -1,3 +1,5 @@
+import { sanitizeCategoryPath } from './utilities/security.js';
+
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.CategoryRoutes'); } catch {}
@@ -72,6 +74,11 @@ class CategoryRoutesPlugin {
     ];
   }
 
+  /**
+   * The default configuration for the plugin.
+   * @returns {CategoryRoutesPluginConfig} The default configuration.
+   * @static
+   */
   static defaultConfig() {
     return {
       title: 'Categories',
@@ -431,9 +438,18 @@ class CategoryRoutesPlugin {
       const { separator } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
 
       // Get the category path from the wildcard route
-      const categoryPath = request.params.categoryPath;
+      let categoryPath = String(request.params.categoryPath || '').trim();
       if (!categoryPath) {
         debug('No category path provided!');
+        next();
+        return;
+      }
+
+      // Sanitize category path to prevent path traversal and other attacks
+      categoryPath = sanitizeCategoryPath(categoryPath, separator);
+
+      if (!categoryPath) {
+        debug('Invalid category path after sanitization!');
         next();
         return;
       }

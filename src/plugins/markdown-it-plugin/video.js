@@ -19,7 +19,6 @@ export function video(state) {
     // <video src="/uploads/example.mp4" />
 
     /** @type {IterableIterator<RegExpMatchArray>} */
-    // eslint-disable-next-line security/detect-unsafe-regex
     const parts = (currentToken.content ?? '')?.matchAll(/\s+(src)=('[^']*'|"[^"]*")?/g);
     /** @type {Record<string, string>} */
     const keys = [...parts].reduce((output, item) => {
