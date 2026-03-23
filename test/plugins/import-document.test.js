@@ -372,7 +372,7 @@ test('apiRequestHandler: should handle requests with valid referrer', async (t) 
   t.is(response.body.error, 'Title and slug are required.');
 });
 
-test.serial('apiRequestHandler: should reject requests with missing title or slug', async (t) => {
+test('apiRequestHandler: should reject requests with missing title or slug', async (t) => {
   const server = express();
   const context = {
     config: {

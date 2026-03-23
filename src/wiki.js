@@ -984,8 +984,11 @@ class UttoriWiki {
    * Sets the `X-Robots-Tag` header to `noindex`.
    *
    * Hooks:
-   * - `render-content` - `render-content` - Passes in the document content.
-   * - `filter` - `view-model-history-index` - Passes in the viewModel.
+   * - `filter` - `render-content` - Passes in the document content.
+   * - `fetch` - `storage-get-revision` - Loads the requested revision (and the prior revision when diffing the newest).
+   * - `fetch` - `storage-get` - Loads the live document for comparison when the requested revision is not the newest.
+   * - `fetch` - `storage-get-history` - Lists revisions to detect the newest and choose a diff baseline.
+   * - `filter` - `view-model-history-detail` - Passes in the viewModel.
    * @async
    * @param {import('express').Request} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
@@ -1012,7 +1015,8 @@ class UttoriWiki {
       return;
     }
 
-    const { slug, revision } = request.params;
+    const { slug } = request.params;
+    const revision = Array.isArray(request.params.revision) ? request.params.revision[0] : request.params.revision;
     /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
@@ -1030,7 +1034,16 @@ class UttoriWiki {
 
     document.html = await this.hooks.filter('render-content', document.content, this);
 
-    // Fetch current version of the document to compare with the revision
+    /**
+     * Normalize a history revision id (same rule as the history index route).
+     * @param {string|number} rev Revision from the URL or history list.
+     * @returns {string}
+     */
+    const historyRevisionKey = (rev) => {
+      const s = String(rev);
+      return s.includes('-') ? s.split('-')[0] : s;
+    };
+
     /** @type {UttoriWikiDocument | undefined} */
     let currentDocument;
     try {
@@ -1040,32 +1053,63 @@ class UttoriWiki {
       debug('Error fetching current document:', error);
     }
 
+    /** @type {string[]} */
+    let historyList = [];
+    try {
+      [historyList] = await this.hooks.fetch('storage-get-history', slug, this);
+    /* c8 ignore next 3 */
+    } catch (error) {
+      debug('Error fetching history for revision diff:', error);
+    }
+
+    /**
+     * When viewing the newest revision, it matches the live document, so diff against the prior revision instead.
+     * @type {UttoriWikiDocument | undefined}
+     */
+    let previousDocument;
+    if (Array.isArray(historyList) && historyList.length >= 2) {
+      const sortedDesc = [...historyList].sort(
+        (a, b) => Number.parseInt(historyRevisionKey(b), 10) - Number.parseInt(historyRevisionKey(a), 10),
+      );
+      if (historyRevisionKey(revision) === historyRevisionKey(sortedDesc[0])) {
+        try {
+          [previousDocument] = await this.hooks.fetch('storage-get-revision', { slug, revision: sortedDesc[1] }, this);
+        /* c8 ignore next 3 */
+        } catch (error) {
+          debug('Error fetching previous revision for diff:', error);
+        }
+      }
+    }
+
+    const diffOldDoc = previousDocument ?? document;
+    const diffNewDoc = previousDocument ? document : currentDocument;
+
     // Generate diffs for fields that have changed
     /** @type {Record<string, string>} */
     const diffs = {};
-    if (currentDocument) {
+    if (diffNewDoc) {
       const fieldsToCompare = ['title', 'excerpt', 'content', 'layout'];
       for (const field of fieldsToCompare) {
-        const oldValue = String(document[field] || '');
-        const newValue = String(currentDocument[field] || '');
+        const oldValue = String(diffOldDoc[field] || '');
+        const newValue = String(diffNewDoc[field] || '');
         if (oldValue !== newValue) {
           diffs[field] = htmlTable(oldValue, newValue);
         }
       }
 
       // Compare image field (which is an ID reference to an attachment)
-      const oldImageId = document.image;
-      const newImageId = currentDocument.image;
+      const oldImageId = diffOldDoc.image;
+      const newImageId = diffNewDoc.image;
       let oldImageValue = '';
       let newImageValue = '';
-      if (oldImageId && document.attachments && Array.isArray(document.attachments)) {
-        const oldImageAttachment = document.attachments.find((att) => att.id === oldImageId);
+      if (oldImageId && diffOldDoc.attachments && Array.isArray(diffOldDoc.attachments)) {
+        const oldImageAttachment = diffOldDoc.attachments.find((att) => att.id === oldImageId);
         oldImageValue = oldImageAttachment?.path || oldImageId;
       } else if (oldImageId) {
         oldImageValue = oldImageId;
       }
-      if (newImageId && currentDocument.attachments && Array.isArray(currentDocument.attachments)) {
-        const newImageAttachment = currentDocument.attachments.find((att) => att.id === newImageId);
+      if (newImageId && diffNewDoc.attachments && Array.isArray(diffNewDoc.attachments)) {
+        const newImageAttachment = diffNewDoc.attachments.find((att) => att.id === newImageId);
         newImageValue = newImageAttachment?.path || newImageId;
       } else if (newImageId) {
         newImageValue = newImageId;
@@ -1075,15 +1119,15 @@ class UttoriWiki {
       }
 
       // Compare tags array
-      const oldTags = Array.isArray(document.tags) ? document.tags.join(', ') : String(document.tags || '');
-      const newTags = Array.isArray(currentDocument.tags) ? currentDocument.tags.join(', ') : String(currentDocument.tags || '');
+      const oldTags = Array.isArray(diffOldDoc.tags) ? diffOldDoc.tags.join(', ') : String(diffOldDoc.tags || '');
+      const newTags = Array.isArray(diffNewDoc.tags) ? diffNewDoc.tags.join(', ') : String(diffNewDoc.tags || '');
       if (oldTags !== newTags) {
         diffs.tags = htmlTable(oldTags, newTags);
       }
 
       // Compare redirects array
-      const oldRedirects = Array.isArray(document.redirects) ? document.redirects.join('\n') : String(document.redirects || '');
-      const newRedirects = Array.isArray(currentDocument.redirects) ? currentDocument.redirects.join('\n') : String(currentDocument.redirects || '');
+      const oldRedirects = Array.isArray(diffOldDoc.redirects) ? diffOldDoc.redirects.join('\n') : String(diffOldDoc.redirects || '');
+      const newRedirects = Array.isArray(diffNewDoc.redirects) ? diffNewDoc.redirects.join('\n') : String(diffNewDoc.redirects || '');
       if (oldRedirects !== newRedirects) {
         diffs.redirects = htmlTable(oldRedirects, newRedirects);
       }

@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors
 - 🧰 Add `CategoryRoutesPlugin` plugin for adding category data to documents that supports  sub-categories
+- 🧰 When comparing diffs, compare the latest to the previous instead of itself
 
 ## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
 
