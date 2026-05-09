@@ -130,6 +130,14 @@ declare class TagRoutesPlugin {
      */
     static bindRoutes(server: import("express").Application, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-tag-routes", TagRoutesPluginConfig>): void;
     /**
+     * Normalize document tags before the document is saved.
+     * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
+     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} _context A Uttori-like context.
+     * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
+     * @static
+     */
+    static normalizeDocumentTags(document: import("../wiki.js").UttoriWikiDocument, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-tag-routes", TagRoutesPluginConfig>): import("../wiki.js").UttoriWikiDocument;
+    /**
      * Returns the documents with the provided tag, up to the provided limit.
      * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
      *

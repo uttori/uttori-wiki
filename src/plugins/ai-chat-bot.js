@@ -9,13 +9,11 @@ import * as sqliteVec from 'sqlite-vec';
 import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 import { MemoryStore } from './chat-bot/memory.js';
 import OllamaEmbedder from './chat-bot/ollama-embedder.js';
-import { indexAllDocuments } from './chat-bot/index-documents.js';
+import { indexAllDocuments, indexDocument, removeIndexedDocument } from './chat-bot/index-documents.js';
 import { buildPromptMessages } from './chat-bot/prompts.js';
 import { retrieve } from './chat-bot/retrieval.js';
 
 export { extractAttachmentText };
-
-// TODO: Setup hooks to index documents
 
 /**
  * Setup
@@ -135,6 +133,8 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {number} batch The batch size for the embedder.
  * @property {string[]} ignoreSlugs Slugs to ignore.
  * @property {string[]} ignoreTags Tags to ignore.
+ * @property {boolean} bootstrapIndexOnStartup Whether to create the chat index when index tables are missing on startup.
+ * @property {boolean} rebuildIndexOnStartup Whether to rebuild the chat index on startup.
  * @property {string} attachmentsRoot The root path to the attachments.
  * @property {boolean} includeAttachments Whether to include attachments.
  * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
@@ -153,6 +153,12 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} sessionId The session ID.
  * @property {string} query The query.
  * @property {string[]} slugs The slugs.
+ */
+
+/**
+ * @typedef {object} AIChatBotSearchUpdate
+ * @property {import('../wiki.js').UttoriWikiDocument} document The saved document.
+ * @property {string} [originalSlug] The document slug before the save, when renamed.
  */
 
 /** @type {import('ws').WebSocketServer | undefined} */
@@ -187,6 +193,11 @@ class AIChatBot {
    */
   static defaultConfig() {
     return {
+      events: {
+        bindRoutes: ['bind-routes'],
+        onSearchDelete: ['search-delete'],
+        onSearchUpdate: ['search-update'],
+      },
       websocketRoute: '/chat-api',
       publicRoute: '/chat',
       documentsRoute: '/chat-documents',
@@ -195,6 +206,8 @@ class AIChatBot {
 
       ignoreSlugs: [],
       ignoreTags: [],
+      bootstrapIndexOnStartup: true,
+      rebuildIndexOnStartup: false,
 
       databasePath: './site/data/uttori-chat.db',
       databseOptions: {
@@ -359,13 +372,24 @@ class AIChatBot {
       throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {AIChatBotConfig} */
-    const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
+    const base = AIChatBot.defaultConfig();
+    const config = {
+      ...base,
+      ...context.config[AIChatBot.configKey],
+      events: {
+        ...base.events,
+        ...context.config[AIChatBot.configKey]?.events,
+      },
+    };
     if (!config.events) {
       throw new Error('Missing events to listen to for in \'config.events\'.');
     }
 
     // Bind events
-    for (const [method, eventNames] of Object.entries(config.events)) {
+    /** @type {Record<string, string[]>} */
+    const events = config.events ?? {};
+    const eventEntries = Object.entries(events);
+    for (const [method, eventNames] of eventEntries) {
       if (typeof AIChatBot[method] === 'function') {
         for (const event of eventNames) {
           /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
@@ -377,16 +401,86 @@ class AIChatBot {
       }
     }
 
-    // If we have not already indexed the documents, do so now
-    const db = AIChatBot.openDatabase(config);
-    const rows = db.prepare('SELECT id FROM uttori_sources').all();
-    if (rows.length === 0) {
-      // Pass the full config to indexAllDocuments to ensure the same shape as event handlers
-      // TODO Refactor indexAllDocuments to actually just index a single document, and bring the logic into static methods here to bind
-      debug('Indexing documents...', config.embedModel);
-      await indexAllDocuments({ [AIChatBot.configKey]: config }, context);
+    await AIChatBot.bootstrapIndex(config, context);
+  }
+
+  /**
+   * Bootstrap the chat index at startup when configured.
+   * @param {AIChatBotConfig} config The plugin configuration.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @returns {Promise<void>} The indexing promise.
+   * @static
+   */
+  static async bootstrapIndex(config, context) {
+    if (!config.bootstrapIndexOnStartup && !config.rebuildIndexOnStartup) {
+      return;
     }
-    db.close();
+    const db = AIChatBot.openDatabase(config);
+    try {
+      const vectorTable = db.prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?').get('table', 'uttori_chunks_vec');
+      if (config.rebuildIndexOnStartup || !vectorTable) {
+        debug('Bootstrapping document index...', config.embedModel);
+        await indexAllDocuments({ [AIChatBot.configKey]: config }, context);
+      }
+    } finally {
+      db.close();
+    }
+  }
+
+  /**
+   * Update the chat index after documents are saved.
+   * @param {AIChatBotSearchUpdate|AIChatBotSearchUpdate[]} payload The search update payload.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @returns {Promise<void>} The indexing promise.
+   * @static
+   */
+  static async onSearchUpdate(payload, context) {
+    const base = AIChatBot.defaultConfig();
+    const config = {
+      ...base,
+      ...context.config[AIChatBot.configKey],
+      events: {
+        ...base.events,
+        ...context.config[AIChatBot.configKey]?.events,
+      },
+    };
+    const updates = Array.isArray(payload) ? payload : [payload];
+    for (const update of updates) {
+      const document = update?.document;
+      if (!document?.slug) {
+        continue;
+      }
+      if (update.originalSlug && update.originalSlug !== document.slug) {
+        removeIndexedDocument({ [AIChatBot.configKey]: config }, update.originalSlug);
+      }
+      const ignoredSlug = config.ignoreSlugs.includes(document.slug);
+      const tags = Array.isArray(document.tags) ? document.tags : [];
+      const ignoredTag = tags.some((tag) => config.ignoreTags.includes(tag));
+      if (ignoredSlug || ignoredTag) {
+        removeIndexedDocument({ [AIChatBot.configKey]: config }, document.slug);
+        continue;
+      }
+      await indexDocument({ [AIChatBot.configKey]: config }, context, document);
+    }
+  }
+
+  /**
+   * Remove deleted documents from the chat index.
+   * @param {import('../wiki.js').UttoriWikiDocument} document The deleted document.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @static
+   */
+  static onSearchDelete(document, context) {
+    const base = AIChatBot.defaultConfig();
+    const config = {
+      ...base,
+      ...context.config[AIChatBot.configKey],
+      events: {
+        ...base.events,
+        ...context.config[AIChatBot.configKey]?.events,
+      },
+    };
+    removeIndexedDocument({ [AIChatBot.configKey]: config }, document?.slug);
   }
 
   /**

@@ -1,13 +1,11 @@
 import { htmlTable } from '@uttori/data-tools/diff/textdiff';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 import crypto from 'node:crypto';
+import express from 'express';
 
 import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
 import { sanitizeSearchQuery, sanitizeSlug } from './plugins/utilities/security.js';
-
-// TODO: Convert to Express Router-Level Middleware, https://expressjs.com/en/guide/using-middleware.html
-// TODO: Require document.image to be an image from the attachments.
 
 let debug = (..._) => {};
 /* c8 ignore next */
@@ -30,6 +28,51 @@ export const routeParamToString = (value) => (Array.isArray(value) ? value[0] ??
 const normalizeRouteParams = (params) => Object.fromEntries(
   Object.entries(params).map(([key, value]) => [key, routeParamToString(value)]),
 );
+
+/**
+ * Normalize attachment metadata and ensure every attachment has an ID.
+ * @param {unknown} rawAttachments The request-provided attachment value.
+ * @returns {UttoriWikiDocumentAttachment[]} Normalized attachments.
+ */
+const normalizeAttachments = (rawAttachments) => {
+  if (!Array.isArray(rawAttachments)) {
+    return [];
+  }
+  /** @type {UttoriWikiDocumentAttachment[]} */
+  const attachments = rawAttachments;
+  return attachments.map((attachment) => {
+    if (!attachment.id) {
+      attachment.id = crypto.randomUUID();
+    }
+    if (typeof attachment?.metadata === 'string') {
+      try {
+        attachment.metadata = JSON.parse(attachment.metadata);
+      } catch (error) {
+        attachment.metadata = {};
+        debug('Error parsing attachment metadata, setting to empty object:', error);
+      }
+    }
+    if (typeof attachment.metadata !== 'object') {
+      attachment.metadata = {};
+    }
+    return attachment;
+  });
+};
+
+/**
+ * Resolve an image reference against document attachments by ID, then by path.
+ * @param {string} image The requested image ID or path.
+ * @param {UttoriWikiDocumentAttachment[]} attachments The document attachments.
+ * @returns {UttoriWikiDocumentAttachment | undefined} The matching attachment.
+ */
+const resolveImageAttachment = (image, attachments) => attachments.find((att) => att.id === image) ?? attachments.find((att) => att.path === image);
+
+/**
+ * Check whether an attachment has an image MIME type.
+ * @param {UttoriWikiDocumentAttachment | undefined} attachment The attachment to test.
+ * @returns {boolean} Whether the attachment is an image.
+ */
+const isImageAttachment = (attachment) => typeof attachment?.type === 'string' && attachment.type.toLowerCase().startsWith('image/');
 
 /**
  * @typedef {object} UttoriWikiViewModel
@@ -302,56 +345,57 @@ class UttoriWiki {
    */
   bindRoutes(server) {
     debug('Binding routes...');
+    const router = express.Router();
 
     // Home
-    server.get('/', this.config.routeMiddleware.home, this.home);
-    server.get(`/${this.config.homePage}`, this.config.routeMiddleware.home, this.homepageRedirect);
+    router.get('/', this.config.routeMiddleware.home, this.home);
+    router.get(`/${this.config.homePage}`, this.config.routeMiddleware.home, this.homepageRedirect);
 
     // Search
     debug('Binding search route:', `/${this.config.routes.search}`);
-    server.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, this.search);
+    router.get(`/${this.config.routes.search}`, this.config.routeMiddleware.search, this.search);
 
     // Tags - handled by plugin
 
     // Not Found Placeholder
-    server.head('/404', this.config.routeMiddleware.notFound, this.notFound);
-    server.get('/404', this.config.routeMiddleware.notFound, this.notFound);
-    server.delete('/404', this.config.routeMiddleware.notFound, this.notFound);
-    server.patch('/404', this.config.routeMiddleware.notFound, this.notFound);
-    server.put('/404', this.config.routeMiddleware.notFound, this.notFound);
-    server.post('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.head('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.get('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.delete('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.patch('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.put('/404', this.config.routeMiddleware.notFound, this.notFound);
+    router.post('/404', this.config.routeMiddleware.notFound, this.notFound);
 
     // Document CRUD / Admin
     if (this.config.allowCRUDRoutes) {
-      server.get('/new/:key', this.config.routeMiddleware.create, this.create);
-      server.get('/new', this.config.routeMiddleware.create, this.create);
-      server.post('/new/:key', this.config.routeMiddleware.saveNew, this.saveNew);
-      server.post('/new', this.config.routeMiddleware.saveNew, this.saveNew);
+      router.get('/new/:key', this.config.routeMiddleware.create, this.create);
+      router.get('/new', this.config.routeMiddleware.create, this.create);
+      router.post('/new/:key', this.config.routeMiddleware.saveNew, this.saveNew);
+      router.post('/new', this.config.routeMiddleware.saveNew, this.saveNew);
 
-      server.post('/preview', this.config.routeMiddleware.preview, this.preview);
-      server.get('/:slug/edit/:key', this.config.routeMiddleware.edit, this.edit);
-      server.get('/:slug/edit', this.config.routeMiddleware.edit, this.edit);
-      server.get('/:slug/delete/:key', this.config.routeMiddleware.delete, this.delete);
-      server.get('/:slug/delete', this.config.routeMiddleware.delete, this.delete);
+      router.post('/preview', this.config.routeMiddleware.preview, this.preview);
+      router.get('/:slug/edit/:key', this.config.routeMiddleware.edit, this.edit);
+      router.get('/:slug/edit', this.config.routeMiddleware.edit, this.edit);
+      router.get('/:slug/delete/:key', this.config.routeMiddleware.delete, this.delete);
+      router.get('/:slug/delete', this.config.routeMiddleware.delete, this.delete);
     }
 
     // Document History
     if (this.config.publicHistory) {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.historyIndex);
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.historyDetail);
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.historyRestore);
+      router.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.historyIndex);
+      router.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.historyDetail);
+      router.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.historyRestore);
     } else {
-      server.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.notFound);
-      server.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.notFound);
-      server.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.notFound);
+      router.get('/:slug/history', this.config.routeMiddleware.historyIndex, this.notFound);
+      router.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.notFound);
+      router.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.notFound);
     }
 
     // Document Update
-    server.post('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
-    server.post('/:slug/save', this.config.routeMiddleware.save, this.save);
-    server.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
-    server.put('/:slug/save', this.config.routeMiddleware.save, this.save);
-    server.get('/:slug', this.config.routeMiddleware.detail, this.detail);
+    router.post('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+    router.post('/:slug/save', this.config.routeMiddleware.save, this.save);
+    router.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+    router.put('/:slug/save', this.config.routeMiddleware.save, this.save);
+    router.get('/:slug', this.config.routeMiddleware.detail, this.detail);
 
     // Handle Redirects
     for (const redirect of this.config.redirects) {
@@ -361,7 +405,7 @@ class UttoriWiki {
         debug('Missing route or target, skipping.');
         continue;
       }
-      server.all(route, (request, response, next) => {
+      router.all(route, (request, response, next) => {
         // Build the new path from the route and target using the request params.
         let path = buildPath(normalizeRouteParams(request.params), route, target);
         debug('Redirecting to:', path);
@@ -382,12 +426,13 @@ class UttoriWiki {
       });
     }
 
-    this.hooks.dispatch('bind-routes', server, this);
+    this.hooks.dispatch('bind-routes', router, this);
 
     // Not Found - Catch All
     if (this.config.handleNotFound) {
-      server.get('/*splat', this.notFound);
+      router.get('/*splat', this.notFound);
     }
+    server.use(router);
 
     debug('Bound routes.');
   }
@@ -1360,17 +1405,6 @@ class UttoriWiki {
     }, {});
     debug('custom keys:', custom);
 
-    // TODO Move this to tag routes as a pre-save filter with `document-save` event
-    // Normalize tags before save
-    /** @type {string[]} */
-    let tags = [];
-    if (Array.isArray(request.body.tags)) {
-      tags = request.body.tags.sort();
-    } else if (typeof request.body.tags === 'string') {
-      tags = request.body.tags.split(',').sort();
-    }
-    tags = [...new Set(tags.map((t) => t.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b));
-
     // Normalize redirects before save
     /** @type {string[]} */
     let redirects = [];
@@ -1384,47 +1418,7 @@ class UttoriWiki {
     /** @type {UttoriWikiDocumentAttachment[]} */
     let attachments = [];
     debug('attachments:', request.body.attachments);
-    if (Array.isArray(request.body.attachments)) {
-      attachments = request.body.attachments;
-      // Ensure the attachments key metadata is an object and generate IDs for attachments without them
-      attachments = attachments.map((attachment) => {
-        // Generate ID if missing
-        if (!attachment.id) {
-          attachment.id = crypto.randomUUID();
-        }
-        if (typeof attachment?.metadata === 'string') {
-          try {
-            attachment.metadata = JSON.parse(attachment.metadata);
-          } catch (error) {
-            attachment.metadata = {};
-            debug('Error parsing attachment metadata, setting to empty object:', error);
-          }
-        }
-        // Fallback incase the metadata is not an object
-        if (typeof attachment.metadata !== 'object') {
-          attachment.metadata = {};
-        }
-        return attachment;
-      });
-    }
-
-    // Handle image - it should be an ID reference to an attachment
-    let imageId = null;
-    if (image) {
-      // If image is a string, it might be an attachment ID - verify it exists in attachments
-      const imageAttachment = attachments.find((att) => att.id === image);
-      if (imageAttachment) {
-        imageId = image;
-      } else {
-        // If not found by ID, try to find by path (for backward compatibility)
-        const imageAttachmentByPath = attachments.find((att) => att.path === image);
-        if (imageAttachmentByPath) {
-          imageId = imageAttachmentByPath.id;
-        } /* c8 ignore next 3 */ else {
-          debug('Image not found by ID or path:', image);
-        }
-      }
-    }
+    attachments = normalizeAttachments(request.body.attachments);
 
     // If we're updating an existing document, preserve createDate and ensure attachments have IDs
     let createDate = Date.now();
@@ -1445,7 +1439,7 @@ class UttoriWiki {
             // Merge with new attachments, preserving IDs from existing ones
             attachments = attachments.map((newAtt) => {
               const existingAtt = existingDocument.attachments.find((e) => e.path === newAtt.path);
-              newAtt.id = existingAtt.id || crypto.randomUUID();
+              newAtt.id = existingAtt?.id || newAtt.id || crypto.randomUUID();
               return newAtt;
             });
           }
@@ -1455,6 +1449,25 @@ class UttoriWiki {
       }
     }
 
+    // Handle image - it should be an ID reference to an image attachment.
+    let imageId = null;
+    if (image) {
+      const imageAttachment = resolveImageAttachment(image, attachments);
+      if (!imageAttachment) {
+        debug('Image not found by ID or path:', image);
+        request.wikiFlash('error', 'Document image must reference an attachment.');
+        response.redirect(request.get?.('Referrer') || '/');
+        return;
+      }
+      if (!isImageAttachment(imageAttachment)) {
+        debug('Image attachment is not an image:', imageAttachment);
+        request.wikiFlash('error', 'Document image must reference an image attachment.');
+        response.redirect(request.get?.('Referrer') || '/');
+        return;
+      }
+      imageId = imageAttachment.id;
+    }
+
     /** @type {UttoriWikiDocument} */
     let document = {
       ...custom,
@@ -1462,7 +1475,7 @@ class UttoriWiki {
       image: imageId || undefined,
       excerpt,
       content,
-      tags,
+      tags: request.body.tags ?? [],
       redirects,
       slug,
       createDate,

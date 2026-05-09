@@ -1,22 +1,3 @@
-/*
- * Modern ESLint v9 Configuration
- *
- * PLUGINS NOT COMPATIBLE WITH ESLINT V9:
- * - eslint-plugin-optimize-regex: Not compatible with flat config
- * - eslint-plugin-no-inferred-method-name: Not compatible with flat config
- * - eslint-plugin-anti-trojan-source: Not compatible with flat config
- * - eslint-plugin-xss: Not compatible with flat config
- *
- * WORKING PLUGINS:
- * - @typescript-eslint/*: Full v9 support
- * - @stylistic/eslint-plugin: Full v9 support
- * - eslint-plugin-ava: Full v9 support
- * - eslint-plugin-n: Full v9 support
- * - eslint-plugin-import: Full v9 support
- * - eslint-plugin-jsdoc: Full v9 support
- * - eslint-plugin-security: Full v9 support
- */
-
 import { defineConfig, globalIgnores } from "eslint/config";
 import antiTrojanSource from "eslint-plugin-anti-trojan-source";
 import ava from "eslint-plugin-ava";
@@ -26,7 +7,7 @@ import jsdoc from "eslint-plugin-jsdoc";
 import n from "eslint-plugin-n";
 import noInferredMethodName from "eslint-plugin-no-inferred-method-name";
 import optimizeRegex from "eslint-plugin-optimize-regex";
-// import security from "eslint-plugin-security";
+import security from "eslint-plugin-security";
 import stylistic from '@stylistic/eslint-plugin';
 import tsParser from "@typescript-eslint/parser";
 import tseslint from 'typescript-eslint';

@@ -88,6 +88,30 @@ test.serial('all(): returns all the documents', async (t) => {
   t.deepEqual(results, { [exampleSlug]: example });
 });
 
+test.serial('all(): reads documents in parallel and merges by filename order', async (t) => {
+  const alpha = { ...fake, slug: 'alpha', title: 'Alpha' };
+  const zulu = { ...empty, slug: 'zulu', title: 'Zulu' };
+  await fs.writeFile(`${folder}/content/zulu.json`, JSON.stringify(zulu));
+  await fs.writeFile(`${folder}/content/alpha.json`, JSON.stringify(alpha));
+
+  const s = new StorageProvider(config);
+  const results = await s.all();
+  t.deepEqual(Object.keys(results), ['alpha', exampleSlug, 'zulu']);
+  t.deepEqual(results.alpha, alpha);
+  t.deepEqual(results.zulu, zulu);
+});
+
+test.serial('all(): deterministically lets the later filename win for duplicate slugs', async (t) => {
+  const first = { ...fake, slug: 'duplicate-slug', title: 'First' };
+  const second = { ...fake, slug: 'duplicate-slug', title: 'Second' };
+  await fs.writeFile(`${folder}/content/a-duplicate.json`, JSON.stringify(first));
+  await fs.writeFile(`${folder}/content/z-duplicate.json`, JSON.stringify(second));
+
+  const s = new StorageProvider(config);
+  const results = await s.all();
+  t.deepEqual(results['duplicate-slug'], second);
+});
+
 test.serial('getQuery(query): returns all unique tags from all the documents', async (t) => {
   const s = new StorageProvider(config);
   await s.add(example);

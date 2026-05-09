@@ -917,6 +917,15 @@ This will create routes at `/categories` and `/categories/:tag` with the specifi
 <dt><a href="#normalizeRouteParams">normalizeRouteParams(params)</a> ⇒ <code>Record.&lt;string, string&gt;</code></dt>
 <dd><p>Normalize Express route parameters to the string-only shape used by redirects.</p>
 </dd>
+<dt><a href="#normalizeAttachments">normalizeAttachments(rawAttachments)</a> ⇒ <code><a href="#UttoriWikiDocumentAttachment">Array.&lt;UttoriWikiDocumentAttachment&gt;</a></code></dt>
+<dd><p>Normalize attachment metadata and ensure every attachment has an ID.</p>
+</dd>
+<dt><a href="#resolveImageAttachment">resolveImageAttachment(image, attachments)</a> ⇒ <code><a href="#UttoriWikiDocumentAttachment">UttoriWikiDocumentAttachment</a></code> | <code>undefined</code></dt>
+<dd><p>Resolve an image reference against document attachments by ID, then by path.</p>
+</dd>
+<dt><a href="#isImageAttachment">isImageAttachment(attachment)</a> ⇒ <code>boolean</code></dt>
+<dd><p>Check whether an attachment has an image MIME type.</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -1357,6 +1366,47 @@ Normalize Express route parameters to the string-only shape used by redirects.
 | Param | Type | Description |
 | --- | --- | --- |
 | params | <code>Record.&lt;string, (string\|Array.&lt;string&gt;)&gt;</code> | The Express route parameters. |
+
+<a name="normalizeAttachments"></a>
+
+## normalizeAttachments(rawAttachments) ⇒ [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment)
+Normalize attachment metadata and ensure every attachment has an ID.
+
+**Kind**: global function  
+**Returns**: [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment) - Normalized attachments.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| rawAttachments | <code>unknown</code> | The request-provided attachment value. |
+
+<a name="normalizeAttachments..attachments"></a>
+
+### normalizeAttachments~attachments : [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment)
+**Kind**: inner constant of [<code>normalizeAttachments</code>](#normalizeAttachments)  
+<a name="resolveImageAttachment"></a>
+
+## resolveImageAttachment(image, attachments) ⇒ [<code>UttoriWikiDocumentAttachment</code>](#UttoriWikiDocumentAttachment) \| <code>undefined</code>
+Resolve an image reference against document attachments by ID, then by path.
+
+**Kind**: global function  
+**Returns**: [<code>UttoriWikiDocumentAttachment</code>](#UttoriWikiDocumentAttachment) \| <code>undefined</code> - The matching attachment.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| image | <code>string</code> | The requested image ID or path. |
+| attachments | [<code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code>](#UttoriWikiDocumentAttachment) | The document attachments. |
+
+<a name="isImageAttachment"></a>
+
+## isImageAttachment(attachment) ⇒ <code>boolean</code>
+Check whether an attachment has an image MIME type.
+
+**Kind**: global function  
+**Returns**: <code>boolean</code> - Whether the attachment is an image.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| attachment | [<code>UttoriWikiDocumentAttachment</code>](#UttoriWikiDocumentAttachment) \| <code>undefined</code> | The attachment to test. |
 
 <a name="UttoriWikiViewModel"></a>
 

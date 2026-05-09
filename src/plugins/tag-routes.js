@@ -60,6 +60,7 @@ class TagRoutesPlugin {
       },
       events: {
         bindRoutes: ['bind-routes'],
+        normalizeDocumentTags: ['document-save'],
         validateConfig: ['validate-config'],
       },
       tagIndexRequestHandler: TagRoutesPlugin.tagIndexRequestHandler,
@@ -186,6 +187,27 @@ class TagRoutesPlugin {
     server.get(`/${tagIndexRoute}`, ...middleware.tagIndex, tagIndexRequestHandler(context));
     server.get(`/${tagRoute}/:tag`, ...middleware.tag, tagRequestHandler(context));
     server.get(`/${apiRoute}`, ...middleware.api, apiRequestHandler(context));
+  }
+
+  /**
+   * Normalize document tags before the document is saved.
+   * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} _context A Uttori-like context.
+   * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
+   * @static
+   */
+  static normalizeDocumentTags(document, _context) {
+    /** @type {string[]} */
+    let tags = [];
+    if (Array.isArray(document.tags)) {
+      tags = document.tags;
+    } else if (typeof document.tags === 'string') {
+      tags = document.tags.split(',');
+    }
+    return {
+      ...document,
+      tags: [...new Set(tags.map((tag) => tag.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+    };
   }
 
   /**

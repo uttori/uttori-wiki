@@ -43,6 +43,8 @@ Search a UttoriWiki database using LLMs.</p>
 <dd></dd>
 <dt><a href="#AIChatBotApiRequestBody">AIChatBotApiRequestBody</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#AIChatBotSearchUpdate">AIChatBotSearchUpdate</a> : <code>object</code></dt>
+<dd></dd>
 </dl>
 
 <a name="AIChatBot"></a>
@@ -59,6 +61,9 @@ Search a UttoriWiki database using LLMs.
     * [.defaultConfig()](#AIChatBot.defaultConfig) ⇒ [<code>AIChatBotConfig</code>](#AIChatBotConfig)
     * [.validateConfig(config, [_context])](#AIChatBot.validateConfig)
     * [.register(context)](#AIChatBot.register)
+    * [.bootstrapIndex(config, context)](#AIChatBot.bootstrapIndex) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.onSearchUpdate(payload, context)](#AIChatBot.onSearchUpdate) ⇒ <code>Promise.&lt;void&gt;</code>
+    * [.onSearchDelete(document, context)](#AIChatBot.onSearchDelete)
     * [.bindRoutes(server, context)](#AIChatBot.bindRoutes)
     * [.bindWebSocket(server, context)](#AIChatBot.bindWebSocket)
     * [.runChatPass(ws, messages, config)](#AIChatBot.runChatPass) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
@@ -139,6 +144,44 @@ const context = {
 };
 AIChatBot.register(context);
 ```
+<a name="AIChatBot.bootstrapIndex"></a>
+
+### AIChatBot.bootstrapIndex(config, context) ⇒ <code>Promise.&lt;void&gt;</code>
+Bootstrap the chat index at startup when configured.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+**Returns**: <code>Promise.&lt;void&gt;</code> - The indexing promise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | [<code>AIChatBotConfig</code>](#AIChatBotConfig) | The plugin configuration. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+
+<a name="AIChatBot.onSearchUpdate"></a>
+
+### AIChatBot.onSearchUpdate(payload, context) ⇒ <code>Promise.&lt;void&gt;</code>
+Update the chat index after documents are saved.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+**Returns**: <code>Promise.&lt;void&gt;</code> - The indexing promise.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| payload | [<code>AIChatBotSearchUpdate</code>](#AIChatBotSearchUpdate) \| [<code>Array.&lt;AIChatBotSearchUpdate&gt;</code>](#AIChatBotSearchUpdate) | The search update payload. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+
+<a name="AIChatBot.onSearchDelete"></a>
+
+### AIChatBot.onSearchDelete(document, context)
+Remove deleted documents from the chat index.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| document | <code>UttoriWikiDocument</code> | The deleted document. |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+
 <a name="AIChatBot.bindRoutes"></a>
 
 ### AIChatBot.bindRoutes(server, context)
@@ -390,6 +433,8 @@ Setup the memory store.
 | batch | <code>number</code> | The batch size for the embedder. |
 | ignoreSlugs | <code>Array.&lt;string&gt;</code> | Slugs to ignore. |
 | ignoreTags | <code>Array.&lt;string&gt;</code> | Tags to ignore. |
+| bootstrapIndexOnStartup | <code>boolean</code> | Whether to create the chat index when index tables are missing on startup. |
+| rebuildIndexOnStartup | <code>boolean</code> | Whether to rebuild the chat index on startup. |
 | attachmentsRoot | <code>string</code> | The root path to the attachments. |
 | includeAttachments | <code>boolean</code> | Whether to include attachments. |
 | [extractAttachmentText] | <code>function</code> | The function to use to extract text from an attachment. |
@@ -413,4 +458,15 @@ Setup the memory store.
 | sessionId | <code>string</code> | The session ID. |
 | query | <code>string</code> | The query. |
 | slugs | <code>Array.&lt;string&gt;</code> | The slugs. |
+
+<a name="AIChatBotSearchUpdate"></a>
+
+## AIChatBotSearchUpdate : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| document | <code>UttoriWikiDocument</code> | The saved document. |
+| [originalSlug] | <code>string</code> | The document slug before the save, when renamed. |
 

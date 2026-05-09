@@ -300,6 +300,14 @@ export type AIChatBotConfig = {
      */
     ignoreTags: string[];
     /**
+     * Whether to create the chat index when index tables are missing on startup.
+     */
+    bootstrapIndexOnStartup: boolean;
+    /**
+     * Whether to rebuild the chat index on startup.
+     */
+    rebuildIndexOnStartup: boolean;
+    /**
      * The root path to the attachments.
      */
     attachmentsRoot: string;
@@ -349,6 +357,16 @@ export type AIChatBotApiRequestBody = {
      * The slugs.
      */
     slugs: string[];
+};
+export type AIChatBotSearchUpdate = {
+    /**
+     * The saved document.
+     */
+    document: import("../wiki.js").UttoriWikiDocument;
+    /**
+     * The document slug before the save, when renamed.
+     */
+    originalSlug?: string;
 };
 import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 /**
@@ -406,6 +424,29 @@ declare class AIChatBot {
      * @static
      */
     static register(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): Promise<void>;
+    /**
+     * Bootstrap the chat index at startup when configured.
+     * @param {AIChatBotConfig} config The plugin configuration.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+     * @returns {Promise<void>} The indexing promise.
+     * @static
+     */
+    static bootstrapIndex(config: AIChatBotConfig, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): Promise<void>;
+    /**
+     * Update the chat index after documents are saved.
+     * @param {AIChatBotSearchUpdate|AIChatBotSearchUpdate[]} payload The search update payload.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+     * @returns {Promise<void>} The indexing promise.
+     * @static
+     */
+    static onSearchUpdate(payload: AIChatBotSearchUpdate | AIChatBotSearchUpdate[], context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): Promise<void>;
+    /**
+     * Remove deleted documents from the chat index.
+     * @param {import('../wiki.js').UttoriWikiDocument} document The deleted document.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+     * @static
+     */
+    static onSearchDelete(document: import("../wiki.js").UttoriWikiDocument, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): void;
     /**
      * Add the upload route to the server object.
      * @param {import('express').Application} server An Express server instance.

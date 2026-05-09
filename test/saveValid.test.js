@@ -437,6 +437,80 @@ test('saveValid: stores image as path and finds attachment by path (backward com
   t.is(document.attachments.length, 1);
 });
 
+test('saveValid: rejects image references to non-image attachments', async (t) => {
+  t.plan(3);
+  const slug = 'test-image-non-image-attachment';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+  const redirect = sandbox.spy();
+  const attachments = [
+    {
+      id: 'file-123',
+      name: 'test.pdf',
+      path: '/uploads/test.pdf',
+      type: 'application/pdf',
+      size: 1024,
+      metadata: {},
+    },
+  ];
+
+  await uttori.saveValid(({ params: {},
+    get: () => '/edit',
+    body: {
+      title: 'Test Non-Image',
+      slug,
+      content: '## Test Non-Image',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+      image: 'file-123',
+      attachments,
+    },
+    wikiFlash }), ({ ...response, redirect }), () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [document] = await uttori.hooks.fetch('storage-get', slug, this);
+  t.is(document, undefined);
+  t.true(redirect.calledWith('/edit'));
+  t.deepEqual(wikiFlash.lastCall.args, [
+    'error',
+    'Document image must reference an image attachment.',
+  ]);
+});
+
+test('saveValid: rejects image references missing from attachments', async (t) => {
+  t.plan(3);
+  const slug = 'test-image-missing-attachment';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+  const redirect = sandbox.spy();
+
+  await uttori.saveValid(({ params: {},
+    get: () => '/edit',
+    body: {
+      title: 'Test Missing Image',
+      slug,
+      content: '## Test Missing Image',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+      image: 'missing-image',
+      attachments: [],
+    },
+    wikiFlash }), ({ ...response, redirect }), () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [document] = await uttori.hooks.fetch('storage-get', slug, this);
+  t.is(document, undefined);
+  t.true(redirect.calledWith('/edit'));
+  t.deepEqual(wikiFlash.lastCall.args, [
+    'error',
+    'Document image must reference an attachment.',
+  ]);
+});
+
 test('saveValid: preserves attachment IDs when updating existing document', async (t) => {
   t.plan(4);
   const slug = 'test-preserve-attachment-ids';

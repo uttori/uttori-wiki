@@ -477,7 +477,7 @@ test('historyDetail: handles image when attachments array does not exist', async
   const uttori = new UttoriWiki(config, server);
   const wikiFlash = sandbox.spy();
 
-  // Create initial document with image but no attachments property
+  // Create initial document, then manually shape it like old data with an image but no attachments property.
   await uttori.saveValid(({ params: {},
     body: {
       title: 'Test Image No Attachments',
@@ -486,13 +486,13 @@ test('historyDetail: handles image when attachments array does not exist', async
       updateDate: 1412921841841,
       createDate: undefined,
       tags: [],
-      image: 'image-id-1',
     },
     wikiFlash }), (response), () => {});
 
   // Manually remove attachments to test the branch
   /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
   const [doc] = await uttori.hooks.fetch('storage-get', slug, this);
+  doc.image = 'image-id-1';
   delete doc.attachments;
   await uttori.hooks.fetch('storage-update', { document: doc, originalSlug: slug }, this);
 

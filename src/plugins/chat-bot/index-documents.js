@@ -189,52 +189,58 @@ export async function buildBlocks(document, config) {
 }
 
 /**
- * Index all documents in the database.
- * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
- * @param {import('../../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', import('../ai-chat-bot.js').AIChatBotConfig>} context The context.
- * @returns {Promise<void>} The indexed documents.
+ * @typedef {object} ChatIndexSchemaOptions
+ * @property {boolean} [rebuild] Whether to rebuild index tables.
  */
-export async function indexAllDocuments (fullConfig, context) {
-  /** @type {import('../ai-chat-bot.js').AIChatBotConfig} */
-  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
-  debug('indexAllDocuments:', config.databasePath);
-  // Open or create the database
-  /** @type {import('better-sqlite3/index.js').Database} */
-  const db = AIChatBot.openDatabase(config);
 
-  // Assert that the sqlite-vec extension is loaded.
+/**
+ * Ensure the chat index tables exist.
+ * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options.
+ * @param {ChatIndexSchemaOptions} [options] Schema options.
+ * @returns {Promise<{ embedder: OllamaEmbedder, dim: number }>} The embedder and vector dimension.
+ */
+export async function ensureChatIndexSchema(db, config, options = {}) {
   try {
     const v = /** @type {Record<string, string>} */
       (db.prepare('SELECT vec_version() AS v').get());
     if (!v?.v) {
       throw new Error('vec_version() returned empty');
     }
-    debug(`indexAllDocuments: sqlite-vec loaded: ${v.v}`);
+    debug(`ensureChatIndexSchema: sqlite-vec loaded: ${v.v}`);
   } catch (error) {
     throw new Error('sqlite-vec is not loaded. Ensure the extension is installed.');
   }
 
-  // Setup the embedder
   const embedder = new OllamaEmbedder(config.ollamaBaseUrl, config.embedModel);
   const dim = await embedder.probeDimension();
-  debug(`indexAllDocuments: dimension: ${dim}`);
+  debug(`ensureChatIndexSchema: dimension: ${dim}`);
 
-  // Ensure Vector Index
-  db.exec(`DROP TABLE IF EXISTS uttori_chunks_vec;
-    CREATE VIRTUAL TABLE uttori_chunks_vec USING vec0(
+  if (options.rebuild) {
+    db.exec(`
+      DROP TABLE IF EXISTS uttori_chunks_vec;
+      DROP TABLE IF EXISTS uttori_chunks_fts;
+      DELETE FROM uttori_chunks;
+      DELETE FROM uttori_sources;
+    `);
+  }
+
+  db.exec(`
+    CREATE VIRTUAL TABLE IF NOT EXISTS uttori_chunks_vec USING vec0(
       embedding float[${dim}],
       source_id TEXT
-    );`);
+    );
+  `);
 
   // Ensure FTS Index
   // https://www.sqlite.org/fts5.html#unicode61_tokenizer
   if (config.fts) {
     db.exec(`
       CREATE VIRTUAL TABLE IF NOT EXISTS uttori_chunks_fts USING fts5(
-        text,                                      -- column name
-        content='uttori_chunks',                   -- table name
-        content_rowid='rowid',                     -- rowid in base table
-        tokenize = "unicode61 remove_diacritics 1" -- tokenizer
+        text,
+        content='uttori_chunks',
+        content_rowid='rowid',
+        tokenize = "unicode61 remove_diacritics 1"
       );
       -- Populate FTS for existing rows if empty
       INSERT INTO uttori_chunks_fts(rowid, text)
@@ -243,168 +249,237 @@ export async function indexAllDocuments (fullConfig, context) {
     `);
   }
 
-  // Get all documents
-  /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
-  let documents = [];
-  try {
-    const query = `SELECT * FROM documents WHERE slug NOT_IN ("${config.ignoreSlugs.join('", "')}") AND tags EXCLUDES ("${config.ignoreTags.join('", "')}") ORDER BY createDate DESC LIMIT -1`;
-    [documents] = await context.hooks.fetch('storage-query', query, context);
-  } catch (error) {
-    debug('indexAllDocuments: error getting documents:', error);
-    return;
-  }
-  debug(`indexAllDocuments: documents: ${documents.length}`);
+  return { embedder, dim };
+}
 
-  let totalChunks = 0;
-  let skipped = 0;
-  let errored = 0;
-  for (const document of documents) {
-    if (!document) continue;
-
-    const chunks = await buildBlocks(document, config);
-    const plainForHash = chunks.map(b => `[${b.sectionPath.join(' > ')}] ${b.text}`).join('\n\n');
-    const contentHash = crypto.createHash('sha256').update(`${document.updateDate ?? ''}|${plainForHash}`).digest('hex');
-
-    // Check the hash of the source and the content to see if it has changed
-    const row = /** @type {Record<string, string>} */
-      (db.prepare('SELECT content_hash FROM uttori_sources WHERE id = ?').get(document.slug));
-    if (row?.content_hash === contentHash) {
-      debug(`indexAllDocuments: ♾️️ ${document.slug} (${document.title}) has not changed`, contentHash);
-      skipped++;
-      continue;
-    }
-
-    // Reindex this document
-    debug(`indexAllDocuments: updating ${document.slug} (${document.title})`);
-
-    // embed in batches
-    const batchSize = Math.max(1, config.batch ?? 24);
-    /** @type {number[][]} */
-    const embeddings = [];
-    for (let i = 0; i < chunks.length; i += batchSize) {
-      const slice = chunks.slice(i, i + batchSize);
-      const sectionPath = slice.map(s => s.sectionPath.join(' > ')).join(' > ');
-
-      // Start a timer
-      const start = Date.now();
-      debug(`indexAllDocuments: embedding ${slice.length} chunks for ${document.slug} ${sectionPath}`);
-      const vecs = await embedder.embedBatch(
-        slice.map(s => s.text),
-        config.embedPrompt('Represent the document for retrieval.', slice.map(s => s.text).join('\n\n')),
-        Math.min(8, slice.length),
-      );
-
-      // Log the time it took to insert the source
-      const end = Date.now();
-      debug(`indexAllDocuments: time to embed: ${sectionPath} ${end - start}ms`);
-      embeddings.push(...vecs);
-      debug(`indexAllDocuments: embedded ${Math.min(i + batchSize, chunks.length)}/${chunks.length} chunks for ${document.slug} ${sectionPath}`);
-    }
-
-    // upsert source, delete old chunks, insert new
-    const stmt = db.prepare(`
-      INSERT INTO uttori_sources(id, slug, title, update_date, meta_json, content_hash)
-      VALUES (@id, @slug, @title, @updateDate, @metaJson, @contentHash)
-      ON CONFLICT(id) DO UPDATE SET
-        slug=excluded.slug,
-        title=excluded.title,
-        update_date=excluded.update_date,
-        meta_json=excluded.meta_json,
-        content_hash=excluded.content_hash
-    `);
-    stmt.run({
-      id: document.slug,
-      title: document.title,
-      slug: document.slug,
-      updateDate: document.updateDate,
-      metaJson: JSON.stringify({ tags: document.tags ?? [] }),
-      contentHash,
-    });
-
-    // delete chunks for source
-    // cascade-like cleanup
-    const rows = /** @type {Array<{rowid: number}>} */
-      (db.prepare('SELECT rowid FROM uttori_chunks WHERE source_id = ?').all(document.slug));
-    /** @type {number[]} */
-    const rowids = rows.map(row => row.rowid);
-    const del1 = db.prepare('DELETE FROM uttori_chunks WHERE source_id = ?');
-    del1.run(document.slug);
-    if (rowids.length) {
-      const placeholders = rowids.map(() => '?').join(',');
+/**
+ * Remove a document and all of its chunks from the chat index.
+ * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {string} slug The source slug to remove.
+ */
+export function removeIndexedDocumentFromDatabase(db, slug) {
+  if (!slug) return;
+  const rows = /** @type {Array<{rowid: number}>} */
+    (db.prepare('SELECT rowid FROM uttori_chunks WHERE source_id = ?').all(slug));
+  const rowids = rows.map(row => row.rowid);
+  db.prepare('DELETE FROM uttori_chunks WHERE source_id = ?').run(slug);
+  db.prepare('DELETE FROM uttori_sources WHERE id = ?').run(slug);
+  if (rowids.length) {
+    const placeholders = rowids.map(() => '?').join(',');
+    try {
       db.prepare(`DELETE FROM uttori_chunks_vec WHERE rowid IN (${placeholders})`).run(...rowids);
-      try {
-        db.prepare(`DELETE FROM uttori_chunks_fts WHERE rowid IN (${placeholders})`).run(...rowids);
-      } catch {}
+    } catch (error) {
+      debug('removeIndexedDocumentFromDatabase: vec cleanup skipped:', error);
     }
-    debug('indexAllDocuments: cleaned up database');
-    debug('indexAllDocuments: chunks:', chunks.length);
-    /** @type {import('../ai-chat-bot.js').ChunkWithMeta[]} */
-    const chunksWithVectors = chunks.map((c, i) => ({
-      source_id: document.slug,
-      idx: c.idx,
-      text: c.text,
-      token_count: c.tokenCount,
-      meta: { sectionPath: c.sectionPath },
-      sectionPath: c.sectionPath,
-      embedding: embeddings[i],
-    }));
-    debug('indexAllDocuments: chunksWithVectors:', chunksWithVectors.length);
-    const insertChunk = db.prepare(`
-      INSERT INTO uttori_chunks(source_id, idx, text, token_count, meta_json)
-      VALUES (@source_id, @idx, @text, @token_count, @meta_json)
-    `);
-    const insertVec = db.prepare(`
-      INSERT INTO uttori_chunks_vec(rowid, embedding, source_id) VALUES (?, ?, ?)
-    `);
-    const insertFts = (() => {
-      try { return db.prepare('INSERT INTO uttori_chunks_fts(rowid, text) VALUES (?, ?)'); }
-      catch { return null; }
-    })();
+    try {
+      db.prepare(`DELETE FROM uttori_chunks_fts WHERE rowid IN (${placeholders})`).run(...rowids);
+    } catch (error) {
+      debug('removeIndexedDocumentFromDatabase: fts cleanup skipped:', error);
+    }
+  }
+}
 
-    const tx = db.transaction(() => {
-      for (const c of chunksWithVectors) {
-        const info = insertChunk.run({
-          source_id: c.source_id,
-          idx: c.idx,
-          text: c.text,
-          token_count: c.token_count,
-          meta_json: c.meta ? JSON.stringify(c.meta) : null,
-        });
+/**
+ * Remove a document from the chat index.
+ * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
+ * @param {string} slug The source slug to remove.
+ */
+export function removeIndexedDocument(fullConfig, slug) {
+  if (!slug) return;
+  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
+  const db = AIChatBot.openDatabase(config);
+  try {
+    removeIndexedDocumentFromDatabase(db, slug);
+  } finally {
+    db.close();
+  }
+}
 
-        const rowid = Number(info.lastInsertRowid);
-        if (!Number.isInteger(rowid)) {
-          throw new Error(`Unexpected non-integer rowid: ${String(info.lastInsertRowid)}`);
-        }
+/**
+ * Index one document using an already-open database.
+ * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options.
+ * @param {OllamaEmbedder} embedder The embedder.
+ * @param {import('../../wiki.js').UttoriWikiDocument} document The document to index.
+ * @returns {Promise<{ chunks: number, skipped: boolean, errored: number }>} Indexing stats.
+ */
+export async function indexDocumentInDatabase(db, config, embedder, document) {
+  const chunks = await buildBlocks(document, config);
+  const plainForHash = chunks.map(b => `[${b.sectionPath.join(' > ')}] ${b.text}`).join('\n\n');
+  const contentHash = crypto.createHash('sha256').update(`${document.updateDate ?? ''}|${plainForHash}`).digest('hex');
 
-        if (insertFts) {
-          insertFts.run(rowid, c.text);
-        }
-
-        // Validate embedding exists and has length before inserting into vec table
-        if (!c.embedding || !Array.isArray(c.embedding) || c.embedding.length === 0) {
-          debug(`💀 Skipping vec insert for chunk with empty embedding: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
-          debug(`Text preview: ${c.text.substring(0, 100)}...`);
-          errored++;
-          continue;
-        }
-
-        // sqlite-vec accepts Float32Array or a Buffer of f32s
-        const f32 = new Float32Array(c.embedding);
-        // Safety check: ensure the Float32Array is valid and non-empty
-        if (!f32 || f32.length === 0) {
-          debug(`💀 Invalid Float32Array for chunk: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
-          errored++;
-          // throw new Error(`Invalid embedding vector (length: ${f32.length}) for chunk: ${c.source_id}`);
-          continue;
-        }
-        insertVec.run(BigInt(rowid), Buffer.from(f32.buffer), c.source_id);
-      }
-    });
-    tx();
-
-    totalChunks += chunks.length;
+  const row = /** @type {Record<string, string>} */
+    (db.prepare('SELECT content_hash FROM uttori_sources WHERE id = ?').get(document.slug));
+  if (row?.content_hash === contentHash) {
+    debug(`indexDocumentInDatabase: ♾️️ ${document.slug} (${document.title}) has not changed`, contentHash);
+    return { chunks: 0, skipped: true, errored: 0 };
   }
 
-  debug(`indexAllDocuments: Done. Chunks indexed: ${totalChunks}. Unchanged skipped: ${skipped}. Errored: ${errored}.`);
-  db.close();
+  debug(`indexDocumentInDatabase: updating ${document.slug} (${document.title})`);
+  const batchSize = Math.max(1, config.batch ?? 24);
+  /** @type {number[][]} */
+  const embeddings = [];
+  for (let i = 0; i < chunks.length; i += batchSize) {
+    const slice = chunks.slice(i, i + batchSize);
+    const sectionPath = slice.map(s => s.sectionPath.join(' > ')).join(' > ');
+    const start = Date.now();
+    debug(`indexDocumentInDatabase: embedding ${slice.length} chunks for ${document.slug} ${sectionPath}`);
+    const vecs = await embedder.embedBatch(
+      slice.map(s => s.text),
+      config.embedPrompt('Represent the document for retrieval.', slice.map(s => s.text).join('\n\n')),
+      Math.min(8, slice.length),
+    );
+    const end = Date.now();
+    debug(`indexDocumentInDatabase: time to embed: ${sectionPath} ${end - start}ms`);
+    embeddings.push(...vecs);
+  }
+
+  db.prepare(`
+    INSERT INTO uttori_sources(id, slug, title, update_date, meta_json, content_hash)
+    VALUES (@id, @slug, @title, @updateDate, @metaJson, @contentHash)
+    ON CONFLICT(id) DO UPDATE SET
+      slug=excluded.slug,
+      title=excluded.title,
+      update_date=excluded.update_date,
+      meta_json=excluded.meta_json,
+      content_hash=excluded.content_hash
+  `).run({
+    id: document.slug,
+    title: document.title,
+    slug: document.slug,
+    updateDate: document.updateDate,
+    metaJson: JSON.stringify({ tags: document.tags ?? [] }),
+    contentHash,
+  });
+
+  removeIndexedDocumentFromDatabase(db, document.slug);
+  db.prepare(`
+    INSERT INTO uttori_sources(id, slug, title, update_date, meta_json, content_hash)
+    VALUES (@id, @slug, @title, @updateDate, @metaJson, @contentHash)
+  `).run({
+    id: document.slug,
+    title: document.title,
+    slug: document.slug,
+    updateDate: document.updateDate,
+    metaJson: JSON.stringify({ tags: document.tags ?? [] }),
+    contentHash,
+  });
+
+  /** @type {import('../ai-chat-bot.js').ChunkWithMeta[]} */
+  const chunksWithVectors = chunks.map((c, i) => ({
+    source_id: document.slug,
+    idx: c.idx,
+    text: c.text,
+    token_count: c.tokenCount,
+    meta: { sectionPath: c.sectionPath },
+    sectionPath: c.sectionPath,
+    embedding: embeddings[i],
+  }));
+  const insertChunk = db.prepare(`
+    INSERT INTO uttori_chunks(source_id, idx, text, token_count, meta_json)
+    VALUES (@source_id, @idx, @text, @token_count, @meta_json)
+  `);
+  const insertVec = db.prepare('INSERT INTO uttori_chunks_vec(rowid, embedding, source_id) VALUES (?, ?, ?)');
+  const insertFts = (() => {
+    try { return db.prepare('INSERT INTO uttori_chunks_fts(rowid, text) VALUES (?, ?)'); }
+    catch { return null; }
+  })();
+
+  let errored = 0;
+  const tx = db.transaction(() => {
+    for (const c of chunksWithVectors) {
+      const info = insertChunk.run({
+        source_id: c.source_id,
+        idx: c.idx,
+        text: c.text,
+        token_count: c.token_count,
+        meta_json: c.meta ? JSON.stringify(c.meta) : null,
+      });
+
+      const rowid = Number(info.lastInsertRowid);
+      if (!Number.isInteger(rowid)) {
+        throw new Error(`Unexpected non-integer rowid: ${String(info.lastInsertRowid)}`);
+      }
+      if (insertFts) {
+        insertFts.run(rowid, c.text);
+      }
+      if (!c.embedding || !Array.isArray(c.embedding) || c.embedding.length === 0) {
+        debug(`💀 Skipping vec insert for chunk with empty embedding: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
+        errored++;
+        continue;
+      }
+      const f32 = new Float32Array(c.embedding);
+      if (!f32 || f32.length === 0) {
+        debug(`💀 Invalid Float32Array for chunk: ${c.source_id} [${c.sectionPath.join(' > ')}]`);
+        errored++;
+        continue;
+      }
+      insertVec.run(BigInt(rowid), Buffer.from(f32.buffer), c.source_id);
+    }
+  });
+  tx();
+
+  return { chunks: chunks.length, skipped: false, errored };
+}
+
+/**
+ * Index one document in the database.
+ * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
+ * @param {import('../../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', import('../ai-chat-bot.js').AIChatBotConfig>} _context The context.
+ * @param {import('../../wiki.js').UttoriWikiDocument} document The document to index.
+ * @returns {Promise<void>} The indexed document.
+ */
+export async function indexDocument(fullConfig, _context, document) {
+  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
+  const db = AIChatBot.openDatabase(config);
+  try {
+    const { embedder } = await ensureChatIndexSchema(db, config);
+    await indexDocumentInDatabase(db, config, embedder, document);
+  } catch (error) {
+    debug('indexDocument: error indexing document:', error);
+  } finally {
+    db.close();
+  }
+}
+
+/**
+ * Index all documents in the database.
+ * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
+ * @param {import('../../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', import('../ai-chat-bot.js').AIChatBotConfig>} context The context.
+ * @returns {Promise<void>} The indexed documents.
+ */
+export async function indexAllDocuments(fullConfig, context) {
+  /** @type {import('../ai-chat-bot.js').AIChatBotConfig} */
+  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
+  debug('indexAllDocuments:', config.databasePath);
+  /** @type {import('better-sqlite3/index.js').Database} */
+  const db = AIChatBot.openDatabase(config);
+
+  try {
+    const { embedder } = await ensureChatIndexSchema(db, config, { rebuild: true });
+    /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
+    let documents = [];
+    try {
+      const query = `SELECT * FROM documents WHERE slug NOT_IN ("${config.ignoreSlugs.join('", "')}") AND tags EXCLUDES ("${config.ignoreTags.join('", "')}") ORDER BY createDate DESC LIMIT -1`;
+      [documents] = await context.hooks.fetch('storage-query', query, context);
+    } catch (error) {
+      debug('indexAllDocuments: error getting documents:', error);
+      return;
+    }
+    debug(`indexAllDocuments: documents: ${documents.length}`);
+
+    let totalChunks = 0;
+    let skipped = 0;
+    let errored = 0;
+    for (const document of documents) {
+      if (!document) continue;
+      const result = await indexDocumentInDatabase(db, config, embedder, document);
+      totalChunks += result.chunks;
+      skipped += result.skipped ? 1 : 0;
+      errored += result.errored;
+    }
+    debug(`indexAllDocuments: Done. Chunks indexed: ${totalChunks}. Unchanged skipped: ${skipped}. Errored: ${errored}.`);
+  } finally {
+    db.close();
+  }
 }
