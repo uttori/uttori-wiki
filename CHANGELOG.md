@@ -2,13 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-02-05)
+## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-08)
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist
 - 🪲 Fix analytics plugin validation function
 - 🪲 Fix some embedding retruns could fail due to different than expected keys
-- 🪲 Fix case where if embedding errored we would not add full text search (FTS) to the database
+- 🪲 Fix case where when embedding errored we would not add full text search (FTS) to the database
 - 🛠 Add `id`, `size` and `metadata` to attachments
 - 🛠 Update indexing to always include FTS even when embedding fails
 - 🛠 Clean up many types
@@ -27,7 +27,7 @@ All notable changes to this project will be documented in this file. This projec
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 - 🧰 Added embedding helper to test embeddings that cause errors
-- 🧰 Add `CategoryRoutesPlugin` plugin for adding category data to documents that supports  sub-categories
+- 🧰 Add `CategoryRoutesPlugin` plugin for adding category data to documents that supports sub-categories
 - 🧰 When comparing diffs, compare the latest to the previous instead of itself
 
 ## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
