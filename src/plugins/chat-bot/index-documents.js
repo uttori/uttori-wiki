@@ -2,6 +2,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 
 import AIChatBot from '../ai-chat-bot.js';
+import { extractAttachmentText } from './attachment-extractor.js';
 import OllamaEmbedder from './ollama-embedder.js';
 import MarkdownItRenderer from '../renderer-markdown-it.js';
 import { consolidateSectionsByHeader, countWords, markdownItAST } from './utilities.js';
@@ -99,7 +100,7 @@ export async function buildBlocks(document, config) {
         debug('buildBlocks: skipping attachment:', attachment.path);
         continue;
       }
-      const text = await config.extractAttachmentText(config, attachment);
+      const text = await (config.extractAttachmentText ?? extractAttachmentText)(config, attachment);
       if (!text) {
         debug('buildBlocks: attachment text is empty:', attachment.path);
         continue;
