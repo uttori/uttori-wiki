@@ -61,6 +61,7 @@ export { extractAttachmentText };
 /**
  * @typedef {object} Block
  * @property {"heading" | "paragraph"} [type] The type of block.
+ * @property {number} [idx] The index of the block.
  * @property {number} [level] The level of the heading.
  * @property {string} text The text of the block.
  * @property {string[]} sectionPath The section path of the block.
@@ -607,7 +608,7 @@ class AIChatBot {
 
     /** The assistant content this pass */
     let assistantAccumulated = '';
-    /** @type {Record<string, any>[]} */
+    /** @type {Array<Record<string, any>>} */
     let pendingToolCalls = []; // collect tool calls observed in this pass
 
     for (;;) {
@@ -639,7 +640,7 @@ class AIChatBot {
         }
 
         // tool calls may appear in-stream
-        /** @type {Record<string, any>[]} */
+        /** @type {Array<Record<string, any>>} */
         const calls = obj?.message?.tool_calls;
         if (Array.isArray(calls) && calls.length) {
           // Stop forwarding (optional) and collect calls

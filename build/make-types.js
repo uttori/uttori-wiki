@@ -1,9 +1,38 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import ts from 'typescript';
 
 // Configuration
 const CUSTOM_EXPORT = 'export * from "./custom.d.ts";';
 const INDEX_DTS_PATH = 'dist/index.d.ts';
+const DIST_PATH = 'dist';
+const PRESERVED_DECLARATIONS = new Set(['custom.d.ts']);
+
+/**
+ * Recursively removes generated declaration files while preserving custom type declarations.
+ * @param {string} directory The directory to clean.
+ */
+const cleanGeneratedDeclarations = (directory) => {
+  if (!fs.existsSync(directory)) {
+    return;
+  }
+
+  for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    const fullPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      cleanGeneratedDeclarations(fullPath);
+      continue;
+    }
+
+    const relativePath = path.relative(DIST_PATH, fullPath);
+    const isDeclaration = entry.name.endsWith('.d.ts') || entry.name.endsWith('.d.ts.map');
+    const isPreserved = PRESERVED_DECLARATIONS.has(relativePath);
+    if (isDeclaration && !isPreserved) {
+      fs.unlinkSync(fullPath);
+      console.log(`Removed ${fullPath}`);
+    }
+  }
+};
 
 // Ensure custom export is at the bottom of index.d.ts
 const ensureCustomExport = () => {
@@ -104,7 +133,7 @@ const compileTypes = async () => {
     diagnostics.forEach(diagnostic => {
       const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
       if (diagnostic.file) {
-        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
         console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
       } else {
         console.log(message);
@@ -122,56 +151,7 @@ const main = async () => {
   try {
     // Clean up existing type files
     console.log('Cleaning up existing type files...');
-    const files = [
-      'config.d.ts',
-      'wiki.d.ts',
-      'middleware.d.ts',
-      'redirect.d.ts',
-      'wiki-flash.d.ts',
-      'index.d.ts',
-      'plugins/ai-chat-bot.d.ts',
-      'plugins/analytics-json-file.d.ts',
-      'plugins/auth-simple.d.ts',
-      'plugins/category-routes.d.ts',
-      'plugins/chat-bot/utilities.d.ts',
-      'plugins/chat-bot/index-documents.d.ts',
-      'plugins/chat-bot/memory.d.ts',
-      'plugins/chat-bot/ollama-embedder.d.ts',
-      'plugins/download-route.d.ts',
-      'plugins/ejs-includes.d.ts',
-      'plugins/filter-ip-address.d.ts',
-      'plugins/form-handler.d.ts',
-      'plugins/form-handlers/email-handler.d.ts',
-      'plugins/form-handlers/google-docs-handler.d.ts',
-      'plugins/import-document.d.ts',
-      'plugins/markdown-it-plugin/footnotes.d.ts',
-      'plugins/markdown-it-plugin/line-breaker.d.ts',
-      'plugins/markdown-it-plugin/markdown-it-plugin.d.ts',
-      'plugins/markdown-it-plugin/toc.d.ts',
-      'plugins/markdown-it-plugin/uttori-inline.d.ts',
-      'plugins/markdown-it-plugin/video.d.ts',
-      'plugins/markdown-it-plugin/wikilinks.d.ts',
-      'plugins/markdown-it-plugin/youtube.d.ts',
-      'plugins/query-output.d.ts',
-      'plugins/renderer-markdown-it.d.ts',
-      'plugins/renderer-replacer.d.ts',
-      'plugins/sitemap-generator.d.ts',
-      'plugins/search-provider-lunr.d.ts',
-      'plugins/storage-provider-json-file.d.ts',
-      'plugins/storage-provider-json-memory.d.ts',
-      'plugins/storeage-provider-json/storage-provider-file.d.ts',
-      'plugins/storeage-provider-json/storage-provider-memory.d.ts',
-      'plugins/tag-routes.d.ts',
-      'plugins/upload-multer.d.ts',
-      'plugins/utilities/analytics-provider.d.ts',
-      'plugins/utilities/cmd.d.ts',
-    ];
-    for (const file of files) {
-      if (fs.existsSync(`dist/${file}`)) {
-        fs.unlinkSync(`dist/${file}`);
-        console.log(`Removed dist/${file}`);
-      }
-    }
+    cleanGeneratedDeclarations(DIST_PATH);
 
     // Run TypeScript compilation programmatically
     console.log('Running TypeScript compilation...');

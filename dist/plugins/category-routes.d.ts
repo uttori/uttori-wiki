@@ -49,6 +49,7 @@ export type CategoryRoutesPluginConfig = {
      */
     separator?: string;
 };
+export type CategoryDocument = import("../wiki.js").UttoriWikiDocument;
 export type CategoryBreadcrumb = {
     /**
      * The name of the breadcrumb.
@@ -93,7 +94,7 @@ export type CategoryTreeNode = {
     /**
      * The documents in the category.
      */
-    documents: import("../../dist/custom.d.ts").UttoriWikiDocumentExtended[];
+    documents: CategoryDocument[];
 };
 /**
  * @typedef {object} CategoryRoutesPluginConfig
@@ -109,6 +110,9 @@ export type CategoryTreeNode = {
  * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route that returns all available categories.
  * @property {string} [categoryField] The document field to use for categories (default: 'categories').
  * @property {string} [separator] The separator used in hierarchical categories (default: '/').
+ */
+/**
+ * @typedef {import('../wiki.js').UttoriWikiDocument} CategoryDocument
  */
 /**
  * @typedef {object} CategoryBreadcrumb
@@ -127,7 +131,7 @@ export type CategoryTreeNode = {
  * @property {string} name The name of the category.
  * @property {string} fullPath The full path of the category.
  * @property {Record<string, CategoryTreeNode>} children The child categories.
- * @property {import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]} documents The documents in the category.
+ * @property {CategoryDocument[]} documents The documents in the category.
  */
 /**
  * Category routes plugin for Uttori Wiki.
@@ -153,27 +157,12 @@ declare class CategoryRoutesPlugin {
      * @static
      */
     static get allowedDocumentKeys(): string[];
-    static defaultConfig(): {
-        title: string;
-        limit: number;
-        categoryIndexRoute: string;
-        categoryRoute: string;
-        apiRoute: string;
-        categoryField: string;
-        separator: string;
-        middleware: {
-            categoryIndex: any[];
-            category: any[];
-            api: any[];
-        };
-        events: {
-            bindRoutes: string[];
-            validateConfig: string[];
-        };
-        categoryIndexRequestHandler: typeof CategoryRoutesPlugin.categoryIndexRequestHandler;
-        categoryRequestHandler: typeof CategoryRoutesPlugin.categoryRequestHandler;
-        apiRequestHandler: typeof CategoryRoutesPlugin.categoryApiRequestHandler;
-    };
+    /**
+     * The default configuration for the plugin.
+     * @returns {CategoryRoutesPluginConfig} The default configuration.
+     * @static
+     */
+    static defaultConfig(): CategoryRoutesPluginConfig;
     /**
      * Create a config that is extended from the default config.
      * @param {CategoryRoutesPluginConfig} config The user provided configuration.
@@ -231,12 +220,12 @@ declare class CategoryRoutesPlugin {
      * @async
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
      * @param {string} category The category to look for in documents.
-     * @returns {Promise<import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]>} Promise object that resolves to the array of the documents.
+     * @returns {Promise<CategoryDocument[]>} Promise object that resolves to the array of the documents.
      * @example
      * CategoryRoutesPlugin.getCategorizedDocuments('example', 10);
      * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', categories: ['example'] }]
      */
-    static getCategorizedDocuments(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-category-routes", CategoryRoutesPluginConfig>, category: string): Promise<import("../../dist/custom.d.ts").UttoriWikiDocumentExtended[]>;
+    static getCategorizedDocuments(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-category-routes", CategoryRoutesPluginConfig>, category: string): Promise<CategoryDocument[]>;
     /**
      * Builds a hierarchical category tree from flat category paths.
      * @param {string[]} categories Array of category paths (e.g., ['parent/child', 'parent/other'])

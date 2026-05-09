@@ -29,6 +29,7 @@ export async function buildBlocks(document, config) {
     tableMaxTokensPerChunk: config.tableMaxTokensPerChunk,
   });
 
+  /** @type {Record<string, { headers: string[], content: string[] }>} */
   const sectionHash = {};
   for (const section of sections) {
     if (
@@ -41,32 +42,26 @@ export async function buildBlocks(document, config) {
       section.type === 'footnote' ||
       section.type === 'image'
     ) {
-      const slug = section.headers.join('-');
+      const sectionPath = section.headers.map((header) => String(header));
+      const slug = sectionPath.join('-');
       if (!sectionHash[slug]) {
         sectionHash[slug] = {
-          headers: section.headers,
+          headers: sectionPath,
           content: [],
         };
       }
-      sectionHash[slug].content.push(section.content);
+      sectionHash[slug].content.push(section.content.join(' '));
     } else if (section.type !== 'heading') {
       console.warn('🐛 Unknown Section Type:', section);
     }
   }
 
   // Loop through and create sections with title, headings & tags prepend to the content.
-  /** @type {import('../../../src/plugins/chat-bot/utilities.js').MarkdownASTNode[]} */
+  /** @type {Array<{ headers: string[], content: string[] }>} */
   const sectionz = Object.values(sectionHash);
 
   for (const section of sectionz) {
-    if (!Array.isArray(section.content)) {
-      console.warn('🐛 section.content is not an array:', section);
-    }
-    const content = Array.isArray(section.content) ? section.content.join(' ').trim() : section.content.trim();
-    if (typeof content !== 'string') {
-      console.warn('🐛 Content is not a string:', section);
-      continue;
-    }
+    const content = section.content.join(' ').trim();
     const tokenCount = Object.keys(countWords(content)).length * 0.75;
 
     // Skip empty sections.

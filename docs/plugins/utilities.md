@@ -323,8 +323,8 @@ Convert MarkdownIt Tokens to an AST.
 | Name | Type | Description |
 | --- | --- | --- |
 | type | <code>string</code> | The type of node. |
-| content | <code>Array.&lt;string&gt;</code> | Text content for the node. |
-| headers | <code>Array.&lt;Array.&lt;(string\|MarkdownASTNode\|number)&gt;&gt;</code> | The relevant headers for this node. |
+| content | <code>Array.&lt;(string\|Array.&lt;string&gt;)&gt;</code> | Text content for the node. |
+| headers | <code>Array.&lt;(string\|number\|MarkdownASTNode\|Array.&lt;(string\|MarkdownASTNode\|number)&gt;)&gt;</code> | The relevant headers for this node. |
 | [open] | <code>module:markdown-it/index.js~Token</code> \| <code>null</code> | The MarkdownIt Token object for the opening tag. |
 | [close] | <code>module:markdown-it/index.js~Token</code> \| <code>null</code> | The MarkdownIt Token object for the closing tag. |
 | children | [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) | The child nodes for this node. |

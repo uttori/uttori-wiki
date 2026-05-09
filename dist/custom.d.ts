@@ -56,6 +56,18 @@ export type UttoriContext = {
   config: UttoriWikiConfig & KnownPluginConfigs & Record<string, UttoriPluginConfig>;
   hooks: EventDispatcher;
   buildMetadata: (document: Partial<UttoriWikiDocument>, path?: string, robots?: string) => Promise<UttoriWikiDocumentMetaData>;
+  buildViewModelBase: (
+    request: import('express').Request,
+    options?: { title?: string; meta?: UttoriWikiDocumentMetaData; slug?: string }
+  ) => {
+    title: string;
+    config: UttoriWikiConfig;
+    session?: import('express-session').Session;
+    meta: UttoriWikiDocumentMetaData;
+    basePath: string;
+    flash?: boolean | object | Array<string>;
+    slug?: string;
+  };
 }
 
 /**
@@ -133,14 +145,13 @@ export interface UttoriWikiPlugin {
 }
 
 export type Operator = '=' | '!=' | '<=' | '<' | '>=' | '>' | 'LIKE' | 'IN' | 'NOT_IN' | 'INCLUDES' | 'EXCLUDES' | 'IS_NULL' | 'IS_NOT_NULL' | 'BETWEEN' | 'AND' | 'OR';
-export type Value = string | number | Array<string | number | SqlWhereParserAst> | [string | number, string | number];
+export type ParserPrimitive = boolean | string | number | symbol;
+export type ParserOperand = ParserPrimitive | SqlWhereParserAst | ParserOperand[];
+export type Value = ParserOperand | ParserOperand[];
 
 export type SqlWhereParserAst = {
-  [key in Exclude<Operator, 'AND' | 'OR'>]?: Value;
-} & {
-  AND?: SqlWhereParserAst[];
-  OR?: SqlWhereParserAst[];
+  [key: string]: Value;
+  [key: symbol]: Value;
 };
-export type ParserOperand = boolean | string | number | symbol | SqlWhereParserAst | Array<boolean | string | number | symbol | SqlWhereParserAst>;
 
-export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<ParserOperand>) => Array<SqlWhereParserAst> | SqlWhereParserAst;
+export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<ParserOperand>) => ParserOperand;

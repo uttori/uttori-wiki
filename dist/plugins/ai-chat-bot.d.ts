@@ -1,59 +1,195 @@
-/**
- * @typedef {object} AIChatBotConfig
- * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
- * @property {string} publicRoute Server route to show the chat bot interface.
- * @property {string} documentsRoute Server route to fetch available documents for the document selector.
- * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
- * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
- * @property {string} databasePath The path to the database.
- * @property {Database.Options} databseOptions The options for the database.
- * @property {string} ollamaBaseUrl The base URL for the Ollama server.
- * @property {string} embedModel The model to use for the embedder.
- * @property {function(string, string): string} [embedPrompt] The prompt to use for the embedder.
- * @property {object[]} tools The tools to use for the chat.
- * @property {string} chatModel The model to use for the chat.
- * @property {number} maxTokens The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window.
- * @property {number} temperature The temperature for the model.
- * @property {number} chunkLimit The limit for the number of chunks to return.
- * @property {boolean} hybrid Whether to use the hybrid approach of vector & FTS.
- * @property {boolean} fts Whether to use the FTS index.
- * @property {number} ftsWeight The weight for the FTS index.
- * @property {number} titleBoost The title boost for the entities.
- * @property {number} textBoost The text boost for the entities.
- * @property {number} ftsWeightBump The FTS weight bump for the entities.
- * @property {number} maxContextTokens The maximum number of tokens to use for the context.
- * @property {number} maxPerSource The maximum number of sources to use per source.
- * @property {number} batch The batch size for the embedder.
- * @property {string[]} ignoreSlugs Slugs to ignore.
- * @property {string[]} ignoreTags Tags to ignore.
- * @property {string} attachmentsRoot The root path to the attachments.
- * @property {boolean} includeAttachments Whether to include attachments.
- * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
- * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
- * @property {boolean} [tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false.
- * @property {number} [tableMaxRowsPerChunk] Maximum number of rows per table chunk for embedding.
- * @property {number} [tableMaxTokensPerChunk] Maximum estimated tokens per table chunk for embedding.
- * @property {object} summary The summary configuration.
- * @property {boolean} summary.enabled Whether to use the summary.
- * @property {string} summary.baseUrl The base URL for the summary.
- * @property {string} summary.model The model to use for the summary.
- */
-/**
- * @typedef {object} AIChatBotApiRequestBody
- * @property {string} sessionId The session ID.
- * @property {string} query The query.
- * @property {string[]} slugs The slugs.
- */
-/**
- * Extract text from an attachment.
- * For PDFs, this now preserves page boundaries to help with chunking.
- * @param {AIChatBotConfig} config The configuration.
- * @param {import('../wiki.js').UttoriWikiDocumentAttachment} attachment The attachment.
- * @returns {Promise<string>} The text of the attachment.
- */
-export function extractAttachmentText(config: AIChatBotConfig, attachment: import("../wiki.js").UttoriWikiDocumentAttachment): Promise<string>;
+export { extractAttachmentText };
 export default AIChatBot;
+export type RetrievedChunk = {
+    /**
+     * The rowid of the chunk.
+     */
+    rowid: number;
+    /**
+     * The source id of the chunk.
+     */
+    source_id: string;
+    /**
+     * The index of the chunk.
+     */
+    idx: number;
+    /**
+     * The text of the chunk.
+     */
+    text: string;
+    /**
+     * The token count of the chunk.
+     */
+    token_count: number;
+    /**
+     * The section path of the chunk.
+     */
+    sectionPath: string[];
+    /**
+     * The source of the chunk.
+     */
+    source: {
+        id: string;
+        title?: string;
+        slug?: string;
+    };
+    /**
+     * The score of the chunk.
+     */
+    score: number;
+};
+export type RetrieveResponse = {
+    /**
+     * The query.
+     */
+    query: string;
+    /**
+     * The chunks.
+     */
+    chunks: RetrievedChunk[];
+    /**
+     * The citations.
+     */
+    citations: any[];
+};
+export type FtsRow = {
+    /**
+     * The rowid of the chunk.
+     */
+    rowid: number;
+    /**
+     * The source id of the chunk.
+     */
+    source_id: string;
+    /**
+     * The index of the chunk.
+     */
+    idx: number;
+    /**
+     * The text of the chunk.
+     */
+    text: string;
+    /**
+     * The token count of the chunk.
+     */
+    token_count: number;
+    /**
+     * The meta JSON of the chunk.
+     */
+    meta_json: string;
+    /**
+     * The title of the source.
+     */
+    source_title: string;
+    /**
+     * The slug of the source.
+     */
+    source_slug: string;
+    /**
+     * The rank of the chunk.
+     */
+    rank: number;
+};
+export type Block = {
+    /**
+     * The type of block.
+     */
+    type?: "heading" | "paragraph";
+    /**
+     * The index of the block.
+     */
+    idx?: number;
+    /**
+     * The level of the heading.
+     */
+    level?: number;
+    /**
+     * The text of the block.
+     */
+    text: string;
+    /**
+     * The section path of the block.
+     */
+    sectionPath: string[];
+    /**
+     * The token count of the block.
+     */
+    tokenCount?: number;
+    /**
+     * The tags of the block.
+     */
+    tags?: string[];
+    /**
+     * The slug of the block.
+     */
+    slug?: string;
+};
+export type ChunkWithMeta = {
+    /**
+     * The text of the chunk.
+     */
+    text: string;
+    /**
+     * The index of the chunk.
+     */
+    idx: number;
+    /**
+     * The token count of the chunk.
+     */
+    token_count: number;
+    /**
+     * The section path of the chunk.
+     */
+    sectionPath: string[];
+    /**
+     * The source id of the chunk.
+     */
+    source_id?: string;
+    /**
+     * The embedding of the chunk.
+     */
+    embedding?: number[];
+    /**
+     * The meta JSON of the chunk.
+     */
+    meta?: object;
+};
+export type BlendedChunk = {
+    /**
+     * The rowid of the chunk.
+     */
+    rowid: number;
+    /**
+     * The score of the chunk.
+     */
+    score: number;
+    /**
+     * The title boost of the chunk.
+     */
+    titleBoost: number;
+    /**
+     * The text boost of the chunk.
+     */
+    textBoost: number;
+};
+export type ChatBotMessage = {
+    /**
+     * The role of the message.
+     */
+    role: "system" | "user" | "assistant" | "tool";
+    /**
+     * The content of the message.
+     */
+    content: string;
+    /**
+     * The name of the tool.
+     */
+    name?: string;
+    /**
+     * The slugs of the sources to use as context.
+     */
+    slugs?: string[];
+};
 export type AIChatBotConfig = {
     /**
      * Events to bind to.
@@ -214,192 +350,7 @@ export type AIChatBotApiRequestBody = {
      */
     slugs: string[];
 };
-export type RetrievedChunk = {
-    /**
-     * The rowid of the chunk.
-     */
-    rowid: number;
-    /**
-     * The source id of the chunk.
-     */
-    source_id: string;
-    /**
-     * The index of the chunk.
-     */
-    idx: number;
-    /**
-     * The text of the chunk.
-     */
-    text: string;
-    /**
-     * The token count of the chunk.
-     */
-    token_count: number;
-    /**
-     * The section path of the chunk.
-     */
-    sectionPath: string[];
-    /**
-     * The source of the chunk.
-     */
-    source: {
-        id: string;
-        title?: string;
-        slug?: string;
-    };
-    /**
-     * The score of the chunk.
-     */
-    score: number;
-};
-export type RetrieveResponse = {
-    /**
-     * The query.
-     */
-    query: string;
-    /**
-     * The chunks.
-     */
-    chunks: RetrievedChunk[];
-    /**
-     * The citations.
-     */
-    citations: any[];
-};
-export type FtsRow = {
-    /**
-     * The rowid of the chunk.
-     */
-    rowid: number;
-    /**
-     * The source id of the chunk.
-     */
-    source_id: string;
-    /**
-     * The index of the chunk.
-     */
-    idx: number;
-    /**
-     * The text of the chunk.
-     */
-    text: string;
-    /**
-     * The token count of the chunk.
-     */
-    token_count: number;
-    /**
-     * The meta JSON of the chunk.
-     */
-    meta_json: string;
-    /**
-     * The title of the source.
-     */
-    source_title: string;
-    /**
-     * The slug of the source.
-     */
-    source_slug: string;
-    /**
-     * The rank of the chunk.
-     */
-    rank: number;
-};
-export type Block = {
-    /**
-     * The type of block.
-     */
-    type?: "heading" | "paragraph";
-    /**
-     * The level of the heading.
-     */
-    level?: number;
-    /**
-     * The text of the block.
-     */
-    text: string;
-    /**
-     * The section path of the block.
-     */
-    sectionPath: string[];
-    /**
-     * The token count of the block.
-     */
-    tokenCount?: number;
-    /**
-     * The tags of the block.
-     */
-    tags?: string[];
-    /**
-     * The slug of the block.
-     */
-    slug?: string;
-};
-export type ChunkWithMeta = {
-    /**
-     * The text of the chunk.
-     */
-    text: string;
-    /**
-     * The index of the chunk.
-     */
-    idx: number;
-    /**
-     * The token count of the chunk.
-     */
-    token_count: number;
-    /**
-     * The section path of the chunk.
-     */
-    sectionPath: string[];
-    /**
-     * The source id of the chunk.
-     */
-    source_id?: string;
-    /**
-     * The embedding of the chunk.
-     */
-    embedding?: number[];
-    /**
-     * The meta JSON of the chunk.
-     */
-    meta?: object;
-};
-export type BlendedChunk = {
-    /**
-     * The rowid of the chunk.
-     */
-    rowid: number;
-    /**
-     * The score of the chunk.
-     */
-    score: number;
-    /**
-     * The title boost of the chunk.
-     */
-    titleBoost: number;
-    /**
-     * The text boost of the chunk.
-     */
-    textBoost: number;
-};
-export type ChatBotMessage = {
-    /**
-     * The role of the message.
-     */
-    role: "system" | "user" | "assistant" | "tool";
-    /**
-     * The content of the message.
-     */
-    content: string;
-    /**
-     * The name of the tool.
-     */
-    name?: string;
-    /**
-     * The slugs of the sources to use as context.
-     */
-    slugs?: string[];
-};
+import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 /**
  * Uttori AI Chat Bot
  * Search a UttoriWiki database using LLMs.
@@ -502,17 +453,6 @@ declare class AIChatBot {
      */
     static documentsHandler(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): import("express").RequestHandler;
     /**
-     * Build messages for the AI chat bot.
-     * @param {string} userQuestion The user's question.
-     * @param {string[]} slugs The slugs of the sources to use as context.
-     * @param {object} opts The options for the prompt.
-     * @param {number} opts.maxContextCharacters The maximum number of characters to include in the context.
-     * @returns {ChatBotMessage[]} The messages for the AI chat bot.
-     */
-    static buildPromptMessages(userQuestion: string, slugs: string[], opts: {
-        maxContextCharacters: number;
-    }): ChatBotMessage[];
-    /**
      * Summarize the conversation between the user and the assistant.
      * @param {string} baseUrl The base URL of the API.
      * @param {string} model The model to use for the summarizer.
@@ -529,23 +469,6 @@ declare class AIChatBot {
      * @returns {import('better-sqlite3').Database} The database.
      */
     static openDatabase(config: Partial<AIChatBotConfig>): import("better-sqlite3").Database;
-    /**
-     * Embed a query using the Ollama API.
-     * @param {string} baseUrl The base URL of the Ollama server.
-     * @param {string} model The model to use for embedding.
-     * @param {string} input The text to embed.
-     * @param {string} [prompt] The prompt to embed.
-     * @returns {Promise<Float32Array>} The embedded query.
-     */
-    static embedQuery(baseUrl: string, model: string, input: string, prompt?: string): Promise<Float32Array>;
-    /**
-     * Retrieve chunks from the database.
-     * @param {string} query The query to retrieve chunks for.
-     * @param {AIChatBotConfig} config The options for the retrieval.
-     * @param {string[]} [slugs] Optional array of source slugs to restrict search to.
-     * @returns {Promise<RetrieveResponse>} The retrieved chunks.
-     */
-    static retrieve(query: string, config: AIChatBotConfig, slugs?: string[]): Promise<RetrieveResponse>;
 }
 import Database from 'better-sqlite3';
 //# sourceMappingURL=ai-chat-bot.d.ts.map

@@ -16,6 +16,22 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } 
 const escapeQueryValue = (value) => JSON.stringify(String(value)).slice(1, -1);
 
 /**
+ * Normalize an Express route parameter to a single string.
+ * @param {string | string[] | undefined} value The route parameter value.
+ * @returns {string} The normalized route parameter.
+ */
+export const routeParamToString = (value) => (Array.isArray(value) ? value[0] ?? '' : value ?? '');
+
+/**
+ * Normalize Express route parameters to the string-only shape used by redirects.
+ * @param {Record<string, string | string[]>} params The Express route parameters.
+ * @returns {Record<string, string>} The normalized route parameters.
+ */
+const normalizeRouteParams = (params) => Object.fromEntries(
+  Object.entries(params).map(([key, value]) => [key, routeParamToString(value)]),
+);
+
+/**
  * @typedef {object} UttoriWikiViewModel
  * @property {string} title The document title to be used anywhere a title may be needed.
  * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
@@ -24,7 +40,12 @@ const escapeQueryValue = (value) => JSON.stringify(String(value)).slice(1, -1);
  * @property {UttoriWikiDocument} [document] The document object.
  * @property {import('express-session').Session} [session] The Express session object.
  * @property {(boolean | object | Array<string>)} [flash] The flash object.
- * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] An array of documents that are tagged with the document.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [categorizedDocuments] Category Routes Plugin: documents grouped by category, or documents for a category detail route.
+ * @property {Record<string, object>} [categoryTree] Category Routes Plugin: hierarchical category data for the category index.
+ * @property {Array<object>} [flattenedCategories] Category Routes Plugin: flattened category data for the category index.
+ * @property {string} [categoryPath] Category Routes Plugin: the active category path for a category detail route.
+ * @property {Array<object>} [breadcrumbs] Category Routes Plugin: breadcrumb data for a category detail route.
  * @property {string} [searchTerm] The search term to be used in the search results.
  * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
  * @property {string} [slug] The slug of the document.
@@ -33,6 +54,24 @@ const escapeQueryValue = (value) => JSON.stringify(String(value)).slice(1, -1);
  * @property {Record<string, string[]>} [historyByDay] An object of history by day.
  * @property {UttoriWikiDocument} [currentDocument] The current version of the document for comparison.
  * @property {Record<string, string>} [diffs] An object containing HTML table diffs for changed fields.
+ */
+
+/**
+ * @typedef {object} UttoriWikiBuildViewModelBaseOptions
+ * @property {string} [title] The title for the view model.
+ * @property {UttoriWikiDocumentMetaData} [meta] The metadata for the view model.
+ * @property {string} [slug] The slug for the view model.
+ */
+
+/**
+ * @typedef {object} UttoriWikiBaseViewModel
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {import('express-session').Session} [session] The Express session object.
+ * @property {UttoriWikiDocumentMetaData} meta The metadata object.
+ * @property {string} basePath The base path of the request.
+ * @property {(boolean | object | Array<string>)} [flash] The flash object.
+ * @property {string} [slug] The slug of the document.
  */
 
 /**
@@ -236,11 +275,12 @@ class UttoriWiki {
   /**
    * Builds the base view model object for all routes.
    * @param {import('express').Request} request The Express Request object.
-   * @param {{ title?: string, meta?: UttoriWikiDocumentMetaData, slug?: string }} [options] Base view model values.
-   * @returns {Pick<UttoriWikiViewModel, 'title' | 'config' | 'session' | 'meta' | 'basePath' | 'flash' | 'slug'>} Base view model.
+   * @param {UttoriWikiBuildViewModelBaseOptions} [options] Base view model values.
+   * @returns {UttoriWikiBaseViewModel} Base view model.
    */
   buildViewModelBase(request, options = {}) {
     const { title = '', meta, slug } = options;
+    const requestSlug = routeParamToString(request.params?.slug);
     return {
       title,
       config: this.config,
@@ -248,7 +288,7 @@ class UttoriWiki {
       meta,
       basePath: request.baseUrl,
       flash: request?.wikiFlash?.() || {},
-      slug: typeof slug === 'string' ? slug : request.params?.slug,
+      slug: typeof slug === 'string' ? slug : requestSlug,
     };
   }
 
@@ -323,7 +363,7 @@ class UttoriWiki {
       }
       server.all(route, (request, response, next) => {
         // Build the new path from the route and target using the request params.
-        let path = buildPath(request.params, route, target);
+        let path = buildPath(normalizeRouteParams(request.params), route, target);
         debug('Redirecting to:', path);
 
         // Append query string if needed
@@ -795,7 +835,7 @@ class UttoriWiki {
       return;
     }
 
-    let slug = request.params.slug.trim();
+    let slug = routeParamToString(request.params.slug).trim();
     if (!slug) {
       debug('Missing slug.');
       next();
@@ -1015,8 +1055,8 @@ class UttoriWiki {
       return;
     }
 
-    const { slug } = request.params;
-    const revision = Array.isArray(request.params.revision) ? request.params.revision[0] : request.params.revision;
+    const slug = routeParamToString(request.params.slug);
+    const revision = routeParamToString(request.params.revision);
     /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
@@ -1189,7 +1229,8 @@ class UttoriWiki {
       return;
     }
 
-    const { slug, revision } = request.params;
+    const slug = routeParamToString(request.params.slug);
+    const revision = routeParamToString(request.params.revision);
     /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
@@ -1250,7 +1291,7 @@ class UttoriWiki {
     const meta = await this.buildMetadata({ title: '404 Not Found' }, '/404', 'noindex');
     /** @type {UttoriWikiViewModel} */
     let viewModel = {
-      ...this.buildViewModelBase(request, { title: '404 Not Found', meta, slug: request.params.slug || '404' }),
+      ...this.buildViewModelBase(request, { title: '404 Not Found', meta, slug: routeParamToString(request.params.slug) || '404' }),
     };
     viewModel = await this.hooks.filter('view-model-error-404', viewModel, this);
 

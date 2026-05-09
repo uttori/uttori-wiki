@@ -21,6 +21,10 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Cat
  */
 
 /**
+ * @typedef {import('../wiki.js').UttoriWikiDocument} CategoryDocument
+ */
+
+/**
  * @typedef {object} CategoryBreadcrumb
  * @property {string} name The name of the breadcrumb.
  * @property {string} path The path to the breadcrumb.
@@ -39,7 +43,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Cat
  * @property {string} name The name of the category.
  * @property {string} fullPath The full path of the category.
  * @property {Record<string, CategoryTreeNode>} children The child categories.
- * @property {import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]} documents The documents in the category.
+ * @property {CategoryDocument[]} documents The documents in the category.
  */
 
 /**
@@ -274,7 +278,7 @@ class CategoryRoutesPlugin {
    * @async
    * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
    * @param {string} category The category to look for in documents.
-   * @returns {Promise<import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]>} Promise object that resolves to the array of the documents.
+   * @returns {Promise<CategoryDocument[]>} Promise object that resolves to the array of the documents.
    * @example
    * CategoryRoutesPlugin.getCategorizedDocuments('example', 10);
    * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', categories: ['example'] }]
@@ -283,7 +287,7 @@ class CategoryRoutesPlugin {
     debug('getCategorizedDocuments:', category);
     /** @type {CategoryRoutesPluginConfig} */
     const { limit, categoryField } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
-    /** @type {import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]} */
+    /** @type {CategoryDocument[]} */
     let results = [];
     try {
       const ignoreSlugs = `"${context.config.ignoreSlugs.join('", "')}"`;
@@ -372,7 +376,7 @@ class CategoryRoutesPlugin {
       let categories = [];
       try {
         // Fetch all the used categories.
-        /** @type {import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[][]} */
+        /** @type {Array<Array<Record<string, string | string[]>>>} */
         const [results] = await context.hooks.fetch('storage-query', query, context);
         // Organize and deduplicate, and sort the categories.
         /** @type {string[]} */
@@ -390,7 +394,7 @@ class CategoryRoutesPlugin {
       const flattenedCategories = CategoryRoutesPlugin.flattenCategoryTree(categoryTree, separator);
 
       // Collect & sort all the categorized documents for each category.
-      /** @type {Record<string, import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]>} */
+      /** @type {Record<string, CategoryDocument[]>} */
       const categorizedDocuments = {};
       await Promise.all(categories.map(async (category) => {
         const sorted = await CategoryRoutesPlugin.getCategorizedDocuments(context, category);
@@ -399,7 +403,7 @@ class CategoryRoutesPlugin {
 
       const meta = await context.buildMetadata({}, `/${context.config[CategoryRoutesPlugin.configKey].categoryIndexRoute}`);
 
-      /** @type {import('../wiki.js').UttoriWikiViewModel & { categorizedDocuments: Record<string, import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[]>, categoryTree: Record<string, CategoryTreeNode>, flattenedCategories: FlattenedCategory[] }} */
+      /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
         title: context.config[CategoryRoutesPlugin.configKey].title,
         config: context.config,
@@ -478,7 +482,7 @@ class CategoryRoutesPlugin {
         });
       }
 
-      /** @type {import('../wiki.js').UttoriWikiViewModel & { categorizedDocuments: import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[], categoryPath: string, breadcrumbs: CategoryBreadcrumb[] }} */
+      /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
         title,
         config: context.config,
@@ -518,7 +522,7 @@ class CategoryRoutesPlugin {
     let categories = [];
     try {
       // Fetch all the used categories.
-      /** @type {import('../../dist/custom.d.ts').UttoriWikiDocumentExtended[][]} */
+      /** @type {Array<Array<Record<string, string | string[]>>>} */
       const [results] = await context.hooks.fetch('storage-query', query, context);
       // Organize and deduplicate, and sort the categories.
       /** @type {string[]} */

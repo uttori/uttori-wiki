@@ -510,9 +510,7 @@ class ImportDocument {
         debug('downloadFile: writing to file:', normalizedFileName);
         let writer = createWriteStream(normalizedFileName);
         await new Promise((resolve, reject) => {
-          // @ts-expect-error Readable.fromWeb is still experimental
-
-          Readable.fromWeb(response.body)
+          Readable.fromWeb(/** @type {any} */ (response.body))
             .pipe(writer)
             .on('finish', () => resolve())
             .on('error', reject);
@@ -521,7 +519,8 @@ class ImportDocument {
       }
     } catch (error) {
       debug('downloadFile: error:', error);
-      throw new Error(`Failed to download file from ${url}: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to download file from ${url}: ${message}`);
     }
   }
 

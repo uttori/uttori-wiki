@@ -1,3 +1,5 @@
+import { routeParamToString } from '../wiki.js';
+
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.TagRoutes'); } catch {}
@@ -284,15 +286,16 @@ class TagRoutesPlugin {
     return async (request, response, next) => {
       debug('tagRequestHandler');
 
-      const taggedDocuments = await TagRoutesPlugin.getTaggedDocuments(context,request.params.tag);
+      const tag = routeParamToString(request.params.tag);
+      const taggedDocuments = await TagRoutesPlugin.getTaggedDocuments(context, tag);
       if (taggedDocuments.length === 0) {
         debug('No documents for tag!');
         next();
         return;
       }
 
-      const meta = await context.buildMetadata({}, `/${context.config[TagRoutesPlugin.configKey].tagRoute}/${request.params.tag}`);
-      const title = `${request.params.tag} Tagged Documents`;
+      const meta = await context.buildMetadata({}, `/${context.config[TagRoutesPlugin.configKey].tagRoute}/${tag}`);
+      const title = `${tag} Tagged Documents`;
 
       /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {

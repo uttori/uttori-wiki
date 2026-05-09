@@ -25,16 +25,21 @@ Build blocks from a document.
 
 * [buildBlocks(document, config)](#buildBlocks) ⇒ <code>Promise.&lt;Array.&lt;Block&gt;&gt;</code>
     * [~output](#buildBlocks..output) : <code>Array.&lt;Block&gt;</code>
-    * [~sectionz](#buildBlocks..sectionz) : <code>Array.&lt;MarkdownASTNode&gt;</code>
+    * [~sectionHash](#buildBlocks..sectionHash) : <code>Record.&lt;string, {headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
+    * [~sectionz](#buildBlocks..sectionz) : <code>Array.&lt;{headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
     * [~newItems](#buildBlocks..newItems) : <code>Array.&lt;Block&gt;</code>
 
 <a name="buildBlocks..output"></a>
 
 ### buildBlocks~output : <code>Array.&lt;Block&gt;</code>
 **Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
+<a name="buildBlocks..sectionHash"></a>
+
+### buildBlocks~sectionHash : <code>Record.&lt;string, {headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
+**Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
 <a name="buildBlocks..sectionz"></a>
 
-### buildBlocks~sectionz : <code>Array.&lt;MarkdownASTNode&gt;</code>
+### buildBlocks~sectionz : <code>Array.&lt;{headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
 **Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
 <a name="buildBlocks..newItems"></a>
 

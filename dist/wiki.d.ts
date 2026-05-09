@@ -1,3 +1,4 @@
+export function routeParamToString(value: string | string[] | undefined): string;
 export default UttoriWiki;
 export type UttoriWikiViewModel = {
     /**
@@ -58,9 +59,29 @@ export type UttoriWikiViewModel = {
      */
     flash?: (boolean | object | Array<string>);
     /**
-     * An array of documents that are tagged with the document.
+     * Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
      */
     taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    /**
+     * Category Routes Plugin: documents grouped by category, or documents for a category detail route.
+     */
+    categorizedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    /**
+     * Category Routes Plugin: hierarchical category data for the category index.
+     */
+    categoryTree?: Record<string, object>;
+    /**
+     * Category Routes Plugin: flattened category data for the category index.
+     */
+    flattenedCategories?: Array<object>;
+    /**
+     * Category Routes Plugin: the active category path for a category detail route.
+     */
+    categoryPath?: string;
+    /**
+     * Category Routes Plugin: breadcrumb data for a category detail route.
+     */
+    breadcrumbs?: Array<object>;
     /**
      * The search term to be used in the search results.
      */
@@ -94,6 +115,108 @@ export type UttoriWikiViewModel = {
      */
     diffs?: Record<string, string>;
 };
+export type UttoriWikiBuildViewModelBaseOptions = {
+    /**
+     * The title for the view model.
+     */
+    title?: string;
+    /**
+     * The metadata for the view model.
+     */
+    meta?: {
+        /**
+         * `${this.config.publicUrl}/private-document-path`
+         */
+        canonical: string;
+        /**
+         * 'no-index'
+         */
+        robots: string;
+        /**
+         * document.title
+         */
+        title: string;
+        /**
+         * document.excerpt || document.content.slice(0, 160)
+         */
+        description: string;
+        /**
+         * new Date(document.updateDate).toISOString()
+         */
+        modified: string;
+        /**
+         * new Date(document.createDate).toISOString()
+         */
+        published: string;
+        /**
+         * OpenGraph Image
+         */
+        image: string;
+    };
+    /**
+     * The slug for the view model.
+     */
+    slug?: string;
+};
+export type UttoriWikiBaseViewModel = {
+    /**
+     * The document title to be used anywhere a title may be needed.
+     */
+    title: string;
+    /**
+     * The configuration object.
+     */
+    config: import("./config.js").UttoriWikiConfig;
+    /**
+     * The Express session object.
+     */
+    session?: import("express-session").Session;
+    /**
+     * The metadata object.
+     */
+    meta: {
+        /**
+         * `${this.config.publicUrl}/private-document-path`
+         */
+        canonical: string;
+        /**
+         * 'no-index'
+         */
+        robots: string;
+        /**
+         * document.title
+         */
+        title: string;
+        /**
+         * document.excerpt || document.content.slice(0, 160)
+         */
+        description: string;
+        /**
+         * new Date(document.updateDate).toISOString()
+         */
+        modified: string;
+        /**
+         * new Date(document.createDate).toISOString()
+         */
+        published: string;
+        /**
+         * OpenGraph Image
+         */
+        image: string;
+    };
+    /**
+     * The base path of the request.
+     */
+    basePath: string;
+    /**
+     * The flash object.
+     */
+    flash?: (boolean | object | Array<string>);
+    /**
+     * The slug of the document.
+     */
+    slug?: string;
+};
 export type UttoriWikiDocument = {
     /**
      * The document slug to be used in the URL and as a unique ID.
@@ -104,7 +227,7 @@ export type UttoriWikiDocument = {
      */
     title: string;
     /**
-     * An image to represent the document in Open Graph or elsewhere.
+     * An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
      */
     image?: string;
     /**
@@ -145,6 +268,10 @@ export type UttoriWikiDocument = {
     attachments?: UttoriWikiDocumentAttachment[];
 };
 export type UttoriWikiDocumentAttachment = {
+    /**
+     * The unique identifier of the attachment.
+     */
+    id: string;
     /**
      * The display name of the attachment.
      */
@@ -189,7 +316,12 @@ export type UttoriWikiDocumentAttachment = {
  * @property {UttoriWikiDocument} [document] The document object.
  * @property {import('express-session').Session} [session] The Express session object.
  * @property {(boolean | object | Array<string>)} [flash] The flash object.
- * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] An array of documents that are tagged with the document.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
+ * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [categorizedDocuments] Category Routes Plugin: documents grouped by category, or documents for a category detail route.
+ * @property {Record<string, object>} [categoryTree] Category Routes Plugin: hierarchical category data for the category index.
+ * @property {Array<object>} [flattenedCategories] Category Routes Plugin: flattened category data for the category index.
+ * @property {string} [categoryPath] Category Routes Plugin: the active category path for a category detail route.
+ * @property {Array<object>} [breadcrumbs] Category Routes Plugin: breadcrumb data for a category detail route.
  * @property {string} [searchTerm] The search term to be used in the search results.
  * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
  * @property {string} [slug] The slug of the document.
@@ -200,10 +332,26 @@ export type UttoriWikiDocumentAttachment = {
  * @property {Record<string, string>} [diffs] An object containing HTML table diffs for changed fields.
  */
 /**
+ * @typedef {object} UttoriWikiBuildViewModelBaseOptions
+ * @property {string} [title] The title for the view model.
+ * @property {UttoriWikiDocumentMetaData} [meta] The metadata for the view model.
+ * @property {string} [slug] The slug for the view model.
+ */
+/**
+ * @typedef {object} UttoriWikiBaseViewModel
+ * @property {string} title The document title to be used anywhere a title may be needed.
+ * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
+ * @property {import('express-session').Session} [session] The Express session object.
+ * @property {UttoriWikiDocumentMetaData} meta The metadata object.
+ * @property {string} basePath The base path of the request.
+ * @property {(boolean | object | Array<string>)} [flash] The flash object.
+ * @property {string} [slug] The slug of the document.
+ */
+/**
  * @typedef {object} UttoriWikiDocument
  * @property {string} slug The document slug to be used in the URL and as a unique ID.
  * @property {string} title The document title to be used anywhere a title may be needed.
- * @property {string} [image] An image to represent the document in Open Graph or elsewhere.
+ * @property {string} [image] An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
  * @property {string} [excerpt] A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
@@ -217,6 +365,7 @@ export type UttoriWikiDocumentAttachment = {
 /**
  * @typedef UttoriWikiDocumentAttachment
  * @type {object}
+ * @property {string} id The unique identifier of the attachment.
  * @property {string} name The display name of the attachment.
  * @property {string} path The path to the attachment.
  * @property {string} type The MIME type of the attachment.
@@ -323,6 +472,13 @@ declare class UttoriWiki {
          */
         image: string;
     }>;
+    /**
+     * Builds the base view model object for all routes.
+     * @param {import('express').Request} request The Express Request object.
+     * @param {UttoriWikiBuildViewModelBaseOptions} [options] Base view model values.
+     * @returns {UttoriWikiBaseViewModel} Base view model.
+     */
+    buildViewModelBase(request: import("express").Request, options?: UttoriWikiBuildViewModelBaseOptions): UttoriWikiBaseViewModel;
     /**
      * Bind the routes to the server.
      * Routes are bound in the order of Home, Tags, Search, Not Found Placeholder, Document, Plugins, Not Found - Catch All
@@ -465,8 +621,11 @@ declare class UttoriWiki {
      * Sets the `X-Robots-Tag` header to `noindex`.
      *
      * Hooks:
-     * - `render-content` - `render-content` - Passes in the document content.
-     * - `filter` - `view-model-history-index` - Passes in the viewModel.
+     * - `filter` - `render-content` - Passes in the document content.
+     * - `fetch` - `storage-get-revision` - Loads the requested revision (and the prior revision when diffing the newest).
+     * - `fetch` - `storage-get` - Loads the live document for comparison when the requested revision is not the newest.
+     * - `fetch` - `storage-get-history` - Lists revisions to detect the newest and choose a diff baseline.
+     * - `filter` - `view-model-history-detail` - Passes in the viewModel.
      * @async
      * @param {import('express').Request} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
