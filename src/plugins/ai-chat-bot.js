@@ -11,14 +11,14 @@ import { MemoryStore } from './chat-bot/memory.js';
 import OllamaEmbedder from './chat-bot/ollama-embedder.js';
 import { indexAllDocuments, indexDocument, removeIndexedDocument } from './chat-bot/index-documents.js';
 import { buildPromptMessages } from './chat-bot/prompts.js';
-import { retrieve } from './chat-bot/retrieval.js';
+import { buildChatTools, executeChatTool } from './chat-bot/tools.js';
 
 export { extractAttachmentText };
 
 /**
  * Setup
- * ollama pull qwen3:8b
- * ollama pull bge-m3
+ * ollama pull qwen3.5:9b
+ * ollama pull qwen3-embedding:8b
  */
 
 /**
@@ -117,7 +117,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} ollamaBaseUrl The base URL for the Ollama server.
  * @property {string} embedModel The model to use for the embedder.
  * @property {function(string, string): string} [embedPrompt] The prompt to use for the embedder.
- * @property {object[]} tools The tools to use for the chat.
+ * @property {import('./chat-bot/tools.js').OllamaTool[] | null} tools Override tool schemas sent to Ollama. Empty array uses the built-in wiki tools. Null/undefined disables tools entirely.
  * @property {string} chatModel The model to use for the chat.
  * @property {number} maxTokens The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window.
  * @property {number} temperature The temperature for the model.
@@ -195,6 +195,7 @@ class AIChatBot {
     return {
       events: {
         bindRoutes: ['bind-routes'],
+        bindWebSocket: ['server-listening'],
         onSearchDelete: ['search-delete'],
         onSearchUpdate: ['search-update'],
       },
@@ -215,9 +216,9 @@ class AIChatBot {
         // verbose: debug,
       },
 
-      chatModel: 'qwen3:8b',
+      chatModel: 'qwen3.5:9b',
       ollamaBaseUrl: 'http://127.0.0.1:11434',
-      embedModel: 'bge-m3:latest', // bge-m3
+      embedModel: 'qwen3-embedding:8b', // bge-m3
       embedPrompt: (task, query) => query,
       tools: [],
       maxTokens: -2,
@@ -293,7 +294,7 @@ class AIChatBot {
       summary: {
         enabled: false,
         baseUrl: 'http://127.0.0.1:11434',
-        model: 'qwen3:8b',
+        model: 'qwen3.5:9b',
       },
     };
   }
@@ -501,11 +502,14 @@ class AIChatBot {
   static bindRoutes(server, context) {
     debug('bindRoutes');
     /** @type {AIChatBotConfig} */
-    const { publicRoute, documentsRoute, middlewarePublicRoute, interfaceRequestHandler } = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
-    debug('bindRoutes:', { publicRoute, documentsRoute });
+    const { publicRoute, documentsRoute, websocketRoute, middlewarePublicRoute, interfaceRequestHandler } = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
+    debug('bindRoutes:', { publicRoute, documentsRoute, websocketRoute });
 
     // Endpoint to fetch available documents for the document selector
     server.get(`${documentsRoute}`, AIChatBot.documentsHandler(context));
+
+    // Endpoint to stream chat responses for the bundled chat interface.
+    server.post(`${websocketRoute}`, AIChatBot.apiRequestHandler(context));
 
     // Endpoint to show the chat bot interface
     if (interfaceRequestHandler) {
@@ -513,6 +517,140 @@ class AIChatBot {
     } else {
       debug('No interfaceRequestHandler set.');
     }
+  }
+
+  /**
+   * Handle POST requests to stream chat responses as server-sent events.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @returns {import('express').RequestHandler} The function to pass to Express.
+   * @example <caption>AIChatBot.apiRequestHandler(context)</caption>
+   * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
+   * @static
+   */
+  static apiRequestHandler(context) {
+    debug('apiRequestHandler');
+    return async (request, response) => {
+      /** @type {AIChatBotConfig} */
+      const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
+      /** @type {unknown} */
+      const rawBody = request.body ?? {};
+      /** @type {Partial<AIChatBotApiRequestBody>} */
+      const body = typeof rawBody === 'object' && rawBody !== null ? rawBody : {};
+      const query = typeof body.query === 'string' ? body.query.trim() : '';
+      if (!query) {
+        response.status(400).json({ error: 'Missing query.' });
+        return;
+      }
+
+      const slugs = Array.isArray(body.slugs) ? body.slugs.filter(slug => typeof slug === 'string') : [];
+      const uniqueId = body.sessionId || request.sessionID || request.session?.id || request.ip || 'no-unique-id';
+
+      response.status(200);
+      response.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      response.setHeader('Cache-Control', 'no-cache, no-transform');
+      response.setHeader('Connection', 'keep-alive');
+      response.flushHeaders?.();
+
+      /**
+       * Write a JSON payload as an SSE data frame.
+       * @param {unknown} payload The payload to send.
+       * @returns {void}
+       */
+      const writeEvent = (payload) => {
+        response.write(`data: ${JSON.stringify(payload)}\n\n`);
+      };
+
+      /** @type {{send: (message: string) => void}} */
+      const stream = {
+        send(message) {
+          try {
+            /** @type {unknown} */
+            const parsed = JSON.parse(message);
+            if (typeof parsed !== 'object' || parsed === null) {
+              writeEvent({ token: message });
+              return;
+            }
+            const event = /** @type {{type?: string, data?: unknown, error?: unknown}} */ (parsed);
+            if (event.type === 'token') {
+              writeEvent({ token: event.data });
+              return;
+            }
+            if (event.type === 'thinking') {
+              writeEvent({ thinking: event.data });
+              return;
+            }
+            if (event.type === 'done') {
+              writeEvent({ done: true });
+              return;
+            }
+            if (event.type === 'error') {
+              writeEvent({ error: event.error });
+              return;
+            }
+            writeEvent(parsed);
+          } catch {
+            writeEvent({ token: message });
+          }
+        },
+      };
+
+      if (config.summary.enabled && uniqueId) {
+        debug('🍜 Getting memory for', uniqueId);
+        if (!memStore.get(`${uniqueId}`)) {
+          debug('🍜 No memory found for', uniqueId);
+          memStore.set(`${uniqueId}`, { summary: '', last: [] });
+        }
+        memStore.touch(`${uniqueId}`);
+      }
+
+      const memoryNote = config.summary.enabled && memStore.get(`${uniqueId}`)?.summary ? `Conversation Summary for added context:\n${memStore.get(`${uniqueId}`).summary}` : '';
+      /** @type {ChatBotMessage[]} */
+      let messages = buildPromptMessages(query, slugs, { maxContextCharacters: 20000 });
+      if (config.summary.enabled && memoryNote) {
+        messages = messages.map(msg => ({
+          ...msg,
+          content: `${msg.content}\n\n${memoryNote}`,
+        }));
+      }
+
+      try {
+        for (;;) {
+          const { messages: nextMessages, finished } = await AIChatBot.runChatPass(/** @type {import('ws').WebSocket} */ (stream), messages, config);
+          messages = nextMessages;
+          if (finished) break;
+        }
+
+        if (config.summary.enabled) {
+          const memory = memStore.get(`${uniqueId}`);
+          const newTurns = [
+            ...(memory?.last ?? []),
+            {
+              user: query,
+              assistant: messages[messages.length - 1]?.content ?? '',
+              ts: Date.now(),
+            },
+          ];
+          const newSummary = await AIChatBot.summarizeTurn(
+            config.summary.baseUrl,
+            config.summary.model,
+            memory?.summary ?? '',
+            memory?.last ?? [],
+            query,
+            messages[messages.length - 1]?.content ?? '',
+          );
+          debug('New Summary:', newSummary);
+          memStore.set(`${uniqueId}`, { summary: newSummary, last: newTurns });
+        }
+
+        stream.send(JSON.stringify({ type: 'done' }));
+      } catch (error) {
+        debug('apiRequestHandler error:', error);
+        stream.send(JSON.stringify({ type: 'error', error: String(error) }));
+      } finally {
+        response.end();
+        memStore.cleanup();
+      }
+    };
   }
 
   /**
@@ -687,7 +825,8 @@ class AIChatBot {
           num_predict: config.maxTokens,
         },
         messages,
-        tools: config.tools,
+        tools: buildChatTools(config),
+        think: true,
         stream: true,
       }),
     });
@@ -727,6 +866,11 @@ class AIChatBot {
           continue;
         }
 
+        // Forward thinking tokens separately (Ollama separates these for supporting models)
+        if (obj?.message?.thinking) {
+          ws.send(JSON.stringify({ type: 'thinking', data: obj.message.thinking }));
+        }
+
         // Forward assistant tokens to WebSocket right away
         if (obj?.message?.content) {
           assistantAccumulated += obj.message.content;
@@ -754,23 +898,8 @@ class AIChatBot {
         const args = call.function?.arguments ?? {};
         ws.send(JSON.stringify({ type: 'tool_call', name, args }));
 
-        let toolResult;
-        if (name === 'vectorSearch') {
-          debug('vectorSearch:', args);
-          toolResult = await retrieve(args?.query, config, args.slugs);
-          // Compose a compact context block with separators + local citations
-          /** @type {string[]} */
-          const blocks = [];
-          for (const chunk of toolResult.chunks) {
-            const srcTitle = chunk.source.title || chunk.source.id;
-            const section = chunk.sectionPath?.length ? ` - ${chunk.sectionPath.join(' > ')}` : '';
-            const text = chunk.text.length <= 1500 ? chunk.text : chunk.text.slice(0, 1500 - 1) + '…';
-            blocks.push(`SOURCE: ${srcTitle}${section}\nSLUG: ${chunk.source.slug ?? ''}\n---\n${text}`);
-          }
-          toolResult = blocks.join('\n\n====\n\n');
-        } else {
-          toolResult = { error: `Unknown Tool: ${name}` };
-        }
+        debug('executeChatTool:', name, args);
+        const toolResult = await executeChatTool(name, args, config);
 
         // Append the tool response as a new message for the next pass
         messages.push({

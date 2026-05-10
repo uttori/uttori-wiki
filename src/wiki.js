@@ -395,7 +395,6 @@ class UttoriWiki {
     router.post('/:slug/save', this.config.routeMiddleware.save, this.save);
     router.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
     router.put('/:slug/save', this.config.routeMiddleware.save, this.save);
-    router.get('/:slug', this.config.routeMiddleware.detail, this.detail);
 
     // Handle Redirects
     for (const redirect of this.config.redirects) {
@@ -426,7 +425,12 @@ class UttoriWiki {
       });
     }
 
+    // Allow plugins to register routes before the /:slug catch-all so their
+    // explicit paths are not shadowed by the document detail handler.
     this.hooks.dispatch('bind-routes', router, this);
+
+    // Document slug catch-all — must stay after plugin routes
+    router.get('/:slug', this.config.routeMiddleware.detail, this.detail);
 
     // Not Found - Catch All
     if (this.config.handleNotFound) {
@@ -1324,7 +1328,7 @@ class UttoriWiki {
    * @param {import('express').NextFunction} next The Express Next function.
    */
   notFound = async (request, response, next) => {
-    debug('404 Not Found Route');
+    debug('404 Not Found Route:', request.path);
 
     // Check for custom route function, and use it if it exists.
     if (this.config.notFoundRoute) {

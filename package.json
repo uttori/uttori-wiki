@@ -226,6 +226,10 @@
     "./plugins/chat-bot/utilities": {
       "import": "./src/plugins/chat-bot/utilities.js",
       "types": "./dist/plugins/chat-bot/utilities.d.ts"
+    },
+    "./plugins/chat-bot/tools": {
+      "import": "./src/plugins/chat-bot/tools.js",
+      "types": "./dist/plugins/chat-bot/tools.d.ts"
     }
   },
   "ava": {
