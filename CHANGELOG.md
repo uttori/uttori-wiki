@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-08)
+## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09)
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist

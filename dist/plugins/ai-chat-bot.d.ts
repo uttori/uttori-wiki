@@ -236,9 +236,9 @@ export type AIChatBotConfig = {
      */
     embedPrompt?: (arg0: string, arg1: string) => string;
     /**
-     * The tools to use for the chat.
+     * Override tool schemas sent to Ollama. Empty array uses the built-in wiki tools. Null/undefined disables tools entirely.
      */
-    tools: object[];
+    tools: import("./chat-bot/tools.js").OllamaTool[] | null;
     /**
      * The model to use for the chat.
      */
@@ -368,6 +368,33 @@ export type AIChatBotSearchUpdate = {
      */
     originalSlug?: string;
 };
+/**
+ * A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
+ * into the same `runChatPass` logic that the real WebSocket connection uses.
+ */
+export type AIChatBotSSEStream = {
+    /**
+     * Sends a JSON-stringified event payload.
+     */
+    send: (arg0: string) => void;
+};
+/**
+ * A parsed SSE event payload forwarded from `runChatPass` to the SSE bridge.
+ */
+export type AIChatBotSSEEvent = {
+    /**
+     * Event type: `"token"`, `"thinking"`, `"done"`, or `"error"`.
+     */
+    type?: string;
+    /**
+     * Token or thinking text for `"token"` and `"thinking"` events.
+     */
+    data?: unknown;
+    /**
+     * Error description for `"error"` events.
+     */
+    error?: unknown;
+};
 import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 /**
  * Uttori AI Chat Bot
@@ -463,6 +490,15 @@ declare class AIChatBot {
      * @static
      */
     static bindRoutes(server: import("express").Application, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): void;
+    /**
+     * Handle POST requests to stream chat responses as server-sent events.
+     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+     * @returns {import('express').RequestHandler} The function to pass to Express.
+     * @example <caption>AIChatBot.apiRequestHandler(context)</caption>
+     * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
+     * @static
+     */
+    static apiRequestHandler(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-ai-chat-bot", AIChatBotConfig>): import("express").RequestHandler;
     /**
      * Bind the WebSocket server to the server object.
      * @param {import('http').Server} server An Express server instance.

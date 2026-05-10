@@ -45,6 +45,13 @@ Search a UttoriWiki database using LLMs.</p>
 <dd></dd>
 <dt><a href="#AIChatBotSearchUpdate">AIChatBotSearchUpdate</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#AIChatBotSSEStream">AIChatBotSSEStream</a> : <code>object</code></dt>
+<dd><p>A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
+into the same <code>runChatPass</code> logic that the real WebSocket connection uses.</p>
+</dd>
+<dt><a href="#AIChatBotSSEEvent">AIChatBotSSEEvent</a> : <code>object</code></dt>
+<dd><p>A parsed SSE event payload forwarded from <code>runChatPass</code> to the SSE bridge.</p>
+</dd>
 </dl>
 
 <a name="AIChatBot"></a>
@@ -65,6 +72,7 @@ Search a UttoriWiki database using LLMs.
     * [.onSearchUpdate(payload, context)](#AIChatBot.onSearchUpdate) ⇒ <code>Promise.&lt;void&gt;</code>
     * [.onSearchDelete(document, context)](#AIChatBot.onSearchDelete)
     * [.bindRoutes(server, context)](#AIChatBot.bindRoutes)
+    * [.apiRequestHandler(context)](#AIChatBot.apiRequestHandler) ⇒ <code>module:express~RequestHandler</code>
     * [.bindWebSocket(server, context)](#AIChatBot.bindWebSocket)
     * [.runChatPass(ws, messages, config)](#AIChatBot.runChatPass) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
     * [.documentsHandler(context)](#AIChatBot.documentsHandler) ⇒ <code>module:express~RequestHandler</code>
@@ -204,6 +212,22 @@ const context = {
   },
 };
 AIChatBot.bindRoutes(server, context);
+```
+<a name="AIChatBot.apiRequestHandler"></a>
+
+### AIChatBot.apiRequestHandler(context) ⇒ <code>module:express~RequestHandler</code>
+Handle POST requests to stream chat responses as server-sent events.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+**Returns**: <code>module:express~RequestHandler</code> - The function to pass to Express.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+
+**Example** *(AIChatBot.apiRequestHandler(context))*  
+```js
+server.post('/chat-api', AIChatBot.apiRequestHandler(context));
 ```
 <a name="AIChatBot.bindWebSocket"></a>
 
@@ -417,7 +441,7 @@ Setup the memory store.
 | ollamaBaseUrl | <code>string</code> | The base URL for the Ollama server. |
 | embedModel | <code>string</code> | The model to use for the embedder. |
 | [embedPrompt] | <code>function</code> | The prompt to use for the embedder. |
-| tools | <code>Array.&lt;object&gt;</code> | The tools to use for the chat. |
+| tools | <code>Array.&lt;OllamaTool&gt;</code> \| <code>null</code> | Override tool schemas sent to Ollama. Empty array uses the built-in wiki tools. Null/undefined disables tools entirely. |
 | chatModel | <code>string</code> | The model to use for the chat. |
 | maxTokens | <code>number</code> | The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window. |
 | temperature | <code>number</code> | The temperature for the model. |
@@ -469,4 +493,31 @@ Setup the memory store.
 | --- | --- | --- |
 | document | <code>UttoriWikiDocument</code> | The saved document. |
 | [originalSlug] | <code>string</code> | The document slug before the save, when renamed. |
+
+<a name="AIChatBotSSEStream"></a>
+
+## AIChatBotSSEStream : <code>object</code>
+A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
+into the same `runChatPass` logic that the real WebSocket connection uses.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| send | <code>function</code> | Sends a JSON-stringified event payload. |
+
+<a name="AIChatBotSSEEvent"></a>
+
+## AIChatBotSSEEvent : <code>object</code>
+A parsed SSE event payload forwarded from `runChatPass` to the SSE bridge.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [type] | <code>string</code> | Event type: `"token"`, `"thinking"`, `"done"`, or `"error"`. |
+| [data] | <code>unknown</code> | Token or thinking text for `"token"` and `"thinking"` events. |
+| [error] | <code>unknown</code> | Error description for `"error"` events. |
 

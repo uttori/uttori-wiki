@@ -23,6 +23,16 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  */
 
 /**
+ * Signature of the retrieval function accepted by {@link executeChatTool}.
+ * Matches the signature of `retrieve` from `./retrieval.js`.
+ * @callback RetrieveFn
+ * @param {string} query The search query.
+ * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The chat bot configuration.
+ * @param {string[]} slugs Optional slugs to restrict the search to.
+ * @returns {Promise<import('../ai-chat-bot.js').RetrieveResponse>} The retrieval result.
+ */
+
+/**
  * Maximum characters to include per retrieved chunk in the context block.
  * Chunks longer than this are truncated with an ellipsis.
  * @type {number}
@@ -118,7 +128,7 @@ export function formatRetrievalResult(result) {
  * @param {string} name The tool name as returned by the model.
  * @param {Record<string, any>} args The arguments object from the model's tool call.
  * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The chat bot configuration.
- * @param {typeof retrieve} [retrieveFn] Optional retrieval function override, primarily for testing.
+ * @param {RetrieveFn} [retrieveFn] Optional retrieval function override, primarily for testing.
  * @returns {Promise<string | ChatToolResult>} The formatted result string, or an error object.
  */
 export async function executeChatTool(name, args, config, retrieveFn = retrieve) {

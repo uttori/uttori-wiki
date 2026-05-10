@@ -161,6 +161,21 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} [originalSlug] The document slug before the save, when renamed.
  */
 
+/**
+ * A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
+ * into the same `runChatPass` logic that the real WebSocket connection uses.
+ * @typedef {object} AIChatBotSSEStream
+ * @property {function(string): void} send Sends a JSON-stringified event payload.
+ */
+
+/**
+ * A parsed SSE event payload forwarded from `runChatPass` to the SSE bridge.
+ * @typedef {object} AIChatBotSSEEvent
+ * @property {string} [type] Event type: `"token"`, `"thinking"`, `"done"`, or `"error"`.
+ * @property {unknown} [data] Token or thinking text for `"token"` and `"thinking"` events.
+ * @property {unknown} [error] Error description for `"error"` events.
+ */
+
 /** @type {import('ws').WebSocketServer | undefined} */
 let wss = new WebSocketServer({ noServer: true });
 
@@ -560,7 +575,7 @@ class AIChatBot {
         response.write(`data: ${JSON.stringify(payload)}\n\n`);
       };
 
-      /** @type {{send: (message: string) => void}} */
+      /** @type {AIChatBotSSEStream} */
       const stream = {
         send(message) {
           try {
@@ -570,7 +585,7 @@ class AIChatBot {
               writeEvent({ token: message });
               return;
             }
-            const event = /** @type {{type?: string, data?: unknown, error?: unknown}} */ (parsed);
+            const event = /** @type {AIChatBotSSEEvent} */ (parsed);
             if (event.type === 'token') {
               writeEvent({ token: event.data });
               return;
