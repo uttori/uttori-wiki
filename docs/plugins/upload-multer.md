@@ -155,4 +155,6 @@ server.post('/upload', MulterUpload.upload);
 | [route] | <code>string</code> | Server route to POST uploads to. The default is '/upload'. |
 | [publicRoute] | <code>string</code> | Server route to GET uploads from. The default is '/uploads'. |
 | [middleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the Upload route |
+| [allowedMimeTypes] | <code>Array.&lt;string&gt;</code> | Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all. |
+| [maxFileSize] | <code>number</code> | Maximum file size in bytes. Default: 10MB (10485760). |
 

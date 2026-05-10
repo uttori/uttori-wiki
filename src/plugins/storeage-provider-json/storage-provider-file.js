@@ -90,24 +90,24 @@ class StorageProviderJsonFile {
     try {
       const fileNames = await fs.readdir(this.config.contentDirectory);
       const validFiles = fileNames.filter((name) => (name.length >= 6) && name.endsWith(this.config.extension));
-      for (const name of validFiles) {
+      const readPromises = validFiles.map(async (name) => {
         const file = path.join(this.config.contentDirectory, name);
         debug('all: Reading', file);
-
         const content = await fs.readFile(file, 'utf8');
         /** @type {import('../../wiki.js').UttoriWikiDocument} */
         const data = JSON.parse(content);
+        return { name, data };
+      });
+      const loadedDocuments = await Promise.all(readPromises);
+      for (const { name, data } of loadedDocuments.sort((a, b) => a.name.localeCompare(b.name))) {
+        if (documents[data.slug]) {
+          debug('all: Duplicate slug found, overwriting:', data.slug, name);
+        }
+        if (path.basename(name, `.${this.config.extension}`) !== data.slug) {
+          debug('all: File name does not match document slug:', name, data.slug);
+        }
         documents[data.slug] = data;
       }
-      // TODO: This is resolving out of order or with an extra document.
-      // const readPromises = validFiles.map(async (name) => {
-      //   const file = path.join(this.config.contentDirectory, name);
-      //   const content = await fs.readFile(file, 'utf8');
-      //   /** @type {import('../../wiki.js').UttoriWikiDocument} */
-      //   const data = JSON.parse(content);
-      //   documents[data.slug] = data;
-      // });
-      // await Promise.all(readPromises);
       debug('all: found', Object.values(documents).length);
       if (this.config.useCache) {
         this.documents = documents;

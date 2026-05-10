@@ -15,7 +15,6 @@ export function headingOpen(tokens, index, options) {
   // Guard against empty headers
   if (label.type === 'inline' && Array.isArray(label.children) && label.children.length > 0) {
     // We want to use slugify to provide nicer deep links
-    // @ts-expect-error slugify is not typed
     const slug = slugify(label.content, options.uttori.toc.slugify);
     // Return the new tag HTML
     const id = `${slug}-${label.map ? label.map[0] : 'MISSING_MAP'}`;

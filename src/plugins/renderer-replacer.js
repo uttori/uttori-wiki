@@ -184,7 +184,6 @@ class ReplacerRenderer {
     for (const rule of config.rules) {
       let search;
       if (typeof rule.test === 'string') {
-        // eslint-disable-next-line security/detect-non-literal-regexp
         search = new RegExp(rule.test, 'g');
       } else if (rule.test instanceof RegExp) {
         search = rule.test;

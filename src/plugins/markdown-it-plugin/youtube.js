@@ -25,7 +25,6 @@ export function youtube(state) {
 
     // Pull the parts out of the tag:
     // <youtube v="XG9dCoTlJYA" start="0" width="560" height="315" title="YouTube Video Player" start="0">
-    // eslint-disable-next-line security/detect-unsafe-regex
     const parts = [...currentToken.content.matchAll(/\s+(v|start|width|height|title)=('[^']*'|"[^"]*")?/g)];
     /** @type {YoutubeTagAttributes} */
     const keys = parts.reduce((output, item) => {

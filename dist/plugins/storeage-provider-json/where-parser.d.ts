@@ -36,9 +36,9 @@ declare class SqlWhereParser {
      * A default fallback evaluator for the parse function.
      * @param {number|string|symbol} operatorValue The operator to evaluate.
      * @param {Array<import('../../../dist/custom.d.ts').ParserOperand>} operands The list of operands.
-     * @returns {Array<import('../../../dist/custom.d.ts').SqlWhereParserAst>|import('../../../dist/custom.d.ts').SqlWhereParserAst} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
+     * @returns {import('../../../dist/custom.d.ts').ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
      */
-    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<import("../../../dist/custom.d.ts").ParserOperand>) => Array<import("../../../dist/custom.d.ts").SqlWhereParserAst> | import("../../../dist/custom.d.ts").SqlWhereParserAst;
+    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<import("../../../dist/custom.d.ts").ParserOperand>) => import("../../../dist/custom.d.ts").ParserOperand;
     /**
      * Creates an instance of SqlWhereParser.
      * @param {SqlWhereParserConfig} [config] - A configuration object.
@@ -54,11 +54,11 @@ declare class SqlWhereParser {
      * Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
      * @param {string} sql Query string to process.
      * @param {import('../../../dist/custom.d.ts').SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
-     * @returns {import('../../../dist/custom.d.ts').SqlWhereParserAst} The parsed query tree.
+     * @returns {import('../../../dist/custom.d.ts').ParserOperand} The parsed query tree.
      * @see {@link https://wcipeg.com/wiki/Shunting_yard_algorithm|Shunting-Yard_Algorithm (P3G)}
      * @see {@link https://en.wikipedia.org/wiki/Shunting-yard_algorithm|Shunting-Yard_Algorithm (Wikipedia)}
      */
-    parse: (sql: string, evaluator?: import("../../../dist/custom.d.ts").SqlWhereParserEvaluator) => import("../../../dist/custom.d.ts").SqlWhereParserAst;
+    parse: (sql: string, evaluator?: import("../../../dist/custom.d.ts").SqlWhereParserEvaluator) => import("../../../dist/custom.d.ts").ParserOperand;
     /**
      * Returns the precedence order from two values.
      * @param {number|string|symbol} operatorValue1 First operator.

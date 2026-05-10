@@ -1,8 +1,8 @@
 /**
  * @typedef {object} MarkdownASTNode
  * @property {string} type The type of node.
- * @property {string[]} content Text content for the node.
- * @property {Array<Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
+ * @property {Array<string | string[]>} content Text content for the node.
+ * @property {Array<string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
  * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
  * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
  * @property {MarkdownASTNode[]} children The child nodes for this node.
@@ -269,7 +269,7 @@ export function consolidateParagraph(token) {
       // Text will be added to the buffer.
       if (childToken.type === 'text') {
         if (Array.isArray(childToken.content)) {
-          content.push(...childToken.content);
+          content.push(...childToken.content.flat());
         } else {
           content.push(childToken.content);
         }
@@ -287,7 +287,7 @@ export function consolidateParagraph(token) {
           console.warn('🐛 Unhandled list_item content', childToken, childToken.children[0]);
         }
         if (Array.isArray(childToken.content)) {
-          content.push(...childToken.content);
+          content.push(...childToken.content.flat());
         } else if (childToken.content) {
           content.push(childToken.content);
         }
@@ -298,15 +298,11 @@ export function consolidateParagraph(token) {
       if (childToken.type === 'paragraph') {
         if (childToken.children) {
           for (const p of childToken.children) {
-            if (Array.isArray(p.content)) {
-              content.push(...consolidateParagraph(p));
-            } else {
-              content.push(consolidateParagraph(p));
-            }
+            content.push(...consolidateParagraph(p));
           }
         }
         if (Array.isArray(childToken.content)) {
-          content.push(...childToken.content);
+          content.push(...childToken.content.flat());
         } else {
           content.push(childToken.content);
         }
@@ -317,7 +313,7 @@ export function consolidateParagraph(token) {
     }
     return content;
   }
-  return token.content;
+  return Array.isArray(token.content) ? token.content.flat() : [token.content];
 }
 
 /**
@@ -360,7 +356,7 @@ export function consolidateNestedItems(items, options = {}) {
               console.warn('🐛 Unhandled TH Children');
             }
             if (th.type === 'th') {
-              header.push(...th.content);
+              header.push(...th.content.flat());
             }
           });
         } else if (child.type === 'tbody') {
@@ -371,7 +367,7 @@ export function consolidateNestedItems(items, options = {}) {
               if (td.children.length > 0) {
                 console.warn('🐛 Unhandled TD Children');
               }
-              bodyRow.push(...td.content);
+              bodyRow.push(...td.content.flat());
             });
             bodyRows.push(bodyRow);
           });
@@ -421,12 +417,12 @@ export function consolidateNestedItems(items, options = {}) {
           headers = [...item.headers, [`Table Part ${chunk.chunkIndex}`, newLevel]];
         }
 
-        return {
+        return /** @type {MarkdownASTNode} */ ({
           type: item.type,
           content,
           children: [],
           headers,
-        };
+        });
       });
     }
 

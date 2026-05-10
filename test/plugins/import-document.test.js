@@ -372,7 +372,7 @@ test('apiRequestHandler: should handle requests with valid referrer', async (t) 
   t.is(response.body.error, 'Title and slug are required.');
 });
 
-test.serial('apiRequestHandler: should reject requests with missing title or slug', async (t) => {
+test('apiRequestHandler: should reject requests with missing title or slug', async (t) => {
   const server = express();
   const context = {
     config: {
@@ -586,7 +586,6 @@ test('downloadFile: should throw error on failed download', async (t) => {
 test('processPage: should process text type pages', async (t) => {
   const mockDownloadFile = sandbox.stub().resolves();
   const mockReadFile = sandbox.stub().resolves('Test markdown content');
-  const mockMkdir = sandbox.stub(fs.promises, 'mkdir').resolves();
   const mockReadFileStub = sandbox.stub(fs.promises, 'readFile').callsFake(mockReadFile);
 
   const config = {
@@ -612,13 +611,12 @@ test('processPage: should process text type pages', async (t) => {
     type: 'text',
   }));
 
-  mockMkdir.restore();
   mockReadFileStub.restore();
 });
 
 test.serial('processPage: should process binary type pages', async (t) => {
   const mockDownloadFile = sandbox.stub().resolves();
-  const mockMkdir = sandbox.stub(fs.promises, 'mkdir').resolves();
+  const mockStatSync = sandbox.stub(fs, 'statSync').returns({ size: 123 });
 
   const config = {
     uploadDirectory: '/tmp',
@@ -642,23 +640,24 @@ test.serial('processPage: should process binary type pages', async (t) => {
 - [test.pdf](uploads/test-document/test.pdf)
 
 *This article was automatically generated for PDF files.*`);
-  t.deepEqual(result.attachments, [{
-    name: 'test.pdf',
-    path: 'uploads/test-document/test.pdf',
-    type: 'application/pdf',
-  }]);
+  t.is(result.attachments[0].name, 'test.pdf');
+  t.is(result.attachments[0].path, 'uploads/test-document/test.pdf');
+  t.is(result.attachments[0].type, 'application/pdf');
+  t.is(result.attachments[0].size, 123);
+  t.truthy(result.attachments[0].id);
+  t.deepEqual(result.attachments[0].metadata, {});
   t.true(mockDownloadFile.calledWith({
     url: 'https://example.com/test.pdf',
     fileName: '/tmp/test-document/test.pdf',
     type: 'binary',
   }));
 
-  mockMkdir.restore();
+  mockStatSync.restore();
 });
 
 test.serial('processPage: should process binary type pages with image extensions', async (t) => {
   const mockDownloadFile = sandbox.stub().resolves();
-  const mockMkdir = sandbox.stub(fs.promises, 'mkdir').resolves();
+  const mockStatSync = sandbox.stub(fs, 'statSync').returns({ size: 456 });
 
   const config = {
     uploadDirectory: '/tmp',
@@ -676,18 +675,19 @@ test.serial('processPage: should process binary type pages with image extensions
   const result = await ImportDocument.processPage(config, slug, page);
 
   t.is(result.content, '');
-  t.deepEqual(result.attachments, [{
-    name: 'test.jpg',
-    path: 'uploads/test-document/test.jpg',
-    type: 'jpg',
-  }]);
+  t.is(result.attachments[0].name, 'test.jpg');
+  t.is(result.attachments[0].path, 'uploads/test-document/test.jpg');
+  t.is(result.attachments[0].type, 'jpg');
+  t.is(result.attachments[0].size, 456);
+  t.truthy(result.attachments[0].id);
+  t.deepEqual(result.attachments[0].metadata, {});
 
-  mockMkdir.restore();
+  mockStatSync.restore();
 });
 
 test.serial('processPage: should create stub article for PDF files when no content', async (t) => {
   const mockDownloadFile = sandbox.stub().resolves();
-  const mockMkdir = sandbox.stub(fs.promises, 'mkdir').resolves();
+  const mockStatSync = sandbox.stub(fs, 'statSync').returns({ size: 123 });
 
   const config = {
     uploadDirectory: '/tmp',
@@ -709,14 +709,13 @@ test.serial('processPage: should create stub article for PDF files when no conte
   t.true(result.content.includes('- [test.pdf](uploads/test-document/test.pdf)'));
   t.true(result.content.includes('*This article was automatically generated for PDF files.*'));
 
-  mockMkdir.restore();
+  mockStatSync.restore();
 });
 
 test.serial('processPage: should handle scrape type pages', async (t) => {
-  const mockMkdir = sandbox.stub(fs.promises, 'mkdir').resolves();
   const mockReaddir = sandbox.stub(fs.promises, 'readdir').resolves(['index.html']);
   const mockReadFile = sandbox.stub(fs.promises, 'readFile').resolves('Converted markdown content');
-  const mockCmd = sandbox.stub(child_process, 'exec').returns('TEST');
+  const mockCmd = sandbox.stub(child_process, 'execFile').returns('TEST');
 
   const config = {
     uploadDirectory: '/tmp',
@@ -739,7 +738,6 @@ test.serial('processPage: should handle scrape type pages', async (t) => {
 
   // Restore
   mockCmd.restore();
-  mockMkdir.restore();
   mockReaddir.restore();
   mockReadFile.restore();
 });

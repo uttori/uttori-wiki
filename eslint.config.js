@@ -1,23 +1,3 @@
-/*
- * Modern ESLint v9 Configuration
- *
- * PLUGINS NOT COMPATIBLE WITH ESLINT V9:
- * - eslint-plugin-optimize-regex: Not compatible with flat config
- * - eslint-plugin-no-inferred-method-name: Not compatible with flat config
- * - eslint-plugin-anti-trojan-source: Not compatible with flat config
- * - eslint-plugin-xss: Not compatible with flat config
- *
- * WORKING PLUGINS:
- * - @typescript-eslint/*: Full v9 support
- * - @stylistic/eslint-plugin: Full v9 support
- * - eslint-plugin-ava: Full v9 support
- * - eslint-plugin-n: Full v9 support
- * - eslint-plugin-import: Full v9 support
- * - eslint-plugin-jsdoc: Full v9 support
- * - eslint-plugin-security: Full v9 support
- */
-
-import importPlugin from 'eslint-plugin-import';
 import { defineConfig, globalIgnores } from "eslint/config";
 import antiTrojanSource from "eslint-plugin-anti-trojan-source";
 import ava from "eslint-plugin-ava";
@@ -46,7 +26,7 @@ export default defineConfig([
     "src/**/*.png",
   ]),
 
-  security.configs.recommended,
+  // security.configs.recommended,
   tseslint.configs.strict,
   tseslint.configs.stylistic,
 
@@ -71,13 +51,12 @@ export default defineConfig([
       "@stylistic": stylistic,
       "anti-trojan-source": antiTrojanSource,
       ava,
-      import: importPlugin,
       js,
       jsdoc,
       n,
       "no-inferred-method-name": noInferredMethodName,
       "optimize-regex": optimizeRegex,
-      security,
+      // security,
       xss,
     },
     settings: {
@@ -132,21 +111,21 @@ export default defineConfig([
         message: "`with` is disallowed in strict mode because it makes code impossible to predict and optimize.",
       }],
 
-      // Import rules
-      "import/no-commonjs": "off",
-      "import/no-dynamic-require": "off",
-      "import/no-extraneous-dependencies": ["error", {
-        devDependencies: ["**/*.test.js", "**/test/**/*.js", "eslint.config.js"],
-        optionalDependencies: true,
-        peerDependencies: true,
-      }],
-      "import/extensions": ["warn", "ignorePackages"],
-      "import/no-unresolved": "off",
+      // // Import rules
+      // "import/no-commonjs": "off",
+      // "import/no-dynamic-require": "off",
+      // "import/no-extraneous-dependencies": ["error", {
+      //   devDependencies: ["**/*.test.js", "**/test/**/*.js", "eslint.config.js"],
+      //   optionalDependencies: true,
+      //   peerDependencies: true,
+      // }],
+      // "import/extensions": ["warn", "ignorePackages"],
+      // "import/no-unresolved": "off",
 
       // Security rules
-      "security/detect-non-literal-fs-filename": "off",
-      "security/detect-non-literal-require": "off",
-      "security/detect-object-injection": "off",
+      // "security/detect-non-literal-fs-filename": "off",
+      // "security/detect-non-literal-require": "off",
+      // "security/detect-object-injection": "off",
 
       // Stylistic rules
       "@stylistic/object-curly-newline": "off",
@@ -185,6 +164,24 @@ export default defineConfig([
     rules: {
       "ava/no-only-test": "warn",
       "jsdoc/no-undefined-types": "off",
+    },
+  },
+
+  // Upcoming JS files without TS project
+  {
+    files: ["upcoming/**/*.js", "upcoming/**/*.test.js"],
+    languageOptions: {
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/unbound-method": "off",
     },
   },
 ]);

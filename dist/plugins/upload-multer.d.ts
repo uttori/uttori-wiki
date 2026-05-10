@@ -20,6 +20,14 @@ export type MulterUploadConfig = {
      * Custom Middleware for the Upload route
      */
     middleware?: import("express").RequestHandler[];
+    /**
+     * Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all.
+     */
+    allowedMimeTypes?: string[];
+    /**
+     * Maximum file size in bytes. Default: 10MB (10485760).
+     */
+    maxFileSize?: number;
 };
 /**
  * @typedef {object} MulterUploadConfig
@@ -28,6 +36,8 @@ export type MulterUploadConfig = {
  * @property {string} [route] Server route to POST uploads to. The default is '/upload'.
  * @property {string} [publicRoute] Server route to GET uploads from. The default is '/uploads'.
  * @property {import('express').RequestHandler[]} [middleware] Custom Middleware for the Upload route
+ * @property {string[]} [allowedMimeTypes] Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all.
+ * @property {number} [maxFileSize] Maximum file size in bytes. Default: 10MB (10485760).
  */
 /**
  * Uttori Multer Upload

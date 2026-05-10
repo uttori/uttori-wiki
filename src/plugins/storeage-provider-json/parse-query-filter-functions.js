@@ -38,9 +38,9 @@ const parseQueryToFilterFunctions = (ast) => {
     const operands = ast[key];
     switch (key) {
       case 'AND':
-        return (item) => ast[key]?.every((subQuery) => parseQueryToFilterFunctions(subQuery)(item));
+        return (item) => /** @type {import('../../../dist/custom.d.ts').SqlWhereParserAst[]} */ (ast[key]).every((subQuery) => parseQueryToFilterFunctions(subQuery)(item));
       case 'OR':
-        return (item) => ast[key]?.some((subQuery) => parseQueryToFilterFunctions(subQuery)(item));
+        return (item) => /** @type {import('../../../dist/custom.d.ts').SqlWhereParserAst[]} */ (ast[key]).some((subQuery) => parseQueryToFilterFunctions(subQuery)(item));
       case 'BETWEEN':
         return (item) => isBetween(item[operands[0]], operands[1], operands[2]);
       case 'IN':

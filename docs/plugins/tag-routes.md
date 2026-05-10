@@ -36,6 +36,7 @@ Provides tag index and individual tag pages functionality.
     * [.validateConfig(config, _context)](#TagRoutesPlugin.validateConfig)
     * [.register(context)](#TagRoutesPlugin.register)
     * [.bindRoutes(server, context)](#TagRoutesPlugin.bindRoutes)
+    * [.normalizeDocumentTags(document, _context)](#TagRoutesPlugin.normalizeDocumentTags) ⇒ <code>UttoriWikiDocument</code>
     * [.getTaggedDocuments(context, tag)](#TagRoutesPlugin.getTaggedDocuments) ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>
     * [.tagIndexRequestHandler(context)](#TagRoutesPlugin.tagIndexRequestHandler) ⇒ <code>module:express~RequestHandler</code>
     * [.tagRequestHandler(context)](#TagRoutesPlugin.tagRequestHandler) ⇒ <code>module:express~RequestHandler</code>
@@ -145,6 +146,19 @@ const context = {
 };
 TagRoutesPlugin.bindRoutes(plugin);
 ```
+<a name="TagRoutesPlugin.normalizeDocumentTags"></a>
+
+### TagRoutesPlugin.normalizeDocumentTags(document, _context) ⇒ <code>UttoriWikiDocument</code>
+Normalize document tags before the document is saved.
+
+**Kind**: static method of [<code>TagRoutesPlugin</code>](#TagRoutesPlugin)  
+**Returns**: <code>UttoriWikiDocument</code> - The document with normalized tags.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| document | <code>UttoriWikiDocument</code> | The document being saved. |
+| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+
 <a name="TagRoutesPlugin.getTaggedDocuments"></a>
 
 ### TagRoutesPlugin.getTaggedDocuments(context, tag) ⇒ <code>Promise.&lt;Array.&lt;UttoriWikiDocument&gt;&gt;</code>

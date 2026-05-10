@@ -76,7 +76,7 @@ const validateQuery = (query) => {
   let where;
   try {
     const parser = new SqlWhereParser();
-    where = parser.parse(where_string);
+    where = /** @type {import('../../../dist/custom.d.ts').SqlWhereParserAst} */ (parser.parse(where_string));
   } catch (error2) {
     error = `Invalid Query: Invalid WHERE: ${error2.message}`;
     debug(error, where_string);

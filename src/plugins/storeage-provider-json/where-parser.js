@@ -1,4 +1,3 @@
-/* eslint-disable security/detect-possible-timing-attacks */
 import Operator from './operator.js';
 import { TokenizeThis } from './tokenizer.js';
 
@@ -117,7 +116,7 @@ class SqlWhereParser {
    * Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
    * @param {string} sql Query string to process.
    * @param {import('../../../dist/custom.d.ts').SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
-   * @returns {import('../../../dist/custom.d.ts').SqlWhereParserAst} The parsed query tree.
+   * @returns {import('../../../dist/custom.d.ts').ParserOperand} The parsed query tree.
    * @see {@link https://wcipeg.com/wiki/Shunting_yard_algorithm|Shunting-Yard_Algorithm (P3G)}
    * @see {@link https://en.wikipedia.org/wiki/Shunting-yard_algorithm|Shunting-Yard_Algorithm (Wikipedia)}
    */
@@ -338,7 +337,7 @@ class SqlWhereParser {
    * A default fallback evaluator for the parse function.
    * @param {number|string|symbol} operatorValue The operator to evaluate.
    * @param {Array<import('../../../dist/custom.d.ts').ParserOperand>} operands The list of operands.
-   * @returns {Array<import('../../../dist/custom.d.ts').SqlWhereParserAst>|import('../../../dist/custom.d.ts').SqlWhereParserAst} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
+   * @returns {import('../../../dist/custom.d.ts').ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
    */
   static defaultEvaluator = (operatorValue, operands) => {
     // debug('defaultEvaluator:', operatorValue);
@@ -351,7 +350,7 @@ class SqlWhereParser {
     // Previously: [].concat(operands[0], operands[1])
     // But this version is more clear about what is happening.
     if (operatorValue === ',') {
-      /** @type {import('../../../dist/custom.d.ts').SqlWhereParserAst} */
+      /** @type {import('../../../dist/custom.d.ts').ParserOperand[]} */
       const output = operands.flatMap((op) => (Array.isArray(op) ? op : [op]));
       debug('defaultEvaluator: Comma Detected!', JSON.stringify(output));
       debug('defaultEvaluator: Converted:', output);

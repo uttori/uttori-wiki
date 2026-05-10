@@ -31,6 +31,7 @@ test('TagRoutesPlugin.defaultConfig(): returns a valid default configuration', (
   });
   t.deepEqual(config.events, {
     bindRoutes: ['bind-routes'],
+    normalizeDocumentTags: ['document-save'],
     validateConfig: ['validate-config'],
   });
   t.is(config.tagIndexRequestHandler, TagRoutesPlugin.tagIndexRequestHandler);
@@ -59,6 +60,7 @@ test('TagRoutesPlugin.extendConfig(): extends default config with user config', 
   t.deepEqual(extended.middleware.tagIndex, [middlewareSpy]);
   t.deepEqual(extended.middleware.tag, []); // from default
   t.deepEqual(extended.events.bindRoutes, ['custom-bind-routes']);
+  t.deepEqual(extended.events.normalizeDocumentTags, ['document-save']); // from default
   t.deepEqual(extended.events.validateConfig, ['validate-config']); // from default
 });
 
@@ -215,8 +217,9 @@ test('TagRoutesPlugin.register(): registers successfully with valid config', (t)
     }));
   });
 
-  t.is(onSpy.callCount, 2);
+  t.is(onSpy.callCount, 3);
   t.true(onSpy.calledWith('bind-routes', TagRoutesPlugin.bindRoutes));
+  t.true(onSpy.calledWith('document-save', TagRoutesPlugin.normalizeDocumentTags));
   t.true(onSpy.calledWith('validate-config', TagRoutesPlugin.validateConfig));
 });
 
@@ -244,8 +247,30 @@ test('TagRoutesPlugin.register(): handles missing methods gracefully', (t) => {
   });
 
   // Should only register the valid method
-  t.is(onSpy.callCount, 2);
+  t.is(onSpy.callCount, 3);
   t.true(onSpy.calledWith('bind-routes', TagRoutesPlugin.bindRoutes));
+});
+
+test('TagRoutesPlugin.normalizeDocumentTags(): normalizes string and array tags', (t) => {
+  const stringTags = TagRoutesPlugin.normalizeDocumentTags(/** @type {any} */ ({
+    slug: 'example',
+    title: 'Example',
+    content: 'Example',
+    createDate: 1,
+    updateDate: 1,
+    tags: 'z, a, z,',
+  }), /** @type {any} */ ({}));
+  const arrayTags = TagRoutesPlugin.normalizeDocumentTags(/** @type {any} */ ({
+    slug: 'example',
+    title: 'Example',
+    content: 'Example',
+    createDate: 1,
+    updateDate: 1,
+    tags: [' beta ', 'alpha', 'beta'],
+  }), /** @type {any} */ ({}));
+
+  t.deepEqual(stringTags.tags, ['a', 'z']);
+  t.deepEqual(arrayTags.tags, ['alpha', 'beta']);
 });
 
 test('TagRoutesPlugin.bindRoutes(): binds routes correctly', (t) => {

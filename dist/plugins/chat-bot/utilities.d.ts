@@ -114,11 +114,11 @@ export type MarkdownASTNode = {
     /**
      * Text content for the node.
      */
-    content: string[];
+    content: Array<string | string[]>;
     /**
      * The relevant headers for this node.
      */
-    headers: Array<Array<string | MarkdownASTNode | number>>;
+    headers: Array<string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>>;
     /**
      * The MarkdownIt Token object for the opening tag.
      */

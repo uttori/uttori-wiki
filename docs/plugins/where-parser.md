@@ -36,10 +36,10 @@ The number of operands depends on if the operation is defined as unary, binary, 
     * [new SqlWhereParser([config])](#new_SqlWhereParser_new)
     * [.tokenizer](#SqlWhereParser+tokenizer) : <code>TokenizeThis</code>
     * [.operators](#SqlWhereParser+operators) : <code>Record.&lt;(string\|symbol), Operator&gt;</code>
-    * [.parse](#SqlWhereParser+parse) ⇒ <code>SqlWhereParserAst</code>
+    * [.parse](#SqlWhereParser+parse) ⇒ <code>ParserOperand</code>
     * [.operatorPrecedenceFromValues](#SqlWhereParser+operatorPrecedenceFromValues) ⇒ <code>boolean</code>
     * [.getOperator](#SqlWhereParser+getOperator) ⇒ <code>Operator</code> \| <code>null</code>
-    * [.defaultEvaluator](#SqlWhereParser+defaultEvaluator) ⇒ <code>Array.&lt;SqlWhereParserAst&gt;</code> \| <code>SqlWhereParserAst</code>
+    * [.defaultEvaluator](#SqlWhereParser+defaultEvaluator) ⇒ <code>ParserOperand</code>
 
 <a name="new_SqlWhereParser_new"></a>
 
@@ -70,11 +70,11 @@ The operators from config converted to Operator objects.
 **Kind**: instance property of [<code>SqlWhereParser</code>](#SqlWhereParser)  
 <a name="SqlWhereParser+parse"></a>
 
-### sqlWhereParser.parse ⇒ <code>SqlWhereParserAst</code>
+### sqlWhereParser.parse ⇒ <code>ParserOperand</code>
 Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
 
 **Kind**: instance property of [<code>SqlWhereParser</code>](#SqlWhereParser)  
-**Returns**: <code>SqlWhereParserAst</code> - The parsed query tree.  
+**Returns**: <code>ParserOperand</code> - The parsed query tree.  
 **See**
 
 - [Shunting-Yard_Algorithm (P3G)](https://wcipeg.com/wiki/Shunting_yard_algorithm)
@@ -113,11 +113,11 @@ Returns the operator from the string or Symbol provided.
 
 <a name="SqlWhereParser+defaultEvaluator"></a>
 
-### sqlWhereParser.defaultEvaluator ⇒ <code>Array.&lt;SqlWhereParserAst&gt;</code> \| <code>SqlWhereParserAst</code>
+### sqlWhereParser.defaultEvaluator ⇒ <code>ParserOperand</code>
 A default fallback evaluator for the parse function.
 
 **Kind**: instance property of [<code>SqlWhereParser</code>](#SqlWhereParser)  
-**Returns**: <code>Array.&lt;SqlWhereParserAst&gt;</code> \| <code>SqlWhereParserAst</code> - Either comma seperated values concated, or an object with the key of the operator and operands as the value.  
+**Returns**: <code>ParserOperand</code> - Either comma seperated values concated, or an object with the key of the operator and operands as the value.  
 
 | Param | Type | Description |
 | --- | --- | --- |

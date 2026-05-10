@@ -1,3 +1,5 @@
+import { routeParamToString } from '../wiki.js';
+
 let debug = (..._) => {};
 /* c8 ignore next 2 */
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.TagRoutes'); } catch {}
@@ -58,6 +60,7 @@ class TagRoutesPlugin {
       },
       events: {
         bindRoutes: ['bind-routes'],
+        normalizeDocumentTags: ['document-save'],
         validateConfig: ['validate-config'],
       },
       tagIndexRequestHandler: TagRoutesPlugin.tagIndexRequestHandler,
@@ -179,11 +182,32 @@ class TagRoutesPlugin {
     debug('bindRoutes');
     /** @type {TagRoutesPluginConfig} */
     const { tagRoute, tagIndexRoute, apiRoute, middleware, tagIndexRequestHandler, tagRequestHandler, apiRequestHandler } = TagRoutesPlugin.extendConfig(context.config[TagRoutesPlugin.configKey]);
-    debug('bindRoutes:', { tagRoute, tagIndexRoute });
+    debug('bindRoutes:', { tagRoute, tagIndexRoute, apiRoute });
 
     server.get(`/${tagIndexRoute}`, ...middleware.tagIndex, tagIndexRequestHandler(context));
     server.get(`/${tagRoute}/:tag`, ...middleware.tag, tagRequestHandler(context));
     server.get(`/${apiRoute}`, ...middleware.api, apiRequestHandler(context));
+  }
+
+  /**
+   * Normalize document tags before the document is saved.
+   * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
+   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} _context A Uttori-like context.
+   * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
+   * @static
+   */
+  static normalizeDocumentTags(document, _context) {
+    /** @type {string[]} */
+    let tags = [];
+    if (Array.isArray(document.tags)) {
+      tags = document.tags;
+    } else if (typeof document.tags === 'string') {
+      tags = document.tags.split(',');
+    }
+    return {
+      ...document,
+      tags: [...new Set(tags.map((tag) => tag.trim()))].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+    };
   }
 
   /**
@@ -258,13 +282,8 @@ class TagRoutesPlugin {
 
       /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
-        title: context.config[TagRoutesPlugin.configKey].title,
-        config: context.config,
-        session: request.session,
+        ...context.buildViewModelBase(request, { title: context.config[TagRoutesPlugin.configKey].title, meta }),
         taggedDocuments,
-        meta,
-        basePath: request.baseUrl,
-        flash: request.wikiFlash(),
       };
       viewModel = await context.hooks.filter('view-model-tag-index', viewModel, context);
       if (context.config.useCache) {
@@ -289,25 +308,21 @@ class TagRoutesPlugin {
     return async (request, response, next) => {
       debug('tagRequestHandler');
 
-      const taggedDocuments = await TagRoutesPlugin.getTaggedDocuments(context,request.params.tag);
+      const tag = routeParamToString(request.params.tag);
+      const taggedDocuments = await TagRoutesPlugin.getTaggedDocuments(context, tag);
       if (taggedDocuments.length === 0) {
         debug('No documents for tag!');
         next();
         return;
       }
 
-      const meta = await context.buildMetadata({}, `/${context.config[TagRoutesPlugin.configKey].tagRoute}/${request.params.tag}`);
-      const title = `${request.params.tag} Tagged Documents`;
+      const meta = await context.buildMetadata({}, `/${context.config[TagRoutesPlugin.configKey].tagRoute}/${tag}`);
+      const title = `${tag} Tagged Documents`;
 
       /** @type {import('../wiki.js').UttoriWikiViewModel} */
       let viewModel = {
-        title,
-        config: context.config,
-        session: request.session,
+        ...context.buildViewModelBase(request, { title, meta }),
         taggedDocuments,
-        meta,
-        basePath: request.baseUrl,
-        flash: request.wikiFlash(),
       };
       viewModel = await context.hooks.filter('view-model-tag', viewModel, context);
       if (context.config.useCache) {
