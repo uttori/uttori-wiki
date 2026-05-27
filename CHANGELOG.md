@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
+## TODO
+
+- CSRF tokens support on edit pages
+- Check for spam if page edit is too different and block update with some sort of "proposed edit" mode that needs manual approval
+
 ## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09)
 
 - 💥 BREAKING CHANGES!
