@@ -18,6 +18,13 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Fil
 export const ipEditHistory = new Map();
 
 /**
+ * Timestamp of the last full sweep of `ipEditHistory`.
+ * Used to avoid scanning the entire map on every edit request.
+ * @type {number}
+ */
+let lastIPHistorySweep = 0;
+
+/**
  * @typedef {object} FilterSpamEditWeights
  * @property {number} [contentSimilarity=40] Jaccard distance weight for large content replacement. Set to 0 to disable.
  * @property {number} [externalLinksAdded=20] Weight for net-new external URLs added. Set to 0 to disable.
@@ -129,8 +136,33 @@ class FilterSpamEdit {
   }
 
   /**
+   * Resolves the plugin configuration by shallow-merging top-level settings and deep-merging nested `events` and `weights` entries with their defaults.
+   * This allows site config to override only the settings it needs without replacing the full default nested objects.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} context The Uttori wiki context with plugin configuration.
+   * @returns {FilterSpamEditConfig} The resolved plugin configuration.
+   * @static
+   */
+  static resolveConfig(context) {
+    const defaults = FilterSpamEdit.defaultConfig();
+    const userConfig = context.config?.[FilterSpamEdit.configKey] ?? {};
+
+    return {
+      ...defaults,
+      ...userConfig,
+      events: {
+        ...defaults.events,
+        ...userConfig.events,
+      },
+      weights: {
+        ...defaults.weights,
+        ...userConfig.weights,
+      },
+    };
+  }
+
+  /**
    * Validates the provided configuration for required entries and correct types.
-   * @param {Record<string, FilterSpamEditConfig>} config A configuration object keyed by plugin configKey.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} config A Uttori-like context.
    * @param {object} _context Unused context object.
    * @throws {Error} When any required config value is missing or invalid.
    * @static
@@ -140,7 +172,7 @@ class FilterSpamEdit {
     if (!config[FilterSpamEdit.configKey]) {
       throw new Error(`Config missing '${FilterSpamEdit.configKey}' entry.`);
     }
-    const c = config[FilterSpamEdit.configKey];
+    const c = FilterSpamEdit.resolveConfig({ config });
 
     if (typeof c.blockThreshold !== 'number' || c.blockThreshold <= 0) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.blockThreshold' must be a positive number.`);
@@ -179,7 +211,7 @@ class FilterSpamEdit {
       throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
 
-    const config = { ...FilterSpamEdit.defaultConfig(), ...context.config[FilterSpamEdit.configKey] };
+    const config = FilterSpamEdit.resolveConfig(context);
     if (!config.events) {
       throw new Error('Missing events to register for in the FilterSpamEdit configuration');
     }
@@ -246,22 +278,64 @@ class FilterSpamEdit {
     const aTokens = FilterSpamEdit.tokenize(FilterSpamEdit.normalizeText(a));
     const bTokens = FilterSpamEdit.tokenize(FilterSpamEdit.normalizeText(b));
 
-    const union = new Set([...aTokens, ...bTokens]).size;
-    if (union === 0) return 1;
+    if (aTokens.size === 0 && bTokens.size === 0) return 1;
 
-    const intersection = [...aTokens].filter((token) => bTokens.has(token)).length;
+    let intersection = 0;
+    const [smaller, larger] = aTokens.size < bTokens.size ? [aTokens, bTokens] : [bTokens, aTokens];
+    for (const token of smaller) {
+      if (larger.has(token)) {
+        intersection += 1;
+      }
+    }
+
+    const union = aTokens.size + bTokens.size - intersection;
     return intersection / union;
   }
 
   /**
-   * Extracts all HTTP/HTTPS URLs from a block of text.
+   * Normalizes a URL before comparison so equivalent URLs with minor differences do not count as newly-added external links.
+   * Removes hashes, common tracking parameters, lowercases hostnames, and normalizes root paths.
+   * @param {string} rawUrl Raw URL string to normalize.
+   * @returns {string} Normalized URL string, or a trimmed lowercase fallback when parsing fails.
+   * @static
+   */
+  static normalizeUrl(rawUrl) {
+    try {
+      const parsed = new URL(rawUrl);
+      parsed.hash = '';
+      parsed.hostname = parsed.hostname.toLowerCase();
+      if (parsed.pathname === '/') {
+        parsed.pathname = '';
+      }
+      return parsed.toString();
+    } catch {
+      return rawUrl.trim().toLowerCase();
+    }
+  }
+
+  /**
+   * Extracts all HTTP/HTTPS URLs from a block of text and normalizes them for stable old/new URL comparisons.
    * @param {string} text Raw text to scan.
-   * @returns {string[]} Array of matched URL strings.
+   * @returns {string[]} Array of normalized URL strings.
    * @static
    */
   static getUrls(text) {
     if (!text) return [];
-    return text.match(/https?:\/\/[^\s)"'>]+/g) ?? [];
+    return [...text.matchAll(/https?:\/\/[^\s)"'>]+/g)].map(([rawUrl]) => FilterSpamEdit.normalizeUrl(rawUrl));
+  }
+
+  /**
+   * Extracts a normalized hostname from a URL for domain-level analysis.
+   * @param {string} rawUrl URL string to parse.
+   * @returns {string} Lowercase hostname without a leading `www.`, or an empty string when parsing fails.
+   * @static
+   */
+  static getUrlHost(rawUrl) {
+    try {
+      return new URL(rawUrl).hostname.replace(/^www\./, '').toLowerCase();
+    } catch {
+      return '';
+    }
   }
 
   /**
@@ -276,21 +350,24 @@ class FilterSpamEdit {
   }
 
   /**
-   * Splits text into paragraphs on two or more consecutive newlines.
+   * Splits text into normalized paragraphs on two or more consecutive newlines.
+   * Paragraph normalization keeps harmless formatting and whitespace changes from being counted as full paragraph removals.
    * @param {string} text Raw text to split.
-   * @returns {string[]} Non-empty paragraph strings.
+   * @returns {string[]} Non-empty normalized paragraph strings.
    * @static
    */
   static splitParagraphs(text) {
     if (!text) return [];
-    return text.split(/\n{2,}/).filter(Boolean);
+    return text
+      .split(/\n{2,}/)
+      .map((paragraph) => FilterSpamEdit.normalizeText(paragraph))
+      .filter(Boolean);
   }
 
   /**
    * Scores suspicious keyword density against a term list.
    * Returns a value in [0, 1]: 0 means no hits, 1 means saturated.
-   * Each unique matched term contributes `1 / list.length` to the score,
-   * clamped to a maximum of 1.
+   * Each unique matched term contributes `1 / list.length` to the score, clamped to a maximum of 1.
    * @param {string} text Text to scan (will be lowercased internally).
    * @param {string[]} termList List of suspicious terms to look for.
    * @returns {number} A value in [0, 1].
@@ -298,51 +375,102 @@ class FilterSpamEdit {
    */
   static scoreSuspiciousTerms(text, termList) {
     if (!text || !termList || termList.length === 0) return 0;
-    const lower = text.toLowerCase();
-    const hits = termList.filter((term) => lower.includes(term)).length;
+    const normalized = FilterSpamEdit.normalizeText(text);
+    const tokens = FilterSpamEdit.tokenize(normalized);
+    let hits = 0;
+
+    for (const term of termList) {
+      const normalizedTerm = FilterSpamEdit.normalizeText(term);
+      if (!normalizedTerm) {
+        continue;
+      }
+      if (normalizedTerm.includes(' ')) {
+        hits += normalized.includes(normalizedTerm) ? 1 : 0;
+      } else {
+        hits += tokens.has(normalizedTerm) ? 1 : 0;
+      }
+    }
+
     return Math.min(hits / termList.length, 1);
   }
 
   /**
-   * Records a new edit attempt from an IP address by pushing the current
-   * timestamp into the module-level `ipEditHistory` map.
-   * Old entries outside `config.ipWindowMs` are pruned on the same call.
-   * @param {string} ip Client IP address.
+   * Periodically sweeps stale IP timestamp entries from the module-level `ipEditHistory` map so IPs that never edit again do not remain forever.
+   * The sweep runs at most once per configured IP window.
    * @param {FilterSpamEditConfig} config Plugin configuration.
    * @static
    */
-  static recordIPEdit(ip, config) {
+  static sweepIPHistory(config) {
     const now = Date.now();
+    // If the last sweep was less than the IP window ago, return
+    if (now - lastIPHistorySweep < config.ipWindowMs) {
+      return;
+    }
+    lastIPHistorySweep = now;
+    // Set the cutoff time for stale entries
     const cutoff = now - config.ipWindowMs;
-    const times = (ipEditHistory.get(ip) ?? []).filter((t) => t >= cutoff);
-    times.push(now);
-    ipEditHistory.set(ip, times);
+    for (const [ip, times] of ipEditHistory) {
+      const fresh = times.filter((time) => time >= cutoff);
+      if (fresh.length === 0) {
+        ipEditHistory.delete(ip);
+      } else {
+        // Keep fresh entries and update the map
+        ipEditHistory.set(ip, fresh);
+      }
+    }
   }
 
   /**
-   * Checks whether the given IP address has exceeded the configured edit rate.
-   * Prunes stale timestamps before the check.
+   * Records a new edit attempt from an IP address and returns whether that edit exceeds the configured rolling-window rate limit.
+   * Old entries outside `config.ipWindowMs` are pruned in-place on the same call.
    * @param {string} ip Client IP address.
    * @param {FilterSpamEditConfig} config Plugin configuration.
-   * @returns {boolean} `true` when the IP is rate-limited, `false` otherwise.
+   * @returns {boolean} `true` when the new attempt exceeds the IP limit, `false` otherwise.
    * @static
    */
-  static scoreIPRateLimit(ip, config) {
+  static recordAndScoreIPRateLimit(ip, config) {
     const now = Date.now();
     const cutoff = now - config.ipWindowMs;
-    const times = (ipEditHistory.get(ip) ?? []).filter((t) => t >= cutoff);
-    return times.length >= config.ipMaxEdits;
+    const times = ipEditHistory.get(ip) ?? [];
+
+    let writeIndex = 0;
+    for (const time of times) {
+      if (time >= cutoff) {
+        times[writeIndex] = time;
+        writeIndex += 1;
+      }
+    }
+
+    times.length = writeIndex;
+    times.push(now);
+    ipEditHistory.set(ip, times);
+
+    return times.length > config.ipMaxEdits;
+  }
+
+  /**
+   * Scores likely unicode obfuscation by measuring the ratio of characters that are neither letters, numbers, punctuation, nor symbols after Unicode NFKC normalization.
+   * Higher values suggest hidden / control / combining character abuse.
+   * @param {string} text Raw text to scan.
+   * @returns {number} A value in [0, 1].
+   * @static
+   */
+  static scoreUnicodeObfuscation(text) {
+    if (!text) return 0;
+    // Normalize the text to Unicode NFKC and filter out whitespace characters
+    const chars = [...text.normalize('NFKC')].filter((char) => !/\s/u.test(char));
+    if (chars.length === 0) return 0;
+    // Count the number of characters that are neither letters, numbers, punctuation, nor symbols
+    const suspicious = chars.filter((char) => !/[\p{L}\p{N}\p{P}\p{S}]/u.test(char)).length;
+    // Return the ratio of suspicious characters to total characters
+    return suspicious / chars.length;
   }
 
   /**
    * Computes a spam risk score from pre-calculated signal values.
-   *
    * Each signal contributes its configured weight when triggered (signal value > 0).
-   * For signals that return a continuous value in [0, 1], the contribution is
-   * `signal * weight` (proportional). For boolean signals the full weight is added.
-   *
-   * The targeted-slug multiplier is applied after summation when the edited slug
-   * appears in `config.targetedSlugs`.
+   * For signals that return a continuous value in [0, 1], the contribution is `signal * weight` (proportional). For boolean signals the full weight is added.
+   * The targeted-slug multiplier is applied after summation when the edited slug appears in `config.targetedSlugs`.
    * @param {object} params Signal parameters.
    * @param {string} params.slug The slug being edited.
    * @param {number} params.contentDistance Jaccard distance (0 = identical, 1 = completely different). Pass -1 to skip (new page).
@@ -350,6 +478,7 @@ class FilterSpamEdit {
    * @param {number} params.oldUrls Number of URLs in the old content.
    * @param {number} params.paragraphsRemoved Fraction of old paragraphs removed.
    * @param {number} params.suspiciousTermScore Suspicious term density (0–1).
+   * @param {number} params.unicodeObfuscationScore Unicode obfuscation ratio (0–1).
    * @param {number} params.newWordCount Word count of the new content.
    * @param {number} params.oldWordCount Word count of the old content. Pass 0 to skip (new page).
    * @param {boolean} params.ipRateLimited Whether the submitting IP is rate-limited.
@@ -365,6 +494,7 @@ class FilterSpamEdit {
     oldUrls,
     paragraphsRemoved,
     suspiciousTermScore,
+    unicodeObfuscationScore,
     newWordCount,
     oldWordCount,
     ipRateLimited,
@@ -439,6 +569,13 @@ class FilterSpamEdit {
       }
     }
 
+    // Unicode obfuscation
+    if (w.unicodeObfuscation > 0 && unicodeObfuscationScore > 0.15) {
+      const contribution = Math.min(unicodeObfuscationScore * w.unicodeObfuscation * 4, w.unicodeObfuscation);
+      signals.unicodeObfuscationScore = contribution;
+      reasons.push(`unicode_obfuscation_${Math.round(unicodeObfuscationScore * 100)}_percent`);
+    }
+
     // IP rate limit
     if (w.ipRateLimit > 0 && ipRateLimited) {
       signals.ipRateLimitScore = w.ipRateLimit;
@@ -491,13 +628,9 @@ class FilterSpamEdit {
   }
 
   /**
-   * Evaluates the incoming edit request and returns `true` to block it when the
-   * computed spam score meets or exceeds `config.blockThreshold`.
-   *
-   * Called automatically on the `validate-save` hook for both `save` (existing
-   * documents) and `saveNew` (new documents). Fetches the current version of the
-   * document from storage to enable content-comparison signals; if no prior
-   * document exists the comparison signals are skipped.
+   * Evaluates the incoming edit request and returns `true` to block it when the computed spam score meets or exceeds `config.blockThreshold`.
+   * Called automatically on the `validate-save` hook for both `save` (existing documents) and `saveNew` (new documents).
+   * Fetches the current version of the document from storage to enable content-comparison signals; if no prior document exists the comparison signals are skipped.
    * @param {import('express').Request<{ slug: string }, {}, import('../../dist/wiki.js').UttoriWikiDocument>} request The Express request object containing the submitted form body.
    * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} context The Uttori wiki context with `hooks` and `config`.
    * @returns {Promise<boolean>} Resolves to `true` to block the save, `false` to allow it.
@@ -506,8 +639,7 @@ class FilterSpamEdit {
   static async validateEdit(request, context) {
     debug('Validating edit for spam...');
 
-    /** @type {FilterSpamEditConfig} */
-    const config = { ...FilterSpamEdit.defaultConfig(), ...context.config[FilterSpamEdit.configKey] };
+    const config = FilterSpamEdit.resolveConfig(context);
 
     const slug = String(request.params?.slug || request.body?.slug || '').toLowerCase().trim();
     const newContent = String(request.body?.content || '');
@@ -516,8 +648,8 @@ class FilterSpamEdit {
     const ip = request.ip || request.socket?.remoteAddress || '0.0.0.0';
 
     // Record this edit attempt (for rate-limit tracking)
-    FilterSpamEdit.recordIPEdit(ip, config);
-    const ipRateLimited = FilterSpamEdit.scoreIPRateLimit(ip, config);
+    FilterSpamEdit.sweepIPHistory(config);
+    const ipRateLimited = FilterSpamEdit.recordAndScoreIPRateLimit(ip, config);
 
     // Fetch the existing document to compare against
     let oldContent = '';
@@ -540,14 +672,15 @@ class FilterSpamEdit {
     const oldUrls = FilterSpamEdit.getUrls(oldContent);
     const newUrls = FilterSpamEdit.getUrls(newContent);
     const oldUrlSet = new Set(oldUrls);
-    const newExternalLinks = newUrls.filter((u) => !oldUrlSet.has(u)).length;
+    const newExternalLinks = newUrls.reduce((count, u) => count + (oldUrlSet.has(u) ? 0 : 1), 0);
 
     const oldParagraphs = FilterSpamEdit.splitParagraphs(oldContent);
-    const newParagraphs = FilterSpamEdit.splitParagraphs(newContent);
-    const removedCount = oldParagraphs.filter((p) => !newParagraphs.includes(p)).length;
+    const newParagraphSet = new Set(FilterSpamEdit.splitParagraphs(newContent));
+    const removedCount = oldParagraphs.reduce((count, paragraph) => count + (newParagraphSet.has(paragraph) ? 0 : 1), 0);
     const paragraphsRemoved = isNewPage || oldParagraphs.length === 0 ? 0 : removedCount / oldParagraphs.length;
 
     const suspiciousTermScore = FilterSpamEdit.scoreSuspiciousTerms(newContent, config.suspiciousTermList);
+    const unicodeObfuscationScore = FilterSpamEdit.scoreUnicodeObfuscation(newContent);
 
     const oldWordCount = FilterSpamEdit.countWords(oldContent);
     const newWordCount = FilterSpamEdit.countWords(newContent);
@@ -560,6 +693,7 @@ class FilterSpamEdit {
       oldUrls: oldUrlSet.size,
       paragraphsRemoved,
       suspiciousTermScore,
+      unicodeObfuscationScore,
       newWordCount,
       oldWordCount,
       ipRateLimited,

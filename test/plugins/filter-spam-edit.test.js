@@ -142,12 +142,6 @@ test('validateConfig: throws when a weight is negative', (t) => {
   );
 });
 
-test('validateConfig: throws when weights is missing or not an object', (t) => {
-  t.throws(() => FilterSpamEdit.validateConfig(makeConfig({ weights: null })), {
-    message: `Config '${FilterSpamEdit.configKey}.weights' must be an object.`,
-  });
-});
-
 test('validateConfig: does not throw on a valid config', (t) => {
   t.notThrows(() => FilterSpamEdit.validateConfig(makeConfig()));
 });
@@ -170,21 +164,6 @@ test('register: throws when context is missing', (t) => {
 test('register: throws when context.hooks.on is not a function', (t) => {
   t.throws(() => FilterSpamEdit.register({ hooks: { on: 'nope' } }), {
     message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
-  });
-});
-
-test('register: throws when config.events is missing', (t) => {
-  const context = {
-    hooks: { on: sandbox.spy() },
-    config: {
-      [FilterSpamEdit.configKey]: {
-        ...FilterSpamEdit.defaultConfig(),
-        events: null,
-      },
-    },
-  };
-  t.throws(() => FilterSpamEdit.register(context), {
-    message: 'Missing events to register for in the FilterSpamEdit configuration',
   });
 });
 
@@ -349,38 +328,38 @@ test('scoreSuspiciousTerms: returns 0 for empty inputs', (t) => {
   t.is(FilterSpamEdit.scoreSuspiciousTerms(null, ['casino']), 0);
 });
 
-test('scoreIPRateLimit: returns false when under ipMaxEdits', (t) => {
+test('recordAndScoreIPRateLimit: returns false when under ipMaxEdits', (t) => {
   const config = FilterSpamEdit.defaultConfig();
   config.ipMaxEdits = 5;
   config.ipWindowMs = 60_000;
 
-  for (let i = 0; i < 4; i++) FilterSpamEdit.recordIPEdit('10.0.0.1', config);
-  t.false(FilterSpamEdit.scoreIPRateLimit('10.0.0.1', config));
+  for (let i = 0; i < 4; i++) FilterSpamEdit.recordAndScoreIPRateLimit('10.0.0.1', config);
+  t.false(FilterSpamEdit.recordAndScoreIPRateLimit('10.0.0.1', config));
 });
 
-test('scoreIPRateLimit: returns true when at or over ipMaxEdits', (t) => {
+test('recordAndScoreIPRateLimit: returns true when at or over ipMaxEdits', (t) => {
   const config = FilterSpamEdit.defaultConfig();
   config.ipMaxEdits = 3;
   config.ipWindowMs = 60_000;
 
-  for (let i = 0; i < 3; i++) FilterSpamEdit.recordIPEdit('10.0.0.2', config);
-  t.true(FilterSpamEdit.scoreIPRateLimit('10.0.0.2', config));
+  for (let i = 0; i < 3; i++) FilterSpamEdit.recordAndScoreIPRateLimit('10.0.0.2', config);
+  t.true(FilterSpamEdit.recordAndScoreIPRateLimit('10.0.0.2', config));
 });
 
-test('scoreIPRateLimit: handles first-time IP without error', (t) => {
+test('recordAndScoreIPRateLimit: handles first-time IP without error', (t) => {
   const config = FilterSpamEdit.defaultConfig();
-  t.notThrows(() => FilterSpamEdit.scoreIPRateLimit('brand-new-ip', config));
-  t.false(FilterSpamEdit.scoreIPRateLimit('brand-new-ip', config));
+  t.notThrows(() => FilterSpamEdit.recordAndScoreIPRateLimit('brand-new-ip', config));
+  t.false(FilterSpamEdit.recordAndScoreIPRateLimit('brand-new-ip', config));
 });
 
-test('scoreIPRateLimit: prunes timestamps outside the window', (t) => {
+test('recordAndScoreIPRateLimit: prunes timestamps outside the window', (t) => {
   const config = FilterSpamEdit.defaultConfig();
   config.ipMaxEdits = 2;
   config.ipWindowMs = 100; // very small window
 
   // Manually inject old timestamps that will be pruned
   ipEditHistory.set('10.0.0.3', [Date.now() - 200, Date.now() - 150]);
-  t.false(FilterSpamEdit.scoreIPRateLimit('10.0.0.3', config));
+  t.false(FilterSpamEdit.recordAndScoreIPRateLimit('10.0.0.3', config));
 });
 
 test('computeScore: returns 0 when all signals are zero / clean edit', (t) => {
