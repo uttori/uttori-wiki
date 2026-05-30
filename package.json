@@ -32,18 +32,18 @@
     "debug": "^4.4.3",
     "ejs": "^5.0.2",
     "express-session": "^1.19.0",
-    "googleapis": "^171.4.0",
+    "googleapis": "^173.0.0",
     "lunr": "^2.3.9",
-    "lunr-languages": "^1.18.0",
+    "lunr-languages": "^1.20.0",
     "markdown-it": "^14.1.1",
     "memorystore": "^1.6.8",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^8.0.10",
     "pdfreader": "^3.0.8",
     "sanitize-filename": "^1.6.4",
     "slugify": "^1.6.9",
     "sqlite-vec": "^0.1.9",
-    "ws": "^8.20.0"
+    "ws": "^8.21.0"
   },
   "peerDependencies": {
     "express": "^5"
@@ -60,20 +60,20 @@
     "@types/express-session": "^1.19.0",
     "@types/lunr": "^2.3.7",
     "@types/multer": "^2.1.0",
-    "@types/node": "^25.6.2",
+    "@types/node": "^25.9.1",
     "@types/nodemailer": "^8.0.0",
     "@types/sinon": "^21.0.1",
     "@types/supertest": "^7.2.0",
     "@types/ws": "^8.18.1",
-    "ava": "^8.0.0",
-    "better-sqlite3": "^12.9.0",
+    "ava": "^8.0.1",
+    "better-sqlite3": "^12.10.0",
     "c8": "^11.0.0",
     "cors": "^2.8.6",
-    "ejs": "^5.0.2",
+    "ejs": "^6.0.1",
     "eslint": "^10.3.0",
-    "eslint-plugin-anti-trojan-source": "^1.1.4",
-    "eslint-plugin-ava": "^16.0.1",
-    "eslint-plugin-jsdoc": "^62.9.0",
+    "eslint-plugin-anti-trojan-source": "^1.1.6",
+    "eslint-plugin-ava": "^17.0.0",
+    "eslint-plugin-jsdoc": "^63.0.0",
     "eslint-plugin-n": "^18.0.1",
     "eslint-plugin-no-inferred-method-name": "^2.0.0",
     "eslint-plugin-optimize-regex": "^1.2.1",
@@ -93,14 +93,14 @@
     "memorystore": "^1.6.8",
     "pdfreader": "^3.0.8",
     "pre-commit": "^2.0.0",
-    "release-it": "^20.0.1",
+    "release-it": "^20.2.0",
     "sanitize-filename": "^1.6.4",
     "sinon": "^22.0.0",
     "slugify": "^1.6.9",
     "sqlite-vec": "^0.1.9",
     "supertest": "^7.2.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.2"
+    "typescript-eslint": "^8.60.0"
   },
   "files": [
     "dist/*",
@@ -135,6 +135,10 @@
       "import": "./src/wiki.js",
       "types": "./dist/wiki.d.ts"
     },
+    "./plugins/csrf": {
+      "import": "./src/plugins/csrf.js",
+      "types": "./dist/plugins/csrf.d.ts"
+    },
     "./plugins/download-route": {
       "import": "./src/plugins/download-route.js",
       "types": "./dist/plugins/download-route.d.ts"
@@ -154,6 +158,10 @@
     "./plugins/filter-ip-address": {
       "import": "./src/plugins/filter-ip-address.js",
       "types": "./dist/plugins/filter-ip-address.d.ts"
+    },
+    "./plugins/filter-spam-edit": {
+      "import": "./src/plugins/filter-spam-edit.js",
+      "types": "./dist/plugins/filter-spam-edit.d.ts"
     },
     "./plugins/upload-multer": {
       "import": "./src/plugins/upload-multer.js",

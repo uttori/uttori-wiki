@@ -24,6 +24,7 @@ export { default as FormHandler } from './plugins/form-handler.js';
 export { default as EmailHandler } from './plugins/form-handlers/email-handler.js';
 export { default as GoogleDocsHandler } from './plugins/form-handlers/google-docs-handler.js';
 export { default as CategoryRoutesPlugin } from './plugins/category-routes.js';
+export { default as CsrfProtection } from './plugins/csrf.js';
 
 // Everything below is for TypeScript exports
 export * from './config.js';
@@ -50,6 +51,7 @@ export * from './plugins/ai-chat-bot.js';
 export * from './plugins/tag-routes.js';
 export * from './plugins/form-handler.js';
 export * from './plugins/category-routes.js';
+export * from './plugins/csrf.js';
 
 export * from './plugins/markdown-it-plugin/footnotes.js';
 export * from './plugins/markdown-it-plugin/toc.js';

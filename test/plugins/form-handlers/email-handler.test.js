@@ -29,8 +29,6 @@ test.afterEach(() => {
   sandbox.restore();
 });
 
-// ── create ────────────────────────────────────────────────────────────────────
-
 test('create: throws when transportOptions is missing', (t) => {
   t.throws(() => EmailHandler.create({ from: 'a@b.com', to: 'c@d.com' }), {
     message: 'Email handler requires transportOptions, from, and to configuration',
@@ -121,8 +119,6 @@ test('create: handler uses template for both subject and body', async (t) => {
   t.true(mailData.html.includes('my-form'));
 });
 
-// ── generateSubject ───────────────────────────────────────────────────────────
-
 test('generateSubject: uses default subject when no template is given', (t) => {
   const formConfig = /** @type {any} */ ({ name: 'contact' });
   const subject = EmailHandler.generateSubject('', {}, formConfig);
@@ -153,8 +149,6 @@ test('generateSubject: handles undefined template (falsy)', (t) => {
   const subject = EmailHandler.generateSubject(undefined, {}, formConfig);
   t.is(subject, 'Form Submission: signup');
 });
-
-// ── generateBody ─────────────────────────────────────────────────────────────
 
 test('generateBody: returns custom template when provided', (t) => {
   const formConfig = /** @type {any} */ ({ name: 'contact' });

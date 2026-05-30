@@ -2,13 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## TODO
+## TODO / WIP
 
-- CSRF tokens support on edit pages
+- Discord Notifications
 
-## [8.1.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-26)
+## [8.1.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30)
 
 - 🧰 Add `FilterSpamEdit` plugin for checking for spam
+- 🧰 Add `CsrfProtection` plugin for CSRF tokens support on creation & update calls
 
 ## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09)
 

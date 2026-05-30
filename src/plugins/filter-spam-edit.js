@@ -162,37 +162,36 @@ class FilterSpamEdit {
 
   /**
    * Validates the provided configuration for required entries and correct types.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} config A Uttori-like context.
-   * @param {object} _context Unused context object.
+   * @param {Record<string, FilterSpamEditConfig>} config A Uttori-like context.
+   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} _context Unused context object.
    * @throws {Error} When any required config value is missing or invalid.
    * @static
    */
   static validateConfig(config, _context) {
     debug('Validating config...');
-    if (!config[FilterSpamEdit.configKey]) {
+    if (!config || !config[FilterSpamEdit.configKey]) {
       throw new Error(`Config missing '${FilterSpamEdit.configKey}' entry.`);
     }
-    const c = FilterSpamEdit.resolveConfig({ config });
 
-    if (typeof c.blockThreshold !== 'number' || c.blockThreshold <= 0) {
+    if (typeof config[FilterSpamEdit.configKey].blockThreshold !== 'number' || config[FilterSpamEdit.configKey].blockThreshold <= 0) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.blockThreshold' must be a positive number.`);
     }
-    if (typeof c.targetedSlugMultiplier !== 'number' || c.targetedSlugMultiplier < 1) {
+    if (typeof config[FilterSpamEdit.configKey].targetedSlugMultiplier !== 'number' || config[FilterSpamEdit.configKey].targetedSlugMultiplier < 1) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.targetedSlugMultiplier' must be a number >= 1.`);
     }
-    if (typeof c.logPath !== 'string' || !c.logPath) {
+    if (typeof config[FilterSpamEdit.configKey].logPath !== 'string' || !config[FilterSpamEdit.configKey].logPath) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.logPath' must be a non-empty string.`);
     }
-    if (!Number.isInteger(c.ipWindowMs) || c.ipWindowMs <= 0) {
+    if (!Number.isInteger(config[FilterSpamEdit.configKey].ipWindowMs) || config[FilterSpamEdit.configKey].ipWindowMs <= 0) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.ipWindowMs' must be a positive integer.`);
     }
-    if (!Number.isInteger(c.ipMaxEdits) || c.ipMaxEdits <= 0) {
+    if (!Number.isInteger(config[FilterSpamEdit.configKey].ipMaxEdits) || config[FilterSpamEdit.configKey].ipMaxEdits <= 0) {
       throw new Error(`Config '${FilterSpamEdit.configKey}.ipMaxEdits' must be a positive integer.`);
     }
-    if (!c.weights || typeof c.weights !== 'object') {
+    if (!config[FilterSpamEdit.configKey].weights || typeof config[FilterSpamEdit.configKey].weights !== 'object') {
       throw new Error(`Config '${FilterSpamEdit.configKey}.weights' must be an object.`);
     }
-    for (const [key, value] of Object.entries(c.weights)) {
+    for (const [key, value] of Object.entries(config[FilterSpamEdit.configKey].weights)) {
       if (typeof value !== 'number' || value < 0) {
         throw new Error(`Config '${FilterSpamEdit.configKey}.weights.${key}' must be a number >= 0.`);
       }
@@ -631,7 +630,7 @@ class FilterSpamEdit {
    * Evaluates the incoming edit request and returns `true` to block it when the computed spam score meets or exceeds `config.blockThreshold`.
    * Called automatically on the `validate-save` hook for both `save` (existing documents) and `saveNew` (new documents).
    * Fetches the current version of the document from storage to enable content-comparison signals; if no prior document exists the comparison signals are skipped.
-   * @param {import('express').Request<{ slug: string }, {}, import('../../dist/wiki.js').UttoriWikiDocument>} request The Express request object containing the submitted form body.
+   * @param {import('express').Request<{ slug: string }, {}, import('../wiki.js').UttoriWikiDocument>} request The Express request object containing the submitted form body.
    * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} context The Uttori wiki context with `hooks` and `config`.
    * @returns {Promise<boolean>} Resolves to `true` to block the save, `false` to allow it.
    * @static
@@ -656,7 +655,7 @@ class FilterSpamEdit {
     let isNewPage = true;
     try {
       const results = await context.hooks.fetch('storage-get', slug, context);
-      /** @type {import('../../dist/wiki.js').UttoriWikiDocument} */
+      /** @type {import('../wiki.js').UttoriWikiDocument} */
       const existing = Array.isArray(results) ? results[0] : results;
       if (existing?.content) {
         oldContent = String(existing.content);

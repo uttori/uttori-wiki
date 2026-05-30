@@ -15,15 +15,11 @@ async function writeTempFile(name, content) {
   return { dir, name };
 }
 
-// ── file-not-found ────────────────────────────────────────────────────────────
-
 test('extractAttachmentText: returns empty string when file does not exist', async (t) => {
   const config = makeConfig('/nonexistent-dir');
   const result = await extractAttachmentText(config, { path: 'missing.txt' });
   t.is(result, '');
 });
-
-// ── skip flag ─────────────────────────────────────────────────────────────────
 
 test('extractAttachmentText: returns empty string when attachment.skip is true', async (t) => {
   const { dir, name } = await writeTempFile('skip.txt', 'should not be read');
@@ -32,8 +28,6 @@ test('extractAttachmentText: returns empty string when attachment.skip is true',
   fs.rmSync(dir, { recursive: true });
   t.is(result, '');
 });
-
-// ── plain-text extraction ─────────────────────────────────────────────────────
 
 test('extractAttachmentText: extracts plain text from .txt file', async (t) => {
   const content = 'Hello, world!';
@@ -80,8 +74,6 @@ test('extractAttachmentText: extracts text from .log file', async (t) => {
   t.is(result, content);
 });
 
-// ── unsupported type ──────────────────────────────────────────────────────────
-
 test('extractAttachmentText: returns empty string for unsupported file extension', async (t) => {
   const { dir, name } = await writeTempFile('binary.bin', Buffer.from([0, 1, 2, 3]));
   const config = makeConfig(dir);
@@ -89,8 +81,6 @@ test('extractAttachmentText: returns empty string for unsupported file extension
   fs.rmSync(dir, { recursive: true });
   t.is(result, '');
 });
-
-// ── PDF path (enter branch; invalid buffer → error path) ──────────────────────
 
 test('extractAttachmentText: returns empty string for invalid PDF content', async (t) => {
   // A file with a .pdf extension but non-PDF bytes triggers the PDF branch.
