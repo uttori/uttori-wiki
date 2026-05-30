@@ -13,8 +13,6 @@ test.afterEach(() => {
   sandbox.restore();
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 /**
  * Returns a minimal valid plugin config block (the inner value).
  * @returns {import('../../src/plugins/category-routes.js').CategoryRoutesPluginConfig}
@@ -92,21 +90,15 @@ const makeResponse = () => ({
   status: sandbox.stub().returnsThis(),
 });
 
-// ── configKey ─────────────────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.configKey: returns the correct config key', (t) => {
   t.is(CategoryRoutesPlugin.configKey, 'uttori-plugin-category-routes');
 });
-
-// ── allowedDocumentKeys ───────────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.allowedDocumentKeys: returns array with categories', (t) => {
   const keys = CategoryRoutesPlugin.allowedDocumentKeys;
   t.true(Array.isArray(keys));
   t.true(keys.includes('categories'));
 });
-
-// ── defaultConfig ─────────────────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.defaultConfig(): returns valid default configuration', (t) => {
   const config = CategoryRoutesPlugin.defaultConfig();
@@ -124,8 +116,6 @@ test('CategoryRoutesPlugin.defaultConfig(): returns valid default configuration'
   t.is(config.categoryRequestHandler, CategoryRoutesPlugin.categoryRequestHandler);
   t.is(config.apiRequestHandler, CategoryRoutesPlugin.categoryApiRequestHandler);
 });
-
-// ── extendConfig ──────────────────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.extendConfig(): merges user config with defaults', (t) => {
   const extended = CategoryRoutesPlugin.extendConfig({
@@ -150,10 +140,8 @@ test('CategoryRoutesPlugin.extendConfig(): handles undefined config (returns def
   t.deepEqual(extended, defaults);
 });
 
-// ── validateConfig ────────────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.validateConfig(): throws when config key is missing', (t) => {
-  t.throws(() => CategoryRoutesPlugin.validateConfig({}, /** @type {any} */ ({})), {
+  t.throws(() => CategoryRoutesPlugin.validateConfig({}, ({})), {
     message: `Config Error: '${CategoryRoutesPlugin.configKey}' configuration key is missing.`,
   });
 });
@@ -162,7 +150,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryIndexRoute is e
   // extendConfig merges defaults; pass empty string to override and trigger the throw
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { categoryIndexRoute: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /categoryIndexRoute.*missing or not a string/,
   });
 });
@@ -170,7 +158,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryIndexRoute is e
 test('CategoryRoutesPlugin.validateConfig(): throws when categoryRoute is empty string', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { categoryRoute: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /categoryRoute.*missing or not a string/,
   });
 });
@@ -178,7 +166,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryRoute is empty 
 test('CategoryRoutesPlugin.validateConfig(): throws when apiRoute is empty string', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { apiRoute: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /apiRoute.*missing or not a string/,
   });
 });
@@ -186,7 +174,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when apiRoute is empty strin
 test('CategoryRoutesPlugin.validateConfig(): throws when title is empty string', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { title: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /title.*missing or not a string/,
   });
 });
@@ -194,7 +182,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when title is empty string',
 test('CategoryRoutesPlugin.validateConfig(): throws when categoryField is empty string', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { categoryField: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /categoryField.*missing or not a string/,
   });
 });
@@ -202,22 +190,22 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryField is empty 
 test('CategoryRoutesPlugin.validateConfig(): throws when separator is empty string', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: { separator: '' },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /separator.*missing or not a string/,
   });
 });
 
 test('CategoryRoutesPlugin.validateConfig(): throws when limit is not a number', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
-    [CategoryRoutesPlugin.configKey]: { limit: /** @type {any} */ ('many') },
-  }, /** @type {any} */ ({})), {
+    [CategoryRoutesPlugin.configKey]: { limit: ('many') },
+  }, ({})), {
     message: /limit.*missing or not a number/,
   });
 });
 
 test('CategoryRoutesPlugin.validateConfig(): throws when middleware is not an object', (t) => {
   // extendConfig always spreads middleware into an object, so stub extendConfig to bypass that
-  const extendConfigStub = sandbox.stub(CategoryRoutesPlugin, 'extendConfig').returns(/** @type {any} */ ({
+  const extendConfigStub = sandbox.stub(CategoryRoutesPlugin, 'extendConfig').returns(({
     categoryIndexRoute: 'categories',
     categoryRoute: 'categories',
     apiRoute: 'category-api',
@@ -233,7 +221,7 @@ test('CategoryRoutesPlugin.validateConfig(): throws when middleware is not an ob
 
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: validPluginConfig(),
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /middleware.*missing or not an object/,
   });
 
@@ -243,9 +231,9 @@ test('CategoryRoutesPlugin.validateConfig(): throws when middleware is not an ob
 test('CategoryRoutesPlugin.validateConfig(): throws when categoryIndexRequestHandler is not a function', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: {
-      categoryIndexRequestHandler: /** @type {any} */ ('not-a-function'),
+      categoryIndexRequestHandler: ('not-a-function'),
     },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /categoryIndexRequestHandler.*missing or not a function/,
   });
 });
@@ -253,9 +241,9 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryIndexRequestHan
 test('CategoryRoutesPlugin.validateConfig(): throws when categoryRequestHandler is not a function', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: {
-      categoryRequestHandler: /** @type {any} */ ('not-a-function'),
+      categoryRequestHandler: ('not-a-function'),
     },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /categoryRequestHandler.*missing or not a function/,
   });
 });
@@ -263,9 +251,9 @@ test('CategoryRoutesPlugin.validateConfig(): throws when categoryRequestHandler 
 test('CategoryRoutesPlugin.validateConfig(): throws when apiRequestHandler is not a function', (t) => {
   t.throws(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: {
-      apiRequestHandler: /** @type {any} */ ('not-a-function'),
+      apiRequestHandler: ('not-a-function'),
     },
-  }, /** @type {any} */ ({})), {
+  }, ({})), {
     message: /apiRequestHandler.*missing or not a function/,
   });
 });
@@ -273,25 +261,23 @@ test('CategoryRoutesPlugin.validateConfig(): throws when apiRequestHandler is no
 test('CategoryRoutesPlugin.validateConfig(): validates successfully with valid config', (t) => {
   t.notThrows(() => CategoryRoutesPlugin.validateConfig({
     [CategoryRoutesPlugin.configKey]: validPluginConfig(),
-  }, /** @type {any} */ ({})));
+  }, ({})));
 });
 
-// ── register ──────────────────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.register(): throws when context is missing', (t) => {
-  t.throws(() => CategoryRoutesPlugin.register(/** @type {any} */ (undefined)), {
+  t.throws(() => CategoryRoutesPlugin.register((undefined)), {
     message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
   });
 });
 
 test('CategoryRoutesPlugin.register(): throws when hooks is missing', (t) => {
-  t.throws(() => CategoryRoutesPlugin.register(/** @type {any} */ ({})), {
+  t.throws(() => CategoryRoutesPlugin.register(({})), {
     message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
   });
 });
 
 test('CategoryRoutesPlugin.register(): throws when hooks.on is not a function', (t) => {
-  t.throws(() => CategoryRoutesPlugin.register(/** @type {any} */ ({ hooks: {} })), {
+  t.throws(() => CategoryRoutesPlugin.register(({ hooks: {} })), {
     message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.',
   });
 });
@@ -300,7 +286,7 @@ test('CategoryRoutesPlugin.register(): registers events successfully', (t) => {
   const hooks = new EventDispatcher();
   const onSpy = sandbox.spy(hooks, 'on');
 
-  t.notThrows(() => CategoryRoutesPlugin.register(/** @type {any} */ ({
+  t.notThrows(() => CategoryRoutesPlugin.register(({
     hooks,
     config: { [CategoryRoutesPlugin.configKey]: validPluginConfig() },
   })));
@@ -314,7 +300,7 @@ test('CategoryRoutesPlugin.register(): handles non-existent method gracefully', 
   const hooks = new EventDispatcher();
   const onSpy = sandbox.spy(hooks, 'on');
 
-  t.notThrows(() => CategoryRoutesPlugin.register(/** @type {any} */ ({
+  t.notThrows(() => CategoryRoutesPlugin.register(({
     hooks,
     config: {
       [CategoryRoutesPlugin.configKey]: {
@@ -330,13 +316,11 @@ test('CategoryRoutesPlugin.register(): handles non-existent method gracefully', 
   t.false(onSpy.calledWith('some-event', sinon.match.any));
 });
 
-// ── bindRoutes ────────────────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.bindRoutes(): binds all three routes', (t) => {
-  const server = /** @type {any} */ ({ get: sandbox.spy() });
+  const server = ({ get: sandbox.spy() });
   const middlewareSpy = sandbox.spy();
 
-  const context = /** @type {any} */ ({
+  const context = ({
     config: {
       [CategoryRoutesPlugin.configKey]: {
         ...validPluginConfig(),
@@ -359,8 +343,6 @@ test('CategoryRoutesPlugin.bindRoutes(): binds all three routes', (t) => {
   t.true(server.get.calledWith('/categories/*categoryPath', middlewareSpy, sinon.match.func));
   t.true(server.get.calledWith('/category-api', middlewareSpy, sinon.match.func));
 });
-
-// ── getCategorizedDocuments ───────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.getCategorizedDocuments(): returns matching documents', async (t) => {
   const context = makeContext();
@@ -393,8 +375,6 @@ test('CategoryRoutesPlugin.getCategorizedDocuments(): filters out falsy results'
   t.is(docs.length, 1);
   t.is(docs[0].slug, 'doc1');
 });
-
-// ── buildCategoryTree ─────────────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.buildCategoryTree(): builds flat categories', (t) => {
   const tree = CategoryRoutesPlugin.buildCategoryTree(['tech', 'science']);
@@ -429,8 +409,6 @@ test('CategoryRoutesPlugin.buildCategoryTree(): uses custom separator', (t) => {
   t.is(tree.tech.children.js.fullPath, 'tech:js');
 });
 
-// ── flattenCategoryTree ───────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.flattenCategoryTree(): flattens and sorts tree', (t) => {
   const tree = CategoryRoutesPlugin.buildCategoryTree(['tech', 'art', 'science']);
   const flat = CategoryRoutesPlugin.flattenCategoryTree(tree);
@@ -456,8 +434,6 @@ test('CategoryRoutesPlugin.flattenCategoryTree(): includes children with correct
 test('CategoryRoutesPlugin.flattenCategoryTree(): returns empty array for empty tree', (t) => {
   t.deepEqual(CategoryRoutesPlugin.flattenCategoryTree({}), []);
 });
-
-// ── categoryIndexRequestHandler ───────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.categoryIndexRequestHandler(): returns a function', (t) => {
   const context = makeContext();
@@ -513,8 +489,6 @@ test('categoryIndexRequestHandler: skips cache header when useCache is false', a
   t.false(response.set.called);
   t.true(response.render.calledWith('categories'));
 });
-
-// ── categoryRequestHandler ────────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.categoryRequestHandler(): returns a function', (t) => {
   const context = makeContext();
@@ -627,8 +601,6 @@ test('categoryRequestHandler: skips cache header when useCache is false', async 
   t.true(response.render.calledWith('category'));
 });
 
-// ── getAllCategories ───────────────────────────────────────────────────────────
-
 test('CategoryRoutesPlugin.getAllCategories(): returns deduplicated sorted categories', async (t) => {
   const context = makeContext();
   context._fetchStub.resolves([[
@@ -660,8 +632,6 @@ test('CategoryRoutesPlugin.getAllCategories(): filters out empty/null categories
 
   t.deepEqual(categories, ['tech']);
 });
-
-// ── categoryApiRequestHandler ─────────────────────────────────────────────────
 
 test('CategoryRoutesPlugin.categoryApiRequestHandler(): returns a function', (t) => {
   const context = makeContext();

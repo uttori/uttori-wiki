@@ -423,7 +423,7 @@ declare class AIChatBot {
     static defaultConfig(): AIChatBotConfig;
     /**
      * Validates the provided configuration for required entries.
-     * @param {Record<string, AIChatBotConfig>} config - A provided configuration to use.
+     * @param {Record<string, AIChatBotConfig>} config A provided configuration to use.
      * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} [_context] Unused.
      * @example <caption>AIChatBot.validateConfig(config, _context)</caption>
      * AIChatBot.validateConfig({ ... });

@@ -13,8 +13,6 @@ test.afterEach(() => {
   sandbox.restore();
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
 /**
  * Returns a minimal GoogleDocsHandlerConfig for tests.
  * @returns {import('../../../src/plugins/form-handlers/google-docs-handler.js').GoogleDocsHandlerConfig}
@@ -95,8 +93,6 @@ const stubGoogleDrive = ({ rejectList = false } = {}) => {
   return { listStub };
 };
 
-// ── create ────────────────────────────────────────────────────────────────────
-
 test('create: throws error on missing credentialsPath', (t) => {
   const config = /** @type {any} */ ({
     spreadsheetId: 'test-spreadsheet-id',
@@ -154,8 +150,6 @@ test.serial('create: handler resolves with failure when appendRow rejects', asyn
   t.false(result.success);
 });
 
-// ── appendRow ─────────────────────────────────────────────────────────────────
-
 test.serial('appendRow: appends data to Google Sheet', async (t) => {
   const { appendStub } = stubGoogleSheets();
 
@@ -190,8 +184,6 @@ test.serial('appendRow: throws when sheets API rejects', async (t) => {
     { message: 'Sheets API error' },
   );
 });
-
-// ── prepareRowData ────────────────────────────────────────────────────────────
 
 test('prepareRowData: returns correct row data without timestamp', (t) => {
   const result = GoogleDocsHandler.prepareRowData(
@@ -349,8 +341,6 @@ test('prepareRowData: does not add timestamp when prependTimestamp is undefined'
   t.deepEqual(result, ['test-form', 'Test']);
 });
 
-// ── createSpreadsheet ─────────────────────────────────────────────────────────
-
 test.serial('createSpreadsheet: creates a spreadsheet and returns its id', async (t) => {
   const { createStub } = stubGoogleSheets();
 
@@ -385,8 +375,6 @@ test.serial('createSpreadsheet: throws when sheets API rejects', async (t) => {
   );
 });
 
-// ── checkSpreadsheetExists ────────────────────────────────────────────────────
-
 test('checkSpreadsheetExists: returns false when spreadsheetId is missing', async (t) => {
   const config = { credentialsPath: '/fake/creds.json', sheetName: 'Sheet1', spreadsheetId: '' };
   const result = await GoogleDocsHandler.checkSpreadsheetExists(/** @type {any} */ (config));
@@ -415,8 +403,6 @@ test.serial('checkSpreadsheetExists: returns false when API throws', async (t) =
 
   t.false(result);
 });
-
-// ── listSpreadsheets ──────────────────────────────────────────────────────────
 
 test.serial('listSpreadsheets: returns list of spreadsheets', async (t) => {
   const { listStub } = stubGoogleDrive();

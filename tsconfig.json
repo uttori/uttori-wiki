@@ -25,7 +25,7 @@
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "outDir": "dist",
-    "noEmit": false,
+    "noEmit": true,
     "sourceMap": true,
     "strict": false,
     "target": "esnext",

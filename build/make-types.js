@@ -98,7 +98,8 @@ const compileTypes = async () => {
     module: ts.ModuleKind.NodeNext,
     declaration: true,
     emitDeclarationOnly: true,
-    outDir: 'dist'
+    outDir: 'dist',
+    noEmit: false,
   };
 
   // Create program

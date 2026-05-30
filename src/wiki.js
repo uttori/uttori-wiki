@@ -429,7 +429,7 @@ class UttoriWiki {
     // explicit paths are not shadowed by the document detail handler.
     this.hooks.dispatch('bind-routes', router, this);
 
-    // Document slug catch-all — must stay after plugin routes
+    // Document slug catch-all - must stay after plugin routes
     router.get('/:slug', this.config.routeMiddleware.detail, this.detail);
 
     // Not Found - Catch All

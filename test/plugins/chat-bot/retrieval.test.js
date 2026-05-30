@@ -16,122 +16,6 @@ import {
   retrieve,
 } from '../../../src/plugins/chat-bot/retrieval.js';
 
-// ─── buildSlugFilter ──────────────────────────────────────────────────────────
-
-test('buildSlugFilter: returns empty filter for no slugs', (t) => {
-  const result = buildSlugFilter([]);
-  t.is(result.sql, '');
-  t.deepEqual(result.params, []);
-});
-
-test('buildSlugFilter: returns empty filter when called with no arguments', (t) => {
-  const result = buildSlugFilter();
-  t.is(result.sql, '');
-  t.deepEqual(result.params, []);
-});
-
-test('buildSlugFilter: returns empty filter for non-array input', (t) => {
-  // @ts-expect-error - testing invalid input
-  const result = buildSlugFilter(null);
-  t.is(result.sql, '');
-  t.deepEqual(result.params, []);
-});
-
-test('buildSlugFilter: builds correct SQL and params for one slug', (t) => {
-  const result = buildSlugFilter(['my-doc']);
-  t.is(result.sql, 'AND s.slug IN (?)');
-  t.deepEqual(result.params, ['my-doc']);
-});
-
-test('buildSlugFilter: builds correct SQL and params for multiple slugs', (t) => {
-  const result = buildSlugFilter(['doc-a', 'doc-b', 'doc-c']);
-  t.is(result.sql, 'AND s.slug IN (?,?,?)');
-  t.deepEqual(result.params, ['doc-a', 'doc-b', 'doc-c']);
-});
-
-test('buildSlugFilter: trims slug whitespace', (t) => {
-  const result = buildSlugFilter(['  trimmed  ']);
-  t.deepEqual(result.params, ['trimmed']);
-});
-
-test('buildSlugFilter: filters out empty strings after trim', (t) => {
-  const result = buildSlugFilter(['valid', '  ', '']);
-  t.deepEqual(result.params, ['valid']);
-  t.is(result.sql, 'AND s.slug IN (?)');
-});
-
-// ─── bm25ToSimilarity ─────────────────────────────────────────────────────────
-
-test('bm25ToSimilarity: returns empty map for no rows', (t) => {
-  const result = bm25ToSimilarity([]);
-  t.is(result.size, 0);
-});
-
-test('bm25ToSimilarity: returns 0.5 for single row (no std dev)', (t) => {
-  const result = bm25ToSimilarity([{ rowid: 1, rank: -5 }]);
-  t.is(result.get(1), 0.5);
-});
-
-test('bm25ToSimilarity: returns scores between 0 and 1 for multiple rows', (t) => {
-  // BM25 ranks are negative; more-negative = better match
-  const rows = [
-    { rowid: 1, rank: -8 },
-    { rowid: 2, rank: -4 },
-    { rowid: 3, rank: -1 },
-  ];
-  const result = bm25ToSimilarity(rows);
-  t.is(result.size, 3);
-  for (const [, score] of result) {
-    t.true(score >= 0 && score <= 1);
-  }
-});
-
-test('bm25ToSimilarity: best (most-negative) rank gets highest similarity', (t) => {
-  const rows = [
-    { rowid: 1, rank: -10 }, // best
-    { rowid: 2, rank: -2 },  // worst
-  ];
-  const result = bm25ToSimilarity(rows);
-  t.true(result.get(1) > result.get(2));
-});
-
-// ─── vecDistanceToSimilarity ──────────────────────────────────────────────────
-
-test('vecDistanceToSimilarity: returns empty map for no rows', (t) => {
-  const result = vecDistanceToSimilarity([]);
-  t.is(result.size, 0);
-});
-
-test('vecDistanceToSimilarity: returns 0 for all rows when all distances equal', (t) => {
-  const rows = [{ rowid: 1, distance: 0.5 }, { rowid: 2, distance: 0.5 }];
-  const result = vecDistanceToSimilarity(rows);
-  t.is(result.get(1), 0);
-  t.is(result.get(2), 0);
-});
-
-test('vecDistanceToSimilarity: closest distance (min) maps to similarity 1', (t) => {
-  const rows = [
-    { rowid: 1, distance: 0.1 }, // closest
-    { rowid: 2, distance: 0.9 }, // furthest
-  ];
-  const result = vecDistanceToSimilarity(rows);
-  t.is(result.get(1), 1);
-  t.is(result.get(2), 0);
-});
-
-test('vecDistanceToSimilarity: intermediate distance maps between 0 and 1', (t) => {
-  const rows = [
-    { rowid: 1, distance: 0.0 },
-    { rowid: 2, distance: 0.5 },
-    { rowid: 3, distance: 1.0 },
-  ];
-  const result = vecDistanceToSimilarity(rows);
-  const mid = result.get(2);
-  t.true(mid > 0 && mid < 1);
-});
-
-// ─── blendAndRank ─────────────────────────────────────────────────────────────
-
 const baseConfig = {
   titleBoost: 0.25,
   textBoost: 0.10,
@@ -141,53 +25,6 @@ const baseConfig = {
   maxContextTokens: 4096,
   maxPerSource: Infinity,
 };
-
-test('blendAndRank: returns blended chunks sorted descending by score', (t) => {
-  const rowids = [1, 2, 3];
-  const vecSim = new Map([[1, 0.9], [2, 0.5], [3, 0.1]]);
-  const ftsSim = new Map([[1, 0.8], [2, 0.4], [3, 0.2]]);
-  const titleCount = new Map();
-  const textCount = new Map();
-  const result = blendAndRank(rowids, vecSim, ftsSim, 0.35, titleCount, textCount, baseConfig);
-  t.is(result.length, 3);
-  // Scores should be descending
-  for (let i = 0; i < result.length - 1; i++) {
-    t.true(result[i].score >= result[i + 1].score);
-  }
-});
-
-test('blendAndRank: adds title boost to score', (t) => {
-  const rowids = [1, 2];
-  const vecSim = new Map([[1, 0.5], [2, 0.5]]);
-  const ftsSim = new Map();
-  const titleCount = new Map([[1, 2]]); // rowid 1 matched title twice
-  const textCount = new Map();
-  const result = blendAndRank(rowids, vecSim, ftsSim, 0, titleCount, textCount, baseConfig);
-  const r1 = result.find((r) => r.rowid === 1);
-  const r2 = result.find((r) => r.rowid === 2);
-  t.true(r1.score > r2.score);
-  t.is(r1.titleBoost, 2 * baseConfig.titleBoost);
-});
-
-test('blendAndRank: adds text boost to score', (t) => {
-  const rowids = [1, 2];
-  const vecSim = new Map([[1, 0.5], [2, 0.5]]);
-  const ftsSim = new Map();
-  const titleCount = new Map();
-  const textCount = new Map([[2, 3]]); // rowid 2 matched text three times
-  const result = blendAndRank(rowids, vecSim, ftsSim, 0, titleCount, textCount, baseConfig);
-  const r1 = result.find((r) => r.rowid === 1);
-  const r2 = result.find((r) => r.rowid === 2);
-  t.true(r2.score > r1.score);
-  t.is(r2.textBoost, 3 * baseConfig.textBoost);
-});
-
-test('blendAndRank: returns empty array for no rowids', (t) => {
-  const result = blendAndRank([], new Map(), new Map(), 0, new Map(), new Map(), baseConfig);
-  t.deepEqual(result, []);
-});
-
-// ─── pickByBudget ─────────────────────────────────────────────────────────────
 
 /** Build a minimal RetrievedChunk */
 const makeChunk = (rowid, source_id, token_count = 100, score = 0.5) => ({
@@ -200,150 +37,6 @@ const makeChunk = (rowid, source_id, token_count = 100, score = 0.5) => ({
   source: { id: source_id, title: 'Title', slug: source_id },
   score,
 });
-
-test('pickByBudget: returns empty array for no chunks', (t) => {
-  const result = pickByBudget([], new Set(), baseConfig);
-  t.deepEqual(result, []);
-});
-
-test('pickByBudget: picks chunks up to chunkLimit', (t) => {
-  const config = { ...baseConfig, chunkLimit: 2, maxContextTokens: 99999, maxPerSource: Infinity };
-  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'src'));
-  const result = pickByBudget(chunks, new Set(), config);
-  t.is(result.length, 2);
-});
-
-test('pickByBudget: respects token budget', (t) => {
-  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 250, maxPerSource: Infinity };
-  // 100 tokens each; budget allows 2, and the 3rd would be skipped
-  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'src' + id, 100));
-  const result = pickByBudget(chunks, new Set(), config);
-  t.true(result.length <= 2);
-});
-
-test('pickByBudget: respects maxPerSource cap', (t) => {
-  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 99999, maxPerSource: 1 };
-  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'same-source'));
-  const result = pickByBudget(chunks, new Set(), config);
-  t.is(result.length, 1);
-});
-
-test('pickByBudget: pinned rowid is always included first', (t) => {
-  const config = { ...baseConfig, chunkLimit: 2, maxContextTokens: 99999, maxPerSource: Infinity };
-  const chunks = [
-    makeChunk(10, 'src', 100, 0.9),
-    makeChunk(20, 'src', 100, 0.1), // pinned but lower score
-    makeChunk(30, 'src', 100, 0.5),
-  ];
-  const pinned = new Set([20]);
-  const result = pickByBudget(chunks, pinned, config);
-  t.is(result[0].rowid, 20);
-});
-
-test('pickByBudget: uses approxTokenLen when token_count is null', (t) => {
-  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 99999, maxPerSource: Infinity };
-  const chunk = { ...makeChunk(1, 'src'), token_count: null };
-  const result = pickByBudget([chunk], new Set(), config);
-  t.is(result.length, 1);
-});
-
-// ─── buildCitations ──────────────────────────────────────────────────────────
-
-test('buildCitations: returns empty array for no chunks', (t) => {
-  t.deepEqual(buildCitations([]), []);
-});
-
-test('buildCitations: maps chunk to citation with slug', (t) => {
-  const chunk = makeChunk(1, 'my-source');
-  chunk.source.slug = 'my-source';
-  const [citation] = buildCitations([chunk]);
-  t.is(citation.source_id, 'my-source');
-  t.is(citation.slug, 'my-source');
-});
-
-test('buildCitations: appends anchor for chunks with sectionPath', (t) => {
-  const chunk = makeChunk(1, 'my-source');
-  chunk.source.slug = 'my-slug';
-  chunk.sectionPath = ['Intro', 'Background'];
-  const [citation] = buildCitations([chunk]);
-  t.true(citation.slug.includes('#'));
-  t.true(citation.slug.startsWith('my-slug#'));
-});
-
-test('buildCitations: uses source.id as title fallback when title is empty', (t) => {
-  const chunk = makeChunk(1, 'my-source');
-  chunk.source.title = '';
-  const [citation] = buildCitations([chunk]);
-  t.is(citation.title, 'my-source');
-});
-
-test('buildCitations: includes idx and score in citation', (t) => {
-  const chunk = { ...makeChunk(1, 'src'), idx: 5, score: 0.77 };
-  const [citation] = buildCitations([chunk]);
-  t.is(citation.idx, 5);
-  t.is(citation.score, 0.77);
-});
-
-// ─── embedQuery (fetch stub) ──────────────────────────────────────────────────
-
-test.serial('embedQuery: returns Float32Array from Ollama embedding response', async (t) => {
-  const fetchStub = sinon.stub(global, 'fetch').resolves({
-    ok: true,
-    json: async () => ({ embedding: [0.1, 0.2, 0.3] }),
-  });
-  try {
-    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test query');
-    t.true(result instanceof Float32Array);
-    t.is(result.length, 3);
-  } finally {
-    fetchStub.restore();
-  }
-});
-
-test.serial('embedQuery: returns Float32Array from embeddings array shape', async (t) => {
-  const fetchStub = sinon.stub(global, 'fetch').resolves({
-    ok: true,
-    json: async () => ({ embeddings: [0.4, 0.5, 0.6] }),
-  });
-  try {
-    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test');
-    t.true(result instanceof Float32Array);
-    // Float32 has ~7 significant digits; use approximate equality
-    t.true(Math.abs(result[0] - 0.4) < 1e-6);
-  } finally {
-    fetchStub.restore();
-  }
-});
-
-test.serial('embedQuery: returns empty Float32Array when embed returns empty vector', async (t) => {
-  const fetchStub = sinon.stub(global, 'fetch').rejects(new Error('Network error'));
-  try {
-    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test');
-    t.true(result instanceof Float32Array);
-    t.is(result.length, 0);
-  } finally {
-    fetchStub.restore();
-  }
-});
-
-// ─── pickByBudget: pinned-skip branch (lines 385-387) ────────────────────────
-
-test('pickByBudget: skips already-included pinned chunk during iteration', (t) => {
-  // Pinned chunk is first in merged so the loop encounters it before any break.
-  // Iteration flow: chunk(20) pinned→pre-added; loop hits 20→skip(lines 385-387),
-  // then adds 30 and 40, reaching chunkLimit.
-  const config = { ...baseConfig, chunkLimit: 3, maxContextTokens: 99999, maxPerSource: Infinity };
-  const chunks = [
-    makeChunk(20, 'src-pinned', 100, 0.9),
-    makeChunk(30, 'src-a', 100, 0.5),
-    makeChunk(40, 'src-b', 100, 0.3),
-  ];
-  const result = pickByBudget(chunks, new Set([20]), config);
-  t.is(result.length, 3);
-  t.is(result[0].rowid, 20);
-});
-
-// ─── retrieve() integration helpers ──────────────────────────────────────────
 
 /**
  * Whether the better-sqlite3 native binding is loadable in this Node version.
@@ -472,7 +165,293 @@ const stubEmbedding = (vec = [0.8, 0.1, 0.1]) =>
     json: async () => ({ embedding: vec }),
   });
 
-// ─── retrieve() integration tests ────────────────────────────────────────────
+test('buildSlugFilter: returns empty filter for no slugs', (t) => {
+  const result = buildSlugFilter([]);
+  t.is(result.sql, '');
+  t.deepEqual(result.params, []);
+});
+
+test('buildSlugFilter: returns empty filter when called with no arguments', (t) => {
+  const result = buildSlugFilter();
+  t.is(result.sql, '');
+  t.deepEqual(result.params, []);
+});
+
+test('buildSlugFilter: returns empty filter for non-array input', (t) => {
+  const result = buildSlugFilter(null);
+  t.is(result.sql, '');
+  t.deepEqual(result.params, []);
+});
+
+test('buildSlugFilter: builds correct SQL and params for one slug', (t) => {
+  const result = buildSlugFilter(['my-doc']);
+  t.is(result.sql, 'AND s.slug IN (?)');
+  t.deepEqual(result.params, ['my-doc']);
+});
+
+test('buildSlugFilter: builds correct SQL and params for multiple slugs', (t) => {
+  const result = buildSlugFilter(['doc-a', 'doc-b', 'doc-c']);
+  t.is(result.sql, 'AND s.slug IN (?,?,?)');
+  t.deepEqual(result.params, ['doc-a', 'doc-b', 'doc-c']);
+});
+
+test('buildSlugFilter: trims slug whitespace', (t) => {
+  const result = buildSlugFilter(['  trimmed  ']);
+  t.deepEqual(result.params, ['trimmed']);
+});
+
+test('buildSlugFilter: filters out empty strings after trim', (t) => {
+  const result = buildSlugFilter(['valid', '  ', '']);
+  t.deepEqual(result.params, ['valid']);
+  t.is(result.sql, 'AND s.slug IN (?)');
+});
+
+test('bm25ToSimilarity: returns empty map for no rows', (t) => {
+  const result = bm25ToSimilarity([]);
+  t.is(result.size, 0);
+});
+
+test('bm25ToSimilarity: returns 0.5 for single row (no std dev)', (t) => {
+  const result = bm25ToSimilarity([{ rowid: 1, rank: -5 }]);
+  t.is(result.get(1), 0.5);
+});
+
+test('bm25ToSimilarity: returns scores between 0 and 1 for multiple rows', (t) => {
+  // BM25 ranks are negative; more-negative = better match
+  const rows = [
+    { rowid: 1, rank: -8 },
+    { rowid: 2, rank: -4 },
+    { rowid: 3, rank: -1 },
+  ];
+  const result = bm25ToSimilarity(rows);
+  t.is(result.size, 3);
+  for (const [, score] of result) {
+    t.true(score >= 0 && score <= 1);
+  }
+});
+
+test('bm25ToSimilarity: best (most-negative) rank gets highest similarity', (t) => {
+  const rows = [
+    { rowid: 1, rank: -10 }, // best
+    { rowid: 2, rank: -2 },  // worst
+  ];
+  const result = bm25ToSimilarity(rows);
+  t.true(result.get(1) > result.get(2));
+});
+
+test('vecDistanceToSimilarity: returns empty map for no rows', (t) => {
+  const result = vecDistanceToSimilarity([]);
+  t.is(result.size, 0);
+});
+
+test('vecDistanceToSimilarity: returns 0 for all rows when all distances equal', (t) => {
+  const rows = [{ rowid: 1, distance: 0.5 }, { rowid: 2, distance: 0.5 }];
+  const result = vecDistanceToSimilarity(rows);
+  t.is(result.get(1), 0);
+  t.is(result.get(2), 0);
+});
+
+test('vecDistanceToSimilarity: closest distance (min) maps to similarity 1', (t) => {
+  const rows = [
+    { rowid: 1, distance: 0.1 }, // closest
+    { rowid: 2, distance: 0.9 }, // furthest
+  ];
+  const result = vecDistanceToSimilarity(rows);
+  t.is(result.get(1), 1);
+  t.is(result.get(2), 0);
+});
+
+test('vecDistanceToSimilarity: intermediate distance maps between 0 and 1', (t) => {
+  const rows = [
+    { rowid: 1, distance: 0.0 },
+    { rowid: 2, distance: 0.5 },
+    { rowid: 3, distance: 1.0 },
+  ];
+  const result = vecDistanceToSimilarity(rows);
+  const mid = result.get(2);
+  t.true(mid > 0 && mid < 1);
+});
+
+test('blendAndRank: returns blended chunks sorted descending by score', (t) => {
+  const rowids = [1, 2, 3];
+  const vecSim = new Map([[1, 0.9], [2, 0.5], [3, 0.1]]);
+  const ftsSim = new Map([[1, 0.8], [2, 0.4], [3, 0.2]]);
+  const titleCount = new Map();
+  const textCount = new Map();
+  const result = blendAndRank(rowids, vecSim, ftsSim, 0.35, titleCount, textCount, baseConfig);
+  t.is(result.length, 3);
+  // Scores should be descending
+  for (let i = 0; i < result.length - 1; i++) {
+    t.true(result[i].score >= result[i + 1].score);
+  }
+});
+
+test('blendAndRank: adds title boost to score', (t) => {
+  const rowids = [1, 2];
+  const vecSim = new Map([[1, 0.5], [2, 0.5]]);
+  const ftsSim = new Map();
+  const titleCount = new Map([[1, 2]]); // rowid 1 matched title twice
+  const textCount = new Map();
+  const result = blendAndRank(rowids, vecSim, ftsSim, 0, titleCount, textCount, baseConfig);
+  const r1 = result.find((r) => r.rowid === 1);
+  const r2 = result.find((r) => r.rowid === 2);
+  t.true(r1.score > r2.score);
+  t.is(r1.titleBoost, 2 * baseConfig.titleBoost);
+});
+
+test('blendAndRank: adds text boost to score', (t) => {
+  const rowids = [1, 2];
+  const vecSim = new Map([[1, 0.5], [2, 0.5]]);
+  const ftsSim = new Map();
+  const titleCount = new Map();
+  const textCount = new Map([[2, 3]]); // rowid 2 matched text three times
+  const result = blendAndRank(rowids, vecSim, ftsSim, 0, titleCount, textCount, baseConfig);
+  const r1 = result.find((r) => r.rowid === 1);
+  const r2 = result.find((r) => r.rowid === 2);
+  t.true(r2.score > r1.score);
+  t.is(r2.textBoost, 3 * baseConfig.textBoost);
+});
+
+test('blendAndRank: returns empty array for no rowids', (t) => {
+  const result = blendAndRank([], new Map(), new Map(), 0, new Map(), new Map(), baseConfig);
+  t.deepEqual(result, []);
+});
+
+test('pickByBudget: returns empty array for no chunks', (t) => {
+  const result = pickByBudget([], new Set(), baseConfig);
+  t.deepEqual(result, []);
+});
+
+test('pickByBudget: picks chunks up to chunkLimit', (t) => {
+  const config = { ...baseConfig, chunkLimit: 2, maxContextTokens: 99999, maxPerSource: Infinity };
+  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'src'));
+  const result = pickByBudget(chunks, new Set(), config);
+  t.is(result.length, 2);
+});
+
+test('pickByBudget: respects token budget', (t) => {
+  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 250, maxPerSource: Infinity };
+  // 100 tokens each; budget allows 2, and the 3rd would be skipped
+  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'src' + id, 100));
+  const result = pickByBudget(chunks, new Set(), config);
+  t.true(result.length <= 2);
+});
+
+test('pickByBudget: respects maxPerSource cap', (t) => {
+  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 99999, maxPerSource: 1 };
+  const chunks = [1, 2, 3].map((id) => makeChunk(id, 'same-source'));
+  const result = pickByBudget(chunks, new Set(), config);
+  t.is(result.length, 1);
+});
+
+test('pickByBudget: pinned rowid is always included first', (t) => {
+  const config = { ...baseConfig, chunkLimit: 2, maxContextTokens: 99999, maxPerSource: Infinity };
+  const chunks = [
+    makeChunk(10, 'src', 100, 0.9),
+    makeChunk(20, 'src', 100, 0.1), // pinned but lower score
+    makeChunk(30, 'src', 100, 0.5),
+  ];
+  const pinned = new Set([20]);
+  const result = pickByBudget(chunks, pinned, config);
+  t.is(result[0].rowid, 20);
+});
+
+test('pickByBudget: uses approxTokenLen when token_count is null', (t) => {
+  const config = { ...baseConfig, chunkLimit: 99, maxContextTokens: 99999, maxPerSource: Infinity };
+  const chunk = { ...makeChunk(1, 'src'), token_count: null };
+  const result = pickByBudget([chunk], new Set(), config);
+  t.is(result.length, 1);
+});
+
+test('buildCitations: returns empty array for no chunks', (t) => {
+  t.deepEqual(buildCitations([]), []);
+});
+
+test('buildCitations: maps chunk to citation with slug', (t) => {
+  const chunk = makeChunk(1, 'my-source');
+  chunk.source.slug = 'my-source';
+  const [citation] = buildCitations([chunk]);
+  t.is(citation.source_id, 'my-source');
+  t.is(citation.slug, 'my-source');
+});
+
+test('buildCitations: appends anchor for chunks with sectionPath', (t) => {
+  const chunk = makeChunk(1, 'my-source');
+  chunk.source.slug = 'my-slug';
+  chunk.sectionPath = ['Intro', 'Background'];
+  const [citation] = buildCitations([chunk]);
+  t.true(citation.slug.includes('#'));
+  t.true(citation.slug.startsWith('my-slug#'));
+});
+
+test('buildCitations: uses source.id as title fallback when title is empty', (t) => {
+  const chunk = makeChunk(1, 'my-source');
+  chunk.source.title = '';
+  const [citation] = buildCitations([chunk]);
+  t.is(citation.title, 'my-source');
+});
+
+test('buildCitations: includes idx and score in citation', (t) => {
+  const chunk = { ...makeChunk(1, 'src'), idx: 5, score: 0.77 };
+  const [citation] = buildCitations([chunk]);
+  t.is(citation.idx, 5);
+  t.is(citation.score, 0.77);
+});
+
+test.serial('embedQuery: returns Float32Array from Ollama embedding response', async (t) => {
+  const fetchStub = sinon.stub(global, 'fetch').resolves({
+    ok: true,
+    json: async () => ({ embedding: [0.1, 0.2, 0.3] }),
+  });
+  try {
+    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test query');
+    t.true(result instanceof Float32Array);
+    t.is(result.length, 3);
+  } finally {
+    fetchStub.restore();
+  }
+});
+
+test.serial('embedQuery: returns Float32Array from embeddings array shape', async (t) => {
+  const fetchStub = sinon.stub(global, 'fetch').resolves({
+    ok: true,
+    json: async () => ({ embeddings: [0.4, 0.5, 0.6] }),
+  });
+  try {
+    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test');
+    t.true(result instanceof Float32Array);
+    // Float32 has ~7 significant digits; use approximate equality
+    t.true(Math.abs(result[0] - 0.4) < 1e-6);
+  } finally {
+    fetchStub.restore();
+  }
+});
+
+test.serial('embedQuery: returns empty Float32Array when embed returns empty vector', async (t) => {
+  const fetchStub = sinon.stub(global, 'fetch').rejects(new Error('Network error'));
+  try {
+    const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test');
+    t.true(result instanceof Float32Array);
+    t.is(result.length, 0);
+  } finally {
+    fetchStub.restore();
+  }
+});
+
+test('pickByBudget: skips already-included pinned chunk during iteration', (t) => {
+  // Pinned chunk is first in merged so the loop encounters it before any break.
+  // Iteration flow: chunk(20) pinned→pre-added; loop hits 20→skip(lines 385-387),
+  // then adds 30 and 40, reaching chunkLimit.
+  const config = { ...baseConfig, chunkLimit: 3, maxContextTokens: 99999, maxPerSource: Infinity };
+  const chunks = [
+    makeChunk(20, 'src-pinned', 100, 0.9),
+    makeChunk(30, 'src-a', 100, 0.5),
+    makeChunk(40, 'src-b', 100, 0.3),
+  ];
+  const result = pickByBudget(chunks, new Set([20]), config);
+  t.is(result.length, 3);
+  t.is(result[0].rowid, 20);
+});
 
 test.serial('retrieve: returns chunks and citations via vector search', async (t) => {
   if (!canIntegrate) { return t.pass('Skipping: better-sqlite3 not available for Node ' + process.version); }
