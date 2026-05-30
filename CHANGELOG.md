@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. This projec
 
 - 🧰 Add `FilterSpamEdit` plugin for checking for spam
 - 🧰 Add `CsrfProtection` plugin for CSRF tokens support on creation & update calls
+- 🛠 Migrate to Oxlint from ESLint
 
 ## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09)
 

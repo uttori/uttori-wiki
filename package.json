@@ -49,9 +49,6 @@
     "express": "^5"
   },
   "devDependencies": {
-    "@eslint/compat": "^2.1.0",
-    "@eslint/eslintrc": "^3.3.5",
-    "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/debug": "^4.1.13",
@@ -70,15 +67,6 @@
     "c8": "^11.0.0",
     "cors": "^2.8.6",
     "ejs": "^6.0.1",
-    "eslint": "^10.3.0",
-    "eslint-plugin-anti-trojan-source": "^1.1.6",
-    "eslint-plugin-ava": "^17.0.0",
-    "eslint-plugin-jsdoc": "^63.0.0",
-    "eslint-plugin-n": "^18.0.1",
-    "eslint-plugin-no-inferred-method-name": "^2.0.0",
-    "eslint-plugin-optimize-regex": "^1.2.1",
-    "eslint-plugin-security": "^4.0.0",
-    "eslint-plugin-xss": "^0.1.12",
     "express": "^5.2.1",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
@@ -91,6 +79,8 @@
     "lunr-languages": "^1.18.0",
     "markdown-it": "^14.1.1",
     "memorystore": "^1.6.8",
+    "oxlint": "^1.67.0",
+    "oxlint-tsgolint": "^0.23.0",
     "pdfreader": "^3.0.8",
     "pre-commit": "^2.0.0",
     "release-it": "^20.2.0",
@@ -99,8 +89,7 @@
     "slugify": "^1.6.9",
     "sqlite-vec": "^0.1.9",
     "supertest": "^7.2.2",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.60.0"
+    "typescript": "^6.0.3"
   },
   "files": [
     "dist/*",
@@ -264,7 +253,8 @@
     }
   },
   "scripts": {
-    "lint": "eslint",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "make": "npm run make-types && npm run make-docs",
     "make-docs": "node build/make-docs.js",
     "make-types": "node build/make-types.js",

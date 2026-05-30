@@ -333,7 +333,7 @@ test('TagRoutesPlugin.getTaggedDocuments(): returns documents with matching tag'
   t.true(mockHooks.fetch.calledWith(
     'storage-query',
     'SELECT * FROM documents WHERE slug NOT_IN ("home-page") AND tags INCLUDES "cool" ORDER BY title ASC LIMIT 10',
-    context
+    context,
   ));
 });
 
