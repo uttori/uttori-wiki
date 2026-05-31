@@ -6,6 +6,20 @@ All notable changes to this project will be documented in this file. This projec
 
 - Discord Notifications
 
+## [8.2.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30)
+
+- 🪲 Fix search plugin Lunr `internalSearch` throwing when the index isn't yet built
+- 🪲 Fix search plugin Lunr not building index correctly, requires new `server-listening` & `before-server-listening` events, and no longer builds the index on plugin registration:
+
+```js
+const wiki = new UttoriWiki(config, app);
+wiki.hooks.dispatch('before-server-listening', app, wiki);
+const server = app.listen(app.get('port'), app.get('ip'), () => {
+  console.log('✔ wiki listening at %s:%d', app.get('ip'), app.get('port'));
+  wiki.hooks.dispatch('server-listening', server, wiki);
+});
+```
+
 ## [8.1.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30)
 
 - 🧰 Add `FilterSpamEdit` plugin for checking for spam

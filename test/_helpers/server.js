@@ -58,6 +58,10 @@ export const config = {
       validateConfig: ['validate-config'],
     },
   },
+
+  [SearchProviderLunr.configKey]: {
+    ...SearchProviderLunr.defaultConfig(),
+  },
 };
 
 export const serverSetup = () => {

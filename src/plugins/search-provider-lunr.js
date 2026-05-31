@@ -132,8 +132,6 @@ class SearchLunrPlugin {
     }
 
     const search = new SearchProvider(config);
-    await search.buildIndex(context);
-
     for (const [method, eventNames] of Object.entries(config.events)) {
       if (typeof search[method] === 'function') {
         for (const event of eventNames) {

@@ -354,6 +354,8 @@ The following events are avaliable to hook into through plugins and are used in 
 | Name                         | Type       | Returns                   | Description |
 |------------------------------|------------|---------------------------|-------------|
 | `bind-routes`                | `dispatch` |                           | Called after the default routes are bound to the server. |
+| `before-server-listening`    | `dispatch` |                           | Called before the server is listening for connections. |
+| `server-listening`           | `dispatch` |                           | Called when the server is listening for connections. |
 | `document-delete`            | `dispatch` |                           | Called when a document is about to be deleted. |
 | `document-save`              | `filter`   | Uttori Document           | Called when a document is about to be saved. |
 | `render-content`             | `filter`   | HTML Content              | Called when content is being prepared to be shown. |

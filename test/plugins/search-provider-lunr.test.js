@@ -128,12 +128,20 @@ test('Plugin E2E: can return search results', async (t) => {
       [SearchLunrPlugin.configKey]: {
         events: {
           search: ['search-query'],
+          buildIndex: ['search-rebuild'],
           getPopularSearchTerms: ['popular-search-terms'],
         },
         lunr_locales: [localeFr],
         ignoreSlugs: [],
       },
       [StoragePlugin.configKey]: {},
+      ignoreSlugs: [],
+      buildMetadata: {
+        ignoreSlugs: [],
+      },
+      buildViewModelBase: {
+        ignoreSlugs: [],
+      },
     },
   };
   StoragePlugin.register(context);
@@ -142,6 +150,7 @@ test('Plugin E2E: can return search results', async (t) => {
   await context.hooks.dispatch('storage-add', documents[2], context);
 
   await SearchLunrPlugin.register(context);
+  await context.hooks.validate('search-rebuild', undefined, context);
   const search_results = await context.hooks.fetch('search-query', { query: 'document' }, context);
   t.deepEqual(search_results, [documents]);
 

@@ -61,13 +61,14 @@ class SearchProvider {
 
   /**
    * Rebuild the search index of documents.
+   * @param {any} _data Unused.
    * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
    * @example
    * ```js
-   * await searchProvider.buildIndex(context);
+   * await searchProvider.buildIndex(_data, context);
    * ```
    */
-  buildIndex = async (context) => {
+  buildIndex = async (_data, context) => {
     if (!context || !context.hooks || !context.hooks.fetch) {
       debug('buildIndex: context or hooks missing');
       return;
@@ -78,6 +79,7 @@ class SearchProvider {
     let documents = [];
     const not_in = `"${ignoreSlugs.join('", "')}"`;
     const query = `SELECT 'slug', 'title', 'tags', 'content' FROM documents WHERE slug NOT_IN (${not_in}) ORDER BY title ASC LIMIT 10000`;
+    debug('buildIndex: query:', query);
     try {
       [documents] = await context.hooks.fetch('storage-query', query, context);
     } /* c8 ignore next 3 */ catch (error) {
@@ -116,7 +118,7 @@ class SearchProvider {
    */
   internalSearch = async ({ query, limit = 100 }, context) => {
     debug('internalSearch:', { query, limit });
-    const results = this.index.search(query);
+    const results = this.index?.search(query) || [];
     debug('internalSearch: results:', results.length);
 
     const slugs = results.map((r) => r.ref).filter(Boolean).slice(0, limit);
@@ -169,7 +171,7 @@ class SearchProvider {
    */
   indexAdd = async (documents, context) => {
     debug('indexAdd');
-    await this.buildIndex(context);
+    await this.buildIndex(undefined, context);
   };
 
   /**
@@ -180,7 +182,7 @@ class SearchProvider {
    */
   indexUpdate = async (documents, context) => {
     debug('indexUpdate');
-    await this.buildIndex(context);
+    await this.buildIndex(undefined, context);
   };
 
   /**
@@ -191,7 +193,7 @@ class SearchProvider {
    */
   indexRemove = async (documents, context) => {
     debug('indexRemove', documents);
-    await this.buildIndex(context);
+    await this.buildIndex(undefined, context);
   };
 
   /**

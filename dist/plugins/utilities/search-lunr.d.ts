@@ -59,13 +59,14 @@ declare class SearchProvider {
     setup: () => void;
     /**
      * Rebuild the search index of documents.
+     * @param {any} _data Unused.
      * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
      * @example
      * ```js
-     * await searchProvider.buildIndex(context);
+     * await searchProvider.buildIndex(_data, context);
      * ```
      */
-    buildIndex: (context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
+    buildIndex: (_data: any, context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
     /**
      * Searches for documents matching the provided query with Lunr.
      * @param {SearchLunrConfigSearchOptions} options The passed in options.
