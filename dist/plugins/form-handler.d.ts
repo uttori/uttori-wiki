@@ -1,4 +1,8 @@
 export default FormHandler;
+/**
+ * Validates a single form field value.
+ */
+export type FormFieldValidationFunction = (value: string) => boolean;
 export type FormField = {
     /**
      * The field name.
@@ -15,21 +19,20 @@ export type FormField = {
     /**
      * The field label for display.
      */
-    label?: string;
+    label?: string | undefined;
     /**
      * The field placeholder text.
      */
-    placeholder?: string;
+    placeholder?: string | undefined;
     /**
      * Custom validation function.
      */
-    validation?: FormFieldValidationFunction;
+    validation?: FormFieldValidationFunction | undefined;
     /**
      * Custom error message for validation.
      */
-    errorMessage?: string;
+    errorMessage?: string | undefined;
 };
-export type FormFieldValidationFunction = Function;
 export type FormConfig = {
     /**
      * The form name/identifier.
@@ -46,7 +49,7 @@ export type FormConfig = {
     /**
      * Custom handler function for form submission.
      */
-    handler?: Function;
+    handler?: FormHandlerFunction | undefined;
     /**
      * Success message to return.
      */
@@ -58,13 +61,13 @@ export type FormConfig = {
     /**
      * Custom middleware for the form route.
      */
-    middleware?: import("express").RequestHandler[];
+    middleware?: express.RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
 };
 export type FormHandlerConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * Array of form configurations.
      */
@@ -72,13 +75,16 @@ export type FormHandlerConfig = {
     /**
      * Base route prefix for all forms.
      */
-    baseRoute?: string;
+    baseRoute?: string | undefined;
     /**
      * Default handler function for forms without custom handlers.
      */
-    defaultHandler?: Function;
+    defaultHandler?: FormHandlerFunction | undefined;
 };
-export type FormHandlerFunction = Function;
+/**
+ * Handles a validated form submission.
+ */
+export type FormHandlerFunction = (formData: Record<string, unknown>, formConfig: FormConfig, req: import("express").Request, res: import("express").Response) => Promise<FormHandlerResult>;
 export type FormHandlerResult = {
     /**
      * Whether the form submission was successful.
@@ -87,7 +93,7 @@ export type FormHandlerResult = {
     /**
      * The result message.
      */
-    message?: string;
+    message?: string | undefined;
 };
 export type FormHandlerValidationResult = {
     /**
@@ -100,6 +106,12 @@ export type FormHandlerValidationResult = {
     errors: string[];
 };
 /**
+ * Validates a single form field value.
+ * @callback FormFieldValidationFunction
+ * @param {string} value The field value.
+ * @returns {boolean} Whether the field is valid.
+ */
+/**
  * @typedef {object} FormField
  * @property {string} name The field name.
  * @property {string} type The field type (text, email, textarea, etc.).
@@ -110,34 +122,29 @@ export type FormHandlerValidationResult = {
  * @property {string} [errorMessage] Custom error message for validation.
  */
 /**
- * @typedef {Function} FormFieldValidationFunction
- * @param {string} value The field value.
- * @returns {boolean} Whether the field is valid.
- */
-/**
  * @typedef {object} FormConfig
  * @property {string} name The form name/identifier.
  * @property {string} route The route path for the form submission.
  * @property {FormField[]} fields The form fields configuration.
- * @property {function} [handler] Custom handler function for form submission.
+ * @property {FormHandlerFunction} [handler] Custom handler function for form submission.
  * @property {string} successMessage Success message to return.
  * @property {string} errorMessage Error message to return.
  * @property {import('express').RequestHandler[]} [middleware] Custom middleware for the form route.
- * @property {FormHandlerFunction} [handler] Custom handler function for form submission.
  */
 /**
  * @typedef {object} FormHandlerConfig
  * @property {Record<string, string[]>} [events] Events to bind to.
  * @property {FormConfig[]} forms Array of form configurations.
  * @property {string} [baseRoute] Base route prefix for all forms.
- * @property {function} [defaultHandler] Default handler function for forms without custom handlers.
+ * @property {FormHandlerFunction} [defaultHandler] Default handler function for forms without custom handlers.
  */
 /**
- * @typedef {Function} FormHandlerFunction
- * @property {Record<string, any>} formData The form data.
- * @property {FormConfig} formConfig The form configuration.
- * @property {import('express').Request} _req The request.
- * @property {import('express').Response} _res The response.
+ * Handles a validated form submission.
+ * @callback FormHandlerFunction
+ * @param {Record<string, unknown>} formData The form data.
+ * @param {FormConfig} formConfig The form configuration.
+ * @param {import('express').Request} req The request.
+ * @param {import('express').Response} res The response.
  * @returns {Promise<FormHandlerResult>} The result.
  */
 /**
@@ -220,11 +227,12 @@ declare class FormHandler {
     static createFormHandler(formConfig: FormConfig, defaultHandler: FormHandlerFunction): import("express").RequestHandler;
     /**
      * Validates form data against form configuration.
-     * @param {Record<string, any>} formData The form data to validate.
+     * @param {Record<string, unknown>} formData The form data to validate.
      * @param {FormConfig} formConfig The form configuration.
      * @returns {FormHandlerValidationResult} Validation result.
      * @static
      */
-    static validateFormData(formData: Record<string, any>, formConfig: FormConfig): FormHandlerValidationResult;
+    static validateFormData(formData: Record<string, unknown>, formConfig: FormConfig): FormHandlerValidationResult;
 }
+import express from 'express';
 //# sourceMappingURL=form-handler.d.ts.map

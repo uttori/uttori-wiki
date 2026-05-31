@@ -5,7 +5,7 @@ import { glob } from 'glob';
 
 // Configuration
 const config = '--configure ./jsdoc.conf.json --private --example-lang js';
-const template = '--template rm.hbs';
+// const template = '--template rm.hbs';
 
 // Ensure docs directories exist
 const ensureDir = (dir) => {
@@ -16,7 +16,8 @@ const ensureDir = (dir) => {
 
 // Generate documentation for a single file
 const generateDoc = (file, outputPath, useTemplate = false) => {
-  const cmd = `jsdoc2md ${config} ${useTemplate ? template : ''} ${file} > ${outputPath}`;
+  // const cmd = `jsdoc2md ${config} ${useTemplate ? '' : 'template rm.hbs' } ${file} > ${outputPath}`;
+  const cmd = `jsdoc2md ${config} ${file} > ${outputPath}`;
   console.log(`Generating docs for ${file} -> ${outputPath}`);
   execSync(cmd, { stdio: 'inherit' });
 };
@@ -41,9 +42,9 @@ const main = async () => {
   // Generate documentation for main files
   mainFiles.forEach(file => {
     const baseName = path.basename(file, '.js');
-    const outputPath = file === 'src/wiki.js' ? 'README.md' : `docs/${baseName}.md`;
-    const useTemplate = file === 'src/wiki.js';
-    generateDoc(file, outputPath, useTemplate);
+    const outputPath = `docs/${baseName}.md`;
+    // const useTemplate = file === 'src/wiki.js' ? true : false;
+    generateDoc(file, outputPath, false);
   });
 
   // Generate documentation for plugin files

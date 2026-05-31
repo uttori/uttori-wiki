@@ -18,6 +18,11 @@ Imports documents from a variety of sources, including markdown, PDF, and image 
 <dd></dd>
 <dt><a href="#ImportDocumentApiPayload">ImportDocumentApiPayload</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#ImportDocumentContext">ImportDocumentContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code></dt>
+<dd></dd>
+<dt><a href="#ImportDocumentRequestHandlerFactory">ImportDocumentRequestHandlerFactory</a> ⇒ <code>module:express~RequestHandler</code></dt>
+<dd><p>Builds an Express request handler from plugin context.</p>
+</dd>
 <dt><a href="#ImportDocumentConfig">ImportDocumentConfig</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -259,6 +264,22 @@ Processes a page and returns the content and attachment.
 | slug | <code>string</code> | The slug of the document. |
 | redirects | <code>Array.&lt;string&gt;</code> | The redirects of the document. |
 
+<a name="ImportDocumentContext"></a>
+
+## ImportDocumentContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code>
+**Kind**: global typedef  
+<a name="ImportDocumentRequestHandlerFactory"></a>
+
+## ImportDocumentRequestHandlerFactory ⇒ <code>module:express~RequestHandler</code>
+Builds an Express request handler from plugin context.
+
+**Kind**: global typedef  
+**Returns**: <code>module:express~RequestHandler</code> - Express middleware.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ctx | [<code>ImportDocumentContext</code>](#ImportDocumentContext) | Uttori context for this plugin. |
+
 <a name="ImportDocumentConfig"></a>
 
 ## ImportDocumentConfig : <code>object</code>
@@ -273,8 +294,8 @@ Processes a page and returns the content and attachment.
 | [uploadPath] | <code>string</code> | The path to reference uploaded files by. |
 | [uploadDirectory] | <code>string</code> | The directory to upload files to. |
 | [allowedReferrers] | <code>Array.&lt;string&gt;</code> | When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all. |
-| [interfaceRequestHandler] | <code>function</code> | A request handler for the interface route. |
-| [apiRequestHandler] | <code>function</code> | A request handler for the API route. |
+| [interfaceRequestHandler] | [<code>ImportDocumentRequestHandlerFactory</code>](#ImportDocumentRequestHandlerFactory) | A request handler for the interface route. |
+| [apiRequestHandler] | [<code>ImportDocumentRequestHandlerFactory</code>](#ImportDocumentRequestHandlerFactory) | A request handler for the API route. |
 | [middlewareApi] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the API route. |
 | [middlewarePublic] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the public route. |
 | [downloadFile] | <code>function</code> | A function to handle the download. |

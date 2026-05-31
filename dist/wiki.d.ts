@@ -49,77 +49,77 @@ export type UttoriWikiViewModel = {
     /**
      * The document object.
      */
-    document?: UttoriWikiDocument;
+    document?: UttoriWikiDocument | undefined;
     /**
      * The Express session object.
      */
-    session?: import("express-session").Session;
+    session?: import("express-session").Session | undefined;
     /**
      * The flash object.
      */
-    flash?: (boolean | object | Array<string>);
+    flash?: boolean | object | string[] | undefined;
     /**
      * Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
      */
-    taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]> | undefined;
     /**
      * Category Routes Plugin: documents grouped by category, or documents for a category detail route.
      */
-    categorizedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
+    categorizedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]> | undefined;
     /**
      * Category Routes Plugin: hierarchical category data for the category index.
      */
-    categoryTree?: Record<string, object>;
+    categoryTree?: Record<string, object> | undefined;
     /**
      * Category Routes Plugin: flattened category data for the category index.
      */
-    flattenedCategories?: Array<object>;
+    flattenedCategories?: object[] | undefined;
     /**
      * Category Routes Plugin: the active category path for a category detail route.
      */
-    categoryPath?: string;
+    categoryPath?: string | undefined;
     /**
      * Category Routes Plugin: breadcrumb data for a category detail route.
      */
-    breadcrumbs?: Array<object>;
+    breadcrumbs?: object[] | undefined;
     /**
      * The search term to be used in the search results.
      */
-    searchTerm?: string;
+    searchTerm?: string | undefined;
     /**
      * An array of search results.
      */
-    searchResults?: UttoriWikiDocument[];
+    searchResults?: UttoriWikiDocument[] | undefined;
     /**
      * The slug of the document.
      */
-    slug?: string;
+    slug?: string | undefined;
     /**
      * The action to be used in the form.
      */
-    action?: string;
+    action?: string | undefined;
     /**
      * The revision of the document.
      */
-    revision?: string;
+    revision?: string | undefined;
     /**
      * An object of history by day.
      */
-    historyByDay?: Record<string, string[]>;
+    historyByDay?: Record<string, string[]> | undefined;
     /**
      * The current version of the document for comparison.
      */
-    currentDocument?: UttoriWikiDocument;
+    currentDocument?: UttoriWikiDocument | undefined;
     /**
      * An object containing HTML table diffs for changed fields.
      */
-    diffs?: Record<string, string>;
+    diffs?: Record<string, string> | undefined;
 };
 export type UttoriWikiBuildViewModelBaseOptions = {
     /**
      * The title for the view model.
      */
-    title?: string;
+    title?: string | undefined;
     /**
      * The metadata for the view model.
      */
@@ -152,11 +152,11 @@ export type UttoriWikiBuildViewModelBaseOptions = {
          * OpenGraph Image
          */
         image: string;
-    };
+    } | undefined;
     /**
      * The slug for the view model.
      */
-    slug?: string;
+    slug?: string | undefined;
 };
 export type UttoriWikiBaseViewModel = {
     /**
@@ -170,7 +170,7 @@ export type UttoriWikiBaseViewModel = {
     /**
      * The Express session object.
      */
-    session?: import("express-session").Session;
+    session?: import("express-session").Session | undefined;
     /**
      * The metadata object.
      */
@@ -211,11 +211,11 @@ export type UttoriWikiBaseViewModel = {
     /**
      * The flash object.
      */
-    flash?: (boolean | object | Array<string>);
+    flash?: boolean | object | string[] | undefined;
     /**
      * The slug of the document.
      */
-    slug?: string;
+    slug?: string | undefined;
 };
 export type UttoriWikiDocument = {
     /**
@@ -229,11 +229,11 @@ export type UttoriWikiDocument = {
     /**
      * An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
      */
-    image?: string;
+    image?: string | undefined;
     /**
      * A succinct deescription of the document, think meta description.
      */
-    excerpt?: string;
+    excerpt?: string | undefined;
     /**
      * All text content for the doucment.
      */
@@ -241,7 +241,7 @@ export type UttoriWikiDocument = {
     /**
      * All rendered HTML content for the doucment that will be presented to the user.
      */
-    html?: string;
+    html?: string | undefined;
     /**
      * The Unix timestamp of the creation date of the document.
      */
@@ -257,15 +257,15 @@ export type UttoriWikiDocument = {
     /**
      * An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
      */
-    redirects?: string | string[];
+    redirects?: string | string[] | undefined;
     /**
      * The layout to use when rendering the document.
      */
-    layout?: string;
+    layout?: string | undefined;
     /**
      * An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
      */
-    attachments?: UttoriWikiDocumentAttachment[];
+    attachments?: UttoriWikiDocumentAttachment[] | undefined;
 };
 export type UttoriWikiDocumentAttachment = {
     /**
@@ -292,20 +292,20 @@ export type UttoriWikiDocumentAttachment = {
      * The metadata of the attachment.
      */
     metadata: {
-        gps?: string;
+        gps?: string | undefined;
     };
     /**
      * The latitude of the GPS coordinates.
      */
-    lat?: number;
+    lat?: number | undefined;
     /**
      * The longitude of the GPS coordinates.
      */
-    lon?: number;
+    lon?: number | undefined;
     /**
      * Whether to skip the attachment. Used to control whether to index the attachment.
      */
-    skip?: boolean;
+    skip?: boolean | undefined;
 };
 /**
  * @typedef {object} UttoriWikiViewModel
@@ -597,7 +597,7 @@ declare class UttoriWiki {
      * Sets the `X-Robots-Tag` header to `noindex`.
      *
      * Hooks:
-     * - `render-content` - `render-content` - Passes in the request body content.
+     * - `filter` - `render-content` - Passes in the request body content.
      * @async
      * @param {import('express').Request} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.

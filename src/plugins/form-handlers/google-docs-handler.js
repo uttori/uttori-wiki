@@ -173,6 +173,7 @@ class GoogleDocsHandler {
 
       // Set up headers if they exist
       if (headers && headers.length > 0) {
+        /** @type {string[]} */
         const headers = [];
 
         // Add timestamp header if requested

@@ -7,11 +7,11 @@ export type AnalyticsProviderConfig = {
     /**
      * The file name of the file containing the page view analytics.
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * The file extension of the file containing the page view analytics.
      */
-    extension?: string;
+    extension?: string | undefined;
 };
 export type AnalyticsProviderPageVisits = Record<string, number>;
 /**

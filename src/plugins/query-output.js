@@ -17,7 +17,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Add
  *   format: (results) => results.map((result) => result.slug),
  *   queryFunction: async (target, context) => {
  *     const ignoreSlugs = ['home-page'];
- *     const [popular] = await context.hooks.fetch('popular-documents', { limit: 5 }, context);
+ *     const [popular] = await context.hooks.fetch('example-documents', { limit: 5 }, context);
  *     const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
  *     const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
  *     const [results] = await context.hooks.fetch('storage-query', query);
@@ -37,6 +37,11 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Add
  * @typedef {object} AddQueryOutputToViewModelConfig
  * @property {Record<string, AddQueryOutputToViewModelQuery[]>} queries The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added.
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
+ */
+
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>} AddQueryOutputToViewModelContext
  */
 
 /**
@@ -210,7 +215,12 @@ class AddQueryOutputToViewModel {
    */
   static callback(eventLabel) {
     debug('callback:', eventLabel);
-    return async (viewModel, context) => AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context);
+    const handler = (viewModel, context) => AddQueryOutputToViewModel.callbackCurry(
+      eventLabel,
+      viewModel,
+      /** @type {AddQueryOutputToViewModelContext} */ (context),
+    );
+    return handler;
   }
 }
 

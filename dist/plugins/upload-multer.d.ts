@@ -3,31 +3,31 @@ export type MulterUploadConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * Directory files will be uploaded to. The default is 'uploads'.
      */
-    directory?: string;
+    directory?: string | undefined;
     /**
      * Server route to POST uploads to. The default is '/upload'.
      */
-    route?: string;
+    route?: string | undefined;
     /**
      * Server route to GET uploads from. The default is '/uploads'.
      */
-    publicRoute?: string;
+    publicRoute?: string | undefined;
     /**
      * Custom Middleware for the Upload route
      */
-    middleware?: import("express").RequestHandler[];
+    middleware?: express.RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
     /**
      * Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all.
      */
-    allowedMimeTypes?: string[];
+    allowedMimeTypes?: string[] | undefined;
     /**
      * Maximum file size in bytes. Default: 10MB (10485760).
      */
-    maxFileSize?: number;
+    maxFileSize?: number | undefined;
 };
 /**
  * @typedef {object} MulterUploadConfig
@@ -122,4 +122,5 @@ declare class MulterUpload {
         fullPath: string;
     }>;
 }
+import express from 'express';
 //# sourceMappingURL=upload-multer.d.ts.map

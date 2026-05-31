@@ -13,7 +13,7 @@ import { lineBreaker } from './line-breaker.js';
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
  * @param {import('markdown-it').default} md The MarkdownIt instance.
- * @returns {object} The instance of Plugin.
+ * @returns {import('markdown-it').default} The MarkdownIt instance.
  */
 function Plugin(md) {
   /**
@@ -104,7 +104,7 @@ function Plugin(md) {
    */
   md.inline.ruler.after('image', 'footnote_ref', footnoteReferences);
 
-  return this;
+  return md;
 }
 
 export default Plugin;

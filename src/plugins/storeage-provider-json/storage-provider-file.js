@@ -154,8 +154,9 @@ class StorageProviderJsonFile {
     debug('get: file', file);
     try {
       const content = await fs.readFile(file, 'utf8');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(content);
+      /** @type {import('../../wiki.js').UttoriWikiDocument} */
+      const parsed = JSON.parse(content);
+      return parsed;
     } catch (error) {
       debug(`get: Error reading "${file}":`, error);
       return undefined;
@@ -241,6 +242,7 @@ class StorageProviderJsonFile {
     }
     debug('update:', document.slug, 'originalSlug:', originalSlug);
     const existing = await this.get(document.slug);
+    /** @type {import('../../wiki.js').UttoriWikiDocument | undefined} */
     let original;
     if (originalSlug) {
       original = await this.get(originalSlug);

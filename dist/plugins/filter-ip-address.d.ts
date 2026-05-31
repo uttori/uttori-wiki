@@ -3,19 +3,19 @@ export type FilterIPAddressConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * Directory where IP logs will be stored.
      */
-    logPath?: string;
+    logPath?: string | undefined;
     /**
      * List of IP addresses to block.
      */
-    blocklist?: string[];
+    blocklist?: string[] | undefined;
     /**
      * Whether to trust the X-Forwarded-For header.
      */
-    trustProxy?: boolean;
+    trustProxy?: boolean | undefined;
 };
 /**
  * @typedef {object} FilterIPAddressConfig

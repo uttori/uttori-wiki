@@ -1,4 +1,30 @@
 /**
+ * @typedef {object} MarkdownItFootnotesEnv
+ * @property {number} length Next footnote id counter.
+ * @property {Record<string, number>} refs Label to id mapping.
+ */
+
+/**
+ * MarkdownIt env object extended with footnote state.
+ * @typedef {object} MarkdownItFootnotesStateEnv
+ * @property {MarkdownItFootnotesEnv} [footnotes] Footnote definitions collected during parsing.
+ */
+
+/**
+ * Ensure footnotes state exists on the MarkdownIt env object.
+ * @param {import('markdown-it/index.js').StateBlock | import('markdown-it/index.js').StateInline} state MarkdownIt state.
+ * @returns {MarkdownItFootnotesEnv} Footnotes env state.
+ */
+function getFootnotesEnv(state) {
+  /** @type {MarkdownItFootnotesStateEnv} */
+  const env = state.env;
+  if (!env.footnotes) {
+    env.footnotes = { length: 0, refs: {} };
+  }
+  return env.footnotes;
+}
+
+/**
  * Converts Footnote definitions to linkable anchor tags.
  * @param {import('markdown-it/index.js').StateBlock} state State of MarkdownIt.
  * @param {number} startLine The starting line of the block.
@@ -20,6 +46,7 @@ export function footnoteDefinition(state, startLine, endLine, silent) {
   if (state.src.charCodeAt(start + 1) !== 0x5E) return false;
   // Do we have content that isn't a space?
   // Stop when we reach the end bracket: `]`
+  /** @type {number} */
   let pos;
   for (pos = start + 2; pos < max; pos++) {
     if (state.src.charCodeAt(pos) === 0x20) return false;
@@ -37,12 +64,12 @@ export function footnoteDefinition(state, startLine, endLine, silent) {
   pos++;
 
   // Setup the footnotes collection if we haven't.
-  if (!state.env.footnotes) { state.env.footnotes = { length: 0, refs: {} }; }
+  const footnotes = getFootnotesEnv(state);
 
   // Setup the token based on the label.
   const label = state.src.slice(start + 2, pos - 2);
-  const id = state.env.footnotes.length++;
-  state.env.footnotes.refs[`:${label}`] = id;
+  const id = footnotes.length++;
+  footnotes.refs[`:${label}`] = id;
 
   // Build the actual token.
   let token = new state.Token('footnote_open', '', 1);
@@ -127,7 +154,10 @@ export function footnoteReferences(state, silent) {
   if (start + 3 > max) return false;
 
   // Do we have no definitions?
-  if (!state.env.footnotes || !state.env.footnotes.refs) return false;
+  /** @type {MarkdownItFootnotesStateEnv} */
+  const env = state.env;
+  if (!env.footnotes || !env.footnotes.refs) return false;
+  const footnotes = env.footnotes;
   // Does it start with the opening bracket: `[`
   if (state.src.charCodeAt(start) !== 0x5B) return false;
   // Is the second character a carrot: `^`
@@ -135,6 +165,7 @@ export function footnoteReferences(state, silent) {
 
   // Do we have content that isn't a space or a new line?
   // Stop when we reach the end bracket: `]`
+  /** @type {number} */
   let pos;
   for (pos = start + 2; pos < max; pos++) {
     if (state.src.charCodeAt(pos) === 0x20) return false;
@@ -151,11 +182,11 @@ export function footnoteReferences(state, silent) {
 
   // Check for the current label in the definitions.
   const label = state.src.slice(start + 2, pos - 1);
-  if (typeof state.env.footnotes.refs[`:${label}`] === 'undefined') return false;
+  if (typeof footnotes.refs[`:${label}`] === 'undefined') return false;
 
   if (!silent) {
     // Build the actual token.
-    const id = state.env.footnotes.refs[`:${label}`];
+    const id = footnotes.refs[`:${label}`];
     const token = state.push('footnote_ref', '', 0);
     token.meta = { id, label };
   }

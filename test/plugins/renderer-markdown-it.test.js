@@ -98,6 +98,12 @@ test('MarkdownItRenderer.validateConfig(config, _context): throws an error when 
   }, { message: 'MarkdownItRenderer Config Error: \'markdownIt\' configuration key is missing.' });
 });
 
+test('MarkdownItRenderer.validateConfig(config, _context): throws an error when markdownIt.uttori is missing', (t) => {
+  t.throws(() => {
+    MarkdownItRenderer.validateConfig({ [MarkdownItRenderer.configKey]: { markdownIt: {} } });
+  }, { message: 'MarkdownItRenderer Config Error: \'markdownIt.uttori\' configuration key is missing.' });
+});
+
 test('MarkdownItRenderer.validateConfig(config, _context): throws an error when allowedExternalDomains is missing', (t) => {
   t.throws(() => {
     MarkdownItRenderer.validateConfig({ [MarkdownItRenderer.configKey]: { markdownIt: { uttori: { } } } });

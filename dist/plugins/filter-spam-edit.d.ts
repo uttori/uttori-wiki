@@ -10,81 +10,81 @@ export type FilterSpamEditWeights = {
     /**
      * Jaccard distance weight for large content replacement. Set to 0 to disable.
      */
-    contentSimilarity?: number;
+    contentSimilarity?: number | undefined;
     /**
      * Weight for net-new external URLs added. Set to 0 to disable.
      */
-    externalLinksAdded?: number;
+    externalLinksAdded?: number | undefined;
     /**
      * Weight for a high fraction of paragraphs replaced or removed. Set to 0 to disable.
      */
-    paragraphRatio?: number;
+    paragraphRatio?: number | undefined;
     /**
      * Weight for hits from `suspiciousTermList`. Set to 0 to disable.
      */
-    suspiciousTerms?: number;
+    suspiciousTerms?: number | undefined;
     /**
      * Weight for an unusually high links-per-word ratio. Set to 0 to disable.
      */
-    linkDensity?: number;
+    linkDensity?: number | undefined;
     /**
      * Weight applied when the submitting IP exceeds `ipMaxEdits` within `ipWindowMs`. Set to 0 to disable.
      */
-    ipRateLimit?: number;
+    ipRateLimit?: number | undefined;
     /**
      * Weight for content that grows to an implausibly large multiple of the original. Set to 0 to disable.
      */
-    contentGrowth?: number;
+    contentGrowth?: number | undefined;
     /**
      * Weight for a high ratio of non-letter/number characters (obfuscation attempts). Set to 0 to disable.
      */
-    unicodeObfuscation?: number;
+    unicodeObfuscation?: number | undefined;
     /**
      * Weight for external links added to a page that was previously short. Set to 0 to disable.
      */
-    smallPageLinkSpam?: number;
+    smallPageLinkSpam?: number | undefined;
 };
 export type FilterSpamEditConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * Score (0–100 scale) at or above which the edit is blocked.
      */
-    blockThreshold?: number;
+    blockThreshold?: number | undefined;
     /**
      * Slugs known to be frequently targeted by spammers. Edits to these pages have their score multiplied by `targetedSlugMultiplier`.
      */
-    targetedSlugs?: string[];
+    targetedSlugs?: string[] | undefined;
     /**
      * Score multiplier applied when the edited slug is in `targetedSlugs`. Must be >= 1.
      */
-    targetedSlugMultiplier?: number;
+    targetedSlugMultiplier?: number | undefined;
     /**
      * Directory where blocked-edit JSON log files are written.
      */
-    logPath?: string;
+    logPath?: string | undefined;
     /**
      * Rolling time window in milliseconds for IP-based rate limiting.
      */
-    ipWindowMs?: number;
+    ipWindowMs?: number | undefined;
     /**
      * Maximum number of edits permitted from one IP within `ipWindowMs` before the `ipRateLimit` weight fires.
      */
-    ipMaxEdits?: number;
+    ipMaxEdits?: number | undefined;
     /**
      * Per-signal weight values. Set any to 0 to disable that signal entirely.
      */
-    weights?: FilterSpamEditWeights;
+    weights?: FilterSpamEditWeights | undefined;
     /**
      * Known spam keyword list used by the `suspiciousTerms` signal.
      */
-    suspiciousTermList?: string[];
+    suspiciousTermList?: string[] | undefined;
     /**
      * Word count below which the `smallPageLinkSpam` signal is active for old content.
      */
-    smallPageWordThreshold?: number;
+    smallPageWordThreshold?: number | undefined;
 };
 export type SpamSignals = {
     /**

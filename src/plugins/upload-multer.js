@@ -239,7 +239,7 @@ class MulterUpload {
         if (error) {
           debug('Upload Error:', error);
           status = 422;
-          send = error.message || String(error);
+          send = error instanceof Error ? error.message : String(error);
         }
         return response.status(status).send(send);
       });

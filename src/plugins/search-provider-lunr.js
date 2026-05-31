@@ -60,7 +60,7 @@ class SearchLunrPlugin {
         indexAdd: ['search-add'],
         indexUpdate: ['search-update'],
         indexRemove: ['search-remove'],
-        getPopularSearchTerms: ['popular-search-terms'],
+        getPopularSearchTerms: ['search-popular-terms'],
         validateConfig: ['validate-config'],
       },
     };
@@ -110,7 +110,7 @@ class SearchLunrPlugin {
    *       events: {
    *         search: ['search-query'],
    *         buildIndex: ['search-add', 'search-rebuild', 'search-remove', 'search-update'],
-   *         getPopularSearchTerms: ['popular-search-terms'],
+   *         getPopularSearchTerms: ['search-popular-terms'],
    *         validateConfig: ['validate-config'],
    *       },
    *     },

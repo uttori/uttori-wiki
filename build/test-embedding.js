@@ -201,10 +201,10 @@ async function debugLines() {
 
     if (success) {
       required[i] = true; // This line is required for the failure
-      console.log(`  → Line ${i + 1} is REQUIRED for failure`);
+      console.log(`  ➜ Line ${i + 1} is REQUIRED for failure`);
     } else {
       required[i] = false; // Not necessary
-      console.log(`  → Line ${i + 1} is NOT required`);
+      console.log(`  ➜ Line ${i + 1} is NOT required`);
     }
   }
 

@@ -17,6 +17,99 @@ test.afterEach(() => {
   sandbox.restore();
 });
 
+test.serial('embed: truncates and retries when the input exceeds the model context window', async (t) => {
+  const embedder = new OllamaEmbedder('http://localhost:11434', 'test-embed');
+  const bigInput = 'x'.repeat(4000);
+
+  // First call: Ollama rejects because the input is too long. Second call: success.
+  const errorResponse = {
+    ok: false,
+    status: 500,
+    text: () => Promise.resolve('{"error":"the input length exceeds the context length"}'),
+  };
+  const okResponse = {
+    ok: true,
+    json: () => Promise.resolve({ embedding: [0.1, 0.2, 0.3] }),
+  };
+  t.context.fetchStub.onCall(0).resolves(errorResponse);
+  t.context.fetchStub.onCall(1).resolves(okResponse);
+
+  const result = await embedder.embed(bigInput);
+  t.deepEqual(result, [0.1, 0.2, 0.3]);
+  t.is(t.context.fetchStub.callCount, 2);
+
+  // The retry must send a strictly shorter (halved) input, not the same oversized payload.
+  const firstBody = JSON.parse(t.context.fetchStub.firstCall.args[1].body);
+  const secondBody = JSON.parse(t.context.fetchStub.secondCall.args[1].body);
+  t.is(firstBody.input.length, 4000);
+  t.is(secondBody.input.length, 2000);
+});
+
+test.serial('embed: keeps retrying transient server-restart failures beyond the deterministic budget', async (t) => {
+  const embedder = new OllamaEmbedder('http://localhost:11434', 'test-embed');
+
+  // Simulate a llama-server crash/restart: 7 transient failures, then a success. The normal budget
+  // is only 5, so this would give up without the separate transient retry budget.
+  const transientError = new Error('Ollama 500: {"error":"llama-server process no longer running: unknown"}');
+  for (let i = 0; i < 7; i++) {
+    t.context.fetchStub.onCall(i).rejects(transientError);
+  }
+  t.context.fetchStub.onCall(7).resolves({ ok: true, json: () => Promise.resolve({ embedding: [0.5, 0.6] }) });
+
+  // Run timers immediately so the test does not actually sleep through the backoffs.
+  const originalSetTimeout = global.setTimeout;
+  global.setTimeout = (fn) => fn();
+  try {
+    const result = await embedder.embed('some text');
+    t.deepEqual(result, [0.5, 0.6]);
+    t.is(t.context.fetchStub.callCount, 8);
+  } finally {
+    global.setTimeout = originalSetTimeout;
+  }
+});
+
+test.serial('embed: gives up after the transient budget is exhausted and returns an empty vector', async (t) => {
+  const embedder = new OllamaEmbedder('http://localhost:11434', 'test-embed');
+  t.context.fetchStub.rejects(new Error('fetch failed'));
+
+  const originalSetTimeout = global.setTimeout;
+  global.setTimeout = (fn) => fn();
+  try {
+    const result = await embedder.embed('some text');
+    t.deepEqual(result, []);
+    // 10 transient retries + 5 deterministic attempts = 15 total fetches before giving up.
+    t.is(t.context.fetchStub.callCount, 15);
+  } finally {
+    global.setTimeout = originalSetTimeout;
+  }
+});
+
+test.serial('embedBatch: applies a per-text prompt builder instead of one shared prompt', async (t) => {
+  const embedder = new OllamaEmbedder('http://localhost:11434', 'test-embed');
+  const okResponse = {
+    ok: true,
+    json: () => Promise.resolve({ embedding: [0.1, 0.2, 0.3] }),
+  };
+  t.context.fetchStub.resolves(okResponse);
+
+  const texts = ['alpha', 'bravo', 'charlie'];
+  await embedder.embedBatch(texts, (text) => `Instruct: ${text}`, 1);
+
+  // Each request must carry its own chunk's prompt, not a single batch-wide blob.
+  const prompts = t.context.fetchStub.getCalls().map((call) => JSON.parse(call.args[1].body).prompt);
+  t.deepEqual(prompts.sort(), ['Instruct: alpha', 'Instruct: bravo', 'Instruct: charlie']);
+});
+
+test.serial('embedBatch: still accepts a plain string prompt for all inputs', async (t) => {
+  const embedder = new OllamaEmbedder('http://localhost:11434', 'test-embed');
+  t.context.fetchStub.resolves({ ok: true, json: () => Promise.resolve({ embedding: [0.1] }) });
+
+  await embedder.embedBatch(['a', 'b'], 'shared-prompt', 1);
+
+  const prompts = t.context.fetchStub.getCalls().map((call) => JSON.parse(call.args[1].body).prompt);
+  t.deepEqual(prompts, ['shared-prompt', 'shared-prompt']);
+});
+
 test.skip('constructor: should set baseUrl and model', (t) => {
   const baseUrl = 'http://localhost:11434';
   const model = 'nomic-embed-text';

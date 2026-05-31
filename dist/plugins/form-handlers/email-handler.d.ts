@@ -19,7 +19,7 @@ export type EmailHandlerConfig = {
     /**
      * Email body template (optional).
      */
-    template?: string;
+    template?: string | undefined;
 };
 /**
  * @typedef {object} EmailHandlerConfig

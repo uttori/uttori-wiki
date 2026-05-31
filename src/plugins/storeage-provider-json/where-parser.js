@@ -6,6 +6,8 @@ let debug = (..._) => {};
 
 try { const { default: d } = await import('debug'); debug = d('Uttori.SqlWhereParser'); } catch {}
 
+/** @import { SqlWhereParserEvaluator, ParserOperand } from '../../../dist/custom.d.ts' */
+
 /**
  * @typedef {object} SqlWhereParserConfig
  * @property {Array<Record<string | number | symbol, number | symbol>>} operators A collection of operators in precedence order.
@@ -115,8 +117,8 @@ class SqlWhereParser {
   /**
    * Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
    * @param {string} sql Query string to process.
-   * @param {import('../../../dist/custom.d.ts').SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
-   * @returns {import('../../../dist/custom.d.ts').ParserOperand} The parsed query tree.
+   * @param {SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
+   * @returns {ParserOperand} The parsed query tree.
    * @see {@link https://wcipeg.com/wiki/Shunting_yard_algorithm|Shunting-Yard_Algorithm (P3G)}
    * @see {@link https://en.wikipedia.org/wiki/Shunting-yard_algorithm|Shunting-Yard_Algorithm (Wikipedia)}
    */
@@ -124,7 +126,7 @@ class SqlWhereParser {
     debug('parse:', sql);
     /** @type {Array<number | string | symbol>} */
     const operatorStack = [];
-    /** @type {Array<import('../../../dist/custom.d.ts').ParserOperand>} */
+    /** @type {Array<ParserOperand>} */
     const outputStream = [];
     let lastOperator;
     let tokenCount = 0;
@@ -169,7 +171,7 @@ class SqlWhereParser {
               throw new SyntaxError('Unknow Error: operatorStack empty?');
             }
             const operator = this.operators[value];
-            /** @type {Array<import('../../../dist/custom.d.ts').ParserOperand>} */
+            /** @type {Array<ParserOperand>} */
             const operands = [];
             let numOperands = operator.type;
             if (typeof numOperands === 'number') {
@@ -204,6 +206,7 @@ class SqlWhereParser {
             if (!operator) {
               throw new SyntaxError(`Unmatched pair within parentheses, cannot find value of: ${String(value)}`);
             }
+            /** @type {Array<ParserOperand>} */
             const operands = [];
             let numOperands = operator.type;
             if (typeof numOperands === 'number') {
@@ -239,6 +242,7 @@ class SqlWhereParser {
             if (!operator) {
               throw new SyntaxError(`Unmatched pair within brackets, no operator matches: ${String(value)}`);
             }
+            /** @type {Array<ParserOperand>} */
             const operands = [];
             let numOperands = operator.type;
             if (typeof numOperands === 'number') {
@@ -264,7 +268,7 @@ class SqlWhereParser {
         }
       } else {
         // Push explicit strings to the output queue.
-        outputStream.push(token);
+        outputStream.push(/** @type {ParserOperand} */ (token));
         lastTokenWasOperatorOrLeftParenthesis = false;
       }
     });
@@ -284,6 +288,7 @@ class SqlWhereParser {
         throw new SyntaxError('Unmatched bracket.');
       }
       const operator = this.operators[operatorValue];
+      /** @type {Array<ParserOperand>} */
       const operands = [];
       let numOperands = operator.type;
       if (typeof numOperands === 'number') {
@@ -336,8 +341,8 @@ class SqlWhereParser {
   /**
    * A default fallback evaluator for the parse function.
    * @param {number|string|symbol} operatorValue The operator to evaluate.
-   * @param {Array<import('../../../dist/custom.d.ts').ParserOperand>} operands The list of operands.
-   * @returns {import('../../../dist/custom.d.ts').ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
+   * @param {Array<ParserOperand>} operands The list of operands.
+   * @returns {ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
    */
   static defaultEvaluator = (operatorValue, operands) => {
     // debug('defaultEvaluator:', operatorValue);
@@ -350,7 +355,7 @@ class SqlWhereParser {
     // Previously: [].concat(operands[0], operands[1])
     // But this version is more clear about what is happening.
     if (operatorValue === ',') {
-      /** @type {import('../../../dist/custom.d.ts').ParserOperand[]} */
+      /** @type {ParserOperand[]} */
       const output = operands.flatMap((op) => (Array.isArray(op) ? op : [op]));
       debug('defaultEvaluator: Comma Detected!', JSON.stringify(output));
       debug('defaultEvaluator: Converted:', output);

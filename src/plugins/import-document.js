@@ -43,6 +43,17 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Imp
  */
 
 /**
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>} ImportDocumentContext
+ */
+
+/**
+ * Builds an Express request handler from plugin context.
+ * @callback ImportDocumentRequestHandlerFactory
+ * @param {ImportDocumentContext} ctx Uttori context for this plugin.
+ * @returns {import('express').RequestHandler} Express middleware.
+ */
+
+/**
  * @typedef {object} ImportDocumentConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {string} [apiRoute] The API route for importing documents.
@@ -50,8 +61,8 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Imp
  * @property {string} [uploadPath] The path to reference uploaded files by.
  * @property {string} [uploadDirectory] The directory to upload files to.
  * @property {string[]} [allowedReferrers] When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route.
+ * @property {ImportDocumentRequestHandlerFactory} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {ImportDocumentRequestHandlerFactory} [apiRequestHandler] A request handler for the API route.
  * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
  * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
@@ -267,13 +278,23 @@ class ImportDocument {
   static bindRoutes(server, context) {
     debug('bindRoutes');
     /** @type {ImportDocumentConfig} */
-    const { apiRoute, publicRoute, middlewareApi, middlewarePublic, apiRequestHandler, interfaceRequestHandler } = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
-    if (!interfaceRequestHandler) {
+    const pluginConfig = context.config[ImportDocument.configKey] ?? {};
+    const configExtended = { ...ImportDocument.defaultConfig(), ...pluginConfig };
+    const { apiRoute, publicRoute, middlewareApi, middlewarePublic } = configExtended;
+    /** @type {ImportDocumentRequestHandlerFactory} */
+    const apiHandler = pluginConfig.apiRequestHandler !== undefined
+      ? pluginConfig.apiRequestHandler
+      : ImportDocument.apiRequestHandler;
+    /** @type {ImportDocumentRequestHandlerFactory} */
+    const interfaceHandler = pluginConfig.interfaceRequestHandler !== undefined
+      ? pluginConfig.interfaceRequestHandler
+      : ImportDocument.interfaceRequestHandler;
+    if (typeof interfaceHandler !== 'function') {
       throw new Error('Config Error: `interfaceRequestHandler` is missing.');
     }
     debug('bindRoutes:', { apiRoute, publicRoute });
-    server.post(`${apiRoute}`, ...middlewareApi, apiRequestHandler(context));
-    server.get(`${publicRoute}`, ...middlewarePublic, interfaceRequestHandler(context));
+    server.post(`${apiRoute}`, ...middlewareApi, apiHandler(context));
+    server.get(`${publicRoute}`, ...middlewarePublic, interfaceHandler(context));
   }
 
   /**
@@ -398,7 +419,8 @@ class ImportDocument {
             continue;
           }
 
-          const processedPage = await config.processPage(config, slug, page);
+          const processPage = config.processPage ?? ImportDocument.processPage;
+          const processedPage = /** @type {ImportDocumentProcessPage} */ (await processPage(config, slug, page));
           if (processedPage.attachments && Array.isArray(processedPage.attachments)) {
             attachments.push(...processedPage.attachments);
           }
@@ -509,8 +531,10 @@ class ImportDocument {
       if (response.ok && response.body) {
         debug('downloadFile: writing to file:', normalizedFileName);
         let writer = createWriteStream(normalizedFileName);
+        /** @type {import('stream/web').ReadableStream} */
+        const body = response.body;
         await new Promise((resolve, reject) => {
-          Readable.fromWeb(/** @type {any} */ (response.body))
+          Readable.fromWeb(body)
             .pipe(writer)
             .on('finish', () => resolve())
             .on('error', reject);
@@ -541,14 +565,14 @@ class ImportDocument {
       return { content: '', attachments: [] };
     }
 
-    /** @type {string} The absolute path to the upload directory */
+    /** @type {string} */
     const uploadDir = path.join(config.uploadDirectory, sanitizedSlug);
 
-    /** @type {boolean} Whether the page has content */
+    /** @type {boolean} */
     let hasContent = false;
-    /** @type {string} The content of the page */
+    /** @type {string} */
     let content = '';
-    /** @type {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} The attachments of the page */
+    /** @type {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} */
     let attachments = [];
 
     // Handle local files (markdown, PDF, and images)

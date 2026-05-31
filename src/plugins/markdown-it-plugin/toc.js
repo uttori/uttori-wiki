@@ -1,6 +1,20 @@
 import slugify from 'slugify';
 
 /**
+ * @typedef {object} MarkdownItTocHeading
+ * @property {string} content Heading text content.
+ * @property {string|number} index Heading map index.
+ * @property {number} level Heading level (1-6).
+ * @property {string} slug Slugified heading id prefix.
+ */
+
+/**
+ * MarkdownIt env object extended with cached TOC headings.
+ * @typedef {object} MarkdownItTocStateEnv
+ * @property {MarkdownItTocHeading[]} [toc_headings] Cached headings for the table of contents.
+ */
+
+/**
  * Adds deep links to the opening of the heading tags with IDs.
  * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens.
  * @param {number} index The index of the current token in the Tokens array.
@@ -50,15 +64,16 @@ export function tocClose(_tokens, _index, options) {
  * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} _options Option parameters of the parser instance.
- * @param {object} env Additional data from parsed input (the toc_headings, for example).
+ * @param {MarkdownItTocStateEnv} env Additional data from parsed input (the toc_headings, for example).
  * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
  * @returns {string} The contents tag of the TOC.
  */
 export function tocBody(_tokens, _index, _options, env, _slf) {
   let indent_level = 0;
+  const headings = env.toc_headings ?? [];
 
   // Reduce the headers down into a string of the TOC
-  const list = env.toc_headings.reduce((accumulator, heading) => {
+  const list = headings.reduce((accumulator, heading) => {
     // Increase / Decrease depth of nesting
     if (heading.level > indent_level) {
       const level_diff = (heading.level - indent_level);
@@ -112,6 +127,7 @@ export function tocRule(state) {
     return false;
   }
 
+  /** @type {import('markdown-it/index.js').Token} */
   let token;
   token = state.push('toc_open', 'toc', 1);
   token.markup = '[toc]';
@@ -131,17 +147,20 @@ export function tocRule(state) {
  * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
  */
 export function collectHeaders(state) {
+  /** @type {MarkdownItTocStateEnv} */
+  const env = state.env;
+  const mdOptions = /** @type {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} */ (state.md.options);
+
   // Create a mapping of all the headers, their indentation level, content and slug.
-  state.env.toc_headings = state.env.toc_headings || [];
+  env.toc_headings = env.toc_headings || [];
   state.tokens.forEach((token, i, tokens) => {
     if (token.type === 'heading_close') {
       const inline = tokens[i - 1];
-      state.env.toc_headings.push({
+      env.toc_headings.push({
         content: inline.content,
         index: inline.map ? inline.map[0] : 'MISSING_MAP',
         level: Number.parseInt(token.tag.slice(1, 2), 10),
-        // @ts-expect-error slugify is not typed
-        slug: slugify(inline.content, state.md.options.uttori.toc.slugify),
+        slug: slugify(inline.content, mdOptions.uttori.toc.slugify),
       });
     }
   });

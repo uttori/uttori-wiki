@@ -169,3 +169,23 @@ test('MulterUpload.upload(context): returns a Express route and can upload neste
   t.is(response.status, 200);
   t.is(response.text.slice(0, 20), '/uploads/am-i-human-');
 });
+
+test('MulterUpload.upload(context): rejects disallowed mime types', async (t) => {
+  t.plan(2);
+  const { serverSetup } = await import('./../_helpers/server.js');
+  const route = '/upload';
+  const context = {
+    config: {
+      [MulterUpload.configKey]: {
+        directory: '/tmp/uploads',
+        route,
+        allowedMimeTypes: ['text/plain'],
+      },
+    },
+  };
+  const server = serverSetup();
+  MulterUpload.bindRoutes(server, context);
+  const response = await request(server).post(route).attach('file', 'test/_helpers/am-i-human.png');
+  t.is(response.status, 422);
+  t.true(response.text.includes('not allowed'));
+});

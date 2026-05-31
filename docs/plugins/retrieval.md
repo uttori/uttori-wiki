@@ -104,7 +104,7 @@ Run the vector search query.
 | --- | --- | --- |
 | db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
 | queryVectors | <code>Float32Array</code> | The embedded query vectors. |
-| config | <code>AIChatBotConfig</code> | The plugin config. |
+| config | <code>SearchSQLiteConfig</code> | The plugin config. |
 | slugFilter | [<code>SlugFilter</code>](#SlugFilter) | The slug filter. |
 
 <a name="buildFtsQuery"></a>
@@ -131,7 +131,7 @@ Run the optional FTS search.
 | --- | --- | --- |
 | db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
 | entities | <code>Array.&lt;string&gt;</code> | The query entities. |
-| config | <code>AIChatBotConfig</code> | The plugin config. |
+| config | <code>SearchSQLiteConfig</code> | The plugin config. |
 | slugFilter | [<code>SlugFilter</code>](#SlugFilter) | The slug filter. |
 
 <a name="bm25ToSimilarity"></a>
@@ -179,7 +179,7 @@ Calculate the FTS blend weight for the current query.
 | query | <code>string</code> | The normalized query. |
 | entities | <code>Array.&lt;string&gt;</code> | The query entities. |
 | ftsRows | [<code>Array.&lt;FtsRankRow&gt;</code>](#FtsRankRow) | The FTS rows. |
-| config | <code>AIChatBotConfig</code> | The plugin config. |
+| config | <code>SearchSQLiteConfig</code> | The plugin config. |
 
 <a name="fetchCandidateRows"></a>
 
@@ -236,7 +236,7 @@ Blend vector, FTS, and entity boost scores.
 | wFTS | <code>number</code> | The FTS weight. |
 | titleMatchCount | <code>Map.&lt;number, number&gt;</code> | Title match counts by rowid. |
 | textMatchCount | <code>Map.&lt;number, number&gt;</code> | Text match counts by rowid. |
-| config | <code>AIChatBotConfig</code> | The plugin config. |
+| config | <code>SearchSQLiteConfig</code> | The plugin config. |
 
 <a name="buildRetrievedChunks"></a>
 
@@ -286,7 +286,7 @@ Select chunks under chunk, per-source, and token budgets.
 | --- | --- | --- |
 | merged | <code>Array.&lt;RetrievedChunk&gt;</code> | The ranked chunks. |
 | pinnedRowids | <code>Set.&lt;number&gt;</code> | Rowids that should be kept first. |
-| config | <code>AIChatBotConfig</code> | The plugin config. |
+| config | <code>SearchSQLiteConfig</code> | The plugin config. |
 
 
 * [pickByBudget(merged, pinnedRowids, config)](#pickByBudget) ⇒ <code>Array.&lt;RetrievedChunk&gt;</code>
@@ -324,7 +324,7 @@ Retrieve chunks from the database.
 | Param | Type | Description |
 | --- | --- | --- |
 | query | <code>string</code> | The query to retrieve chunks for. |
-| config | <code>AIChatBotConfig</code> | The options for the retrieval. |
+| config | <code>SearchSQLiteConfig</code> | The options for the retrieval. |
 | [slugs] | <code>Array.&lt;string&gt;</code> | Optional array of source slugs to restrict search to. |
 
 <a name="retrieve..pinnedRowids"></a>

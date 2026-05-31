@@ -1,4 +1,9 @@
-import { retrieve } from './retrieval.js';
+import {
+  WIKI_TOOLS,
+  getWikiTool,
+  toOllamaTool,
+  executeWikiTool,
+} from './tool-registry.js';
 
 let debug = (..._) => {};
 /* c8 ignore next 1 */
@@ -19,17 +24,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
 
 /**
  * @typedef {object} ChatToolResult
- * @property {string} [error] Set when the tool name is unknown.
- */
-
-/**
- * Signature of the retrieval function accepted by {@link executeChatTool}.
- * Matches the signature of `retrieve` from `./retrieval.js`.
- * @callback RetrieveFn
- * @param {string} query The search query.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The chat bot configuration.
- * @param {string[]} slugs Optional slugs to restrict the search to.
- * @returns {Promise<import('../ai-chat-bot.js').RetrieveResponse>} The retrieval result.
+ * @property {string} [error] Set when the tool name is unknown or no provider handled it.
  */
 
 /**
@@ -41,40 +36,17 @@ const MAX_CHUNK_CHARS = 1500;
 
 /**
  * Built-in Ollama tool schema for `vectorSearch`.
- * Passed verbatim in the `tools` array of every `/api/chat` request.
+ * Derived from the shared registry so the chat bot and MCP provider stay in sync.
  * @type {OllamaTool}
  */
-export const vectorSearchTool = {
-  type: 'function',
-  function: {
-    name: 'vectorSearch',
-    description: 'Search the wiki for information relevant to the user question. Returns formatted source passages.',
-    parameters: {
-      type: 'object',
-      required: ['query'],
-      properties: {
-        query: {
-          type: 'string',
-          description: 'Concise search query derived from the user question.',
-        },
-        slugs: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Optional array of document slugs to restrict the search to.',
-        },
-      },
-    },
-  },
-};
+export const vectorSearchTool = toOllamaTool(/** @type {import('./tool-registry.js').WikiToolDefinition} */ (getWikiTool('vectorSearch')));
 
 /**
  * Map of all built-in chat tools indexed by their name.
- * Extend this map to register additional tools without changing `runChatPass`.
+ * Built from the shared wiki tool registry.
  * @type {Map<string, OllamaTool>}
  */
-export const BUILT_IN_TOOLS = new Map([
-  [vectorSearchTool.function.name, vectorSearchTool],
-]);
+export const BUILT_IN_TOOLS = new Map(WIKI_TOOLS.map(definition => [definition.name, toOllamaTool(definition)]));
 
 /**
  * Build the array of Ollama tool schemas to include in an `/api/chat` request.
@@ -97,7 +69,7 @@ export function buildChatTools(config) {
 }
 
 /**
- * Format a {@link import('../ai-chat-bot.js').RetrieveResponse} into the compact context
+ * Format a {@link import('../search-provider-sqlite.js').RetrieveResponse} into the compact context
  * block string that is sent back to the model as a tool result.
  * Each chunk becomes a block:
  * ```
@@ -107,7 +79,7 @@ export function buildChatTools(config) {
  * <text (truncated to MAX_CHUNK_CHARS)>
  * ```
  * Blocks are joined with `\n\n====\n\n`.
- * @param {import('../ai-chat-bot.js').RetrieveResponse} result The retrieval result.
+ * @param {import('../search-provider-sqlite.js').RetrieveResponse} result The retrieval result.
  * @returns {string} The formatted context block.
  */
 export function formatRetrievalResult(result) {
@@ -123,19 +95,52 @@ export function formatRetrievalResult(result) {
 }
 
 /**
- * Execute a named chat tool and return its formatted result.
- * Unknown tool names return an error object consistent with the original behaviour.
+ * @typedef {object} ChatToolExecutionContext
+ * @property {import('@uttori/event-dispatcher').EventDispatcher} [hooks] The Uttori event dispatcher.
+ * @property {object} [context] The full Uttori context.
+ * @property {import('../ai-chat-bot.js').AIChatBotConfig} [config] The chat bot configuration.
+ */
+
+/**
+ * Execute a named chat tool and return its result.
+ * Tools are resolved through the shared wiki tool registry, which dispatches to the
+ * registered storage / search providers via the Uttori hook system. The `vectorSearch`
+ * tool result is post-formatted into the compact context block expected by the model;
+ * all other tools return their structured result JSON-serialized.
+ * Unknown tool names and missing providers return an error object.
  * @param {string} name The tool name as returned by the model.
  * @param {Record<string, any>} args The arguments object from the model's tool call.
  * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The chat bot configuration.
- * @param {RetrieveFn} [retrieveFn] Optional retrieval function override, primarily for testing.
- * @returns {Promise<string | ChatToolResult>} The formatted result string, or an error object.
+ * @param {ChatToolExecutionContext} context A Uttori-like context exposing `hooks`.
+ * @returns {Promise<string | ChatToolResult>} The formatted/serialized result string, or an error object.
  */
-export async function executeChatTool(name, args, config, retrieveFn = retrieve) {
+export async function executeChatTool(name, args, config, context) {
   debug('executeChatTool:', name, args);
-  if (name === 'vectorSearch') {
-    const result = await retrieveFn(args?.query, config, args?.slugs ?? []);
-    return formatRetrievalResult(result);
+  const definition = getWikiTool(name);
+  if (!definition) {
+    return { error: `Unknown Tool: ${name}` };
   }
-  return { error: `Unknown Tool: ${name}` };
+
+  // Inject the configured default chunk limit for vectorSearch when the model omits one.
+  const effectiveArgs = name === 'vectorSearch' && (args == null || args.limit == null) && config?.retrieveLimit != null
+    ? { ...args, limit: config.retrieveLimit }
+    : args;
+
+  const result = await executeWikiTool(name, effectiveArgs, {
+    hooks: context.hooks,
+    context,
+    config,
+  });
+
+  // Propagate registry errors (unknown tool / missing provider) verbatim.
+  if (result && typeof result === 'object' && 'error' in result && !('chunks' in result)) {
+    return /** @type {ChatToolResult} */ (result);
+  }
+
+  // The vectorSearch tool returns a RetrieveResponse that is formatted into a context block.
+  if (name === 'vectorSearch') {
+    return formatRetrievalResult(/** @type {import('../search-provider-sqlite.js').RetrieveResponse} */ (result));
+  }
+
+  return JSON.stringify(result);
 }

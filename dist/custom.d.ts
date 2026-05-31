@@ -144,14 +144,45 @@ export interface UttoriWikiPlugin {
   static bindRoutes?: (app: Express, context: UttoriContext) => void
 }
 
-export type Operator = '=' | '!=' | '<=' | '<' | '>=' | '>' | 'LIKE' | 'IN' | 'NOT_IN' | 'INCLUDES' | 'EXCLUDES' | 'IS_NULL' | 'IS_NOT_NULL' | 'BETWEEN' | 'AND' | 'OR';
+/** SQL comparison and logical operator names. */
+export type SqlWhereParserOperator =
+  | '='
+  | '!='
+  | '<='
+  | '<'
+  | '>='
+  | '>'
+  | 'LIKE'
+  | 'IN'
+  | 'NOT_IN'
+  | 'INCLUDES'
+  | 'EXCLUDES'
+  | 'IS_NULL'
+  | 'IS_NOT_NULL'
+  | 'BETWEEN'
+  | 'AND'
+  | 'OR';
+
+/** SQL comparison and logical operator names. */
+export type Operator = SqlWhereParserOperator;
+
+/** Primitive leaf values in a WHERE parser AST. */
 export type ParserPrimitive = boolean | string | number | symbol;
+
+/** Operand in a WHERE parser AST node. */
 export type ParserOperand = ParserPrimitive | SqlWhereParserAst | ParserOperand[];
+
+/** Value attached to an AST operator key. */
 export type Value = ParserOperand | ParserOperand[];
 
+/** Parsed WHERE clause abstract syntax tree. */
 export type SqlWhereParserAst = {
   [key: string]: Value;
   [key: symbol]: Value;
 };
 
-export type SqlWhereParserEvaluator = (operatorValue: (number | string | symbol), operands: Array<ParserOperand>) => ParserOperand;
+/** Evaluates a parsed operator and its operands into an AST node. */
+export type SqlWhereParserEvaluator = (
+  operatorValue: number | string | symbol,
+  operands: ParserOperand[],
+) => ParserOperand;

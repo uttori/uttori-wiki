@@ -13,9 +13,21 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Tag
  * @property {string} [tagIndexRoute] A replacement route for the tag index route.
  * @property {string} [tagRoute] A replacement route for the tag show route.
  * @property {string} [apiRoute] A replacement route for the tag index route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>): import('express').RequestHandler} [tagIndexRequestHandler] A replacement route handler for the tag index route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>): import('express').RequestHandler} [tagRequestHandler] A replacement route handler for the tag show route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route.
+ * @property {TagRoutesRequestHandler} [tagIndexRequestHandler] A replacement route handler for the tag index route.
+ * @property {TagRoutesRequestHandler} [tagRequestHandler] A replacement route handler for the tag show route.
+ * @property {TagRoutesRequestHandler} [apiRequestHandler] A request handler for the API route.
+ */
+
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} TagRoutesContext
+ */
+
+/**
+ * Builds an Express handler for a tag route.
+ * @callback TagRoutesRequestHandler
+ * @param {TagRoutesContext} context A Uttori-like context.
+ * @returns {import('express').RequestHandler} The Express request handler.
  */
 
 /**
@@ -94,7 +106,7 @@ class TagRoutesPlugin {
   /**
    * Validates the provided configuration for required entries.
    * @param {Record<string, TagRoutesPluginConfig>} config A configuration object.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} _context - A Uttori-like context (unused).
+   * @param {TagRoutesContext} _context - A Uttori-like context (unused).
    * @example <caption>TagRoutesPlugin.validateConfig(config, _context)</caption>
    * TagRoutesPlugin.validateConfig({ ... });
    * @static
@@ -127,7 +139,7 @@ class TagRoutesPlugin {
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} context A Uttori-like context.
+   * @param {TagRoutesContext} context A Uttori-like context.
    * @example <caption>TagRoutesPlugin.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -166,7 +178,7 @@ class TagRoutesPlugin {
   /**
    * Wrapper function for binding tag routes.
    * @param {import('express').Application} server An Express server instance.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} context A Uttori-like context.
+   * @param {TagRoutesContext} context A Uttori-like context.
    * @example <caption>TagRoutesPlugin.bindRoutes(plugin)</caption>
    * const context = {
    *   config: {
@@ -192,7 +204,7 @@ class TagRoutesPlugin {
   /**
    * Normalize document tags before the document is saved.
    * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} _context A Uttori-like context.
+   * @param {TagRoutesContext} _context A Uttori-like context.
    * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
    * @static
    */
@@ -217,7 +229,7 @@ class TagRoutesPlugin {
    * Hooks:
    * - `fetch` - `storage-query` - Searched for the tagged documents.
    * @async
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} context A Uttori-like context.
+   * @param {TagRoutesContext} context A Uttori-like context.
    * @param {string} tag The tag to look for in documents.
    * @returns {Promise<import('../wiki.js').UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
    * @example
@@ -246,7 +258,7 @@ class TagRoutesPlugin {
    *
    * Hooks:
    * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} context A Uttori-like context.
+   * @param {TagRoutesContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */
@@ -300,7 +312,7 @@ class TagRoutesPlugin {
    *
    * Hooks:
    * - `filter` - `view-model-tag` - Passes in the viewModel.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} context A Uttori-like context.
+   * @param {TagRoutesContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */

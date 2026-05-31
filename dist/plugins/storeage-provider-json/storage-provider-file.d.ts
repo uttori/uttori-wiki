@@ -14,31 +14,31 @@ export type StorageProviderJsonFileConfig = {
     /**
      * The file extension to use for file.
      */
-    extension?: string;
+    extension?: string | undefined;
     /**
      * Should update times be marked at the time of edit.
      */
-    updateTimestamps?: boolean;
+    updateTimestamps?: boolean | undefined;
     /**
      * Should history entries be created.
      */
-    useHistory?: boolean;
+    useHistory?: boolean | undefined;
     /**
      * Should we cache files in memory?
      */
-    useCache?: boolean;
+    useCache?: boolean | undefined;
     /**
      * The spaces parameter for JSON stringifying documents.
      */
-    spacesDocument?: number;
+    spacesDocument?: number | undefined;
     /**
      * The spaces parameter for JSON stringifying history.
      */
-    spacesHistory?: number;
+    spacesHistory?: number | undefined;
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
 };
 /**
  * @typedef StorageProviderJsonFileConfig The configuration object for the StorageProviderJsonFile.
@@ -100,15 +100,15 @@ declare class StorageProviderJsonFile {
         /**
          * The spaces parameter for JSON stringifying documents.
          */
-        spacesDocument: number;
+        spacesDocument: number | undefined;
         /**
          * The spaces parameter for JSON stringifying history.
          */
-        spacesHistory: number;
+        spacesHistory: number | undefined;
         /**
          * The events to listen for.
          */
-        events?: Record<string, string[]>;
+        events?: Record<string, string[]> | undefined;
     };
     refresh: boolean;
     /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} */

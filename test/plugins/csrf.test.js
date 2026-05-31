@@ -203,6 +203,14 @@ test('register: throws when context.hooks.on is not a function', (t) => {
   });
 });
 
+test('register: throws when events are missing', (t) => {
+  const resolveConfigStub = sinon.stub(CsrfProtection, 'resolveConfig').returns(/** @type {any} */ ({ events: undefined }));
+  t.throws(() => CsrfProtection.register({ hooks: { on: () => {} }, config: {} }), {
+    message: 'Missing events to listen to for in \'config.events\'.',
+  });
+  resolveConfigStub.restore();
+});
+
 test('register: binds injectToken to view-model-edit, view-model-new, and view-model-history-restore', (t) => {
   const onSpy = sandbox.spy();
   CsrfProtection.register({ hooks: { on: onSpy }, config: makeConfig() });

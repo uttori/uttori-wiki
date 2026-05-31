@@ -13,6 +13,9 @@
 <dd></dd>
 <dt><a href="#AddQueryOutputToViewModelConfig">AddQueryOutputToViewModelConfig</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#AddQueryOutputToViewModelContext">AddQueryOutputToViewModelContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code></dt>
+<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
+</dd>
 </dl>
 
 <a name="AddQueryOutputToViewModel"></a>
@@ -173,7 +176,7 @@ Curry the hook function to take the current event label.
   format: (results) => results.map((result) => result.slug),
   queryFunction: async (target, context) => {
     const ignoreSlugs = ['home-page'];
-    const [popular] = await context.hooks.fetch('popular-documents', { limit: 5 }, context);
+    const [popular] = await context.hooks.fetch('example-documents', { limit: 5 }, context);
     const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
     const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
     const [results] = await context.hooks.fetch('storage-query', query);
@@ -201,3 +204,9 @@ Curry the hook function to take the current event label.
 | queries | <code>Record.&lt;string, Array.&lt;AddQueryOutputToViewModelQuery&gt;&gt;</code> | The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added. |
 | [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
 
+<a name="AddQueryOutputToViewModelContext"></a>
+
+## AddQueryOutputToViewModelContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code>
+Uttori context narrowed to this plugin's config shape.
+
+**Kind**: global typedef  

@@ -11,7 +11,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
 /**
  * Extract text from an attachment.
  * For PDFs, this now preserves page boundaries to help with chunking.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The configuration.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The configuration.
  * @param {import('../../wiki.js').UttoriWikiDocumentAttachment} attachment The attachment.
  * @returns {Promise<string>} The text of the attachment.
  */

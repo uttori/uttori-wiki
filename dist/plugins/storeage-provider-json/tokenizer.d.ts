@@ -62,15 +62,15 @@ export type TokenizeThisConfig = {
     /**
      * The list of tokenizable substrings.
      */
-    shouldTokenize?: string[];
+    shouldTokenize?: string[] | undefined;
     /**
      * The list of quotes to match explicit strings with.
      */
-    shouldMatch?: string[];
+    shouldMatch?: string[] | undefined;
     /**
      * The list of delimiters.
      */
-    shouldDelimitBy?: string[];
+    shouldDelimitBy?: string[] | undefined;
     /**
      * If literals should be converted or not, ie 'true' -> true.
      */

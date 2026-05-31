@@ -10,17 +10,8 @@
 <dt><a href="#removeIndexedDocumentFromDatabase">removeIndexedDocumentFromDatabase(db, slug)</a></dt>
 <dd><p>Remove a document and all of its chunks from the chat index.</p>
 </dd>
-<dt><a href="#removeIndexedDocument">removeIndexedDocument(fullConfig, slug)</a></dt>
-<dd><p>Remove a document from the chat index.</p>
-</dd>
 <dt><a href="#indexDocumentInDatabase">indexDocumentInDatabase(db, config, embedder, document)</a> ⇒ <code>Promise.&lt;{chunks: number, skipped: boolean, errored: number}&gt;</code></dt>
 <dd><p>Index one document using an already-open database.</p>
-</dd>
-<dt><a href="#indexDocument">indexDocument(fullConfig, _context, document)</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
-<dd><p>Index one document in the database.</p>
-</dd>
-<dt><a href="#indexAllDocuments">indexAllDocuments(fullConfig, context)</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
-<dd><p>Index all documents in the database.</p>
 </dd>
 </dl>
 
@@ -42,13 +33,14 @@ Build blocks from a document.
 | Param | Type | Description |
 | --- | --- | --- |
 | document | <code>UttoriWikiDocument</code> | The document to build blocks from. |
-| config | <code>AIChatBotConfig</code> | The options. |
+| config | <code>SearchSQLiteConfig</code> | The options. |
 
 
 * [buildBlocks(document, config)](#buildBlocks) ⇒ <code>Promise.&lt;Array.&lt;Block&gt;&gt;</code>
     * [~output](#buildBlocks..output) : <code>Array.&lt;Block&gt;</code>
     * [~sectionHash](#buildBlocks..sectionHash) : <code>Record.&lt;string, {headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
     * [~sectionz](#buildBlocks..sectionz) : <code>Array.&lt;{headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
+    * [~chunks](#buildBlocks..chunks) : <code>Array.&lt;string&gt;</code>
     * [~newItems](#buildBlocks..newItems) : <code>Array.&lt;Block&gt;</code>
 
 <a name="buildBlocks..output"></a>
@@ -62,6 +54,10 @@ Build blocks from a document.
 <a name="buildBlocks..sectionz"></a>
 
 ### buildBlocks~sectionz : <code>Array.&lt;{headers: Array.&lt;string&gt;, content: Array.&lt;string&gt;}&gt;</code>
+**Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
+<a name="buildBlocks..chunks"></a>
+
+### buildBlocks~chunks : <code>Array.&lt;string&gt;</code>
 **Kind**: inner constant of [<code>buildBlocks</code>](#buildBlocks)  
 <a name="buildBlocks..newItems"></a>
 
@@ -78,7 +74,7 @@ Ensure the chat index tables exist.
 | Param | Type | Description |
 | --- | --- | --- |
 | db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
-| config | <code>AIChatBotConfig</code> | The options. |
+| config | <code>SearchSQLiteConfig</code> | The options. |
 | [options] | [<code>ChatIndexSchemaOptions</code>](#ChatIndexSchemaOptions) | Schema options. |
 
 <a name="removeIndexedDocumentFromDatabase"></a>
@@ -93,18 +89,6 @@ Remove a document and all of its chunks from the chat index.
 | db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
 | slug | <code>string</code> | The source slug to remove. |
 
-<a name="removeIndexedDocument"></a>
-
-## removeIndexedDocument(fullConfig, slug)
-Remove a document from the chat index.
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| fullConfig | <code>Record.&lt;string, AIChatBotConfig&gt;</code> | The configuration. |
-| slug | <code>string</code> | The source slug to remove. |
-
 <a name="indexDocumentInDatabase"></a>
 
 ## indexDocumentInDatabase(db, config, embedder, document) ⇒ <code>Promise.&lt;{chunks: number, skipped: boolean, errored: number}&gt;</code>
@@ -116,7 +100,7 @@ Index one document using an already-open database.
 | Param | Type | Description |
 | --- | --- | --- |
 | db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
-| config | <code>AIChatBotConfig</code> | The options. |
+| config | <code>SearchSQLiteConfig</code> | The options. |
 | embedder | <code>OllamaEmbedder</code> | The embedder. |
 | document | <code>UttoriWikiDocument</code> | The document to index. |
 
@@ -133,51 +117,6 @@ Index one document using an already-open database.
 
 ### indexDocumentInDatabase~chunksWithVectors : <code>Array.&lt;ChunkWithMeta&gt;</code>
 **Kind**: inner constant of [<code>indexDocumentInDatabase</code>](#indexDocumentInDatabase)  
-<a name="indexDocument"></a>
-
-## indexDocument(fullConfig, _context, document) ⇒ <code>Promise.&lt;void&gt;</code>
-Index one document in the database.
-
-**Kind**: global function  
-**Returns**: <code>Promise.&lt;void&gt;</code> - The indexed document.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| fullConfig | <code>Record.&lt;string, AIChatBotConfig&gt;</code> | The configuration. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | The context. |
-| document | <code>UttoriWikiDocument</code> | The document to index. |
-
-<a name="indexAllDocuments"></a>
-
-## indexAllDocuments(fullConfig, context) ⇒ <code>Promise.&lt;void&gt;</code>
-Index all documents in the database.
-
-**Kind**: global function  
-**Returns**: <code>Promise.&lt;void&gt;</code> - The indexed documents.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| fullConfig | <code>Record.&lt;string, AIChatBotConfig&gt;</code> | The configuration. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | The context. |
-
-
-* [indexAllDocuments(fullConfig, context)](#indexAllDocuments) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [~documents](#indexAllDocuments..documents) : <code>Array.&lt;UttoriWikiDocument&gt;</code>
-    * [~config](#indexAllDocuments..config) : <code>AIChatBotConfig</code>
-    * [~db](#indexAllDocuments..db) : <code>module:better-sqlite3/index.js~Database</code>
-
-<a name="indexAllDocuments..documents"></a>
-
-### indexAllDocuments~documents : <code>Array.&lt;UttoriWikiDocument&gt;</code>
-**Kind**: inner property of [<code>indexAllDocuments</code>](#indexAllDocuments)  
-<a name="indexAllDocuments..config"></a>
-
-### indexAllDocuments~config : <code>AIChatBotConfig</code>
-**Kind**: inner constant of [<code>indexAllDocuments</code>](#indexAllDocuments)  
-<a name="indexAllDocuments..db"></a>
-
-### indexAllDocuments~db : <code>module:better-sqlite3/index.js~Database</code>
-**Kind**: inner constant of [<code>indexAllDocuments</code>](#indexAllDocuments)  
 <a name="ChatIndexSchemaOptions"></a>
 
 ## ChatIndexSchemaOptions : <code>object</code>

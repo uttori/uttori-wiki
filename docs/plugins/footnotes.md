@@ -1,6 +1,9 @@
 ## Functions
 
 <dl>
+<dt><a href="#getFootnotesEnv">getFootnotesEnv(state)</a> ⇒ <code><a href="#MarkdownItFootnotesEnv">MarkdownItFootnotesEnv</a></code></dt>
+<dd><p>Ensure footnotes state exists on the MarkdownIt env object.</p>
+</dd>
 <dt><a href="#footnoteDefinition">footnoteDefinition(state, startLine, endLine, silent)</a> ⇒ <code>boolean</code></dt>
 <dd><p>Converts Footnote definitions to linkable anchor tags.</p>
 </dd>
@@ -24,6 +27,32 @@
 </dd>
 </dl>
 
+## Typedefs
+
+<dl>
+<dt><a href="#MarkdownItFootnotesEnv">MarkdownItFootnotesEnv</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#MarkdownItFootnotesStateEnv">MarkdownItFootnotesStateEnv</a> : <code>object</code></dt>
+<dd><p>MarkdownIt env object extended with footnote state.</p>
+</dd>
+</dl>
+
+<a name="getFootnotesEnv"></a>
+
+## getFootnotesEnv(state) ⇒ [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv)
+Ensure footnotes state exists on the MarkdownIt env object.
+
+**Kind**: global function  
+**Returns**: [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv) - Footnotes env state.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| state | <code>module:markdown-it/index.js~StateBlock</code> \| <code>module:markdown-it/index.js~StateInline</code> | MarkdownIt state. |
+
+<a name="getFootnotesEnv..env"></a>
+
+### getFootnotesEnv~env : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
+**Kind**: inner constant of [<code>getFootnotesEnv</code>](#getFootnotesEnv)  
 <a name="footnoteDefinition"></a>
 
 ## footnoteDefinition(state, startLine, endLine, silent) ⇒ <code>boolean</code>
@@ -40,6 +69,10 @@ Converts Footnote definitions to linkable anchor tags.
 | endLine | <code>number</code> | The ending line of the block. |
 | silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
 
+<a name="footnoteDefinition..pos"></a>
+
+### footnoteDefinition~pos : <code>number</code>
+**Kind**: inner property of [<code>footnoteDefinition</code>](#footnoteDefinition)  
 <a name="footnoteReferences"></a>
 
 ## footnoteReferences(state, silent) ⇒ <code>boolean</code>
@@ -54,6 +87,19 @@ Converts Footnote definitions to linkable anchor tags.
 | state | <code>module:markdown-it/index.js~StateInline</code> | State of MarkdownIt. |
 | silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
 
+
+* [footnoteReferences(state, silent)](#footnoteReferences) ⇒ <code>boolean</code>
+    * [~pos](#footnoteReferences..pos) : <code>number</code>
+    * [~env](#footnoteReferences..env) : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
+
+<a name="footnoteReferences..pos"></a>
+
+### footnoteReferences~pos : <code>number</code>
+**Kind**: inner property of [<code>footnoteReferences</code>](#footnoteReferences)  
+<a name="footnoteReferences..env"></a>
+
+### footnoteReferences~env : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
+**Kind**: inner constant of [<code>footnoteReferences</code>](#footnoteReferences)  
 <a name="referenceTag"></a>
 
 ## referenceTag(token) ⇒ <code>string</code>
@@ -142,3 +188,26 @@ Creates the closing tag of the Footnote items block.
 
 ### configFootnoteClose~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>configFootnoteClose</code>](#configFootnoteClose)  
+<a name="MarkdownItFootnotesEnv"></a>
+
+## MarkdownItFootnotesEnv : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| length | <code>number</code> | Next footnote id counter. |
+| refs | <code>Record.&lt;string, number&gt;</code> | Label to id mapping. |
+
+<a name="MarkdownItFootnotesStateEnv"></a>
+
+## MarkdownItFootnotesStateEnv : <code>object</code>
+MarkdownIt env object extended with footnote state.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [footnotes] | [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv) | Footnote definitions collected during parsing. |
+

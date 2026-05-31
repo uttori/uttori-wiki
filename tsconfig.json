@@ -14,6 +14,7 @@
     "allowSyntheticDefaultImports": true,
     "checkJs": true,
     "declaration": true,
+    "declarationMap": true,
     "emitDeclarationOnly": true,
     "extendedDiagnostics": true,
     "forceConsistentCasingInFileNames": true,
@@ -24,13 +25,13 @@
     ],
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "outDir": "dist",
     "noEmit": true,
-    "sourceMap": true,
-    "strict": false,
-    "target": "esnext",
+    "outDir": "dist",
     "removeComments": false,
     "skipLibCheck": true,
-    "declarationMap": true
+    "sourceMap": true,
+    "strict": true,
+    "target": "esnext",
+    "types": ["debug", "node"]
   }
 }

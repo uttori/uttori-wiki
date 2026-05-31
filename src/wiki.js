@@ -488,7 +488,7 @@ class UttoriWiki {
     if (this.config.useCache) {
       response.set('Cache-control', `public, max-age=${this.config.cacheShort}`);
     }
-    debug('Rendering home template:', viewModel);
+    debug('Rendering home template');
     response.render('home', viewModel);
   };
 
@@ -952,7 +952,7 @@ class UttoriWiki {
    * Sets the `X-Robots-Tag` header to `noindex`.
    *
    * Hooks:
-   * - `render-content` - `render-content` - Passes in the request body content.
+   * - `filter` - `render-content` - Passes in the request body content.
    * @async
    * @param {import('express').Request} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.

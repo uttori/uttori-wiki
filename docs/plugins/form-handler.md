@@ -28,16 +28,18 @@
 ## Typedefs
 
 <dl>
-<dt><a href="#FormField">FormField</a> : <code>object</code></dt>
-<dd></dd>
 <dt><a href="#FormFieldValidationFunction">FormFieldValidationFunction</a> ⇒ <code>boolean</code></dt>
+<dd><p>Validates a single form field value.</p>
+</dd>
+<dt><a href="#FormField">FormField</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#FormConfig">FormConfig</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#FormHandlerConfig">FormHandlerConfig</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#FormHandlerFunction">FormHandlerFunction</a> ⇒ <code><a href="#FormHandlerResult">Promise.&lt;FormHandlerResult&gt;</a></code></dt>
-<dd></dd>
+<dd><p>Handles a validated form submission.</p>
+</dd>
 <dt><a href="#FormHandlerResult">FormHandlerResult</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#FormHandlerValidationResult">FormHandlerValidationResult</a> : <code>object</code></dt>
@@ -166,7 +168,7 @@ Validates form data against form configuration.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| formData | <code>Record.&lt;string, any&gt;</code> | The form data to validate. |
+| formData | <code>Record.&lt;string, unknown&gt;</code> | The form data to validate. |
 | formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
 
 <a name="baseRoute"></a>
@@ -196,6 +198,18 @@ Default handler function for forms without custom handlers
 | _req | <code>module:express~Request</code> | The request. |
 | _res | <code>module:express~Response</code> | The response. |
 
+<a name="FormFieldValidationFunction"></a>
+
+## FormFieldValidationFunction ⇒ <code>boolean</code>
+Validates a single form field value.
+
+**Kind**: global typedef  
+**Returns**: <code>boolean</code> - Whether the field is valid.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| value | <code>string</code> | The field value. |
+
 <a name="FormField"></a>
 
 ## FormField : <code>object</code>
@@ -212,16 +226,6 @@ Default handler function for forms without custom handlers
 | [validation] | [<code>FormFieldValidationFunction</code>](#FormFieldValidationFunction) | Custom validation function. |
 | [errorMessage] | <code>string</code> | Custom error message for validation. |
 
-<a name="FormFieldValidationFunction"></a>
-
-## FormFieldValidationFunction ⇒ <code>boolean</code>
-**Kind**: global typedef  
-**Returns**: <code>boolean</code> - Whether the field is valid.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | The field value. |
-
 <a name="FormConfig"></a>
 
 ## FormConfig : <code>object</code>
@@ -233,11 +237,10 @@ Default handler function for forms without custom handlers
 | name | <code>string</code> | The form name/identifier. |
 | route | <code>string</code> | The route path for the form submission. |
 | fields | [<code>Array.&lt;FormField&gt;</code>](#FormField) | The form fields configuration. |
-| [handler] | <code>function</code> | Custom handler function for form submission. |
+| [handler] | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | Custom handler function for form submission. |
 | successMessage | <code>string</code> | Success message to return. |
 | errorMessage | <code>string</code> | Error message to return. |
 | [middleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom middleware for the form route. |
-| [handler] | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | Custom handler function for form submission. |
 
 <a name="FormHandlerConfig"></a>
 
@@ -250,21 +253,22 @@ Default handler function for forms without custom handlers
 | [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | Events to bind to. |
 | forms | [<code>Array.&lt;FormConfig&gt;</code>](#FormConfig) | Array of form configurations. |
 | [baseRoute] | <code>string</code> | Base route prefix for all forms. |
-| [defaultHandler] | <code>function</code> | Default handler function for forms without custom handlers. |
+| [defaultHandler] | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | Default handler function for forms without custom handlers. |
 
 <a name="FormHandlerFunction"></a>
 
 ## FormHandlerFunction ⇒ [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult)
+Handles a validated form submission.
+
 **Kind**: global typedef  
 **Returns**: [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult) - The result.  
-**Properties**
 
-| Name | Type | Description |
+| Param | Type | Description |
 | --- | --- | --- |
-| formData | <code>Record.&lt;string, any&gt;</code> | The form data. |
+| formData | <code>Record.&lt;string, unknown&gt;</code> | The form data. |
 | formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
-| _req | <code>module:express~Request</code> | The request. |
-| _res | <code>module:express~Response</code> | The response. |
+| req | <code>module:express~Request</code> | The request. |
+| res | <code>module:express~Response</code> | The response. |
 
 <a name="FormHandlerResult"></a>
 

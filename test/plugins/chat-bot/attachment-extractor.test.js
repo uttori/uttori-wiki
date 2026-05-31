@@ -2,6 +2,8 @@ import test from 'ava';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
+import sinon from 'sinon';
+import { PdfReader } from 'pdfreader';
 import { extractAttachmentText } from '../../../src/plugins/chat-bot/attachment-extractor.js';
 
 /** Minimal config – only attachmentsRoot is used */
@@ -82,20 +84,55 @@ test('extractAttachmentText: returns empty string for unsupported file extension
   t.is(result, '');
 });
 
-test('extractAttachmentText: returns empty string for invalid PDF content', async (t) => {
-  // A file with a .pdf extension but non-PDF bytes triggers the PDF branch.
-  // PdfReader will either error or produce no items; both paths return ''.
-  const { dir, name } = await writeTempFile('document.pdf', Buffer.from('not a real pdf file'));
-  const config = makeConfig(dir);
-  const result = await extractAttachmentText(config, { path: name });
-  fs.rmSync(dir, { recursive: true });
-  t.is(result, '');
+test.serial('extractAttachmentText: returns empty string when PDF parser errors', async (t) => {
+  const pdfSandbox = sinon.createSandbox();
+  try {
+    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
+      cb(new Error('parse failed'));
+    });
+    const { dir, name } = await writeTempFile('document.pdf', Buffer.from('not a real pdf file'));
+    const config = makeConfig(dir);
+    const result = await extractAttachmentText(config, { path: name });
+    fs.rmSync(dir, { recursive: true });
+    t.is(result, '');
+  } finally {
+    pdfSandbox.restore();
+  }
 });
 
-test('extractAttachmentText: returns empty string for PDF detected via mime type', async (t) => {
-  const { dir, name } = await writeTempFile('document.dat', Buffer.from('not a real pdf file'));
-  const config = makeConfig(dir);
-  const result = await extractAttachmentText(config, { path: name, type: 'application/pdf' });
-  fs.rmSync(dir, { recursive: true });
-  t.is(result, '');
+test.serial('extractAttachmentText: returns empty string for PDF detected via mime type', async (t) => {
+  const pdfSandbox = sinon.createSandbox();
+  try {
+    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
+      cb(new Error('parse failed'));
+    });
+    const { dir, name } = await writeTempFile('document.dat', Buffer.from('not a real pdf file'));
+    const config = makeConfig(dir);
+    const result = await extractAttachmentText(config, { path: name, type: 'application/pdf' });
+    fs.rmSync(dir, { recursive: true });
+    t.is(result, '');
+  } finally {
+    pdfSandbox.restore();
+  }
+});
+
+test.serial('extractAttachmentText: extracts page-separated text from valid PDF buffers', async (t) => {
+  const pdfSandbox = sinon.createSandbox();
+  try {
+    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
+      cb(null, { page: 1, text: 'Page one text' });
+      cb(null, { page: 2, text: 'Page two text' });
+      cb(null, null);
+    });
+
+    const { dir, name } = await writeTempFile('manual.pdf', Buffer.from('%PDF-1.4 fake'));
+    const config = makeConfig(dir);
+    const result = await extractAttachmentText(config, { path: name, type: 'application/pdf' });
+    fs.rmSync(dir, { recursive: true });
+
+    t.true(result.includes('[Page 1]'));
+    t.true(result.includes('Page one text'));
+  } finally {
+    pdfSandbox.restore();
+  }
 });

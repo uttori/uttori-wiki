@@ -17,6 +17,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki.Redir
 export function parsePath(path) {
   debug('parsePath:', { path });
 
+  /** @type {Array<ParsedPathKey | string>} */
   const segments = [];
   let buffer = '';
   let variableBuffer = '';

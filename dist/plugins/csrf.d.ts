@@ -3,39 +3,39 @@ export type CsrfProtectionConfig = {
     /**
      * An object whose keys correspond to plugin methods, and whose values are arrays of hook event names to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * The hidden form field name that themes should render and that is read from the POST body on save.
      */
-    fieldName?: string;
+    fieldName?: string | undefined;
     /**
      * The HTTP request header name that JavaScript clients can use to submit the token instead of a form field.
      */
-    headerName?: string;
+    headerName?: string | undefined;
     /**
      * The key used to store the CSRF token on `request.session`. Change this if it collides with another session value.
      */
-    sessionKey?: string;
+    sessionKey?: string | undefined;
     /**
      * Number of random bytes to generate. Each byte becomes two hex characters, so the default produces a 64-character token.
      */
-    tokenBytes?: number;
+    tokenBytes?: number | undefined;
     /**
      * Ordered list of sources to search for the submitted token. The first source that contains a non-empty value is used.
      */
-    sources?: Array<"body" | "header">;
+    sources?: ("header" | "body")[] | undefined;
     /**
      * When `true`, a missing or unavailable `request.session` causes the token to be skipped on injection and the request to be blocked on validation. Set to `false` only if your setup guarantees cookies can never be forged (e.g. purely API clients with custom headers).
      */
-    requireSession?: boolean;
+    requireSession?: boolean | undefined;
     /**
      * When `true`, a fresh token is written to the session every time a valid save request completes. This limits replay-window but will break any browser tabs that still hold the old token. Leave `false` for typical wikis where multiple tabs are common.
      */
-    rotateOnValidation?: boolean;
+    rotateOnValidation?: boolean | undefined;
     /**
      * When `true`, the `Sec-Fetch-Site` header is also checked as a defense-in-depth measure. Requests that arrive as `cross-site` are rejected even if the CSRF token matches. Has no effect on browsers that do not send Fetch Metadata headers (e.g. some older browsers), so this is supplemental, not a replacement for token checks.
      */
-    checkFetchMetadata?: boolean;
+    checkFetchMetadata?: boolean | undefined;
 };
 export type CsrfViewModel = {
     /**

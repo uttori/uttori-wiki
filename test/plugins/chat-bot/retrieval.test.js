@@ -15,6 +15,7 @@ import {
   embedQuery,
   retrieve,
 } from '../../../src/plugins/chat-bot/retrieval.js';
+import { slow } from '../../_helpers/slow.js';
 
 const baseConfig = {
   titleBoost: 0.25,
@@ -427,7 +428,7 @@ test.serial('embedQuery: returns Float32Array from embeddings array shape', asyn
   }
 });
 
-test.serial('embedQuery: returns empty Float32Array when embed returns empty vector', async (t) => {
+slow('embedQuery: returns empty Float32Array when embed returns empty vector', async (t) => {
   const fetchStub = sinon.stub(global, 'fetch').rejects(new Error('Network error'));
   try {
     const result = await embedQuery('http://localhost:11434', 'bge-m3', 'test');
@@ -440,7 +441,7 @@ test.serial('embedQuery: returns empty Float32Array when embed returns empty vec
 
 test('pickByBudget: skips already-included pinned chunk during iteration', (t) => {
   // Pinned chunk is first in merged so the loop encounters it before any break.
-  // Iteration flow: chunk(20) pinned→pre-added; loop hits 20→skip(lines 385-387),
+  // Iteration flow: chunk(20) pinned➜pre-added; loop hits 20➜skip(lines 385-387),
   // then adds 30 and 40, reaching chunkLimit.
   const config = { ...baseConfig, chunkLimit: 3, maxContextTokens: 99999, maxPerSource: Infinity };
   const chunks = [

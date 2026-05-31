@@ -212,7 +212,9 @@ class Tokenizer {
   pushDefaultModeTokenizables() {
     // debug('pushDefaultModeTokenizables');
     let tokenizeIndex = 0;
+    /** @type {number} */
     let lowestIndexOfTokenize = Infinity;
+    /** @type {string | null} */
     let toTokenize = null;
 
     // Iterate through the list of tokenizable substrings.

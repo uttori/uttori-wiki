@@ -15,7 +15,7 @@ export type GoogleDocsHandlerConfig = {
     /**
      * Whether to prepend a timestamp to each row.
      */
-    prependTimestamp?: boolean;
+    prependTimestamp?: boolean | undefined;
 };
 export type GoogleDocsSheetItem = {
     /**

@@ -4,6 +4,10 @@
 <dt><a href="#AIChatBot">AIChatBot</a></dt>
 <dd><p>Uttori AI Chat Bot
 Search a UttoriWiki database using LLMs.</p>
+<p>The chat bot owns only the chat interface: HTTP/SSE and WebSocket transports, the tool-call
+orchestration loop, prompt construction, and the rolling conversation summary. All data access
+(retrieval, search, document listing, history) is delegated to the registered storage / search
+providers through the Uttori hook system, so the chat bot no longer owns a database of its own.</p>
 </dd>
 </dl>
 
@@ -25,32 +29,39 @@ Search a UttoriWiki database using LLMs.</p>
 ## Typedefs
 
 <dl>
-<dt><a href="#RetrievedChunk">RetrievedChunk</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#RetrieveResponse">RetrieveResponse</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#FtsRow">FtsRow</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#Block">Block</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ChunkWithMeta">ChunkWithMeta</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#BlendedChunk">BlendedChunk</a> : <code>object</code></dt>
-<dd></dd>
 <dt><a href="#ChatBotMessage">ChatBotMessage</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#OllamaChatToolCallFunction">OllamaChatToolCallFunction</a> : <code>object</code></dt>
+<dd><p>Function payload inside an Ollama <code>/api/chat</code> tool call.</p>
+</dd>
+<dt><a href="#OllamaChatToolCall">OllamaChatToolCall</a> : <code>object</code></dt>
+<dd><p>A tool call entry returned by Ollama&#39;s <code>/api/chat</code> endpoint.</p>
+</dd>
+<dt><a href="#OllamaChatMessage">OllamaChatMessage</a> : <code>object</code></dt>
+<dd><p>Message payload in an Ollama <code>/api/chat</code> response.</p>
+</dd>
+<dt><a href="#OllamaChatResponse">OllamaChatResponse</a> : <code>object</code></dt>
+<dd><p>A single Ollama <code>/api/chat</code> response (non-streaming body or one NDJSON stream line).</p>
+</dd>
 <dt><a href="#AIChatBotConfig">AIChatBotConfig</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#AIChatBotApiRequestBody">AIChatBotApiRequestBody</a> : <code>object</code></dt>
 <dd></dd>
-<dt><a href="#AIChatBotSearchUpdate">AIChatBotSearchUpdate</a> : <code>object</code></dt>
-<dd></dd>
+<dt><a href="#AIChatBotSSEStreamSend">AIChatBotSSEStreamSend</a> ⇒ <code>void</code></dt>
+<dd><p>Sends a JSON-stringified event payload through the SSE bridge.</p>
+</dd>
 <dt><a href="#AIChatBotSSEStream">AIChatBotSSEStream</a> : <code>object</code></dt>
 <dd><p>A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
 into the same <code>runChatPass</code> logic that the real WebSocket connection uses.</p>
 </dd>
 <dt><a href="#AIChatBotSSEEvent">AIChatBotSSEEvent</a> : <code>object</code></dt>
 <dd><p>A parsed SSE event payload forwarded from <code>runChatPass</code> to the SSE bridge.</p>
+</dd>
+<dt><a href="#AIChatBotContext">AIChatBotContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code></dt>
+<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
+</dd>
+<dt><a href="#AIChatBotInterfaceRequestHandler">AIChatBotInterfaceRequestHandler</a> ⇒ <code>module:express~RequestHandler</code></dt>
+<dd><p>Builds the Express handler for the chat bot interface route.</p>
 </dd>
 </dl>
 
@@ -60,24 +71,27 @@ into the same <code>runChatPass</code> logic that the real WebSocket connection 
 Uttori AI Chat Bot
 Search a UttoriWiki database using LLMs.
 
+The chat bot owns only the chat interface: HTTP/SSE and WebSocket transports, the tool-call
+orchestration loop, prompt construction, and the rolling conversation summary. All data access
+(retrieval, search, document listing, history) is delegated to the registered storage / search
+providers through the Uttori hook system, so the chat bot no longer owns a database of its own.
+
 **Kind**: global class  
 
 * [AIChatBot](#AIChatBot)
     * [new AIChatBot()](#new_AIChatBot_new)
     * [.configKey](#AIChatBot.configKey) ⇒ <code>string</code>
     * [.defaultConfig()](#AIChatBot.defaultConfig) ⇒ [<code>AIChatBotConfig</code>](#AIChatBotConfig)
+    * [.mergeConfig(context)](#AIChatBot.mergeConfig) ⇒ [<code>AIChatBotConfig</code>](#AIChatBotConfig)
     * [.validateConfig(config, [_context])](#AIChatBot.validateConfig)
     * [.register(context)](#AIChatBot.register)
-    * [.bootstrapIndex(config, context)](#AIChatBot.bootstrapIndex) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.onSearchUpdate(payload, context)](#AIChatBot.onSearchUpdate) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.onSearchDelete(document, context)](#AIChatBot.onSearchDelete)
     * [.bindRoutes(server, context)](#AIChatBot.bindRoutes)
     * [.apiRequestHandler(context)](#AIChatBot.apiRequestHandler) ⇒ <code>module:express~RequestHandler</code>
     * [.bindWebSocket(server, context)](#AIChatBot.bindWebSocket)
-    * [.runChatPass(ws, messages, config)](#AIChatBot.runChatPass) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
+    * [.chatQuery(payload, context)](#AIChatBot.chatQuery) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.runChatPass(ws, messages, config, context)](#AIChatBot.runChatPass) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
     * [.documentsHandler(context)](#AIChatBot.documentsHandler) ⇒ <code>module:express~RequestHandler</code>
     * [.summarizeTurn(baseUrl, model, prevSummary, lastTurns, newUser, newAssistant)](#AIChatBot.summarizeTurn) ⇒ <code>Promise.&lt;string&gt;</code>
-    * [.openDatabase(config)](#AIChatBot.openDatabase) ⇒ <code>module:better-sqlite3~Database</code>
 
 <a name="new_AIChatBot_new"></a>
 
@@ -108,6 +122,18 @@ The default configuration.
 ```js
 const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
 ```
+<a name="AIChatBot.mergeConfig"></a>
+
+### AIChatBot.mergeConfig(context) ⇒ [<code>AIChatBotConfig</code>](#AIChatBotConfig)
+Merge the default configuration with the provided context configuration.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+**Returns**: [<code>AIChatBotConfig</code>](#AIChatBotConfig) - The merged configuration.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
+
 <a name="AIChatBot.validateConfig"></a>
 
 ### AIChatBot.validateConfig(config, [_context])
@@ -118,7 +144,7 @@ Validates the provided configuration for required entries.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>Record.&lt;string, AIChatBotConfig&gt;</code> | A provided configuration to use. |
-| [_context] | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | Unused. |
+| [_context] | [<code>AIChatBotContext</code>](#AIChatBotContext) | Unused. |
 
 **Example** *(AIChatBot.validateConfig(config, _context))*  
 ```js
@@ -133,7 +159,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 
 **Example** *(AIChatBot.register(context))*  
 ```js
@@ -152,55 +178,17 @@ const context = {
 };
 AIChatBot.register(context);
 ```
-<a name="AIChatBot.bootstrapIndex"></a>
-
-### AIChatBot.bootstrapIndex(config, context) ⇒ <code>Promise.&lt;void&gt;</code>
-Bootstrap the chat index at startup when configured.
-
-**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
-**Returns**: <code>Promise.&lt;void&gt;</code> - The indexing promise.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| config | [<code>AIChatBotConfig</code>](#AIChatBotConfig) | The plugin configuration. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
-
-<a name="AIChatBot.onSearchUpdate"></a>
-
-### AIChatBot.onSearchUpdate(payload, context) ⇒ <code>Promise.&lt;void&gt;</code>
-Update the chat index after documents are saved.
-
-**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
-**Returns**: <code>Promise.&lt;void&gt;</code> - The indexing promise.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| payload | [<code>AIChatBotSearchUpdate</code>](#AIChatBotSearchUpdate) \| [<code>Array.&lt;AIChatBotSearchUpdate&gt;</code>](#AIChatBotSearchUpdate) | The search update payload. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
-
-<a name="AIChatBot.onSearchDelete"></a>
-
-### AIChatBot.onSearchDelete(document, context)
-Remove deleted documents from the chat index.
-
-**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| document | <code>UttoriWikiDocument</code> | The deleted document. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
-
 <a name="AIChatBot.bindRoutes"></a>
 
 ### AIChatBot.bindRoutes(server, context)
-Add the upload route to the server object.
+Add the chat routes to the server object.
 
 **Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | server | <code>module:express~Application</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 
 **Example** *(AIChatBot.bindRoutes(server, context))*  
 ```js
@@ -223,7 +211,7 @@ Handle POST requests to stream chat responses as server-sent events.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 
 **Example** *(AIChatBot.apiRequestHandler(context))*  
 ```js
@@ -239,15 +227,32 @@ Bind the WebSocket server to the server object.
 | Param | Type | Description |
 | --- | --- | --- |
 | server | <code>module:http~Server</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 
 **Example** *(AIChatBot.bindWebSocket(server, context))*  
 ```js
 AIChatBot.bindWebSocket(server, context);
 ```
+<a name="AIChatBot.chatQuery"></a>
+
+### AIChatBot.chatQuery(payload, context) ⇒ <code>Promise.&lt;string&gt;</code>
+Run a single non-streaming chat turn and return the final assistant message.
+Exposed via the `chat-query` hook so other plugins (such as the MCP provider) can ask the
+chat bot a question programmatically.
+
+**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
+**Returns**: <code>Promise.&lt;string&gt;</code> - The final assistant message content.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| payload | <code>object</code> | The chat request. |
+| payload.query | <code>string</code> | The user question. |
+| [payload.slugs] | <code>Array.&lt;string&gt;</code> | Optional document slugs to focus retrieval on. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
+
 <a name="AIChatBot.runChatPass"></a>
 
-### AIChatBot.runChatPass(ws, messages, config) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
+### AIChatBot.runChatPass(ws, messages, config, context) ⇒ <code>Promise.&lt;{messages: Array.&lt;ChatBotMessage&gt;, finished: boolean}&gt;</code>
 Helper: stream one /api/chat call and forward chunks to client,
 intercepting tool calls. Returns {messages, finished}
 messages: updated transcript to continue if tool used
@@ -261,18 +266,20 @@ finished: true once an assistant final turn is produced
 | ws | <code>module:ws~WebSocket</code> | The WebSocket instance. |
 | messages | [<code>Array.&lt;ChatBotMessage&gt;</code>](#ChatBotMessage) | The messages. |
 | config | [<code>AIChatBotConfig</code>](#AIChatBotConfig) | The configuration. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context exposing `context.hooks` for tool execution. |
 
 <a name="AIChatBot.documentsHandler"></a>
 
 ### AIChatBot.documentsHandler(context) ⇒ <code>module:express~RequestHandler</code>
 Handle requests to fetch available documents for the document selector.
+Delegates to the registered search provider via the `search-documents` hook.
 
 **Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
 **Returns**: <code>module:express~RequestHandler</code> - The function to pass to Express.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 
 <a name="AIChatBot.summarizeTurn"></a>
 
@@ -291,18 +298,6 @@ Summarize the conversation between the user and the assistant.
 | newUser | <code>string</code> | The new user message. |
 | newAssistant | <code>string</code> | The new assistant message. |
 
-<a name="AIChatBot.openDatabase"></a>
-
-### AIChatBot.openDatabase(config) ⇒ <code>module:better-sqlite3~Database</code>
-Open the database and create the necessary tables if they don't exist.
-
-**Kind**: static method of [<code>AIChatBot</code>](#AIChatBot)  
-**Returns**: <code>module:better-sqlite3~Database</code> - The database.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| config | [<code>Partial.&lt;AIChatBotConfig&gt;</code>](#AIChatBotConfig) | The configuration. |
-
 <a name="wss"></a>
 
 ## wss : <code>module:ws~WebSocketServer</code> \| <code>undefined</code>
@@ -313,102 +308,6 @@ Open the database and create the necessary tables if they don't exist.
 Setup the memory store.
 
 **Kind**: global constant  
-<a name="RetrievedChunk"></a>
-
-## RetrievedChunk : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| rowid | <code>number</code> | The rowid of the chunk. |
-| source_id | <code>string</code> | The source id of the chunk. |
-| idx | <code>number</code> | The index of the chunk. |
-| text | <code>string</code> | The text of the chunk. |
-| token_count | <code>number</code> | The token count of the chunk. |
-| sectionPath | <code>Array.&lt;string&gt;</code> | The section path of the chunk. |
-| source | <code>object</code> | The source of the chunk. |
-| source.id | <code>string</code> | The id of the source. |
-| [source.title] | <code>string</code> | The title of the source. |
-| [source.slug] | <code>string</code> | The slug of the source. |
-| score | <code>number</code> | The score of the chunk. |
-
-<a name="RetrieveResponse"></a>
-
-## RetrieveResponse : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| query | <code>string</code> | The query. |
-| chunks | [<code>Array.&lt;RetrievedChunk&gt;</code>](#RetrievedChunk) | The chunks. |
-| citations | <code>Array.&lt;any&gt;</code> | The citations. |
-
-<a name="FtsRow"></a>
-
-## FtsRow : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| rowid | <code>number</code> | The rowid of the chunk. |
-| source_id | <code>string</code> | The source id of the chunk. |
-| idx | <code>number</code> | The index of the chunk. |
-| text | <code>string</code> | The text of the chunk. |
-| token_count | <code>number</code> | The token count of the chunk. |
-| meta_json | <code>string</code> | The meta JSON of the chunk. |
-| source_title | <code>string</code> | The title of the source. |
-| source_slug | <code>string</code> | The slug of the source. |
-| rank | <code>number</code> | The rank of the chunk. |
-
-<a name="Block"></a>
-
-## Block : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [type] | <code>&quot;heading&quot;</code> \| <code>&quot;paragraph&quot;</code> | The type of block. |
-| [idx] | <code>number</code> | The index of the block. |
-| [level] | <code>number</code> | The level of the heading. |
-| text | <code>string</code> | The text of the block. |
-| sectionPath | <code>Array.&lt;string&gt;</code> | The section path of the block. |
-| [tokenCount] | <code>number</code> | The token count of the block. |
-| [tags] | <code>Array.&lt;string&gt;</code> | The tags of the block. |
-| [slug] | <code>string</code> | The slug of the block. |
-
-<a name="ChunkWithMeta"></a>
-
-## ChunkWithMeta : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| text | <code>string</code> | The text of the chunk. |
-| idx | <code>number</code> | The index of the chunk. |
-| token_count | <code>number</code> | The token count of the chunk. |
-| sectionPath | <code>Array.&lt;string&gt;</code> | The section path of the chunk. |
-| [source_id] | <code>string</code> | The source id of the chunk. |
-| [embedding] | <code>Array.&lt;number&gt;</code> | The embedding of the chunk. |
-| [meta] | <code>object</code> | The meta JSON of the chunk. |
-
-<a name="BlendedChunk"></a>
-
-## BlendedChunk : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| rowid | <code>number</code> | The rowid of the chunk. |
-| score | <code>number</code> | The score of the chunk. |
-| titleBoost | <code>number</code> | The title boost of the chunk. |
-| textBoost | <code>number</code> | The text boost of the chunk. |
-
 <a name="ChatBotMessage"></a>
 
 ## ChatBotMessage : <code>object</code>
@@ -422,6 +321,63 @@ Setup the memory store.
 | [name] | <code>string</code> | The name of the tool. |
 | [slugs] | <code>Array.&lt;string&gt;</code> | The slugs of the sources to use as context. |
 
+<a name="OllamaChatToolCallFunction"></a>
+
+## OllamaChatToolCallFunction : <code>object</code>
+Function payload inside an Ollama `/api/chat` tool call.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | The function name. |
+| [arguments] | <code>Record.&lt;string, unknown&gt;</code> | Parsed arguments object. |
+
+<a name="OllamaChatToolCall"></a>
+
+## OllamaChatToolCall : <code>object</code>
+A tool call entry returned by Ollama's `/api/chat` endpoint.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| function | [<code>OllamaChatToolCallFunction</code>](#OllamaChatToolCallFunction) | The invoked function. |
+
+<a name="OllamaChatMessage"></a>
+
+## OllamaChatMessage : <code>object</code>
+Message payload in an Ollama `/api/chat` response.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [role] | <code>&quot;assistant&quot;</code> \| <code>&quot;tool&quot;</code> | The message role. |
+| [content] | <code>string</code> | Assistant text content. |
+| [thinking] | <code>string</code> | Reasoning text for thinking-capable models. |
+| [tool_calls] | [<code>Array.&lt;OllamaChatToolCall&gt;</code>](#OllamaChatToolCall) | Tool calls requested by the model. |
+
+<a name="OllamaChatResponse"></a>
+
+## OllamaChatResponse : <code>object</code>
+A single Ollama `/api/chat` response (non-streaming body or one NDJSON stream line).
+
+**Kind**: global typedef  
+**See**: [https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion](https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion) Ollama API documentation.  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [model] | <code>string</code> | The model that produced the response. |
+| [created_at] | <code>string</code> | ISO timestamp of the response. |
+| [message] | [<code>OllamaChatMessage</code>](#OllamaChatMessage) | The assistant message payload. |
+| [done] | <code>boolean</code> | Whether generation has finished. |
+| [done_reason] | <code>string</code> | Why generation stopped. |
+
 <a name="AIChatBotConfig"></a>
 
 ## AIChatBotConfig : <code>object</code>
@@ -434,38 +390,14 @@ Setup the memory store.
 | websocketRoute | <code>string</code> | The WebSocket route for streaming to and from the chat bot interface. |
 | publicRoute | <code>string</code> | Server route to show the chat bot interface. |
 | documentsRoute | <code>string</code> | Server route to fetch available documents for the document selector. |
-| [interfaceRequestHandler] | <code>function</code> | A request handler for the interface route. |
+| [interfaceRequestHandler] | [<code>AIChatBotInterfaceRequestHandler</code>](#AIChatBotInterfaceRequestHandler) | A request handler for the interface route. |
 | middlewarePublicRoute | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the public route. |
-| databasePath | <code>string</code> | The path to the database. |
-| databseOptions | <code>Database.Options</code> | The options for the database. |
 | ollamaBaseUrl | <code>string</code> | The base URL for the Ollama server. |
-| embedModel | <code>string</code> | The model to use for the embedder. |
-| [embedPrompt] | <code>function</code> | The prompt to use for the embedder. |
 | tools | <code>Array.&lt;OllamaTool&gt;</code> \| <code>null</code> | Override tool schemas sent to Ollama. Empty array uses the built-in wiki tools. Null/undefined disables tools entirely. |
 | chatModel | <code>string</code> | The model to use for the chat. |
 | maxTokens | <code>number</code> | The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window. |
 | temperature | <code>number</code> | The temperature for the model. |
-| chunkLimit | <code>number</code> | The limit for the number of chunks to return. |
-| hybrid | <code>boolean</code> | Whether to use the hybrid approach of vector & FTS. |
-| fts | <code>boolean</code> | Whether to use the FTS index. |
-| ftsWeight | <code>number</code> | The weight for the FTS index. |
-| titleBoost | <code>number</code> | The title boost for the entities. |
-| textBoost | <code>number</code> | The text boost for the entities. |
-| ftsWeightBump | <code>number</code> | The FTS weight bump for the entities. |
-| maxContextTokens | <code>number</code> | The maximum number of tokens to use for the context. |
-| maxPerSource | <code>number</code> | The maximum number of sources to use per source. |
-| batch | <code>number</code> | The batch size for the embedder. |
-| ignoreSlugs | <code>Array.&lt;string&gt;</code> | Slugs to ignore. |
-| ignoreTags | <code>Array.&lt;string&gt;</code> | Tags to ignore. |
-| bootstrapIndexOnStartup | <code>boolean</code> | Whether to create the chat index when index tables are missing on startup. |
-| rebuildIndexOnStartup | <code>boolean</code> | Whether to rebuild the chat index on startup. |
-| attachmentsRoot | <code>string</code> | The root path to the attachments. |
-| includeAttachments | <code>boolean</code> | Whether to include attachments. |
-| [extractAttachmentText] | <code>function</code> | The function to use to extract text from an attachment. |
-| markdownItPluginConfig | <code>MarkdownItRendererConfig</code> | The markdown-it plugin configuration. |
-| [tableToCSV] | <code>boolean</code> | Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false. |
-| [tableMaxRowsPerChunk] | <code>number</code> | Maximum number of rows per table chunk for embedding. |
-| [tableMaxTokensPerChunk] | <code>number</code> | Maximum estimated tokens per table chunk for embedding. |
+| [retrieveLimit] | <code>number</code> | Default chunk limit injected into the `vectorSearch` tool when the model does not provide one. |
 | summary | <code>object</code> | The summary configuration. |
 | summary.enabled | <code>boolean</code> | Whether to use the summary. |
 | summary.baseUrl | <code>string</code> | The base URL for the summary. |
@@ -483,16 +415,16 @@ Setup the memory store.
 | query | <code>string</code> | The query. |
 | slugs | <code>Array.&lt;string&gt;</code> | The slugs. |
 
-<a name="AIChatBotSearchUpdate"></a>
+<a name="AIChatBotSSEStreamSend"></a>
 
-## AIChatBotSearchUpdate : <code>object</code>
+## AIChatBotSSEStreamSend ⇒ <code>void</code>
+Sends a JSON-stringified event payload through the SSE bridge.
+
 **Kind**: global typedef  
-**Properties**
 
-| Name | Type | Description |
+| Param | Type | Description |
 | --- | --- | --- |
-| document | <code>UttoriWikiDocument</code> | The saved document. |
-| [originalSlug] | <code>string</code> | The document slug before the save, when renamed. |
+| message | <code>string</code> | JSON-stringified event payload. |
 
 <a name="AIChatBotSSEStream"></a>
 
@@ -505,7 +437,7 @@ into the same `runChatPass` logic that the real WebSocket connection uses.
 
 | Name | Type | Description |
 | --- | --- | --- |
-| send | <code>function</code> | Sends a JSON-stringified event payload. |
+| send | [<code>AIChatBotSSEStreamSend</code>](#AIChatBotSSEStreamSend) | Sends a JSON-stringified event payload. |
 
 <a name="AIChatBotSSEEvent"></a>
 
@@ -520,4 +452,22 @@ A parsed SSE event payload forwarded from `runChatPass` to the SSE bridge.
 | [type] | <code>string</code> | Event type: `"token"`, `"thinking"`, `"done"`, or `"error"`. |
 | [data] | <code>unknown</code> | Token or thinking text for `"token"` and `"thinking"` events. |
 | [error] | <code>unknown</code> | Error description for `"error"` events. |
+
+<a name="AIChatBotContext"></a>
+
+## AIChatBotContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-ai-chat-bot&#x27;, AIChatBotConfig&gt;</code>
+Uttori context narrowed to this plugin's config shape.
+
+**Kind**: global typedef  
+<a name="AIChatBotInterfaceRequestHandler"></a>
+
+## AIChatBotInterfaceRequestHandler ⇒ <code>module:express~RequestHandler</code>
+Builds the Express handler for the chat bot interface route.
+
+**Kind**: global typedef  
+**Returns**: <code>module:express~RequestHandler</code> - The Express request handler.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| context | [<code>AIChatBotContext</code>](#AIChatBotContext) | A Uttori-like context. |
 

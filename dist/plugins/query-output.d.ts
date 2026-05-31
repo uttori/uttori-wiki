@@ -3,7 +3,7 @@ export type AddQueryOutputToViewModelQuery = {
     /**
      * The query to be run.
      */
-    query?: string;
+    query?: string | undefined;
     /**
      * The key to add the query output to.
      */
@@ -15,11 +15,11 @@ export type AddQueryOutputToViewModelQuery = {
     /**
      * An optional function to format the query output.
      */
-    format?: import("../../dist/custom.js").AddQueryOutputToViewModelFormatFunction;
+    format?: import("../../dist/custom.js").AddQueryOutputToViewModelFormatFunction | undefined;
     /**
      * An optional custom function to execut the query.
      */
-    queryFunction?: import("../../dist/custom.js").AddQueryOutputToViewModelQueryFunction;
+    queryFunction?: import("../../dist/custom.js").AddQueryOutputToViewModelQueryFunction | undefined;
 };
 export type AddQueryOutputToViewModelConfig = {
     /**
@@ -29,8 +29,12 @@ export type AddQueryOutputToViewModelConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
 };
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ */
+export type AddQueryOutputToViewModelContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-add-query-output-to-view-model", AddQueryOutputToViewModelConfig>;
 /**
  * @typedef {object} AddQueryOutputToViewModelQuery
  * @property {string} [query] The query to be run.
@@ -46,7 +50,7 @@ export type AddQueryOutputToViewModelConfig = {
  *   format: (results) => results.map((result) => result.slug),
  *   queryFunction: async (target, context) => {
  *     const ignoreSlugs = ['home-page'];
- *     const [popular] = await context.hooks.fetch('popular-documents', { limit: 5 }, context);
+ *     const [popular] = await context.hooks.fetch('example-documents', { limit: 5 }, context);
  *     const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
  *     const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
  *     const [results] = await context.hooks.fetch('storage-query', query);
@@ -65,6 +69,10 @@ export type AddQueryOutputToViewModelConfig = {
  * @typedef {object} AddQueryOutputToViewModelConfig
  * @property {Record<string, AddQueryOutputToViewModelQuery[]>} queries The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added.
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
+ */
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>} AddQueryOutputToViewModelContext
  */
 /**
  * Add queries output to the view model.

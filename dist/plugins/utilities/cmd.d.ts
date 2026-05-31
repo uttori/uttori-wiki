@@ -15,7 +15,7 @@ export function cmd(command: {
     file: string;
     args?: string[];
 }, { log, timeout }?: {
-    log?: Function;
-    timeout?: number;
+    log?: Function | undefined;
+    timeout?: number | undefined;
 }): Promise<string>;
 //# sourceMappingURL=cmd.d.ts.map

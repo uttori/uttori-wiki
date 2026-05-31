@@ -88,7 +88,7 @@ export async function embedQuery(baseUrl, model, input, prompt) {
  * Run the vector search query.
  * @param {import('better-sqlite3/index.js').Database} db The database.
  * @param {Float32Array} queryVectors The embedded query vectors.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The plugin config.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
  * @param {SlugFilter} slugFilter The slug filter.
  * @returns {VectorRow[]} The vector rows.
  */
@@ -140,7 +140,7 @@ function buildFtsQuery(entities) {
  * Run the optional FTS search.
  * @param {import('better-sqlite3/index.js').Database} db The database.
  * @param {string[]} entities The query entities.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The plugin config.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
  * @param {SlugFilter} slugFilter The slug filter.
  * @returns {FtsRankRow[]} The FTS rows.
  */
@@ -220,7 +220,7 @@ export function vecDistanceToSimilarity(vectorRows) {
  * @param {string} query The normalized query.
  * @param {string[]} entities The query entities.
  * @param {FtsRankRow[]} ftsRows The FTS rows.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The plugin config.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
  * @returns {number} The FTS weight.
  */
 function ftsWeight(query, entities, ftsRows, config) {
@@ -294,8 +294,8 @@ function calculateMatchCounts(candidateRows, entities) {
  * @param {number} wFTS The FTS weight.
  * @param {Map<number, number>} titleMatchCount Title match counts by rowid.
  * @param {Map<number, number>} textMatchCount Text match counts by rowid.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The plugin config.
- * @returns {import('../ai-chat-bot.js').BlendedChunk[]} The blended chunks.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
+ * @returns {import('../search-provider-sqlite.js').BlendedChunk[]} The blended chunks.
  */
 export function blendAndRank(candidateRowids, vecSimilarity, ftsSimilarity, wFTS, titleMatchCount, textMatchCount, config) {
   const blended = candidateRowids.map(rowid => {
@@ -315,9 +315,9 @@ export function blendAndRank(candidateRowids, vecSimilarity, ftsSimilarity, wFTS
 
 /**
  * Materialize scored candidates into retrieved chunks.
- * @param {import('../ai-chat-bot.js').BlendedChunk[]} blended The blended chunks.
+ * @param {import('../search-provider-sqlite.js').BlendedChunk[]} blended The blended chunks.
  * @param {CandidateRow[]} candidateRows The candidate rows.
- * @returns {import('../ai-chat-bot.js').RetrievedChunk[]} The retrieved chunks.
+ * @returns {import('../search-provider-sqlite.js').RetrievedChunk[]} The retrieved chunks.
  */
 function buildRetrievedChunks(blended, candidateRows) {
   /** @type {Map<number, CandidateRow>} */
@@ -326,7 +326,7 @@ function buildRetrievedChunks(blended, candidateRows) {
     candidateRowsById.set(row.rowid, row);
   }
 
-  /** @type {import('../ai-chat-bot.js').RetrievedChunk[]} */
+  /** @type {import('../search-provider-sqlite.js').RetrievedChunk[]} */
   const merged = [];
   for (const blendedChunk of blended) {
     const row = candidateRowsById.get(blendedChunk.rowid);
@@ -358,15 +358,15 @@ function buildRetrievedChunks(blended, candidateRows) {
 
 /**
  * Select chunks under chunk, per-source, and token budgets.
- * @param {import('../ai-chat-bot.js').RetrievedChunk[]} merged The ranked chunks.
+ * @param {import('../search-provider-sqlite.js').RetrievedChunk[]} merged The ranked chunks.
  * @param {Set<number>} pinnedRowids Rowids that should be kept first.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The plugin config.
- * @returns {import('../ai-chat-bot.js').RetrievedChunk[]} The picked chunks.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
+ * @returns {import('../search-provider-sqlite.js').RetrievedChunk[]} The picked chunks.
  */
 export function pickByBudget(merged, pinnedRowids, config) {
   /** @type {Map<string, number>} */
   const capBySource = new Map();
-  /** @type {import('../ai-chat-bot.js').RetrievedChunk[]} */
+  /** @type {import('../search-provider-sqlite.js').RetrievedChunk[]} */
   const picked = [];
   let budget = config.maxContextTokens;
 
@@ -411,7 +411,7 @@ export function pickByBudget(merged, pinnedRowids, config) {
 
 /**
  * Build citations from retrieved chunks.
- * @param {import('../ai-chat-bot.js').RetrievedChunk[]} picked The picked chunks.
+ * @param {import('../search-provider-sqlite.js').RetrievedChunk[]} picked The picked chunks.
  * @returns {Citation[]} The citations.
  */
 export function buildCitations(picked) {
@@ -431,9 +431,9 @@ export function buildCitations(picked) {
 /**
  * Retrieve chunks from the database.
  * @param {string} query The query to retrieve chunks for.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options for the retrieval.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options for the retrieval.
  * @param {string[]} [slugs] Optional array of source slugs to restrict search to.
- * @returns {Promise<import('../ai-chat-bot.js').RetrieveResponse>} The retrieved chunks.
+ * @returns {Promise<import('../search-provider-sqlite.js').RetrieveResponse>} The retrieved chunks.
  */
 export async function retrieve(query, config, slugs = []) {
   debug('retrieve:', { query, slugs });

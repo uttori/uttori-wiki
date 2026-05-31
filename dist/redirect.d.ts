@@ -42,6 +42,6 @@ export type ParsedPathKey = {
     /**
      * The default value of the segment, if set.
      */
-    def?: string;
+    def?: string | undefined;
 };
 //# sourceMappingURL=redirect.d.ts.map

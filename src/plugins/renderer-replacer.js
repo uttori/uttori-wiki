@@ -181,7 +181,9 @@ class ReplacerRenderer {
       return '';
     }
 
+    let output = content;
     for (const rule of config.rules) {
+      /** @type {RegExp | undefined} */
       let search;
       if (typeof rule.test === 'string') {
         search = new RegExp(rule.test, 'g');
@@ -191,10 +193,10 @@ class ReplacerRenderer {
         debug('Invalid Rule:', rule);
         continue;
       }
-      content = content.replace(search, rule.output);
+      output = output.replace(search, rule.output);
     }
 
-    return content;
+    return output;
   }
 }
 

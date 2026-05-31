@@ -14,6 +14,12 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Sit
  */
 
 /**
+ * @callback SitemapUrlFilter
+ * @param {SitemapGeneratorUrl} route A sitemap URL entry to test.
+ * @returns {boolean} Whether the URL should be included in the sitemap.
+ */
+
+/**
  * @typedef {object} SitemapGeneratorConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {SitemapGeneratorUrl[]} urls A collection of Uttori documents.
@@ -230,12 +236,14 @@ class SitemapGenerator {
       });
     }
 
-    /** @type {function(SitemapGeneratorUrl): boolean} */
-    let urlFilter = (input) => !!input;
+    /** @type {SitemapUrlFilter} */
+    let urlFilter = () => true;
     if (Array.isArray(url_filters) && url_filters.length > 0) {
+      /** @type {RegExp[]} */
+      const filters = url_filters;
       urlFilter = (route) => {
         let pass = true;
-        for (const url_filter of url_filters) {
+        for (const url_filter of filters) {
           try {
             if (url_filter.test(route.url)) {
               pass = false;

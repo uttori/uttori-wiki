@@ -8,7 +8,7 @@ Extract text from an attachment.For PDFs, this now preserves page boundaries to
 
 | Param | Type | Description |
 | --- | --- | --- |
-| config | <code>AIChatBotConfig</code> | The configuration. |
+| config | <code>SearchSQLiteConfig</code> | The configuration. |
 | attachment | <code>UttoriWikiDocumentAttachment</code> | The attachment. |
 
 <a name="extractAttachmentText..text"></a>

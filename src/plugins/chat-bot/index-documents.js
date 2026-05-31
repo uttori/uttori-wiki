@@ -1,11 +1,10 @@
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-import AIChatBot from '../ai-chat-bot.js';
 import { extractAttachmentText } from './attachment-extractor.js';
 import OllamaEmbedder from './ollama-embedder.js';
 import MarkdownItRenderer from '../renderer-markdown-it.js';
-import { consolidateSectionsByHeader, countWords, markdownItAST } from './utilities.js';
+import { consolidateSectionsByHeader, markdownItAST } from './utilities.js';
 
 let debug = (..._) => {};
 /* c8 ignore next 1 */
@@ -14,12 +13,12 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
 /**
  * Build blocks from a document.
  * @param {import('../../wiki.js').UttoriWikiDocument} document The document to build blocks from.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options.
- * @returns {Promise<import('../ai-chat-bot.js').Block[]>} The blocks.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options.
+ * @returns {Promise<import('../search-provider-sqlite.js').Block[]>} The blocks.
  */
 export async function buildBlocks(document, config) {
   debug('buildBlocks: document:', document?.slug ?? '');
-  /** @type {import('../ai-chat-bot.js').Block[]} */
+  /** @type {import('../search-provider-sqlite.js').Block[]} */
   const output = [];
 
   const tokens = MarkdownItRenderer.parse(document.content, config.markdownItPluginConfig);
@@ -62,7 +61,8 @@ export async function buildBlocks(document, config) {
 
   for (const section of sectionz) {
     const content = section.content.join(' ').trim();
-    const tokenCount = Object.keys(countWords(content)).length * 0.75;
+    // Use the TOTAL token estimate.
+    const tokenCount = OllamaEmbedder.approxTokenLen(content);
 
     // Skip empty sections.
     if (!tokenCount) {
@@ -123,6 +123,7 @@ export async function buildBlocks(document, config) {
               if (sentence.length > 500) {
                 // Break very long sentences into words
                 const words = sentence.split(/\s+/);
+                /** @type {string[]} */
                 const chunks = [];
                 let currentChunk = [];
                 let currentLength = 0;
@@ -141,17 +142,18 @@ export async function buildBlocks(document, config) {
                   chunks.push(currentChunk.join(' '));
                 }
 
-                chunks.forEach(chunk => {
-                  if (chunk.trim()) {
+                for (const chunk of chunks) {
+                  const trimmed = chunk.trim();
+                  if (trimmed) {
                     output.push({
-                      text: chunk.trim(),
+                      text: trimmed,
                       sectionPath: attachmentPath,
-                      tokenCount: OllamaEmbedder.approxTokenLen(chunk.trim()),
+                      tokenCount: OllamaEmbedder.approxTokenLen(trimmed),
                       tags: [...document.tags],
                       slug: document.slug,
                     });
                   }
-                });
+                }
               } else if (sentence.trim()) {
                 output.push({
                   text: sentence.trim(),
@@ -177,7 +179,7 @@ export async function buildBlocks(document, config) {
   }
 
   debug('buildBlocks: total sections per-merge:', output.length);
-  /** @type {import('../ai-chat-bot.js').Block[]} */
+  /** @type {import('../search-provider-sqlite.js').Block[]} */
   const newItems = consolidateSectionsByHeader(output, 500, 600);
   debug('buildBlocks: total sections after merge:', newItems.length);
   // debug('buildBlocks: sections:', newItems.map((section) => ( {
@@ -196,7 +198,7 @@ export async function buildBlocks(document, config) {
 /**
  * Ensure the chat index tables exist.
  * @param {import('better-sqlite3/index.js').Database} db The database.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options.
  * @param {ChatIndexSchemaOptions} [options] Schema options.
  * @returns {Promise<{ embedder: OllamaEmbedder, dim: number }>} The embedder and vector dimension.
  */
@@ -280,25 +282,9 @@ export function removeIndexedDocumentFromDatabase(db, slug) {
 }
 
 /**
- * Remove a document from the chat index.
- * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
- * @param {string} slug The source slug to remove.
- */
-export function removeIndexedDocument(fullConfig, slug) {
-  if (!slug) return;
-  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
-  const db = AIChatBot.openDatabase(config);
-  try {
-    removeIndexedDocumentFromDatabase(db, slug);
-  } finally {
-    db.close();
-  }
-}
-
-/**
  * Index one document using an already-open database.
  * @param {import('better-sqlite3/index.js').Database} db The database.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The options.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options.
  * @param {OllamaEmbedder} embedder The embedder.
  * @param {import('../../wiki.js').UttoriWikiDocument} document The document to index.
  * @returns {Promise<{ chunks: number, skipped: boolean, errored: number }>} Indexing stats.
@@ -321,12 +307,15 @@ export async function indexDocumentInDatabase(db, config, embedder, document) {
   const embeddings = [];
   for (let i = 0; i < chunks.length; i += batchSize) {
     const slice = chunks.slice(i, i + batchSize);
-    const sectionPath = slice.map(s => s.sectionPath.join(' > ')).join(' > ');
+    // Bracket each chunk's path so the per-chunk boundaries are clear.
+    const sectionPath = slice.map(s => `[${s.sectionPath.join(' > ')}]`).join(', ');
     const start = Date.now();
     debug(`indexDocumentInDatabase: embedding ${slice.length} chunks for ${document.slug} ${sectionPath}`);
+    // Build the embedding prompt per-chunk (mirrors the query-time `embedPrompt` usage).
+    // Passing a builder here ensures each chunk gets its own prompt instead of the whole batch concatenated.
     const vecs = await embedder.embedBatch(
       slice.map(s => s.text),
-      config.embedPrompt('Represent the document for retrieval.', slice.map(s => s.text).join('\n\n')),
+      (text) => config.embedPrompt('Represent the document for retrieval.', text),
       Math.min(8, slice.length),
     );
     const end = Date.now();
@@ -365,7 +354,7 @@ export async function indexDocumentInDatabase(db, config, embedder, document) {
     contentHash,
   });
 
-  /** @type {import('../ai-chat-bot.js').ChunkWithMeta[]} */
+  /** @type {import('../search-provider-sqlite.js').ChunkWithMeta[]} */
   const chunksWithVectors = chunks.map((c, i) => ({
     source_id: document.slug,
     idx: c.idx,
@@ -420,66 +409,4 @@ export async function indexDocumentInDatabase(db, config, embedder, document) {
   tx();
 
   return { chunks: chunks.length, skipped: false, errored };
-}
-
-/**
- * Index one document in the database.
- * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
- * @param {import('../../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', import('../ai-chat-bot.js').AIChatBotConfig>} _context The context.
- * @param {import('../../wiki.js').UttoriWikiDocument} document The document to index.
- * @returns {Promise<void>} The indexed document.
- */
-export async function indexDocument(fullConfig, _context, document) {
-  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
-  const db = AIChatBot.openDatabase(config);
-  try {
-    const { embedder } = await ensureChatIndexSchema(db, config);
-    await indexDocumentInDatabase(db, config, embedder, document);
-  } catch (error) {
-    debug('indexDocument: error indexing document:', error);
-  } finally {
-    db.close();
-  }
-}
-
-/**
- * Index all documents in the database.
- * @param {Record<string, import('../ai-chat-bot.js').AIChatBotConfig>} fullConfig The configuration.
- * @param {import('../../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', import('../ai-chat-bot.js').AIChatBotConfig>} context The context.
- * @returns {Promise<void>} The indexed documents.
- */
-export async function indexAllDocuments(fullConfig, context) {
-  /** @type {import('../ai-chat-bot.js').AIChatBotConfig} */
-  const config = { ...AIChatBot.defaultConfig(), ...fullConfig[AIChatBot.configKey] };
-  debug('indexAllDocuments:', config.databasePath);
-  /** @type {import('better-sqlite3/index.js').Database} */
-  const db = AIChatBot.openDatabase(config);
-
-  try {
-    const { embedder } = await ensureChatIndexSchema(db, config, { rebuild: true });
-    /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
-    let documents = [];
-    try {
-      const query = `SELECT * FROM documents WHERE slug NOT_IN ("${config.ignoreSlugs.join('", "')}") AND tags EXCLUDES ("${config.ignoreTags.join('", "')}") ORDER BY createDate DESC LIMIT -1`;
-      [documents] = await context.hooks.fetch('storage-query', query, context);
-    } catch (error) {
-      debug('indexAllDocuments: error getting documents:', error);
-      return;
-    }
-    debug(`indexAllDocuments: documents: ${documents.length}`);
-
-    let totalChunks = 0;
-    let skipped = 0;
-    let errored = 0;
-    for (const document of documents) {
-      if (!document) continue;
-      const result = await indexDocumentInDatabase(db, config, embedder, document);
-      totalChunks += result.chunks;
-      skipped += result.skipped ? 1 : 0;
-      errored += result.errored;
-    }
-    debug(`indexAllDocuments: Done. Chunks indexed: ${totalChunks}. Unchanged skipped: ${skipped}. Errored: ${errored}.`);
-  } finally {
-    db.close();
-  }
 }

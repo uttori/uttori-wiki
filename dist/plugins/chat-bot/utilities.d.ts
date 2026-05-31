@@ -8,8 +8,8 @@
  * @returns {Array<{header: string[], rows: string[][], chunkIndex: number, totalChunks: number}>} Array of table chunks.
  */
 export function chunkTable(header: string[], bodyRows: string[][], options?: {
-    maxRowsPerChunk?: number;
-    maxTokensPerChunk?: number;
+    maxRowsPerChunk?: number | undefined;
+    maxTokensPerChunk?: number | undefined;
 }): Array<{
     header: string[];
     rows: string[][];
@@ -56,9 +56,9 @@ export function consolidateParagraph(token: MarkdownASTNode): string[];
  * @returns {MarkdownASTNode[]} The array of items with flattened structures.
  */
 export function consolidateNestedItems(items: MarkdownASTNode[], options?: {
-    tableToCSV?: boolean;
-    tableMaxRowsPerChunk?: number;
-    tableMaxTokensPerChunk?: number;
+    tableToCSV?: boolean | undefined;
+    tableMaxRowsPerChunk?: number | undefined;
+    tableMaxTokensPerChunk?: number | undefined;
 }): MarkdownASTNode[];
 /**
  * Remove any items with no content and no children.
@@ -79,14 +79,26 @@ export function countWords(input: string): Record<string, number>;
  */
 export function longestCommonPrefix(paths: string[][]): string[];
 /**
+ * Split a block of text into pieces that each fit within an approximate token budget.
+ *
+ * Splits on line boundaries first (which keeps table rows and code lines intact), then falls back
+ * to splitting an individually over-long line on word boundaries. This is used to break up sections
+ * that are larger than the chunk cap so they can still be embedded, an un-split section can exceed
+ * the embedding model's context window and fail to embed entirely.
+ * @param {string} text The text to split.
+ * @param {number} maxTokens The maximum approximate tokens per piece.
+ * @returns {string[]} The text split into token-bounded pieces.
+ */
+export function splitTextToTokenBudget(text: string, maxTokens: number): string[];
+/**
  * Consolidate like sub-sections by their headers.
- * @param {import('../ai-chat-bot.js').Block[]} items The items to consolidate.
+ * @param {import('../search-provider-sqlite.js').Block[]} items The items to consolidate.
  * @param {number} [maximumTokenCount] The maximum token count to consolidate to.
  * @param {number} [softMinTokens] If we've already packed at least this many tokens, and the next item would shrink the anchor, flush early.
  * @param {number} [minAnchorDecrease] How much the anchor must shrink (in header levels) to trigger early flush.
- * @returns {object[]} The consolidated items.
+ * @returns {import('../search-provider-sqlite.js').Block[]} The consolidated items.
  */
-export function consolidateSectionsByHeader(items: import("../ai-chat-bot.js").Block[], maximumTokenCount?: number, softMinTokens?: number, minAnchorDecrease?: number): object[];
+export function consolidateSectionsByHeader(items: import("../search-provider-sqlite.js").Block[], maximumTokenCount?: number, softMinTokens?: number, minAnchorDecrease?: number): import("../search-provider-sqlite.js").Block[];
 /**
  * Convert MarkdownIt Tokens to an AST.
  * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
@@ -98,9 +110,9 @@ export function consolidateSectionsByHeader(items: import("../ai-chat-bot.js").B
  * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
  */
 export function markdownItAST(tokens: import("markdown-it/index.js").Token[], title: string, options?: {
-    tableToCSV?: boolean;
-    tableMaxRowsPerChunk?: number;
-    tableMaxTokensPerChunk?: number;
+    tableToCSV?: boolean | undefined;
+    tableMaxRowsPerChunk?: number | undefined;
+    tableMaxTokensPerChunk?: number | undefined;
 }): MarkdownASTNode[];
 export function oneLine(text: string, replace?: string): string;
 export function toCSV(table: string[][], seperator?: string, newLine?: string, alwaysDoubleQuote?: boolean): string;
@@ -118,18 +130,71 @@ export type MarkdownASTNode = {
     /**
      * The relevant headers for this node.
      */
-    headers: Array<string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>>;
+    headers: MarkdownASTHeaderValue[];
     /**
      * The MarkdownIt Token object for the opening tag.
      */
-    open?: import("markdown-it/index.js").Token | null;
+    open?: {
+        type: string;
+        tag: string;
+        attrs: Array<[string, string]> | null;
+        map: [number, number] | null;
+        nesting: import("markdown-it/dist/index.cjs.js").Token.Nesting;
+        level: number;
+        children: /*elided*/ any[] | null;
+        content: string;
+        markup: string;
+        info: string;
+        meta: any;
+        block: boolean;
+        hidden: boolean;
+        attrIndex(name: string): number;
+        attrPush(attrData: [string, string]): void;
+        attrSet(name: string, value: string): void;
+        attrGet(name: string): string | null;
+        attrJoin(name: string, value: string): void;
+    } | null | undefined;
     /**
      * The MarkdownIt Token object for the closing tag.
      */
-    close?: import("markdown-it/index.js").Token | null;
+    close?: {
+        type: string;
+        tag: string;
+        attrs: Array<[string, string]> | null;
+        map: [number, number] | null;
+        nesting: import("markdown-it/dist/index.cjs.js").Token.Nesting;
+        level: number;
+        children: /*elided*/ any[] | null;
+        content: string;
+        markup: string;
+        info: string;
+        meta: any;
+        block: boolean;
+        hidden: boolean;
+        attrIndex(name: string): number;
+        attrPush(attrData: [string, string]): void;
+        attrSet(name: string, value: string): void;
+        attrGet(name: string): string | null;
+        attrJoin(name: string, value: string): void;
+    } | null | undefined;
     /**
      * The child nodes for this node.
      */
     children: MarkdownASTNode[];
+};
+export type MarkdownASTHeaderEntry = string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>;
+export type MarkdownASTHeaderStack = MarkdownASTHeaderEntry[];
+/**
+ * A header slot before or after consolidation.
+ */
+export type MarkdownASTHeaderValue = string | number | boolean | null | undefined | MarkdownASTHeaderStack;
+/**
+ * Optional footnote metadata on a MarkdownIt token.
+ */
+export type MarkdownFootnoteMeta = {
+    /**
+     * Footnote label text.
+     */
+    label?: unknown;
 };
 //# sourceMappingURL=utilities.d.ts.map

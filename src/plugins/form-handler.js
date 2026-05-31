@@ -5,6 +5,13 @@ let debug = (..._) => {};
 try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FormHandler'); } catch {}
 
 /**
+ * Validates a single form field value.
+ * @callback FormFieldValidationFunction
+ * @param {string} value The field value.
+ * @returns {boolean} Whether the field is valid.
+ */
+
+/**
  * @typedef {object} FormField
  * @property {string} name The field name.
  * @property {string} type The field type (text, email, textarea, etc.).
@@ -16,21 +23,14 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.For
  */
 
 /**
- * @typedef {Function} FormFieldValidationFunction
- * @param {string} value The field value.
- * @returns {boolean} Whether the field is valid.
- */
-
-/**
  * @typedef {object} FormConfig
  * @property {string} name The form name/identifier.
  * @property {string} route The route path for the form submission.
  * @property {FormField[]} fields The form fields configuration.
- * @property {function} [handler] Custom handler function for form submission.
+ * @property {FormHandlerFunction} [handler] Custom handler function for form submission.
  * @property {string} successMessage Success message to return.
  * @property {string} errorMessage Error message to return.
  * @property {import('express').RequestHandler[]} [middleware] Custom middleware for the form route.
- * @property {FormHandlerFunction} [handler] Custom handler function for form submission.
  */
 
 /**
@@ -38,15 +38,16 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.For
  * @property {Record<string, string[]>} [events] Events to bind to.
  * @property {FormConfig[]} forms Array of form configurations.
  * @property {string} [baseRoute] Base route prefix for all forms.
- * @property {function} [defaultHandler] Default handler function for forms without custom handlers.
+ * @property {FormHandlerFunction} [defaultHandler] Default handler function for forms without custom handlers.
  */
 
 /**
- * @typedef {Function} FormHandlerFunction
- * @property {Record<string, any>} formData The form data.
- * @property {FormConfig} formConfig The form configuration.
- * @property {import('express').Request} _req The request.
- * @property {import('express').Response} _res The response.
+ * Handles a validated form submission.
+ * @callback FormHandlerFunction
+ * @param {Record<string, unknown>} formData The form data.
+ * @param {FormConfig} formConfig The form configuration.
+ * @param {import('express').Request} req The request.
+ * @param {import('express').Response} res The response.
  * @returns {Promise<FormHandlerResult>} The result.
  */
 
@@ -287,14 +288,13 @@ class FormHandler {
    * @static
    */
   static createFormHandler(formConfig, defaultHandler) {
-    /** @type {import('express').RequestHandler<any, any, any, any>} */
-    return async (req, res) => {
+    return /** @type {import('express').RequestHandler} */ (async (req, res) => {
       try {
         debug(`Processing form submission for "${formConfig.name}"`);
 
         // Extract form data from request body
-        /** @type {Record<string, any>} */
-        const formData = req.body;
+        /** @type {Record<string, unknown>} */
+        const formData = typeof req.body === 'object' && req.body !== null ? req.body : {};
 
         // Validate form data
         const validationResult = FormHandler.validateFormData(formData, formConfig);
@@ -328,12 +328,12 @@ class FormHandler {
           error: error instanceof Error ? error.message : 'Unknown Error',
         });
       }
-    };
+    });
   }
 
   /**
    * Validates form data against form configuration.
-   * @param {Record<string, any>} formData The form data to validate.
+   * @param {Record<string, unknown>} formData The form data to validate.
    * @param {FormConfig} formConfig The form configuration.
    * @returns {FormHandlerValidationResult} Validation result.
    * @static

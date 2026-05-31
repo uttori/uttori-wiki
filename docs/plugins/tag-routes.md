@@ -12,6 +12,12 @@ Provides tag index and individual tag pages functionality.</p>
 <dl>
 <dt><a href="#TagRoutesPluginConfig">TagRoutesPluginConfig</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#TagRoutesContext">TagRoutesContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code></dt>
+<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
+</dd>
+<dt><a href="#TagRoutesRequestHandler">TagRoutesRequestHandler</a> ⇒ <code>module:express~RequestHandler</code></dt>
+<dd><p>Builds an Express handler for a tag route.</p>
+</dd>
 </dl>
 
 <a name="TagRoutesPlugin"></a>
@@ -92,7 +98,7 @@ Validates the provided configuration for required entries.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>Record.&lt;string, TagRoutesPluginConfig&gt;</code> | A configuration object. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context (unused). |
+| _context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context (unused). |
 
 **Example** *(TagRoutesPlugin.validateConfig(config, _context))*  
 ```js
@@ -107,7 +113,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 
 **Example** *(TagRoutesPlugin.register(context))*  
 ```js
@@ -133,7 +139,7 @@ Wrapper function for binding tag routes.
 | Param | Type | Description |
 | --- | --- | --- |
 | server | <code>module:express~Application</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 
 **Example** *(TagRoutesPlugin.bindRoutes(plugin))*  
 ```js
@@ -157,7 +163,7 @@ Normalize document tags before the document is saved.
 | Param | Type | Description |
 | --- | --- | --- |
 | document | <code>UttoriWikiDocument</code> | The document being saved. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| _context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 
 <a name="TagRoutesPlugin.getTaggedDocuments"></a>
 
@@ -173,7 +179,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 | tag | <code>string</code> | The tag to look for in documents. |
 
 **Example**  
@@ -194,7 +200,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 
 <a name="TagRoutesPlugin.tagRequestHandler"></a>
 
@@ -211,7 +217,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 
 <a name="TagRoutesPluginConfig"></a>
 
@@ -228,7 +234,25 @@ Hooks:
 | [tagIndexRoute] | <code>string</code> | A replacement route for the tag index route. |
 | [tagRoute] | <code>string</code> | A replacement route for the tag show route. |
 | [apiRoute] | <code>string</code> | A replacement route for the tag index route. |
-| [tagIndexRequestHandler] | <code>function</code> | A replacement route handler for the tag index route. |
-| [tagRequestHandler] | <code>function</code> | A replacement route handler for the tag show route. |
-| [apiRequestHandler] | <code>function</code> | A request handler for the API route. |
+| [tagIndexRequestHandler] | [<code>TagRoutesRequestHandler</code>](#TagRoutesRequestHandler) | A replacement route handler for the tag index route. |
+| [tagRequestHandler] | [<code>TagRoutesRequestHandler</code>](#TagRoutesRequestHandler) | A replacement route handler for the tag show route. |
+| [apiRequestHandler] | [<code>TagRoutesRequestHandler</code>](#TagRoutesRequestHandler) | A request handler for the API route. |
+
+<a name="TagRoutesContext"></a>
+
+## TagRoutesContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-tag-routes&#x27;, TagRoutesPluginConfig&gt;</code>
+Uttori context narrowed to this plugin's config shape.
+
+**Kind**: global typedef  
+<a name="TagRoutesRequestHandler"></a>
+
+## TagRoutesRequestHandler ⇒ <code>module:express~RequestHandler</code>
+Builds an Express handler for a tag route.
+
+**Kind**: global typedef  
+**Returns**: <code>module:express~RequestHandler</code> - The Express request handler.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| context | [<code>TagRoutesContext</code>](#TagRoutesContext) | A Uttori-like context. |
 

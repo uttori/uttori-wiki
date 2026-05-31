@@ -15,13 +15,14 @@ export type SitemapGeneratorUrl = {
     /**
      * The change frequency of the document.
      */
-    changefreq?: string;
+    changefreq?: string | undefined;
 };
+export type SitemapUrlFilter = (route: SitemapGeneratorUrl) => boolean;
 export type SitemapGeneratorConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * A collection of Uttori documents.
      */
@@ -29,7 +30,7 @@ export type SitemapGeneratorConfig = {
     /**
      * A collection of Regular Expression URL filters to exclude documents.
      */
-    url_filters?: RegExp[];
+    url_filters?: RegExp[] | undefined;
     /**
      * The base URL (ie https://domain.tld) for all documents.
      */
@@ -41,23 +42,23 @@ export type SitemapGeneratorConfig = {
     /**
      * The file name to use for the generated file.
      */
-    filename?: string;
+    filename?: string | undefined;
     /**
      * The file extension to use for the generated file.
      */
-    extension?: string;
+    extension?: string | undefined;
     /**
      * Sitemap default page priority.
      */
-    page_priority?: string;
+    page_priority?: string | undefined;
     /**
      * Sitemap XML Header, standard XML sitemap header is the default.
      */
-    xml_header?: string;
+    xml_header?: string | undefined;
     /**
      * Sitemap XML Footer, standard XML sitemap closing tag is the default.
      */
-    xml_footer?: string;
+    xml_footer?: string | undefined;
 };
 /**
  * @typedef {object} SitemapGeneratorUrl
@@ -65,6 +66,11 @@ export type SitemapGeneratorConfig = {
  * @property {string} lastmod The last modified date of the document.
  * @property {string} priority The priority of the document.
  * @property {string} [changefreq] The change frequency of the document.
+ */
+/**
+ * @callback SitemapUrlFilter
+ * @param {SitemapGeneratorUrl} route A sitemap URL entry to test.
+ * @returns {boolean} Whether the URL should be included in the sitemap.
  */
 /**
  * @typedef {object} SitemapGeneratorConfig

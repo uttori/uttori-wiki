@@ -84,4 +84,23 @@ declare namespace _default {
     export { configFootnoteClose };
 }
 export default _default;
+export type MarkdownItFootnotesEnv = {
+    /**
+     * Next footnote id counter.
+     */
+    length: number;
+    /**
+     * Label to id mapping.
+     */
+    refs: Record<string, number>;
+};
+/**
+ * MarkdownIt env object extended with footnote state.
+ */
+export type MarkdownItFootnotesStateEnv = {
+    /**
+     * Footnote definitions collected during parsing.
+     */
+    footnotes?: MarkdownItFootnotesEnv | undefined;
+};
 //# sourceMappingURL=footnotes.d.ts.map

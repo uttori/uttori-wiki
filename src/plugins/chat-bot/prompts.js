@@ -72,7 +72,7 @@ If and only if the first vectorSearch returns no results, rewrite the user's que
 - Cover likely synonyms and platform variants.
 - Include key entities and constraints.
 - Remove punctuation/hyphens/spaces for one variant.
-- Replace Roman numerals with Arabic ("MKII"→"MK2") and vice-versa.
+- Replace Roman numerals with Arabic ("MKII"➜"MK2") and vice-versa.
 - Include both compact and spaced forms.
 
 <output>

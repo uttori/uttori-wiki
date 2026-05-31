@@ -7,11 +7,11 @@ Chunks longer than this are truncated with an ellipsis.</p>
 </dd>
 <dt><a href="#vectorSearchTool">vectorSearchTool</a> : <code><a href="#OllamaTool">OllamaTool</a></code></dt>
 <dd><p>Built-in Ollama tool schema for <code>vectorSearch</code>.
-Passed verbatim in the <code>tools</code> array of every <code>/api/chat</code> request.</p>
+Derived from the shared registry so the chat bot and MCP provider stay in sync.</p>
 </dd>
 <dt><a href="#BUILT_IN_TOOLS">BUILT_IN_TOOLS</a> : <code>Map.&lt;string, OllamaTool&gt;</code></dt>
 <dd><p>Map of all built-in chat tools indexed by their name.
-Extend this map to register additional tools without changing <code>runChatPass</code>.</p>
+Built from the shared wiki tool registry.</p>
 </dd>
 </dl>
 
@@ -35,9 +35,13 @@ SLUG: <slug></h2>
 <pre><code>Blocks are joined with `\n\n====\n\n`.
 </code></pre>
 </dd>
-<dt><a href="#executeChatTool">executeChatTool(name, args, config, [retrieveFn])</a> ⇒ <code>Promise.&lt;(string|ChatToolResult)&gt;</code></dt>
-<dd><p>Execute a named chat tool and return its formatted result.
-Unknown tool names return an error object consistent with the original behaviour.</p>
+<dt><a href="#executeChatTool">executeChatTool(name, args, config, context)</a> ⇒ <code>Promise.&lt;(string|ChatToolResult)&gt;</code></dt>
+<dd><p>Execute a named chat tool and return its result.
+Tools are resolved through the shared wiki tool registry, which dispatches to the
+registered storage / search providers via the Uttori hook system. The <code>vectorSearch</code>
+tool result is post-formatted into the compact context block expected by the model;
+all other tools return their structured result JSON-serialized.
+Unknown tool names and missing providers return an error object.</p>
 </dd>
 </dl>
 
@@ -50,10 +54,8 @@ Unknown tool names return an error object consistent with the original behaviour
 <dd></dd>
 <dt><a href="#ChatToolResult">ChatToolResult</a> : <code>object</code></dt>
 <dd></dd>
-<dt><a href="#RetrieveFn">RetrieveFn</a> ⇒ <code>Promise.&lt;RetrieveResponse&gt;</code></dt>
-<dd><p>Signature of the retrieval function accepted by <a href="#executeChatTool">executeChatTool</a>.
-Matches the signature of <code>retrieve</code> from <code>./retrieval.js</code>.</p>
-</dd>
+<dt><a href="#ChatToolExecutionContext">ChatToolExecutionContext</a> : <code>object</code></dt>
+<dd></dd>
 </dl>
 
 <a name="MAX_CHUNK_CHARS"></a>
@@ -65,13 +67,13 @@ Maximum characters to include per retrieved chunk in the context block.Chunks l
 <a name="vectorSearchTool"></a>
 
 ## vectorSearchTool : [<code>OllamaTool</code>](#OllamaTool)
-Built-in Ollama tool schema for `vectorSearch`.Passed verbatim in the `tools` array of every `/api/chat` request.
+Built-in Ollama tool schema for `vectorSearch`.Derived from the shared registry so the chat bot and MCP provider stay in sync.
 
 **Kind**: global constant  
 <a name="BUILT_IN_TOOLS"></a>
 
 ## BUILT\_IN\_TOOLS : <code>Map.&lt;string, OllamaTool&gt;</code>
-Map of all built-in chat tools indexed by their name.Extend this map to register additional tools without changing `runChatPass`.
+Map of all built-in chat tools indexed by their name.Built from the shared wiki tool registry.
 
 **Kind**: global constant  
 <a name="buildChatTools"></a>
@@ -104,18 +106,18 @@ Format a [RetrieveResponse](RetrieveResponse) into the compact contextblock str
 **Kind**: inner constant of [<code>formatRetrievalResult</code>](#formatRetrievalResult)  
 <a name="executeChatTool"></a>
 
-## executeChatTool(name, args, config, [retrieveFn]) ⇒ <code>Promise.&lt;(string\|ChatToolResult)&gt;</code>
-Execute a named chat tool and return its formatted result.Unknown tool names return an error object consistent with the original behaviour.
+## executeChatTool(name, args, config, context) ⇒ <code>Promise.&lt;(string\|ChatToolResult)&gt;</code>
+Execute a named chat tool and return its result.Tools are resolved through the shared wiki tool registry, which dispatches to theregistered storage / search providers via the Uttori hook system. The `vectorSearch`tool result is post-formatted into the compact context block expected by the model;all other tools return their structured result JSON-serialized.Unknown tool names and missing providers return an error object.
 
 **Kind**: global function  
-**Returns**: <code>Promise.&lt;(string\|ChatToolResult)&gt;</code> - The formatted result string, or an error object.  
+**Returns**: <code>Promise.&lt;(string\|ChatToolResult)&gt;</code> - The formatted/serialized result string, or an error object.  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | name | <code>string</code> | The tool name as returned by the model. |
 | args | <code>Record.&lt;string, any&gt;</code> | The arguments object from the model's tool call. |
 | config | <code>AIChatBotConfig</code> | The chat bot configuration. |
-| [retrieveFn] | [<code>RetrieveFn</code>](#RetrieveFn) | Optional retrieval function override, primarily for testing. |
+| context | [<code>ChatToolExecutionContext</code>](#ChatToolExecutionContext) | A Uttori-like context exposing `hooks`. |
 
 <a name="OllamaToolFunction"></a>
 
@@ -148,19 +150,17 @@ Execute a named chat tool and return its formatted result.Unknown tool names re
 
 | Name | Type | Description |
 | --- | --- | --- |
-| [error] | <code>string</code> | Set when the tool name is unknown. |
+| [error] | <code>string</code> | Set when the tool name is unknown or no provider handled it. |
 
-<a name="RetrieveFn"></a>
+<a name="ChatToolExecutionContext"></a>
 
-## RetrieveFn ⇒ <code>Promise.&lt;RetrieveResponse&gt;</code>
-Signature of the retrieval function accepted by [executeChatTool](#executeChatTool).Matches the signature of `retrieve` from `./retrieval.js`.
-
+## ChatToolExecutionContext : <code>object</code>
 **Kind**: global typedef  
-**Returns**: <code>Promise.&lt;RetrieveResponse&gt;</code> - The retrieval result.  
+**Properties**
 
-| Param | Type | Description |
+| Name | Type | Description |
 | --- | --- | --- |
-| query | <code>string</code> | The search query. |
-| config | <code>AIChatBotConfig</code> | The chat bot configuration. |
-| slugs | <code>Array.&lt;string&gt;</code> | Optional slugs to restrict the search to. |
+| [hooks] | <code>module:@uttori/event-dispatcher~EventDispatcher</code> | The Uttori event dispatcher. |
+| [context] | <code>object</code> | The full Uttori context. |
+| [config] | <code>AIChatBotConfig</code> | The chat bot configuration. |
 
