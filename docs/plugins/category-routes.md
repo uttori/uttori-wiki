@@ -10,8 +10,6 @@ Provides category index and individual category pages functionality with hierarc
 ## Typedefs
 
 <dl>
-<dt><a href="#DebugLogger">DebugLogger</a> ⇒ <code>void</code></dt>
-<dd></dd>
 <dt><a href="#CategoryRoutesPluginConfig">CategoryRoutesPluginConfig</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#CategoryDocument">CategoryDocument</a> : <code>UttoriWikiDocument</code></dt>
@@ -285,15 +283,6 @@ Renders the category API that returns all available categories.
 | Param | Type | Description |
 | --- | --- | --- |
 | context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
-
-<a name="DebugLogger"></a>
-
-## DebugLogger ⇒ <code>void</code>
-**Kind**: global typedef  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| ...args | <code>unknown</code> | Debug arguments. |
 
 <a name="CategoryRoutesPluginConfig"></a>
 

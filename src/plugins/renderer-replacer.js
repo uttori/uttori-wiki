@@ -1,7 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Render.Replacer'); } catch {}
+import { createDebug } from '../debug.js';
 
+const debug = createDebug('Uttori.Plugin.Render.Replacer');
 /**
  * @typedef {object} ReplacerRendererRule
  * @property {string | RegExp} test The test to use for replacing content.
@@ -161,7 +160,7 @@ class ReplacerRenderer {
     /** @type {ReplacerRendererConfig} */
     const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
     return collection.map((document) => {
-      const html = ReplacerRenderer.render(document.html, config);
+      const html = ReplacerRenderer.render(document.html ?? '', config);
       return { ...document, html };
     });
   }

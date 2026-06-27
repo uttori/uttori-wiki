@@ -1,8 +1,7 @@
+import { createDebug } from '../../debug.js';
 import SqlWhereParser from './where-parser.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.ValidateQuery'); } catch {}
+const debug = createDebug('Uttori.ValidateQuery');
 
 /** @import { SqlWhereParserAst } from '../../../dist/custom.d.ts' */
 

@@ -1,3 +1,4 @@
+import { createDebug } from '../../debug.js';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
@@ -6,9 +7,7 @@ import OllamaEmbedder from './ollama-embedder.js';
 import MarkdownItRenderer from '../renderer-markdown-it.js';
 import { consolidateSectionsByHeader, markdownItAST } from './utilities.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot.IndexDocuments'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot.IndexDocuments');
 
 /**
  * Build blocks from a document.

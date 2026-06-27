@@ -1,8 +1,7 @@
+import { createDebug } from '../../debug.js';
 import { createTransport } from 'nodemailer';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FormHandler.Email'); } catch {}
+const debug = createDebug('Uttori.Plugin.FormHandler.Email');
 
 /**
  * @typedef {object} EmailHandlerConfig

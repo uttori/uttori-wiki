@@ -1,3 +1,4 @@
+import { createDebug } from './debug.js';
 import { htmlTable } from '@uttori/data-tools/diff/textdiff';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 import crypto from 'node:crypto';
@@ -7,11 +8,9 @@ import defaultConfig from './config.js';
 import { buildPath } from './redirect.js';
 import { sanitizeSearchQuery, sanitizeSlug } from './plugins/utilities/security.js';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki'); } catch {}
+const debug = createDebug('Uttori.Wiki');
 
-const escapeQueryValue = (value) => JSON.stringify(String(value)).slice(1, -1);
+const escapeQueryValue = (value = '') => JSON.stringify(String(value)).slice(1, -1);
 
 /**
  * Normalize an Express route parameter to a single string.
@@ -397,7 +396,7 @@ class UttoriWiki {
     router.put('/:slug/save', this.config.routeMiddleware.save, this.save);
 
     // Handle Redirects
-    for (const redirect of this.config.redirects) {
+    for (const redirect of this.config?.redirects ?? []) {
       debug('Redirect:', redirect);
       const { route, target, status = 301, appendQueryString = true } = redirect;
       if (!route || !target) {
@@ -462,7 +461,7 @@ class UttoriWiki {
       return;
     }
 
-    /** @type {UttoriWikiDocument} */
+    /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', this.config.homePage, this);
@@ -614,7 +613,7 @@ class UttoriWiki {
       return;
     }
 
-    /** @type {UttoriWikiDocument} */
+    /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
@@ -705,7 +704,7 @@ class UttoriWiki {
    * - `dispatch` - `validate-invalid` - Passes in the request.
    * - `dispatch` - `validate-valid` - Passes in the request.
    * @async
-   * @param {import('express').Request<import('../dist/custom.d.ts').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
+   * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
    * @param {import('express').Response} response The Express Response object.
    * @param {import('express').NextFunction} next The Express Next function.
    */
@@ -1007,7 +1006,8 @@ class UttoriWiki {
       next();
       return;
     }
-    /** @type {UttoriWikiDocument} */
+
+    /** @type {UttoriWikiDocument | undefined} */
     let document;
     try {
       [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
@@ -1015,14 +1015,13 @@ class UttoriWiki {
     } catch (error) {
       debug('Error fetching document:', error);
     }
-
     if (!document) {
       debug('No document found for given slug:', request.params.slug);
       next();
       return;
     }
 
-    /** @type {string[]} */
+    /** @type {string[] | undefined} */
     let history;
     try {
       [history] = await this.hooks.fetch('storage-get-history', request.params.slug, this);
@@ -1391,7 +1390,7 @@ class UttoriWiki {
 
     const { title = '', excerpt = '', content = '', image = '' } = request.body;
 
-    /** @type {string} */
+    /** @type {string | undefined} */
     let slug = request.body.slug || request.params.slug;
     if (!slug) {
       request.wikiFlash('error', 'Missing slug.');
@@ -1442,7 +1441,7 @@ class UttoriWiki {
             });
             // Merge with new attachments, preserving IDs from existing ones
             attachments = attachments.map((newAtt) => {
-              const existingAtt = existingDocument.attachments.find((e) => e.path === newAtt.path);
+              const existingAtt = existingDocument?.attachments?.find((e) => e.path === newAtt.path);
               newAtt.id = existingAtt?.id || newAtt.id || crypto.randomUUID();
               return newAtt;
             });

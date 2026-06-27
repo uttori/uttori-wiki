@@ -1,9 +1,8 @@
+import { createDebug } from '../debug.js';
 import fs from 'node:fs';
 import path from 'node:path';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.DownloadRouter'); } catch {}
+const debug = createDebug('Uttori.Plugin.DownloadRouter');
 
 /**
  * @typedef {object} DownloadRouterConfig

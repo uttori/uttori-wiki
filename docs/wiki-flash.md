@@ -1,8 +1,6 @@
 ## Functions
 
 <dl>
-<dt><a href="#debug">debug()</a> : <code>function</code></dt>
-<dd></dd>
 <dt><a href="#wikiFlash">wikiFlash([key], [value])</a> ⇒ <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | <code>Array</code> | <code>boolean</code></dt>
 <dd><p>Flash messages are stored in the session.
 First, use <code>wikiFlash(key, value)</code> to set a flash message.
@@ -13,10 +11,6 @@ Then, on subsequent requests, you can retrieve the message with <code>wikiFlash(
 </dd>
 </dl>
 
-<a name="debug"></a>
-
-## debug() : <code>function</code>
-**Kind**: global function  
 <a name="wikiFlash"></a>
 
 ## wikiFlash([key], [value]) ⇒ <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> \| <code>Array</code> \| <code>boolean</code>

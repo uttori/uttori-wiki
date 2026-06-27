@@ -550,11 +550,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request<import('../dist/custom.d.ts').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
+     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
      * @param {import('express').Response} response The Express Response object.
      * @param {import('express').NextFunction} next The Express Next function.
      */
-    save: (request: import("express").Request<import("../dist/custom.d.ts").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
+    save: (request: import("express").Request<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>, response: import("express").Response, next: import("express").NextFunction) => Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *

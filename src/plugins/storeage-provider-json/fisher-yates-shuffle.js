@@ -1,7 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.FisherYatesShuffle'); } catch {}
+import { createDebug } from '../../debug.js';
 
+const debug = createDebug('Uttori.FisherYatesShuffle');
 /**
  * Fisher-Yates Shuffle (aka Knuth Shuffle)
  * The algorithm continually determines the next element by randomly drawing an element from the array until no elements remain.

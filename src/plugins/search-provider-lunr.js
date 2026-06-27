@@ -1,9 +1,7 @@
+import { createDebug } from '../debug.js';
 import SearchProvider from './utilities/search-lunr.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.SearchProvider.Lunr.Plugin'); } catch {}
+const debug = createDebug('Uttori.SearchProvider.Lunr.Plugin');
 
 /**
  * @typedef {Function} LunrLocale

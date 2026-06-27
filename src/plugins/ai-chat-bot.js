@@ -1,3 +1,4 @@
+import { createDebug } from '../debug.js';
 import url from 'node:url';
 import { WebSocketServer } from 'ws';
 
@@ -61,9 +62,7 @@ export { extractAttachmentText };
  */
 const memStore = new MemoryStore(60 * 60 * 1000, 5); // 1h TTL, last 5 turns
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot');
 
 /**
  * @typedef {object} AIChatBotConfig

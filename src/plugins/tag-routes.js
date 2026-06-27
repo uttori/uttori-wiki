@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import { routeParamToString } from '../wiki.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.TagRoutes'); } catch {}
+const debug = createDebug('Uttori.Plugin.TagRoutes');
 
 /**
  * @typedef {object} TagRoutesPluginConfig

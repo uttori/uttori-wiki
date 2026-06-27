@@ -1,9 +1,8 @@
+import { createDebug } from '../debug.js';
 import SearchProvider from './utilities/search-sqlite.js';
 import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.SearchProvider.SQLite.Plugin'); } catch {}
+const debug = createDebug('Uttori.SearchProvider.SQLite.Plugin');
 
 /**
  * @callback SearchSQLiteEmbedPrompt

@@ -1,21 +1,17 @@
+import { createDebug } from '../../debug.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 import validateQuery from '../storeage-provider-json/validate-query.js';
 import { retrieve as retrieveFromDatabase } from '../chat-bot/retrieval.js';
+
+const debug = createDebug('Uttori.SearchProvider.SQLite');
 import {
   ensureChatIndexSchema,
   indexDocumentInDatabase,
   removeIndexedDocumentFromDatabase,
 } from '../chat-bot/index-documents.js';
-
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try {
-  const { default: d } = await import('debug');
-  debug = d('Uttori.SearchProvider.SQLite');
-} catch {}
 
 /**
  * @typedef {import('../search-provider-sqlite.js').SearchSQLiteConfig} SearchSQLiteConfig

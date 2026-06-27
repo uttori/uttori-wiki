@@ -1,10 +1,8 @@
+import { createDebug } from '../../debug.js';
 import Operator from './operator.js';
 import { TokenizeThis } from './tokenizer.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.SqlWhereParser'); } catch {}
+const debug = createDebug('Uttori.SqlWhereParser');
 
 /** @import { SqlWhereParserEvaluator, ParserOperand } from '../../../dist/custom.d.ts' */
 

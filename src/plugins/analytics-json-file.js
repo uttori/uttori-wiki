@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import AnalyticsProvider from './utilities/analytics-provider.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AnalyticsPlugin'); } catch {}
+const debug = createDebug('Uttori.Plugin.AnalyticsPlugin');
 
 /**
  * @typedef {object} AnalyticsPluginPopularDocument

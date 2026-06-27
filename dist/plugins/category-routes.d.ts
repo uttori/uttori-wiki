@@ -1,5 +1,4 @@
 export default CategoryRoutesPlugin;
-export type DebugLogger = (...args: unknown[]) => void;
 export type CategoryRoutesPluginConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.

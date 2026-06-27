@@ -1,3 +1,6 @@
+import { createDebug } from '../debug.js';
+
+const debug = createDebug('Uttori.Plugin.ImportDocument');
 
 import fs, { createWriteStream } from 'node:fs';
 import path, { dirname } from 'node:path';
@@ -6,10 +9,6 @@ import { fileURLToPath } from 'node:url';
 
 import { cmd } from './utilities/cmd.js';
 import { sanitizeSlug, sanitizeFilename, validateAndSanitizeUrl } from './utilities/security.js';
-
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ImportDocument'); } catch {}
 
 /**
  * @typedef {object} ImportDocumentConfigPage

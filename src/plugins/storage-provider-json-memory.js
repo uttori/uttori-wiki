@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import StorageProvider from './storeage-provider-json/storage-provider-memory.js';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.StorageProvider.JSON.Memory'); } catch {}
+const debug = createDebug('Uttori.Plugin.StorageProvider.JSON.Memory');
 
 /**
  * Uttori Storage Provider - JSON Memory

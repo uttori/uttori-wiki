@@ -1,6 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot.ToolRegistry'); } catch {}
+import { createDebug } from '../../debug.js';
+
+const debug = createDebug('Uttori.Plugin.AIChatBot.ToolRegistry');
 
 /**
  * @typedef {object} WikiToolExecuteContext

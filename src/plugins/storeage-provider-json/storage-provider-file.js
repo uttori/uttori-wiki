@@ -1,12 +1,10 @@
+import { createDebug } from '../../debug.js';
 import { promises as fs } from 'node:fs';
 import sanitize from 'sanitize-filename';
 import path from 'node:path';
 import processQuery from './query-tools.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.StorageProvider.JSON'); } catch {}
+const debug = createDebug('Uttori.StorageProvider.JSON');
 
 /**
  * @typedef StorageProviderJsonFileConfig The configuration object for the StorageProviderJsonFile.

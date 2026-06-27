@@ -1,10 +1,9 @@
+import { createDebug } from '../../debug.js';
 import lunr from 'lunr';
 import lunrMulti from 'lunr-languages/lunr.multi.js';
 import stemmerSupport from 'lunr-languages/lunr.stemmer.support.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.SearchProvider.Lunr'); } catch {}
+const debug = createDebug('Uttori.SearchProvider.Lunr');
 
 /**
  * @typedef {object} SearchLunrConfigSearchOptions

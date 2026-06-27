@@ -1,7 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AuthSimple'); } catch {}
+import { createDebug } from '../debug.js';
 
+const debug = createDebug('Uttori.Plugin.AuthSimple');
 /**
  * @typedef {object} AuthSimpleConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.

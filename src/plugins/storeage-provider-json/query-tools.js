@@ -1,11 +1,9 @@
+import { createDebug } from '../../debug.js';
 import parseQueryToFilterFunctions from './parse-query-filter-functions.js';
 import validateQuery from './validate-query.js';
 import fyShuffle from './fisher-yates-shuffle.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.StorageProvider.JSON.QueryTools'); } catch {}
+const debug = createDebug('Uttori.StorageProvider.JSON.QueryTools');
 
 /**
  * Processes a query string.

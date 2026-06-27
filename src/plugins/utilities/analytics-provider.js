@@ -1,9 +1,8 @@
+import { createDebug } from '../../debug.js';
 import * as fs from 'node:fs';
 import path from 'node:path';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Utilities.AnalyticsProvider'); } catch {}
+const debug = createDebug('Uttori.Utilities.AnalyticsProvider');
 
 /**
  * @typedef {object} AnalyticsProviderConfig

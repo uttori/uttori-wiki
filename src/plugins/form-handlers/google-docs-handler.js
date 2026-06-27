@@ -1,8 +1,7 @@
+import { createDebug } from '../../debug.js';
 import { google } from 'googleapis';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FormHandler.GoogleDocs'); } catch {}
+const debug = createDebug('Uttori.Plugin.FormHandler.GoogleDocs');
 
 /**
  * @typedef {object} GoogleDocsHandlerConfig

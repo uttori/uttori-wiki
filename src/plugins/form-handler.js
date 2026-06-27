@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import express from 'express';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FormHandler'); } catch {}
+const debug = createDebug('Uttori.Plugin.FormHandler');
 
 /**
  * Validates a single form field value.

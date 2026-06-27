@@ -1,14 +1,7 @@
+import { createDebug } from '../debug.js';
 import { sanitizeCategoryPath } from './utilities/security.js';
 
-/**
- * @callback DebugLogger
- * @param {...unknown} args Debug arguments.
- * @returns {void}
- */
-
-let debug = /** @type {DebugLogger} */ ((..._args) => {});
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.CategoryRoutes'); } catch {}
+const debug = createDebug('Uttori.Plugin.CategoryRoutes');
 
 /**
  * @typedef {object} CategoryRoutesPluginConfig

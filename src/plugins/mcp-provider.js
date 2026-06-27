@@ -1,3 +1,4 @@
+import { createDebug } from '../debug.js';
 import {
   WIKI_TOOLS,
   toMcpTool,
@@ -5,9 +6,7 @@ import {
 } from './chat-bot/tool-registry.js';
 import { buildPromptMessages } from './chat-bot/prompts.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.MCPProvider'); } catch {}
+const debug = createDebug('Uttori.Plugin.MCPProvider');
 
 /**
  * @typedef {object} MCPProviderConfig

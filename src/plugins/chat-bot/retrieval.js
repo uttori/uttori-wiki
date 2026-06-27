@@ -1,11 +1,10 @@
+import { createDebug } from '../../debug.js';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 
 import OllamaEmbedder from './ollama-embedder.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot.Retrieval'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot.Retrieval');
 
 /**
  * @typedef {object} VectorRow

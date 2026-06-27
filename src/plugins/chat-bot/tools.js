@@ -1,3 +1,4 @@
+import { createDebug } from '../../debug.js';
 import {
   WIKI_TOOLS,
   getWikiTool,
@@ -5,9 +6,7 @@ import {
   executeWikiTool,
 } from './tool-registry.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot.Tools'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot.Tools');
 
 /**
  * @typedef {object} OllamaToolFunction

@@ -1,6 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki.Redirect'); } catch {}
+import { createDebug } from './debug.js';
+
+const debug = createDebug('Uttori.Wiki.Redirect');
 
 /**
  * @typedef {object} ParsedPathKey

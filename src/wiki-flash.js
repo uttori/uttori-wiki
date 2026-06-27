@@ -1,6 +1,6 @@
-/** @type {Function} */
-const debug = () => {}; // try { debug = require('debug')('Uttori.Wiki.WikiFlash'); } catch {}
+import { createDebug } from './debug.js';
 
+const debug = createDebug('Uttori.Wiki.WikiFlash');
 /**
  * Flash messages are stored in the session.
  * First, use `wikiFlash(key, value)` to set a flash message.

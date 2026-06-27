@@ -1,6 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 3 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.ChatBot.OllamaEmbedder'); } catch {}
+import { createDebug } from '../../debug.js';
+
+const debug = createDebug('Uttori.Plugin.ChatBot.OllamaEmbedder');
 
 /**
  * A single embedding entry in an OpenAI-style `data` array.

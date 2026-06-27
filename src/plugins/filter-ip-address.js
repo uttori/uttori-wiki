@@ -1,3 +1,4 @@
+import { createDebug } from '../debug.js';
 // const invalid = await this.hooks.validate('validate-save', request, this);
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,9 +7,7 @@ import * as url from 'url';
 /** @type {string} The directory name of the current file. */
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FilterIPAddress'); } catch {}
+const debug = createDebug('Uttori.Plugin.FilterIPAddress');
 
 /**
  * @typedef {object} FilterIPAddressConfig

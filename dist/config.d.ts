@@ -1,4 +1,5 @@
 export default config;
+export type UttoriWikiDocument = import("./wiki.js").UttoriWikiDocument;
 export type UttoriWikiConfig = {
     /**
      * Useful for development environments.
@@ -103,11 +104,11 @@ export type UttoriWikiConfig = {
     /**
      * A replacement route handler for the save route.
      */
-    saveRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
+    saveRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the save new handler.
      */
-    saveNewRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
+    saveNewRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the create route.
      */
@@ -139,7 +140,7 @@ export type UttoriWikiConfig = {
     /**
      * A replacement route handler for the save valid route.
      */
-    saveValidRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
+    saveValidRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A collection of middleware for each route.
      */
@@ -157,6 +158,7 @@ export type UttoriWikiConfig = {
      */
     redirects?: import("../dist/custom.js").UttoriRedirect[] | undefined;
 };
+/** @typedef {import("./wiki.js").UttoriWikiDocument} UttoriWikiDocument */
 /**
  * @typedef UttoriWikiConfig
  * @type {object}
@@ -185,8 +187,8 @@ export type UttoriWikiConfig = {
  * @property {import("express").RequestHandler} [searchRoute] A replacement route handler for the search route.
  * @property {import("express").RequestHandler} [editRoute] A replacement route handler for the edit route.
  * @property {import("express").RequestHandler} [deleteRoute] A replacement route handler for the delete route.
- * @property {import("express").RequestHandler} [saveRoute] A replacement route handler for the save route.
- * @property {import("express").RequestHandler} [saveNewRoute] A replacement route handler for the save new handler.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveRoute] A replacement route handler for the save route.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveNewRoute] A replacement route handler for the save new handler.
  * @property {import("express").RequestHandler} [newRoute] A replacement route handler for the create route.
  * @property {import("express").RequestHandler} [detailRoute] A replacement route handler for the detail route.
  * @property {import("express").RequestHandler} [previewRoute] A replacement route handler for the preview route.
@@ -194,7 +196,7 @@ export type UttoriWikiConfig = {
  * @property {import("express").RequestHandler} [historyDetailRoute] A replacement route handler for the history detail route.
  * @property {import("express").RequestHandler} [historyRestoreRoute] A replacement route handler for the history restore route.
  * @property {import("express").RequestHandler} [notFoundRoute] A replacement route handler for the 404 not found route.
- * @property {import("express").RequestHandler} [saveValidRoute] A replacement route handler for the save valid route.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveValidRoute] A replacement route handler for the save valid route.
  * @property {Record<string, import("express").RequestHandler[]>} routeMiddleware A collection of middleware for each route.
  * @property {import("../dist/custom.js").UttoriWikiPlugin[]} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {import("../dist/custom.js").UttoriMiddleware[]} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].

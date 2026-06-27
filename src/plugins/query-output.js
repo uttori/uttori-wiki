@@ -1,6 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AddQueryOutputToViewModel'); } catch {}
+import { createDebug } from '../debug.js';
+
+const debug = createDebug('Uttori.Plugin.AddQueryOutputToViewModel');
 
 /**
  * @typedef {object} AddQueryOutputToViewModelQuery
