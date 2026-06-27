@@ -2,12 +2,23 @@
 
 All notable changes to this project will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/).
 
-## TODO / WIP
+## PLANNED / TODO / WIP
 
 - Discord Notifications
 
-## [8.2.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30)
+## [9.0.0](https://github.com/uttori/uttori-wiki/compare/v8.1.0...v9.0.0) - 2026-06-26
 
+- 💥 BREAKING CHANGES!
+- 💥 `popular-search-terms` hook renamed to `search-popular-terms`
+- 🧰 Add `McpProvider` plugin: runs a real Model Context Protocol server exposing wiki tools, document resources (`wiki://doc/<slug>`), and the wiki assistant prompt over stdio and/or Streamable HTTP. The `@modelcontextprotocol/sdk` package is an optional dependency; transports no-op when it is absent.
+- 🧰 Add `SearchProviderSQLite` to use SQLite as a storage and search provider and can work as a search provier with any other storage provider
+- 🧰 Add a shared wiki tool registry (`plugins/chat-bot/tool-registry.js`, exported as `WIKI_TOOLS` / `executeWikiTool` / `toOllamaTool` / `toMcpTool`). Both the chat bot and the MCP server build and execute tools from this single source, dispatching through the Uttori hook system.
+- 🧰 Add an optional `chat-query` hook (`AIChatBot.chatQuery`) so other plugins can run a non-streaming chat turn programmatically.
+- 🛠 `AIChatBot` no longer owns a database, indexing, or retrieval. Now `AIChatBot` only handles the chat interface (HTTP/SSE + WebSocket), tool orchestration, prompts, and the rolling summary. All data access goes through the registered storage / search providers via hooks (`search-retrieve`, `search-query`, `search-documents`, `storage-get`, etc.). Register `SearchProviderSQLite` (or another provider exposing those hooks) for retrieval to work.
+  - Removed config keys: `databasePath`/`databaseOptions`, `embedModel`, `chunkLimit`, `hybrid`, `fts`, boosts, `attachmentsRoot`, indexing/bootstrap flags, etc. Added `retrieveLimit`.
+  - Removed events: `onSearchUpdate` / `onSearchDelete` (indexing is solely the search provider's job).
+  - Migration: replace the chat bot's `uttori-chat.db` with the shared `uttori-wiki.sqlite` owned by `SearchProviderSQLite`.
+- 🛠 Added `package.json` export entries for `./plugins/mcp-provider`, `./plugins/search-provider-sqlite`, `./plugins/search-sqlite`, and `./plugins/chat-bot/tool-registry`.
 - 🪲 Fix search plugin Lunr `internalSearch` throwing when the index isn't yet built
 - 🪲 Fix search plugin Lunr not building index correctly, requires new `server-listening` & `before-server-listening` events, and no longer builds the index on plugin registration:
 
@@ -20,13 +31,13 @@ const server = app.listen(app.get('port'), app.get('ip'), () => {
 });
 ```
 
-## [8.1.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30)
+## [8.1.0](https://github.com/uttori/uttori-wiki/compare/v8.0.0...v8.1.0) - 2026-05-30
 
 - 🧰 Add `FilterSpamEdit` plugin for checking for spam
 - 🧰 Add `CsrfProtection` plugin for CSRF tokens support on creation & update calls
 - 🛠 Migrate to Oxlint from ESLint
 
-## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09)
+## [8.0.0](https://github.com/uttori/uttori-wiki/compare/v7.1.0...v8.0.0) - 2026-05-09
 
 - 💥 BREAKING CHANGES!
 - 💥 New `history_detail` theme is expected to exist
@@ -54,7 +65,7 @@ const server = app.listen(app.get('port'), app.get('ip'), () => {
 - 🧰 Add `CategoryRoutesPlugin` plugin for adding category data to documents that supports sub-categories
 - 🧰 When comparing diffs, compare the latest to the previous instead of itself
 
-## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10)
+## [7.1.0](https://github.com/uttori/uttori-wiki/compare/v7.0.2...v7.1.0) - 2025-10-10
 
 - 💥 BREAKING CHANGES!
 - 💥 Remove `middleware`, server setup becomes so much more flexible
@@ -63,7 +74,7 @@ const server = app.listen(app.get('port'), app.get('ip'), () => {
 - 🎁 Update dependencies
 - 🎁 Update dev dependencies
 
-## [7.0.2](https://github.com/uttori/uttori-wiki/compare/v7.0.0...v7.0.2) - 2025-10-05)
+## [7.0.2](https://github.com/uttori/uttori-wiki/compare/v7.0.0...v7.0.2) - 2025-10-05
 
 - 🪲 Fix analytics plugin with popular documents not working with limit
 - 🛠 New type & docs build system
@@ -72,7 +83,7 @@ const server = app.listen(app.get('port'), app.get('ip'), () => {
 - 🎁 Update dev dependencies
 - 🦤 Test failed during 7.0.1, thus this version
 
-## [7.0.0](https://github.com/uttori/uttori-wiki/compare/v6.1.3...v7.0.0) - 2025-10-04)
+## [7.0.0](https://github.com/uttori/uttori-wiki/compare/v6.1.3...v7.0.0) - 2025-10-04
 
 - 💥 BREAKING CHANGES!
 - 💥 Upgrade to Express v5

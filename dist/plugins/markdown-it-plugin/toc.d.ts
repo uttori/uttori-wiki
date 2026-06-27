@@ -1,4 +1,16 @@
 /**
+ * @typedef {object} MarkdownItTocHeading
+ * @property {string} content Heading text content.
+ * @property {string|number} index Heading map index.
+ * @property {number} level Heading level (1-6).
+ * @property {string} slug Slugified heading id prefix.
+ */
+/**
+ * MarkdownIt env object extended with cached TOC headings.
+ * @typedef {object} MarkdownItTocStateEnv
+ * @property {MarkdownItTocHeading[]} [toc_headings] Cached headings for the table of contents.
+ */
+/**
  * Adds deep links to the opening of the heading tags with IDs.
  * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens.
  * @param {number} index The index of the current token in the Tokens array.
@@ -27,11 +39,11 @@ export function tocClose(_tokens: import("markdown-it/index.js").Token[], _index
  * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} _options Option parameters of the parser instance.
- * @param {object} env Additional data from parsed input (the toc_headings, for example).
+ * @param {MarkdownItTocStateEnv} env Additional data from parsed input (the toc_headings, for example).
  * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
  * @returns {string} The contents tag of the TOC.
  */
-export function tocBody(_tokens: import("markdown-it/index.js").Token[], _index: number, _options: import("./../renderer-markdown-it.js").MarkdownItRendererOptions, env: object, _slf: import("markdown-it/index.js").Renderer): string;
+export function tocBody(_tokens: import("markdown-it/index.js").Token[], _index: number, _options: import("./../renderer-markdown-it.js").MarkdownItRendererOptions, env: MarkdownItTocStateEnv, _slf: import("markdown-it/index.js").Renderer): string;
 /**
  * Find and replace the TOC tag with the TOC itself.
  * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.
@@ -53,4 +65,31 @@ declare namespace _default {
     export { collectHeaders };
 }
 export default _default;
+export type MarkdownItTocHeading = {
+    /**
+     * Heading text content.
+     */
+    content: string;
+    /**
+     * Heading map index.
+     */
+    index: string | number;
+    /**
+     * Heading level (1-6).
+     */
+    level: number;
+    /**
+     * Slugified heading id prefix.
+     */
+    slug: string;
+};
+/**
+ * MarkdownIt env object extended with cached TOC headings.
+ */
+export type MarkdownItTocStateEnv = {
+    /**
+     * Cached headings for the table of contents.
+     */
+    toc_headings?: MarkdownItTocHeading[] | undefined;
+};
 //# sourceMappingURL=toc.d.ts.map

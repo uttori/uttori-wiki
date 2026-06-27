@@ -6,15 +6,15 @@ export type StorageProviderConfig = {
     /**
      * Should update times be marked at the time of edit.
      */
-    updateTimestamps?: boolean;
+    updateTimestamps?: boolean | undefined;
     /**
      * Should history entries be created.
      */
-    useHistory?: boolean;
+    useHistory?: boolean | undefined;
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
 };
 /**
  * @typedef StorageProviderConfig The configuration object for the StorageProvider.
@@ -50,7 +50,7 @@ declare class StorageProvider {
         /**
          * The events to listen for.
          */
-        events?: Record<string, string[]>;
+        events?: Record<string, string[]> | undefined;
     };
     /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of documents where the slug is the key and the value is the document. */
     documents: Record<string, import("../../wiki.js").UttoriWikiDocument>;
@@ -140,7 +140,7 @@ declare class StorageProvider {
     updateHistory: ({ slug, content, originalSlug }: {
         slug: string;
         content: import("../../wiki.js").UttoriWikiDocument;
-        originalSlug?: string;
+        originalSlug?: string | undefined;
     }) => Promise<void>;
 }
 //# sourceMappingURL=storage-provider-memory.d.ts.map

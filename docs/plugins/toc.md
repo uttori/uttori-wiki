@@ -21,6 +21,16 @@
 </dd>
 </dl>
 
+## Typedefs
+
+<dl>
+<dt><a href="#MarkdownItTocHeading">MarkdownItTocHeading</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#MarkdownItTocStateEnv">MarkdownItTocStateEnv</a> : <code>object</code></dt>
+<dd><p>MarkdownIt env object extended with cached TOC headings.</p>
+</dd>
+</dl>
+
 <a name="headingOpen"></a>
 
 ## headingOpen(tokens, index, options) ⇒ <code>string</code>
@@ -76,7 +86,7 @@ Creates the contents of the TOC.
 | _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
 | _options | <code>MarkdownItRendererOptions</code> | Option parameters of the parser instance. |
-| env | <code>object</code> | Additional data from parsed input (the toc_headings, for example). |
+| env | [<code>MarkdownItTocStateEnv</code>](#MarkdownItTocStateEnv) | Additional data from parsed input (the toc_headings, for example). |
 | _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
 
 <a name="tocRule"></a>
@@ -92,6 +102,10 @@ Find and replace the TOC tag with the TOC itself.
 | --- | --- | --- |
 | state | <code>module:markdown-it/index.js~StateInline</code> | State of MarkdownIt. |
 
+<a name="tocRule..token"></a>
+
+### tocRule~token : <code>module:markdown-it/index.js~Token</code>
+**Kind**: inner property of [<code>tocRule</code>](#tocRule)  
 <a name="collectHeaders"></a>
 
 ## collectHeaders(state)
@@ -102,4 +116,33 @@ Caches the headers for use in building the TOC body.
 | Param | Type | Description |
 | --- | --- | --- |
 | state | <code>module:markdown-it/index.js~StateCore</code> | State of MarkdownIt. |
+
+<a name="collectHeaders..env"></a>
+
+### collectHeaders~env : [<code>MarkdownItTocStateEnv</code>](#MarkdownItTocStateEnv)
+**Kind**: inner constant of [<code>collectHeaders</code>](#collectHeaders)  
+<a name="MarkdownItTocHeading"></a>
+
+## MarkdownItTocHeading : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| content | <code>string</code> | Heading text content. |
+| index | <code>string</code> \| <code>number</code> | Heading map index. |
+| level | <code>number</code> | Heading level (1-6). |
+| slug | <code>string</code> | Slugified heading id prefix. |
+
+<a name="MarkdownItTocStateEnv"></a>
+
+## MarkdownItTocStateEnv : <code>object</code>
+MarkdownIt env object extended with cached TOC headings.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [toc_headings] | [<code>Array.&lt;MarkdownItTocHeading&gt;</code>](#MarkdownItTocHeading) | Cached headings for the table of contents. |
 

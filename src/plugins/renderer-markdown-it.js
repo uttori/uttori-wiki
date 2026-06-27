@@ -1,11 +1,10 @@
+import { createDebug } from '../debug.js';
 import MarkdownIt from 'markdown-it';
 import slugify from 'slugify';
 import markdownItPlugin from './markdown-it-plugin/markdown-it-plugin.js';
 import { referenceTag, definitionOpenTag } from './markdown-it-plugin/footnotes.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Render.MarkdownIt'); } catch {}
+const debug = createDebug('Uttori.Plugin.Render.MarkdownIt');
 
 /**
  * @typedef {object} MarkdownItRendererOptionsUttori

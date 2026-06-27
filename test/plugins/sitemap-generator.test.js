@@ -226,6 +226,25 @@ test('SitemapGenerator.validateConfig(config, _context): can validate', (t) => {
   });
 });
 
+test('SitemapGenerator.generateSitemap(_document, context): includes changefreq when provided', async (t) => {
+  const output = await SitemapGenerator.generateSitemap({
+    ...context,
+    config: {
+      ...context.config,
+      [SitemapGenerator.configKey]: {
+        ...context.config[SitemapGenerator.configKey],
+        urls: [{
+          url: '/weekly-page',
+          lastmod: '2019-04-20T00:00:00.000Z',
+          priority: '0.50',
+          changefreq: 'weekly',
+        }],
+      },
+    },
+  });
+  t.true(output.includes('<changefreq>weekly</changefreq>'));
+});
+
 test('SitemapGenerator.callback(_document, context): writes properly generated sitemap to desired location', async (t) => {
   try {
     fs.unlinkSync('./test/sitemap.xml');

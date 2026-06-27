@@ -295,3 +295,21 @@ test('Level 2: Hyphonated Strings used with IN', (t) => {
   out = filter(sql);
   t.is(out.length, 1);
 });
+
+test('AND/OR: ignore non-object sub-queries', (t) => {
+  const andFilter = parseQueryToFilterFunctions({
+    AND: [
+      'not-an-object',
+      { IS: ['name', 'First Last'] },
+    ],
+  });
+  t.false(andFilter(docs[0]));
+
+  const orFilter = parseQueryToFilterFunctions({
+    OR: [
+      null,
+      { IS: ['name', 'First Last'] },
+    ],
+  });
+  t.true(orFilter(docs[0]));
+});

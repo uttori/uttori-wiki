@@ -1,7 +1,3 @@
-// let debug = (..._) => {};
-/* c8 ignore next 2 */
-// try { const { default: d } = await import('debug'); debug = d('Uttori.Tokenizer'); } catch {}
-
 const MODE_NONE = 'modeNone';
 const MODE_DEFAULT = 'modeDefault';
 const MODE_MATCH = 'modeMatch';
@@ -212,7 +208,9 @@ class Tokenizer {
   pushDefaultModeTokenizables() {
     // debug('pushDefaultModeTokenizables');
     let tokenizeIndex = 0;
+    /** @type {number} */
     let lowestIndexOfTokenize = Infinity;
+    /** @type {string | null} */
     let toTokenize = null;
 
     // Iterate through the list of tokenizable substrings.
@@ -318,19 +316,19 @@ export class TokenizeThis {
   /** @type {string[]} Holds the list of tokenizable substrings. */
   tokenizeList = [];
 
-  /** @type {Map} Holds an easy lookup map of tokenizable substrings. */
+  /** @type {Map<string, string>} Holds an easy lookup map of tokenizable substrings. */
   tokenizeMap = new Map();
 
-  /** @type {Array} Holds the list of quotes to match explicit strings with. */
+  /** @type {string[]} Holds the list of quotes to match explicit strings with. */
   matchList = [];
 
-  /** @type {Map} Holds an easy lookup map of quotes to match explicit strings with. */
+  /** @type {Map<string, string>} Holds an easy lookup map of quotes to match explicit strings with. */
   matchMap = new Map();
 
-  /** @type {Array} Holds the list of delimiters. */
+  /** @type {string[]} Holds the list of delimiters. */
   delimiterList = [];
 
-  /** @type {Map} Holds an easy lookup map of delimiters. */
+  /** @type {Map<string, string>} Holds an easy lookup map of delimiters. */
   delimiterMap = new Map();
 
   /**

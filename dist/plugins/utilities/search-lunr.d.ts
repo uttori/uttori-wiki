@@ -7,7 +7,7 @@ export type SearchLunrConfigSearchOptions = {
     /**
      * Limit for the number of returned documents.
      */
-    limit?: number;
+    limit?: number | undefined;
 };
 /**
  * @typedef {object} SearchLunrConfigSearchOptions
@@ -51,7 +51,7 @@ declare class SearchProvider {
         /**
          * The events to listen for.
          */
-        events?: Record<string, string[]>;
+        events?: Record<string, string[]> | undefined;
     };
     /**
      * Sets up the search provider with any `lunr_locales` supplied.

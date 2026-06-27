@@ -1,13 +1,14 @@
 export default config;
+export type UttoriWikiDocument = import("./wiki.js").UttoriWikiDocument;
 export type UttoriWikiConfig = {
     /**
      * Useful for development environments.
      */
-    production?: boolean;
+    production?: boolean | undefined;
     /**
      * Slug of the root `/` page document.
      */
-    homePage?: string;
+    homePage?: string | undefined;
     /**
      * Slugs to ignore in search & filtered documents, default is 'home-page';
      */
@@ -19,11 +20,11 @@ export type UttoriWikiConfig = {
     /**
      * Excerpt length, used in search result previews.
      */
-    excerptLength?: number;
+    excerptLength?: number | undefined;
     /**
      * Application base URL. Used for canonical URLs and redirects, do not include a trailing slash.
      */
-    publicUrl?: string;
+    publicUrl?: string | undefined;
     /**
      * The object containing the route strings for search.
      */
@@ -35,7 +36,7 @@ export type UttoriWikiConfig = {
     /**
      * Specify the path to the theme directory, no trailing slash.
      */
-    themePath?: string;
+    themePath?: string | undefined;
     /**
      * Path to the static file directory for themes, no trailing slash
      */
@@ -43,11 +44,11 @@ export type UttoriWikiConfig = {
     /**
      * Enable creation, deletion and editing routes.
      */
-    allowCRUDRoutes?: boolean;
+    allowCRUDRoutes?: boolean | undefined;
     /**
      * Enable hiding document deletion behind a private key.
      */
-    useDeleteKey?: boolean;
+    useDeleteKey?: boolean | undefined;
     /**
      * Key used for verifying document deletion.
      */
@@ -55,7 +56,7 @@ export type UttoriWikiConfig = {
     /**
      * Enable hiding document modification behind a private key.
      */
-    useEditKey?: boolean;
+    useEditKey?: boolean | undefined;
     /**
      * Key used for verifying document modification.
      */
@@ -63,11 +64,11 @@ export type UttoriWikiConfig = {
     /**
      * Allow access to history URLs.
      */
-    publicHistory?: boolean;
+    publicHistory?: boolean | undefined;
     /**
      * Allows the middleware to capture fall through routes as a `404 not found` handler when enabled.
      */
-    handleNotFound?: boolean;
+    handleNotFound?: boolean | undefined;
     /**
      * List of allowed custom values to set on a document. `title`, `excerpt`, `content`, `slug`, and `tags` are always allowed.
      */
@@ -75,71 +76,71 @@ export type UttoriWikiConfig = {
     /**
      * Enables `Cache-control` headers reducing server load, but breaks sessions. Cache is disabled always on the `/edit` and `/new` routes.
      */
-    useCache?: boolean;
+    useCache?: boolean | undefined;
     /**
      * Used as the max-age for Cache-control'headers on frequently updated routes: home, tag index, tag details, details & history index
      */
-    cacheShort?: number;
+    cacheShort?: number | undefined;
     /**
      * Used as the max-age for Cache-control'headers on seldom updated routes: history details, history restore
      */
-    cacheLong?: number;
+    cacheLong?: number | undefined;
     /**
      * A replacement route handler for the home route.
      */
-    homeRoute?: import("express").RequestHandler;
+    homeRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the search route.
      */
-    searchRoute?: import("express").RequestHandler;
+    searchRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the edit route.
      */
-    editRoute?: import("express").RequestHandler;
+    editRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the delete route.
      */
-    deleteRoute?: import("express").RequestHandler;
+    deleteRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the save route.
      */
-    saveRoute?: import("express").RequestHandler;
+    saveRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the save new handler.
      */
-    saveNewRoute?: import("express").RequestHandler;
+    saveNewRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the create route.
      */
-    newRoute?: import("express").RequestHandler;
+    newRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the detail route.
      */
-    detailRoute?: import("express").RequestHandler;
+    detailRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the preview route.
      */
-    previewRoute?: import("express").RequestHandler;
+    previewRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the history index route.
      */
-    historyIndexRoute?: import("express").RequestHandler;
+    historyIndexRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the history detail route.
      */
-    historyDetailRoute?: import("express").RequestHandler;
+    historyDetailRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the history restore route.
      */
-    historyRestoreRoute?: import("express").RequestHandler;
+    historyRestoreRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the 404 not found route.
      */
-    notFoundRoute?: import("express").RequestHandler;
+    notFoundRoute?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A replacement route handler for the save valid route.
      */
-    saveValidRoute?: import("express").RequestHandler;
+    saveValidRoute?: import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, import("./wiki.js").UttoriWikiDocument, import("qs").ParsedQs, Record<string, any>> | undefined;
     /**
      * A collection of middleware for each route.
      */
@@ -151,12 +152,13 @@ export type UttoriWikiConfig = {
     /**
      * Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].
      */
-    middleware?: import("../dist/custom.js").UttoriMiddleware[];
+    middleware?: import("../dist/custom.js").UttoriMiddleware[] | undefined;
     /**
      * Redirect Configuration to redirect old routes to new routes.
      */
-    redirects?: import("../dist/custom.js").UttoriRedirect[];
+    redirects?: import("../dist/custom.js").UttoriRedirect[] | undefined;
 };
+/** @typedef {import("./wiki.js").UttoriWikiDocument} UttoriWikiDocument */
 /**
  * @typedef UttoriWikiConfig
  * @type {object}
@@ -185,8 +187,8 @@ export type UttoriWikiConfig = {
  * @property {import("express").RequestHandler} [searchRoute] A replacement route handler for the search route.
  * @property {import("express").RequestHandler} [editRoute] A replacement route handler for the edit route.
  * @property {import("express").RequestHandler} [deleteRoute] A replacement route handler for the delete route.
- * @property {import("express").RequestHandler} [saveRoute] A replacement route handler for the save route.
- * @property {import("express").RequestHandler} [saveNewRoute] A replacement route handler for the save new handler.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveRoute] A replacement route handler for the save route.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveNewRoute] A replacement route handler for the save new handler.
  * @property {import("express").RequestHandler} [newRoute] A replacement route handler for the create route.
  * @property {import("express").RequestHandler} [detailRoute] A replacement route handler for the detail route.
  * @property {import("express").RequestHandler} [previewRoute] A replacement route handler for the preview route.
@@ -194,7 +196,7 @@ export type UttoriWikiConfig = {
  * @property {import("express").RequestHandler} [historyDetailRoute] A replacement route handler for the history detail route.
  * @property {import("express").RequestHandler} [historyRestoreRoute] A replacement route handler for the history restore route.
  * @property {import("express").RequestHandler} [notFoundRoute] A replacement route handler for the 404 not found route.
- * @property {import("express").RequestHandler} [saveValidRoute] A replacement route handler for the save valid route.
+ * @property {import("express").RequestHandler<import("../dist/custom.js").SaveParams, {}, UttoriWikiDocument>} [saveValidRoute] A replacement route handler for the save valid route.
  * @property {Record<string, import("express").RequestHandler[]>} routeMiddleware A collection of middleware for each route.
  * @property {import("../dist/custom.js").UttoriWikiPlugin[]} plugins Collection of Uttori Plugins. Storage Plugins should come before other plugins.
  * @property {import("../dist/custom.js").UttoriMiddleware[]} [middleware] Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile].

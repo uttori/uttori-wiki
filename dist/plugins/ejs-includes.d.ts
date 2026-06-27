@@ -3,11 +3,11 @@ export type EJSRendererConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * EJS configuration.
      */
-    ejs?: ejs.Options;
+    ejs?: ejs.Options | undefined;
 };
 /**
  * @typedef {object} EJSRendererConfig

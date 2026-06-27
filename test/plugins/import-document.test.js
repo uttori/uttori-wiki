@@ -713,31 +713,36 @@ test.serial('processPage: should create stub article for PDF files when no conte
 });
 
 test.serial('processPage: should handle scrape type pages', async (t) => {
-  const mockReaddir = sandbox.stub(fs.promises, 'readdir').resolves(['index.html']);
-  const mockReadFile = sandbox.stub(fs.promises, 'readFile').resolves('Converted markdown content');
-  const mockCmd = sandbox.stub(child_process, 'execFile').returns('TEST');
+  sandbox.stub(child_process, 'execFile').callsFake((file) => {
+    if (file === 'wget' || file === 'pandoc') {
+      return /** @type {any} */ ('TEST');
+    }
+    return /** @type {any} */ ('TEST');
+  });
+  sandbox.stub(fs.promises, 'readdir').resolves(['index.html']);
+  sandbox.stub(fs.promises, 'readFile').resolves('Converted markdown content');
 
-  const config = {
-    uploadDirectory: '/tmp',
-    uploadPath: 'uploads',
-    downloadFile: () => {},
-  };
+  const originalSetTimeout = global.setTimeout;
+  global.setTimeout = ((fn) => {
+    fn();
+    return 0;
+  });
 
-  const slug = 'test-document';
-  const page = {
-    url: 'https://example.com',
-    name: 'index.html',
-    type: 'scrape',
-  };
+  try {
+    const result = await ImportDocument.processPage({
+      uploadDirectory: '/tmp',
+      uploadPath: 'uploads',
+      downloadFile: () => {},
+    }, 'test-document', {
+      url: 'https://example.com',
+      name: 'index.html',
+      type: 'scrape',
+    });
 
-  const result = await ImportDocument.processPage(config, slug, page);
-
-  t.true(result.content.includes('Converted markdown content'));
-  t.true(mockCmd.called);
-  t.true(mockReaddir.called);
-
-  // Restore
-  mockCmd.restore();
-  mockReaddir.restore();
-  mockReadFile.restore();
+    t.true(result.content.includes('Converted markdown content'));
+    t.true(child_process.execFile.called);
+    t.true(fs.promises.readdir.called);
+  } finally {
+    global.setTimeout = originalSetTimeout;
+  }
 });

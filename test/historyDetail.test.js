@@ -515,3 +515,94 @@ test('historyDetail: handles image when attachments array does not exist', async
 
   t.truthy(viewModel.diffs.image);
 });
+
+test('historyDetail: diffs against previous revision when viewing the newest revision', async (t) => {
+  t.plan(2);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+
+  const [history] = await uttori.hooks.fetch('storage-get-history', 'demo-title', uttori);
+  const newestRevision = [...history].sort(
+    (a, b) => Number.parseInt(a.split('-')[0], 10) - Number.parseInt(b.split('-')[0], 10),
+  ).at(-1);
+  t.truthy(newestRevision);
+
+  const viewModel = { diffs: {} };
+  const renderSpy = sandbox.spy((_template, vm) => {
+    Object.assign(viewModel, vm);
+  });
+  const mockResponse = { set: () => {}, render: renderSpy, status: () => mockResponse };
+
+  await uttori.historyDetail(
+    { params: { slug: 'demo-title', revision: newestRevision } },
+    mockResponse,
+    () => {},
+  );
+
+  t.truthy(viewModel.diffs.title);
+});
+
+test('historyDetail: uses image id when previous revision has no attachments', async (t) => {
+  t.plan(3);
+
+  const slug = 'image-baseline-no-attachments';
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  const wikiFlash = sandbox.spy();
+
+  await uttori.saveValid({ params: {},
+    body: {
+      title: 'Version 1',
+      slug,
+      content: 'Version 1',
+      updateDate: 1412921841841,
+      createDate: undefined,
+      tags: [],
+    },
+    wikiFlash,
+  }, response, () => {});
+
+  await uttori.saveValid({ params: { slug },
+    body: {
+      title: 'Version 2',
+      slug,
+      content: 'Version 2',
+      updateDate: 1412921841842,
+      createDate: undefined,
+      tags: [],
+    },
+    wikiFlash,
+  }, response, () => {});
+
+  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  const [doc] = await uttori.hooks.fetch('storage-get', slug, uttori);
+  doc.image = 'orphan-image-id';
+  delete doc.attachments;
+  await uttori.hooks.fetch('storage-update', { document: doc, originalSlug: slug }, uttori);
+
+  doc.image = 'current-image-id';
+  await uttori.hooks.fetch('storage-update', { document: doc, originalSlug: slug }, uttori);
+
+  const [history] = await uttori.hooks.fetch('storage-get-history', slug, uttori);
+  const newestRevision = [...history].sort(
+    (a, b) => Number.parseInt(a.split('-')[0], 10) - Number.parseInt(b.split('-')[0], 10),
+  ).at(-1);
+  t.truthy(newestRevision);
+
+  const viewModel = { diffs: {} };
+  const renderSpy = sandbox.spy((_template, vm) => {
+    Object.assign(viewModel, vm);
+  });
+  const mockResponse = { set: () => {}, render: renderSpy, status: () => mockResponse };
+
+  await uttori.historyDetail(
+    { params: { slug, revision: newestRevision } },
+    mockResponse,
+    () => {},
+  );
+
+  t.truthy(viewModel.diffs.image);
+  t.true(viewModel.diffs.image.includes('orphan-image-id'));
+});

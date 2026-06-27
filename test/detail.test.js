@@ -98,3 +98,16 @@ test('falls throught to next() when there is no document found', async (t) => {
   await uttori.detail({ params: { slug: 'missing' } }, response, next);
   t.true(next.calledOnce);
 });
+
+test('falls through to next() when slug is invalid after sanitization', async (t) => {
+  t.plan(1);
+
+  const response = { set: () => {}, render: () => {}, redirect: () => {} };
+  /** @type {import('express').NextFunction} */
+  const next = sandbox.spy();
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  await uttori.detail({ params: { slug: '...' } }, response, next);
+  t.true(next.calledOnce);
+});

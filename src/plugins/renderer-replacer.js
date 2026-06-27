@@ -1,7 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Render.Replacer'); } catch {}
+import { createDebug } from '../debug.js';
 
+const debug = createDebug('Uttori.Plugin.Render.Replacer');
 /**
  * @typedef {object} ReplacerRendererRule
  * @property {string | RegExp} test The test to use for replacing content.
@@ -161,7 +160,7 @@ class ReplacerRenderer {
     /** @type {ReplacerRendererConfig} */
     const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
     return collection.map((document) => {
-      const html = ReplacerRenderer.render(document.html, config);
+      const html = ReplacerRenderer.render(document.html ?? '', config);
       return { ...document, html };
     });
   }
@@ -181,7 +180,9 @@ class ReplacerRenderer {
       return '';
     }
 
+    let output = content;
     for (const rule of config.rules) {
+      /** @type {RegExp | undefined} */
       let search;
       if (typeof rule.test === 'string') {
         search = new RegExp(rule.test, 'g');
@@ -191,10 +192,10 @@ class ReplacerRenderer {
         debug('Invalid Rule:', rule);
         continue;
       }
-      content = content.replace(search, rule.output);
+      output = output.replace(search, rule.output);
     }
 
-    return content;
+    return output;
   }
 }
 

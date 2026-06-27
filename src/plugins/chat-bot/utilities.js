@@ -2,11 +2,100 @@
  * @typedef {object} MarkdownASTNode
  * @property {string} type The type of node.
  * @property {Array<string | string[]>} content Text content for the node.
- * @property {Array<string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>>} headers The relevant headers for this node.
+ * @property {MarkdownASTHeaderValue[]} headers The relevant headers for this node.
  * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
  * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
  * @property {MarkdownASTNode[]} children The child nodes for this node.
  */
+
+/**
+ * @typedef {string | number | MarkdownASTNode | Array<string | MarkdownASTNode | number>} MarkdownASTHeaderEntry
+ */
+
+/**
+ * @typedef {MarkdownASTHeaderEntry[]} MarkdownASTHeaderStack
+ */
+
+/**
+ * A header slot before or after consolidation.
+ * @typedef {string | number | boolean | null | undefined | MarkdownASTHeaderStack} MarkdownASTHeaderValue
+ */
+
+/**
+ * Optional footnote metadata on a MarkdownIt token.
+ * @typedef {object} MarkdownFootnoteMeta
+ * @property {unknown} [label] Footnote label text.
+ */
+
+/**
+ * Coerce unknown markdown content into plain text.
+ * @param {unknown} value The value to coerce.
+ * @returns {string} Plain text.
+ */
+function toPlainText(value) {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.flat().map(toPlainText).join(' ');
+  }
+  if (value == null) {
+    return '';
+  }
+  return String(value);
+}
+
+/**
+ * Read a footnote label from a MarkdownIt token meta object.
+ * @param {unknown} meta The token meta.
+ * @returns {string} The footnote label, if present.
+ */
+function footnoteLabelFromMeta(meta) {
+  if (!meta || typeof meta !== 'object' || !('label' in meta)) {
+    return '';
+  }
+  const record = /** @type {MarkdownFootnoteMeta} */ (meta);
+  const label = record.label;
+  return typeof label === 'string' ? label : toPlainText(label);
+}
+
+/**
+ * Normalize a header stack entry to plain text or a numeric level.
+ * @param {MarkdownASTHeaderEntry | null | undefined} entry The header stack entry.
+ * @returns {MarkdownASTHeaderValue | null | undefined} The normalized header value.
+ */
+function normalizeHeaderStackEntry(entry) {
+  if (entry === null) {
+    return null;
+  }
+  if (entry === undefined) {
+    return undefined;
+  }
+  if (typeof entry === 'string') {
+    return stripImagesFromMarkdown(entry);
+  }
+  if (typeof entry === 'number' || typeof entry === 'boolean') {
+    return entry;
+  }
+  if (Array.isArray(entry)) {
+    return stripImagesFromMarkdown(entry.map(toPlainText).join(' '));
+  }
+  if (typeof entry === 'object') {
+    const node = /** @type {MarkdownASTNode} */ (entry);
+    if (typeof node.content === 'string') {
+      return stripImagesFromMarkdown(node.content);
+    }
+    if (Array.isArray(node.content)) {
+      return stripImagesFromMarkdown(node.content.map(toPlainText).join(' '));
+    }
+    const content = node.content;
+    if (typeof content === 'string' || typeof content === 'number' || typeof content === 'boolean') {
+      return content;
+    }
+    return toPlainText(content);
+  }
+  return toPlainText(entry);
+}
 
 /**
  * Convert newlines to spaces.
@@ -193,9 +282,9 @@ export function stripImagesFromMarkdown(text) {
 
   // Remove image markdown syntax: ![alt](src) or ![alt](src "title")
   // Also handles data URLs and other image formats
-  return text.replace(/!\[([^\]]*)\]\([^)]+\)/g, (match, altText) => {
-    // If there's alt text, keep it, otherwise remove the entire image
-    return altText ? altText : '';
+  return text.replace(/!\[([^\]]*)\]\([^)]+\)/g, (_match, altText) => {
+    const alt = typeof altText === 'string' ? altText : '';
+    return alt ? alt : '';
   }).replace(/\s+/g, ' ').trim();
 }
 
@@ -229,23 +318,10 @@ export function consolidateHeaders(items) {
   return items.map((item) => {
     if (item.headers && item.headers.length > 0) {
       item.headers = item.headers.map((header) => {
-        if (typeof header[0] === 'string') {
-          return stripImagesFromMarkdown(header[0]);
+        if (!Array.isArray(header)) {
+          return header;
         }
-        if (typeof header[0] === 'number') {
-          return header[0];
-        }
-        if (typeof header[0] === 'object' && header[0] !== null && header[0].content) {
-          // Handle both string content and array content
-          if (typeof header[0].content === 'string') {
-            return stripImagesFromMarkdown(header[0].content);
-          }
-          if (Array.isArray(header[0].content)) {
-            return stripImagesFromMarkdown(header[0].content.join(' '));
-          }
-          return header[0].content;
-        }
-        return header[0];
+        return normalizeHeaderStackEntry(header[0]);
       });
     }
     return item;
@@ -259,6 +335,7 @@ export function consolidateHeaders(items) {
  */
 export function consolidateParagraph(token) {
   if (token.children && token.children.length > 0) {
+    /** @type {string[]} */
     const content = [];
     for (const childToken of token.children) {
       // Images can be ignored and links contain text.
@@ -288,7 +365,7 @@ export function consolidateParagraph(token) {
         }
         if (Array.isArray(childToken.content)) {
           content.push(...childToken.content.flat());
-        } else if (childToken.content) {
+        } else if (childToken.content !== undefined && childToken.content !== null) {
           content.push(childToken.content);
         }
         continue;
@@ -462,8 +539,9 @@ export function consolidateNestedItems(items, options = {}) {
     // Footnotes
     if (item.type === 'footnote') {
       // Loop over children and pull out their paragraphs
+      const footnoteLabel = footnoteLabelFromMeta(item.open?.meta);
       for (const child of item.children) {
-        item.content.push(`Footenote ${item?.open?.meta?.label || ''}: ${consolidateParagraph(child).join('; ')}`);
+        item.content.push(`Footenote ${footnoteLabel}: ${consolidateParagraph(child).join('; ')}`);
       }
       item.children = [];
     }
@@ -544,18 +622,101 @@ export function longestCommonPrefix(paths) {
 }
 
 /**
+ * Approximate the number of tokens in a string (≈ 3/4 of the word count for English text).
+ * @param {string} text The text to estimate.
+ * @returns {number} The approximate token count.
+ */
+function approximateTokens(text) {
+  return (typeof text === 'string' ? text : '').trim().split(/\s+/).filter(Boolean).length * 0.75;
+}
+
+/**
+ * Split a block of text into pieces that each fit within an approximate token budget.
+ *
+ * Splits on line boundaries first (which keeps table rows and code lines intact), then falls back
+ * to splitting an individually over-long line on word boundaries. This is used to break up sections
+ * that are larger than the chunk cap so they can still be embedded, an un-split section can exceed
+ * the embedding model's context window and fail to embed entirely.
+ * @param {string} text The text to split.
+ * @param {number} maxTokens The maximum approximate tokens per piece.
+ * @returns {string[]} The text split into token-bounded pieces.
+ */
+export function splitTextToTokenBudget(text, maxTokens) {
+  const safeText = typeof text === 'string' ? text : '';
+  // A non-positive or infinite budget means "do not split".
+  if (!Number.isFinite(maxTokens) || maxTokens <= 0) {
+    return safeText.trim() ? [safeText] : [];
+  }
+
+  /** @type {string[]} */
+  const pieces = [];
+  /** @type {string[]} */
+  let current = [];
+  let currentTokens = 0;
+
+  const flush = () => {
+    if (current.length) {
+      pieces.push(current.join('\n'));
+      current = [];
+      currentTokens = 0;
+    }
+  };
+
+  // Hard-split a single line that is itself larger than the budget, on word boundaries.
+  /** @param {string} line */
+  const splitLongLine = (line) => {
+    /** @type {string[]} */
+    let buffer = [];
+    let bufferTokens = 0;
+    for (const word of line.split(/\s+/).filter(Boolean)) {
+      const wordTokens = Math.max(1, word.length / 4);
+      if (buffer.length && bufferTokens + wordTokens > maxTokens) {
+        pieces.push(buffer.join(' '));
+        buffer = [];
+        bufferTokens = 0;
+      }
+      buffer.push(word);
+      bufferTokens += wordTokens;
+    }
+    if (buffer.length) {
+      pieces.push(buffer.join(' '));
+    }
+  };
+
+  for (const line of safeText.split('\n')) {
+    const lineTokens = approximateTokens(line);
+
+    if (lineTokens > maxTokens) {
+      flush();
+      splitLongLine(line);
+      continue;
+    }
+
+    if (current.length && currentTokens + lineTokens > maxTokens) {
+      flush();
+    }
+    current.push(line);
+    currentTokens += lineTokens;
+  }
+  flush();
+
+  return pieces.filter(piece => piece.trim());
+}
+
+/**
  * Consolidate like sub-sections by their headers.
- * @param {import('../ai-chat-bot.js').Block[]} items The items to consolidate.
+ * @param {import('../search-provider-sqlite.js').Block[]} items The items to consolidate.
  * @param {number} [maximumTokenCount] The maximum token count to consolidate to.
  * @param {number} [softMinTokens] If we've already packed at least this many tokens, and the next item would shrink the anchor, flush early.
  * @param {number} [minAnchorDecrease] How much the anchor must shrink (in header levels) to trigger early flush.
- * @returns {object[]} The consolidated items.
+ * @returns {import('../search-provider-sqlite.js').Block[]} The consolidated items.
  */
 export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity, softMinTokens = 600, minAnchorDecrease = 1) {
+  /** @type {import('../search-provider-sqlite.js').Block[]} */
   const result = [];
 
   // Group items by slug
-  /** @type {Map<string, import('../ai-chat-bot.js').Block[]>} */
+  /** @type {Map<string, import('../search-provider-sqlite.js').Block[]>} */
   const bySlug = new Map();
   for (const item of items) {
     const parent = item.slug;
@@ -565,7 +726,7 @@ export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity,
   }
 
   for (const [_slug, slugItems] of bySlug.entries()) {
-    /** @type {import('../ai-chat-bot.js').Block[]} */
+    /** @type {import('../search-provider-sqlite.js').Block[]} */
     let pack = [];
     let packTokens = 0;
     let index = 1;
@@ -591,13 +752,17 @@ export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity,
     };
 
     for (const item of slugItems) {
-      const tokenCount = item.tokenCount ?? countWords(item.text ?? '').length * 0.75;
+      const tokenCount = item.tokenCount ?? approximateTokens(item.text ?? '');
 
-      // If single item is bigger than the cap, emit current pack (if any),
-      // then emit the item as-is (can't split further here).
+      // If a single item is bigger than the cap, emit the current pack (if any), then split the
+      // oversized item down to the budget. Emitting it verbatim could exceed the embedding model's
+      // context window and fail to embed (e.g. very large tables), leaving the chunk unindexed.
       if (tokenCount > maximumTokenCount) {
         flush();
-        result.push({ ...item, tokenCount: tokenCount, idx: index++ });
+        const pieces = splitTextToTokenBudget(item.text ?? '', maximumTokenCount);
+        for (const piece of pieces) {
+          result.push({ ...item, text: piece, tokenCount: approximateTokens(piece), idx: index++ });
+        }
         continue;
       }
 
@@ -645,6 +810,7 @@ export function markdownItAST(tokens, title, options = {}) {
   const headersStack = [[title, 1]];
   const stack = [];
 
+  /** @type {MarkdownASTNode | undefined} */
   let tmp;
   for (const token of tokens) {
     if (token.nesting === 1) {
@@ -767,7 +933,7 @@ export function markdownItAST(tokens, title, options = {}) {
             }
 
             if (childToken.type === 'footnote_ref') {
-              current.content.push(`(See footnote ${childToken.meta.label})`);
+              current.content.push(`(See footnote ${footnoteLabelFromMeta(childToken.meta)})`);
               continue;
             }
 

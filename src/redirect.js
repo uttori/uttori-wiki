@@ -1,6 +1,6 @@
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki.Redirect'); } catch {}
+import { createDebug } from './debug.js';
+
+const debug = createDebug('Uttori.Wiki.Redirect');
 
 /**
  * @typedef {object} ParsedPathKey
@@ -17,6 +17,7 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Wiki.Redir
 export function parsePath(path) {
   debug('parsePath:', { path });
 
+  /** @type {Array<ParsedPathKey | string>} */
   const segments = [];
   let buffer = '';
   let variableBuffer = '';

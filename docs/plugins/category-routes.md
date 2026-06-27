@@ -20,6 +20,12 @@ Provides category index and individual category pages functionality with hierarc
 <dd></dd>
 <dt><a href="#CategoryTreeNode">CategoryTreeNode</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#CategoryRoutesContext">CategoryRoutesContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code></dt>
+<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
+</dd>
+<dt><a href="#CategoryRoutesRequestHandler">CategoryRoutesRequestHandler</a> ⇒ <code>module:express~RequestHandler</code></dt>
+<dd><p>Builds an Express handler for a category route.</p>
+</dd>
 </dl>
 
 <a name="CategoryRoutesPlugin"></a>
@@ -40,6 +46,7 @@ Provides category index and individual category pages functionality with hierarc
     * [new CategoryRoutesPlugin()](#new_CategoryRoutesPlugin_new)
     * [.configKey](#CategoryRoutesPlugin.configKey) ⇒ <code>string</code>
     * [.allowedDocumentKeys](#CategoryRoutesPlugin.allowedDocumentKeys) ⇒ <code>Array.&lt;string&gt;</code>
+    * [.getDocumentCategories(document, categoryField)](#CategoryRoutesPlugin.getDocumentCategories) ⇒ <code>Array.&lt;string&gt;</code>
     * [.defaultConfig()](#CategoryRoutesPlugin.defaultConfig) ⇒ [<code>CategoryRoutesPluginConfig</code>](#CategoryRoutesPluginConfig)
     * [.extendConfig(config)](#CategoryRoutesPlugin.extendConfig) ⇒ [<code>CategoryRoutesPluginConfig</code>](#CategoryRoutesPluginConfig)
     * [.validateConfig(config, _context)](#CategoryRoutesPlugin.validateConfig)
@@ -78,6 +85,19 @@ The keys that are allowed to be set on a document.
 
 **Kind**: static property of [<code>CategoryRoutesPlugin</code>](#CategoryRoutesPlugin)  
 **Returns**: <code>Array.&lt;string&gt;</code> - The allowed document keys.  
+<a name="CategoryRoutesPlugin.getDocumentCategories"></a>
+
+### CategoryRoutesPlugin.getDocumentCategories(document, categoryField) ⇒ <code>Array.&lt;string&gt;</code>
+Normalize a storage row category field into an array of category names.
+
+**Kind**: static method of [<code>CategoryRoutesPlugin</code>](#CategoryRoutesPlugin)  
+**Returns**: <code>Array.&lt;string&gt;</code> - The category names.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| document | <code>Record.&lt;string, (string\|Array.&lt;string&gt;)&gt;</code> | The storage row. |
+| categoryField | <code>string</code> | The field containing categories. |
+
 <a name="CategoryRoutesPlugin.defaultConfig"></a>
 
 ### CategoryRoutesPlugin.defaultConfig() ⇒ [<code>CategoryRoutesPluginConfig</code>](#CategoryRoutesPluginConfig)
@@ -107,7 +127,7 @@ Validates the provided configuration for required entries.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | <code>Record.&lt;string, CategoryRoutesPluginConfig&gt;</code> | A configuration object. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context (unused). |
+| _context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context (unused). |
 
 **Example** *(CategoryRoutesPlugin.validateConfig(config, _context))*  
 ```js
@@ -122,7 +142,7 @@ Register the plugin with a provided set of events on a provided Hook system.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 **Example** *(CategoryRoutesPlugin.register(context))*  
 ```js
@@ -148,7 +168,7 @@ Wrapper function for binding category routes.
 | Param | Type | Description |
 | --- | --- | --- |
 | server | <code>module:express~Application</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 **Example** *(CategoryRoutesPlugin.bindRoutes(plugin))*  
 ```js
@@ -174,7 +194,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 | category | <code>string</code> | The category to look for in documents. |
 
 **Example**  
@@ -220,7 +240,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 <a name="CategoryRoutesPlugin.categoryRequestHandler"></a>
 
@@ -237,7 +257,7 @@ Hooks:
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 <a name="CategoryRoutesPlugin.getAllCategories"></a>
 
@@ -250,7 +270,7 @@ This is used for auto-completion and category listing.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 <a name="CategoryRoutesPlugin.categoryApiRequestHandler"></a>
 
@@ -262,7 +282,7 @@ Renders the category API that returns all available categories.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code> | A Uttori-like context. |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 
 <a name="CategoryRoutesPluginConfig"></a>
 
@@ -279,9 +299,9 @@ Renders the category API that returns all available categories.
 | [categoryIndexRoute] | <code>string</code> | A replacement route for the category index route. |
 | [categoryRoute] | <code>string</code> | A replacement route for the category show route. |
 | [apiRoute] | <code>string</code> | A replacement route for the category index route. |
-| [categoryIndexRequestHandler] | <code>function</code> | A replacement route handler for the category index route. |
-| [categoryRequestHandler] | <code>function</code> | A replacement route handler for the category show route. |
-| [apiRequestHandler] | <code>function</code> | A request handler for the API route that returns all available categories. |
+| [categoryIndexRequestHandler] | [<code>CategoryRoutesRequestHandler</code>](#CategoryRoutesRequestHandler) | A replacement route handler for the category index route. |
+| [categoryRequestHandler] | [<code>CategoryRoutesRequestHandler</code>](#CategoryRoutesRequestHandler) | A replacement route handler for the category show route. |
+| [apiRequestHandler] | [<code>CategoryRoutesRequestHandler</code>](#CategoryRoutesRequestHandler) | A request handler for the API route that returns all available categories. |
 | [categoryField] | <code>string</code> | The document field to use for categories (default: 'categories'). |
 | [separator] | <code>string</code> | The separator used in hierarchical categories (default: '/'). |
 
@@ -325,4 +345,22 @@ Renders the category API that returns all available categories.
 | fullPath | <code>string</code> | The full path of the category. |
 | children | <code>Record.&lt;string, CategoryTreeNode&gt;</code> | The child categories. |
 | documents | [<code>Array.&lt;CategoryDocument&gt;</code>](#CategoryDocument) | The documents in the category. |
+
+<a name="CategoryRoutesContext"></a>
+
+## CategoryRoutesContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-category-routes&#x27;, CategoryRoutesPluginConfig&gt;</code>
+Uttori context narrowed to this plugin's config shape.
+
+**Kind**: global typedef  
+<a name="CategoryRoutesRequestHandler"></a>
+
+## CategoryRoutesRequestHandler ⇒ <code>module:express~RequestHandler</code>
+Builds an Express handler for a category route.
+
+**Kind**: global typedef  
+**Returns**: <code>module:express~RequestHandler</code> - The Express request handler.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| context | [<code>CategoryRoutesContext</code>](#CategoryRoutesContext) | A Uttori-like context. |
 

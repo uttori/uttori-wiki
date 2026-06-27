@@ -4,19 +4,19 @@ export type SearchLunrConfig = {
     /**
      * A list of locales to add support for from lunr-languages.
      */
-    lunr_locales?: string[];
+    lunr_locales?: string[] | undefined;
     /**
      * A list of locales to add support for from lunr-languages.
      */
-    lunrLocaleFunctions?: LunrLocale[];
+    lunrLocaleFunctions?: Function[] | undefined;
     /**
      * A list of slugs to not consider when indexing documents.
      */
-    ignoreSlugs?: string[];
+    ignoreSlugs?: string[] | undefined;
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
 };
 /**
  * @typedef {Function} LunrLocale
@@ -79,7 +79,7 @@ declare class SearchLunrPlugin {
      *       events: {
      *         search: ['search-query'],
      *         buildIndex: ['search-add', 'search-rebuild', 'search-remove', 'search-update'],
-     *         getPopularSearchTerms: ['popular-search-terms'],
+     *         getPopularSearchTerms: ['search-popular-terms'],
      *         validateConfig: ['validate-config'],
      *       },
      *     },

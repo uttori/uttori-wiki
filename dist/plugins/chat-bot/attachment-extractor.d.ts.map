@@ -1,1 +1,1 @@
-{"version":3,"file":"attachment-extractor.d.ts","sourceRoot":"","sources":["../../../src/plugins/chat-bot/attachment-extractor.js"],"names":[],"mappings":"AAUA;;;;;;GAMG;AACH,8CAJW,OAAO,mBAAmB,EAAE,eAAe,cAC3C,OAAO,eAAe,EAAE,4BAA4B,GAClD,OAAO,CAAC,MAAM,CAAC,CAwE3B"}
+{"version":3,"file":"attachment-extractor.d.ts","sourceRoot":"","sources":["../../../src/plugins/chat-bot/attachment-extractor.js"],"names":[],"mappings":"AASA;;;;;;GAMG;AACH,8CAJW,OAAO,8BAA8B,EAAE,kBAAkB,cACzD,OAAO,eAAe,EAAE,4BAA4B,GAClD,OAAO,CAAC,MAAM,CAAC,CAwE3B"}

@@ -12,6 +12,8 @@
 <dl>
 <dt><a href="#SitemapGeneratorUrl">SitemapGeneratorUrl</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#SitemapUrlFilter">SitemapUrlFilter</a> ⇒ <code>boolean</code></dt>
+<dd></dd>
 <dt><a href="#SitemapGeneratorConfig">SitemapGeneratorConfig</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -174,6 +176,16 @@ SitemapGenerator.generateSitemap(context);
 | lastmod | <code>string</code> | The last modified date of the document. |
 | priority | <code>string</code> | The priority of the document. |
 | [changefreq] | <code>string</code> | The change frequency of the document. |
+
+<a name="SitemapUrlFilter"></a>
+
+## SitemapUrlFilter ⇒ <code>boolean</code>
+**Kind**: global typedef  
+**Returns**: <code>boolean</code> - Whether the URL should be included in the sitemap.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| route | [<code>SitemapGeneratorUrl</code>](#SitemapGeneratorUrl) | A sitemap URL entry to test. |
 
 <a name="SitemapGeneratorConfig"></a>
 

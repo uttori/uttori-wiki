@@ -8,6 +8,8 @@
 ## Typedefs
 
 <dl>
+<dt><a href="#UttoriWikiDocument">UttoriWikiDocument</a> : <code><a href="#UttoriWikiDocument">UttoriWikiDocument</a></code></dt>
+<dd></dd>
 <dt><a href="#UttoriWikiConfig">UttoriWikiConfig</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -16,6 +18,10 @@
 
 ## config : [<code>UttoriWikiConfig</code>](#UttoriWikiConfig)
 **Kind**: global constant  
+<a name="UttoriWikiDocument"></a>
+
+## UttoriWikiDocument : [<code>UttoriWikiDocument</code>](#UttoriWikiDocument)
+**Kind**: global typedef  
 <a name="UttoriWikiConfig"></a>
 
 ## UttoriWikiConfig : <code>object</code>
@@ -49,8 +55,8 @@
 | [searchRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the search route. |
 | [editRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the edit route. |
 | [deleteRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the delete route. |
-| [saveRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the save route. |
-| [saveNewRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the save new handler. |
+| [saveRoute] | <code>module:express~RequestHandler.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> |  | A replacement route handler for the save route. |
+| [saveNewRoute] | <code>module:express~RequestHandler.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> |  | A replacement route handler for the save new handler. |
 | [newRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the create route. |
 | [detailRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the detail route. |
 | [previewRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the preview route. |
@@ -58,7 +64,7 @@
 | [historyDetailRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the history detail route. |
 | [historyRestoreRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the history restore route. |
 | [notFoundRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the 404 not found route. |
-| [saveValidRoute] | <code>module:express~RequestHandler</code> |  | A replacement route handler for the save valid route. |
+| [saveValidRoute] | <code>module:express~RequestHandler.&lt;SaveParams, {}, UttoriWikiDocument&gt;</code> |  | A replacement route handler for the save valid route. |
 | routeMiddleware | <code>Record.&lt;string, Array.&lt;module:express~RequestHandler&gt;&gt;</code> |  | A collection of middleware for each route. |
 | plugins | <code>Array.&lt;UttoriWikiPlugin&gt;</code> |  | Collection of Uttori Plugins. Storage Plugins should come before other plugins. |
 | [middleware] | <code>Array.&lt;UttoriMiddleware&gt;</code> |  | Middleware Configuration to be passed along to Express in the format of ['use', layouts], ['set', 'layout extractScripts', true], ['engine', 'html', ejs.renderFile]. |

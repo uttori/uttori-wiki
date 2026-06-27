@@ -63,3 +63,17 @@ test('can be replaced', async (t) => {
   await request(server).get('/search?s=test');
   t.is(spy.called, true);
 });
+
+test('renders without searching when query sanitizes to empty', async (t) => {
+  t.plan(4);
+
+  const server = serverSetup();
+  const uttori = new UttoriWiki(config, server);
+  await seed(uttori);
+  const express_response = await request(server).get('/search?s=%20%20%20');
+  t.is(express_response.status, 200);
+  t.is(express_response.headers['x-robots-tag'], 'noindex');
+  t.is(express_response.headers['cache-control'], 'no-store, no-cache, max-age=0');
+  const title = express_response.text.match(/<title>(.*?)<\/title>/i);
+  t.is(title[1], 'Search');
+});

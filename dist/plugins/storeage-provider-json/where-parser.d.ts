@@ -13,6 +13,7 @@ export type SqlWhereParserConfig = {
      */
     wrapQuery: boolean;
 };
+/** @import { SqlWhereParserEvaluator, ParserOperand } from '../../../dist/custom.d.ts' */
 /**
  * @typedef {object} SqlWhereParserConfig
  * @property {Array<Record<string | number | symbol, number | symbol>>} operators A collection of operators in precedence order.
@@ -35,10 +36,10 @@ declare class SqlWhereParser {
     /**
      * A default fallback evaluator for the parse function.
      * @param {number|string|symbol} operatorValue The operator to evaluate.
-     * @param {Array<import('../../../dist/custom.d.ts').ParserOperand>} operands The list of operands.
-     * @returns {import('../../../dist/custom.d.ts').ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
+     * @param {Array<ParserOperand>} operands The list of operands.
+     * @returns {ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
      */
-    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<import("../../../dist/custom.d.ts").ParserOperand>) => import("../../../dist/custom.d.ts").ParserOperand;
+    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<ParserOperand>) => ParserOperand;
     /**
      * Creates an instance of SqlWhereParser.
      * @param {SqlWhereParserConfig} [config] - A configuration object.
@@ -53,12 +54,12 @@ declare class SqlWhereParser {
     /**
      * Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
      * @param {string} sql Query string to process.
-     * @param {import('../../../dist/custom.d.ts').SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
-     * @returns {import('../../../dist/custom.d.ts').ParserOperand} The parsed query tree.
+     * @param {SqlWhereParserEvaluator} [evaluator] Function to evaluate operators.
+     * @returns {ParserOperand} The parsed query tree.
      * @see {@link https://wcipeg.com/wiki/Shunting_yard_algorithm|Shunting-Yard_Algorithm (P3G)}
      * @see {@link https://en.wikipedia.org/wiki/Shunting-yard_algorithm|Shunting-Yard_Algorithm (Wikipedia)}
      */
-    parse: (sql: string, evaluator?: import("../../../dist/custom.d.ts").SqlWhereParserEvaluator) => import("../../../dist/custom.d.ts").ParserOperand;
+    parse: (sql: string, evaluator?: SqlWhereParserEvaluator) => ParserOperand;
     /**
      * Returns the precedence order from two values.
      * @param {number|string|symbol} operatorValue1 First operator.
@@ -74,4 +75,6 @@ declare class SqlWhereParser {
     getOperator: (operatorValue: number | string | symbol) => Operator | null;
 }
 import Operator from './operator.js';
+import type { ParserOperand } from '../../../dist/custom.d.ts';
+import type { SqlWhereParserEvaluator } from '../../../dist/custom.d.ts';
 //# sourceMappingURL=where-parser.d.ts.map

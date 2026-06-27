@@ -24,55 +24,79 @@ export type MarkdownItRendererOptionsUttori = {
      * Footnote settings.
      */
     footnotes?: {
+        /**
+         * A funciton to return the default HTML for a footnote reference.
+         */
         referenceTag: Function;
+        /**
+         * A funciton to return the default opening HTML for a footnote definition.
+         */
         definitionOpenTag: Function;
+        /**
+         * The default closing HTML for a footnote definition.
+         */
         definitionCloseTag: string;
-    };
+    } | undefined;
     /**
      * Table of Contents settings.
      */
     toc?: {
+        /**
+         * When true, extract the table of contents to the view model from the content.
+         */
         extract: boolean;
+        /**
+         * The opening DOM tag for the TOC container.
+         */
         openingTag: string;
+        /**
+         * The closing DOM tag for the TOC container.
+         */
         closingTag: string;
+        /**
+         * Slugify options for convering headings to anchor links.
+         */
         slugify: object;
-    };
+    } | undefined;
     /**
      * WikiLinks settings.
      */
     wikilinks?: {
+        /**
+         * Slugify options for convering Wikilinks to anchor links.
+         */
         slugify: object;
-    };
+    } | undefined;
 };
 export type MarkdownItRendererOptions = {
     /**
      * Enable HTML tags in source.
      */
-    html?: boolean;
+    html?: boolean | undefined;
     /**
      * Use '/' to close single tags.
      */
-    xhtmlOut?: boolean;
+    xhtmlOut?: boolean | undefined;
     /**
      * Convert '\n' in paragraphs into <br>.
      */
-    breaks?: boolean;
+    breaks?: boolean | undefined;
     /**
      * CSS language prefix for fenced blocks.
      */
-    langPrefix?: string;
+    langPrefix?: string | undefined;
     /**
      * Autoconvert URL-like text to links.
      */
-    linkify?: boolean;
+    linkify?: boolean | undefined;
     /**
      * Enable some language-neutral replacement + quotes beautification.
      */
-    typographer?: boolean;
+    typographer?: boolean | undefined;
     /**
      * Double + single quotes replacement pairs.
      */
-    quotes?: string;
+    quotes?: string | undefined;
     /**
      * The Uttori specific configuration.
      */
@@ -82,7 +106,7 @@ export type MarkdownItRendererConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * The MarkdownIt configuration.
      */

@@ -129,7 +129,7 @@ test('Plugin E2E: can return search results', async (t) => {
         events: {
           search: ['search-query'],
           buildIndex: ['search-rebuild'],
-          getPopularSearchTerms: ['popular-search-terms'],
+          getPopularSearchTerms: ['search-popular-terms'],
         },
         lunr_locales: [localeFr],
         ignoreSlugs: [],
@@ -154,6 +154,6 @@ test('Plugin E2E: can return search results', async (t) => {
   const search_results = await context.hooks.fetch('search-query', { query: 'document' }, context);
   t.deepEqual(search_results, [documents]);
 
-  const popular_search_terms = await context.hooks.fetch('popular-search-terms', {}, context);
+  const popular_search_terms = await context.hooks.fetch('search-popular-terms', {}, context);
   t.deepEqual(popular_search_terms, [['document']]);
 });

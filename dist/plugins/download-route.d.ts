@@ -3,7 +3,7 @@ export type DownloadRouterConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * Directory files will be downloaded from.
      */

@@ -1,3 +1,4 @@
+import { createDebug } from '../debug.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import * as url from 'url';
@@ -5,9 +6,7 @@ import * as url from 'url';
 /** @type {string} The directory name of the current file. */
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.FilterSpamEdit'); } catch {}
+const debug = createDebug('Uttori.Plugin.FilterSpamEdit');
 
 /**
  * Module-level in-memory map of IP addresses to edit timestamps.

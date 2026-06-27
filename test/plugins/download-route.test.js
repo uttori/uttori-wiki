@@ -1,6 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
+import path from 'node:path';
 import express from 'express';
 import request from 'supertest';
 
@@ -198,4 +199,38 @@ test('download: should handle file download requests', async (t) => {
   // Valid
   response = await request(server).get('/download/test/plugins/download-route.test.js').set('Referrer', 'good.good');
   t.is(response.status, 200);
+});
+
+test('download: joins array file params into a path', (t) => {
+  const middleware = DownloadRouter.download({
+    config: {
+      [DownloadRouter.configKey]: {
+        ...DownloadRouter.defaultConfig(),
+        basePath: './',
+        allowedReferrers: [],
+      },
+    },
+  });
+  sandbox.stub(fs, 'existsSync').returns(true);
+  sandbox.stub(fs, 'statSync').returns({ size: 100 });
+  const pipeStub = sandbox.stub().callsFake(() => ({ on: () => {} }));
+  sandbox.stub(fs, 'createReadStream').returns({ pipe: pipeStub });
+
+  const next = sandbox.spy();
+  const response = {
+    setHeader: () => {},
+    on: () => {},
+    status: () => response,
+    send: () => {},
+  };
+  middleware(
+    { params: { file: ['test', 'plugins', 'download-route.test.js'] }, get: () => '' },
+    response,
+    next,
+  );
+
+  t.false(next.called);
+  t.true(fs.createReadStream.calledOnce);
+  t.true(String(fs.createReadStream.firstCall.args[0]).endsWith(`${path.sep}test${path.sep}plugins${path.sep}download-route.test.js`));
+  t.true(pipeStub.calledOnce);
 });

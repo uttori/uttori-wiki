@@ -435,6 +435,15 @@ test('CategoryRoutesPlugin.flattenCategoryTree(): returns empty array for empty 
   t.deepEqual(CategoryRoutesPlugin.flattenCategoryTree({}), []);
 });
 
+test('CategoryRoutesPlugin.flattenCategoryTree(): falls back to the object key when node name is empty', (t) => {
+  const flat = CategoryRoutesPlugin.flattenCategoryTree({
+    tech: { name: '', fullPath: 'tech', children: {} },
+  });
+
+  t.is(flat.length, 1);
+  t.is(flat[0].name, 'tech');
+});
+
 test('CategoryRoutesPlugin.categoryIndexRequestHandler(): returns a function', (t) => {
   const context = makeContext();
   const handler = CategoryRoutesPlugin.categoryIndexRequestHandler(context);
@@ -488,6 +497,25 @@ test('categoryIndexRequestHandler: skips cache header when useCache is false', a
 
   t.false(response.set.called);
   t.true(response.render.calledWith('categories'));
+});
+
+test('categoryIndexRequestHandler: handles missing ignoreCategories and rows without categoryField', async (t) => {
+  const context = makeContext();
+  delete context.config.ignoreCategories;
+  context._fetchStub.resolves([[
+    { slug: 'doc1', title: 'Alpha' },
+    { slug: 'doc2', title: 'Beta', categories: ['tech'] },
+  ]]);
+
+  const handler = CategoryRoutesPlugin.categoryIndexRequestHandler(context);
+  const request = makeRequest();
+  const response = makeResponse();
+
+  await handler(request, response, null);
+
+  t.true(response.render.calledOnce);
+  const [, viewModel] = response.render.firstCall.args;
+  t.deepEqual(viewModel.flattenedCategories.map((entry) => entry.fullPath), ['tech']);
 });
 
 test('CategoryRoutesPlugin.categoryRequestHandler(): returns a function', (t) => {
@@ -575,7 +603,7 @@ test('categoryRequestHandler: calls next() when path is sanitized away (all dots
   const context = makeContext();
   const handler = CategoryRoutesPlugin.categoryRequestHandler(context);
 
-  // '...' gets sanitized to '' by sanitizeCategoryPath → next() is called
+  // '...' gets sanitized to '' by sanitizeCategoryPath ➜ next() is called
   const request = makeRequest({ params: { categoryPath: '...' } });
   const response = makeResponse();
   const next = sandbox.spy();
@@ -631,6 +659,19 @@ test('CategoryRoutesPlugin.getAllCategories(): filters out empty/null categories
   const categories = await CategoryRoutesPlugin.getAllCategories(context);
 
   t.deepEqual(categories, ['tech']);
+});
+
+test('CategoryRoutesPlugin.getAllCategories(): handles missing ignoreCategories and rows without categoryField', async (t) => {
+  const context = makeContext();
+  delete context.config.ignoreCategories;
+  context._fetchStub.resolves([[
+    { slug: 'doc1' },
+    { slug: 'doc2', categories: ['science'] },
+  ]]);
+
+  const categories = await CategoryRoutesPlugin.getAllCategories(context);
+
+  t.deepEqual(categories, ['science']);
 });
 
 test('CategoryRoutesPlugin.categoryApiRequestHandler(): returns a function', (t) => {

@@ -13,6 +13,7 @@ import {
   removeEmptyItems,
   consolidateSectionsByHeader,
   longestCommonPrefix,
+  splitTextToTokenBudget,
 } from '../../../src/plugins/chat-bot/utilities.js';
 
 test('oneLine: should convert newlines to spaces', (t) => {
@@ -863,7 +864,9 @@ test('consolidateSectionsByHeader: should handle single item exceeding token lim
   const result = consolidateSectionsByHeader(items, 50);
   t.is(result.length, 1);
   t.is(result[0].slug, 'doc1');
-  t.is(result[0].tokenCount, 100);
+  // The oversized section is split to the budget; since the actual text is short it stays one
+  // piece, and the token count is recomputed from the real text (8 words ≈ 6 tokens).
+  t.is(result[0].tokenCount, 6);
   t.is(result[0].idx, 1);
 });
 
@@ -878,9 +881,10 @@ test('consolidateSectionsByHeader: should flush pack when single item exceeds li
   // First result should be consolidated pack
   t.is(result[0].text, 'Content 1\nSubheader - Content 2');
   t.is(result[0].tokenCount, 40);
-  // Second result should be the oversized item
+  // Second result is the oversized item, split to the budget (one piece here) with a
+  // token count recomputed from the actual text (8 words ≈ 6 tokens).
   t.is(result[1].text, 'Very long content that exceeds the token limit');
-  t.is(result[1].tokenCount, 100);
+  t.is(result[1].tokenCount, 6);
 });
 
 test('consolidateSectionsByHeader: should handle soft minimum early flush', (t) => {
@@ -1381,4 +1385,51 @@ test('markdownItAST: should handle image and link tokens', (t) => {
   t.is(result.length, 1);
   t.is(result[0].type, 'paragraph');
   t.deepEqual(result[0].content, ['Hello link world']); // Images and links should be ignored
+});
+
+test('splitTextToTokenBudget: returns the whole text when the budget is infinite or non-positive', (t) => {
+  const text = 'one two three four five';
+  t.deepEqual(splitTextToTokenBudget(text, Infinity), [text]);
+  t.deepEqual(splitTextToTokenBudget(text, 0), [text]);
+  t.deepEqual(splitTextToTokenBudget('', Infinity), []);
+});
+
+test('splitTextToTokenBudget: splits multi-line text into pieces within the token budget', (t) => {
+  // 10 lines of 4 words each (~3 tokens/line). With a 6-token budget each piece holds ~2 lines.
+  const lines = Array.from({ length: 10 }, (_, i) => `row ${i} alpha beta`);
+  const pieces = splitTextToTokenBudget(lines.join('\n'), 6);
+  t.true(pieces.length > 1);
+  // Every piece must respect the budget (≈ 3/4 of the word count).
+  for (const piece of pieces) {
+    const tokens = piece.trim().split(/\s+/).filter(Boolean).length * 0.75;
+    t.true(tokens <= 6, `piece exceeded budget: ${tokens}`);
+  }
+  // No content is lost (all original rows are present across the pieces).
+  t.is(pieces.join('\n').split(/\s+/).filter(Boolean).length, lines.join('\n').split(/\s+/).filter(Boolean).length);
+});
+
+test('splitTextToTokenBudget: hard-splits a single over-long line on word boundaries', (t) => {
+  const longLine = Array.from({ length: 100 }, (_, i) => `word${i}`).join(' ');
+  const pieces = splitTextToTokenBudget(longLine, 10);
+  t.true(pieces.length > 1);
+  for (const piece of pieces) {
+    t.true(piece.split(/\s+/).filter(Boolean).length * 0.75 <= 10);
+  }
+});
+
+test('consolidateSectionsByHeader: splits an oversized section instead of emitting it verbatim', (t) => {
+  // A single section far larger than the cap (previously emitted as one un-embeddable chunk).
+  const bigText = Array.from({ length: 60 }, (_, i) => `line ${i} alpha beta gamma`).join('\n');
+  const items = [{
+    sectionPath: ['Doc', 'Big Table'],
+    text: bigText,
+    tokenCount: bigText.split(/\s+/).filter(Boolean).length * 0.75,
+    slug: 'doc',
+  }];
+  const result = consolidateSectionsByHeader(items, 20, 30);
+  t.true(result.length > 1, 'oversized section should be split into multiple chunks');
+  for (const chunk of result) {
+    t.true(chunk.text.split(/\s+/).filter(Boolean).length * 0.75 <= 20, 'each chunk must fit the budget');
+    t.deepEqual(chunk.sectionPath, ['Doc', 'Big Table'], 'section path is preserved');
+  }
 });

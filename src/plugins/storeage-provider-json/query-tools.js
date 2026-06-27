@@ -1,11 +1,9 @@
+import { createDebug } from '../../debug.js';
 import parseQueryToFilterFunctions from './parse-query-filter-functions.js';
 import validateQuery from './validate-query.js';
 import fyShuffle from './fisher-yates-shuffle.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.StorageProvider.JSON.QueryTools'); } catch {}
+const debug = createDebug('Uttori.StorageProvider.JSON.QueryTools');
 
 /**
  * Processes a query string.
@@ -36,9 +34,10 @@ const processQuery = (query, objects) => {
   }
 
   // Sort / Order
+  /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
   let output;
   if (order[0].prop === 'RANDOM') {
-    output = fyShuffle(filtered);
+    output = fyShuffle(filtered.slice());
   } else {
     output = filtered.sort((a, b) => {
       for (const value of order) {
@@ -58,14 +57,16 @@ const processQuery = (query, objects) => {
   // Select
   if (!fields.includes('*')) {
     output = output.map((item) => {
-      /** @type {import('../../wiki.js').UttoriWikiDocument} */
-      const newItem = /** @type {import('../../wiki.js').UttoriWikiDocument} */ ({});
-      fields.forEach((field) => {
-        if (Object.hasOwn(item, field)) {
-          newItem[field] = item[field];
+      /** @type {Record<string, unknown>} */
+      const source = item;
+      /** @type {Partial<import('../../wiki.js').UttoriWikiDocument>} */
+      const newItem = {};
+      for (const field of fields) {
+        if (Object.hasOwn(source, field)) {
+          newItem[field] = source[field];
         }
-      });
-      return newItem;
+      }
+      return /** @type {import('../../wiki.js').UttoriWikiDocument} */ (newItem);
     });
   }
 

@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import { sanitizeCategoryPath } from './utilities/security.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.CategoryRoutes'); } catch {}
+const debug = createDebug('Uttori.Plugin.CategoryRoutes');
 
 /**
  * @typedef {object} CategoryRoutesPluginConfig
@@ -13,9 +12,9 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Cat
  * @property {string} [categoryIndexRoute] A replacement route for the category index route.
  * @property {string} [categoryRoute] A replacement route for the category show route.
  * @property {string} [apiRoute] A replacement route for the category index route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>): import('express').RequestHandler} [categoryIndexRequestHandler] A replacement route handler for the category index route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>): import('express').RequestHandler} [categoryRequestHandler] A replacement route handler for the category show route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route that returns all available categories.
+ * @property {CategoryRoutesRequestHandler} [categoryIndexRequestHandler] A replacement route handler for the category index route.
+ * @property {CategoryRoutesRequestHandler} [categoryRequestHandler] A replacement route handler for the category show route.
+ * @property {CategoryRoutesRequestHandler} [apiRequestHandler] A request handler for the API route that returns all available categories.
  * @property {string} [categoryField] The document field to use for categories (default: 'categories').
  * @property {string} [separator] The separator used in hierarchical categories (default: '/').
  */
@@ -44,6 +43,18 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Cat
  * @property {string} fullPath The full path of the category.
  * @property {Record<string, CategoryTreeNode>} children The child categories.
  * @property {CategoryDocument[]} documents The documents in the category.
+ */
+
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} CategoryRoutesContext
+ */
+
+/**
+ * Builds an Express handler for a category route.
+ * @callback CategoryRoutesRequestHandler
+ * @param {CategoryRoutesContext} context A Uttori-like context.
+ * @returns {import('express').RequestHandler} The Express request handler.
  */
 
 /**
@@ -76,6 +87,21 @@ class CategoryRoutesPlugin {
     return [
       'categories',
     ];
+  }
+
+  /**
+   * Normalize a storage row category field into an array of category names.
+   * @param {Record<string, string | string[]>} document The storage row.
+   * @param {string} categoryField The field containing categories.
+   * @returns {string[]} The category names.
+   * @static
+   */
+  static getDocumentCategories(document, categoryField) {
+    const categories = document[categoryField];
+    if (Array.isArray(categories)) {
+      return categories;
+    }
+    return categories ? [categories] : [];
   }
 
   /**
@@ -132,7 +158,7 @@ class CategoryRoutesPlugin {
   /**
    * Validates the provided configuration for required entries.
    * @param {Record<string, CategoryRoutesPluginConfig>} config A configuration object.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} _context - A Uttori-like context (unused).
+   * @param {CategoryRoutesContext} _context - A Uttori-like context (unused).
    * @example <caption>CategoryRoutesPlugin.validateConfig(config, _context)</caption>
    * CategoryRoutesPlugin.validateConfig({ ... });
    * @static
@@ -208,7 +234,7 @@ class CategoryRoutesPlugin {
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @example <caption>CategoryRoutesPlugin.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -231,11 +257,11 @@ class CategoryRoutesPlugin {
     const config = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
 
     // Bind events
-    for (const [method, events] of Object.entries(config.events)) {
-      if (typeof CategoryRoutesPlugin[method] === 'function') {
+    const pluginMethods = /** @type {Record<string, import('@uttori/event-dispatcher').UttoriEventCallback>} */ (/** @type {unknown} */ (CategoryRoutesPlugin));
+    for (const [method, events] of Object.entries(config.events ?? {})) {
+      if (typeof pluginMethods[method] === 'function') {
         for (const event of events) {
-          /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */
-          const callback = CategoryRoutesPlugin[method];
+          const callback = pluginMethods[method];
           context.hooks.on(event, callback);
         }
       } else {
@@ -247,7 +273,7 @@ class CategoryRoutesPlugin {
   /**
    * Wrapper function for binding category routes.
    * @param {import('express').Application} server An Express server instance.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @example <caption>CategoryRoutesPlugin.bindRoutes(plugin)</caption>
    * const context = {
    *   config: {
@@ -262,12 +288,26 @@ class CategoryRoutesPlugin {
   static bindRoutes(server, context) {
     debug('bindRoutes');
     /** @type {CategoryRoutesPluginConfig} */
-    const { categoryRoute, categoryIndexRoute, apiRoute, middleware, categoryIndexRequestHandler, categoryRequestHandler, apiRequestHandler } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
+    const {
+      categoryRoute = 'categories',
+      categoryIndexRoute = 'categories',
+      apiRoute = 'category-api',
+      middleware = {},
+      categoryIndexRequestHandler = CategoryRoutesPlugin.categoryIndexRequestHandler,
+      categoryRequestHandler = CategoryRoutesPlugin.categoryRequestHandler,
+      apiRequestHandler = CategoryRoutesPlugin.categoryApiRequestHandler,
+    } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
+    const routeMiddleware = {
+      categoryIndex: [],
+      category: [],
+      api: [],
+      ...middleware,
+    };
     debug('bindRoutes:', { categoryRoute, categoryIndexRoute, apiRoute });
 
-    server.get(`/${categoryIndexRoute}`, ...middleware.categoryIndex, categoryIndexRequestHandler(context));
-    server.get(`/${categoryRoute}/*categoryPath`, ...middleware.category, categoryRequestHandler(context));
-    server.get(`/${apiRoute}`, ...middleware.api, apiRequestHandler(context));
+    server.get(`/${categoryIndexRoute}`, ...routeMiddleware.categoryIndex, categoryIndexRequestHandler(context));
+    server.get(`/${categoryRoute}/*categoryPath`, ...routeMiddleware.category, categoryRequestHandler(context));
+    server.get(`/${apiRoute}`, ...routeMiddleware.api, apiRequestHandler(context));
   }
 
   /**
@@ -276,7 +316,7 @@ class CategoryRoutesPlugin {
    * Hooks:
    * - `fetch` - `storage-query` - Searched for the categorized documents.
    * @async
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @param {string} category The category to look for in documents.
    * @returns {Promise<CategoryDocument[]>} Promise object that resolves to the array of the documents.
    * @example
@@ -340,6 +380,7 @@ class CategoryRoutesPlugin {
    * @static
    */
   static flattenCategoryTree(tree, separator = '/', level = 0) {
+    /** @type {FlattenedCategory[]} */
     const result = [];
     for (const [name, category] of Object.entries(tree)) {
       result.push({
@@ -358,7 +399,7 @@ class CategoryRoutesPlugin {
    * Renders the category index page with the `categories` template.
    * Hooks:
    * - `filter` - `view-model-category-index` - Passes in the viewModel.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */
@@ -367,7 +408,7 @@ class CategoryRoutesPlugin {
       debug('categoryIndexRequestHandler');
 
       /** @type {CategoryRoutesPluginConfig} */
-      const { categoryField, separator } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
+      const { categoryField = 'categories', separator = '/' } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
 
       const ignoreSlugs = `"${context.config.ignoreSlugs.join('", "')}"`;
       const ignoreCategories = `"${context.config.ignoreCategories?.join('", "') || ''}"`;
@@ -380,7 +421,7 @@ class CategoryRoutesPlugin {
         const [results] = await context.hooks.fetch('storage-query', query, context);
         // Organize and deduplicate, and sort the categories.
         /** @type {string[]} */
-        const flatCategories = results.flatMap((doc) => doc?.[categoryField] ?? []);
+        const flatCategories = results.flatMap((doc) => CategoryRoutesPlugin.getDocumentCategories(doc, categoryField));
         categories = [...new Set(flatCategories)].filter(Boolean).sort((a, b) => a.localeCompare(b));
       /* c8 ignore next 3 */
       } catch (error) {
@@ -430,7 +471,7 @@ class CategoryRoutesPlugin {
    *
    * Hooks:
    * - `filter` - `view-model-category` - Passes in the viewModel.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */
@@ -439,7 +480,7 @@ class CategoryRoutesPlugin {
       debug('categoryRequestHandler');
 
       /** @type {CategoryRoutesPluginConfig} */
-      const { separator } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
+      const { separator = '/' } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
 
       // Get the category path from the wildcard route
       let categoryPath = String(request.params.categoryPath || '').trim();
@@ -505,14 +546,14 @@ class CategoryRoutesPlugin {
   /**
    * Returns all available categories from documents.
    * This is used for auto-completion and category listing.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @returns {Promise<string[]>} Promise object that resolves to the array of all categories.
    * @static
    */
   static async getAllCategories(context) {
     debug('getAllCategories');
     /** @type {CategoryRoutesPluginConfig} */
-    const { categoryField } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
+    const { categoryField = 'categories' } = CategoryRoutesPlugin.extendConfig(context.config[CategoryRoutesPlugin.configKey]);
 
     const ignoreSlugs = `"${context.config.ignoreSlugs.join('", "')}"`;
     const ignoreCategories = `"${context.config.ignoreCategories?.join('", "') || ''}"`;
@@ -526,7 +567,7 @@ class CategoryRoutesPlugin {
       const [results] = await context.hooks.fetch('storage-query', query, context);
       // Organize and deduplicate, and sort the categories.
       /** @type {string[]} */
-      const flatCategories = results.flatMap((doc) => doc?.[categoryField] ?? []);
+      const flatCategories = results.flatMap((doc) => CategoryRoutesPlugin.getDocumentCategories(doc, categoryField));
       categories = [...new Set(flatCategories)].filter(Boolean).sort((a, b) => a.localeCompare(b));
     /* c8 ignore next 3 */
     } catch (error) {
@@ -538,7 +579,7 @@ class CategoryRoutesPlugin {
 
   /**
    * Renders the category API that returns all available categories.
-   * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>} context A Uttori-like context.
+   * @param {CategoryRoutesContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */

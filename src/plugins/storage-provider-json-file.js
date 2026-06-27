@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import StorageProvider from './storeage-provider-json/storage-provider-file.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.StorageProvider.JSON'); } catch {}
+const debug = createDebug('Uttori.Plugin.StorageProvider.JSON');
 
 /**
  * Uttori Storage Provider - JSON File

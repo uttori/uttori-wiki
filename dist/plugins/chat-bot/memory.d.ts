@@ -78,7 +78,7 @@ export type Turn = {
     /**
      * The assistant's message.
      */
-    assistant?: string;
+    assistant?: string | undefined;
     /**
      * The timestamp of the turn.
      */
@@ -96,7 +96,7 @@ export type Memory = {
     /**
      * The optional entities.
      */
-    entities?: Record<string, string>;
+    entities?: Record<string, string> | undefined;
 };
 export type Memories = {
     /**

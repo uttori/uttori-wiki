@@ -36,6 +36,15 @@ Parse an Express compatible path into an array containing literal path segments 
 | --- | --- | --- |
 | path | <code>string</code> | The path to parse. |
 
+
+* [parsePath(path)](#parsePath) ⇒ <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
+    * [~segments](#parsePath..segments) : <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
+    * [~processVariable(innerVariableBuffer)](#parsePath..processVariable)
+
+<a name="parsePath..segments"></a>
+
+### parsePath~segments : <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
+**Kind**: inner constant of [<code>parsePath</code>](#parsePath)  
 <a name="parsePath..processVariable"></a>
 
 ### parsePath~processVariable(innerVariableBuffer)

@@ -13,15 +13,15 @@ export type AnalyticsPluginConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * The name of the analytics file. The default is 'visits'.
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * The extension of the analytics file. The default is 'json'.
      */
-    extension?: string;
+    extension?: string | undefined;
     /**
      * The path to the location you want the JSON file to be writtent to.
      */
@@ -29,8 +29,15 @@ export type AnalyticsPluginConfig = {
     /**
      * The limit of documents to return. The default is 10.
      */
-    limit?: number;
+    limit?: number | undefined;
 };
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ */
+export type AnalyticsPluginContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>;
+export type AnalyticsPluginDocumentHandler = (document: import("../wiki.js").UttoriWikiDocument, context: AnalyticsPluginContext) => import("../wiki.js").UttoriWikiDocument;
+export type AnalyticsPluginGetCountHandler = (document: import("../wiki.js").UttoriWikiDocument, context: AnalyticsPluginContext) => number;
+export type AnalyticsPluginGetPopularDocumentsHandler = (data: unknown, context: AnalyticsPluginContext) => AnalyticsPluginPopularDocument[];
 /**
  * @typedef {object} AnalyticsPluginPopularDocument
  * @property {string} slug The slug of the document.
@@ -43,6 +50,28 @@ export type AnalyticsPluginConfig = {
  * @property {string} [extension] The extension of the analytics file. The default is 'json'.
  * @property {string} directory The path to the location you want the JSON file to be writtent to.
  * @property {number} [limit] The limit of documents to return. The default is 10.
+ */
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} AnalyticsPluginContext
+ */
+/**
+ * @callback AnalyticsPluginDocumentHandler
+ * @param {import('../wiki.js').UttoriWikiDocument} document The document being processed.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {import('../wiki.js').UttoriWikiDocument} The provided document.
+ */
+/**
+ * @callback AnalyticsPluginGetCountHandler
+ * @param {import('../wiki.js').UttoriWikiDocument} document The document being processed.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {number} The view count.
+ */
+/**
+ * @callback AnalyticsPluginGetPopularDocumentsHandler
+ * @param {unknown} data Unused request data.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {AnalyticsPluginPopularDocument[]} Popular documents.
  */
 /**
  * Page view analytics for Uttori documents using JSON files stored on the local file system.
@@ -102,7 +131,7 @@ declare class AnalyticsPlugin {
     /**
      * Wrapper function for calling update.
      * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-     * @returns {function(import('../wiki.js').UttoriWikiDocument, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): import('../wiki.js').UttoriWikiDocument} The provided document.
+     * @returns {AnalyticsPluginDocumentHandler} The provided document.
      * @example <caption>AnalyticsPlugin.updateDocument(analytics)</caption>
      * const context = {
      *   config: {
@@ -114,11 +143,11 @@ declare class AnalyticsPlugin {
      * AnalyticsPlugin.updateDocument(document, null);
      * @static
      */
-    static updateDocument(analytics: import("./utilities/analytics-provider.js").default): (arg0: import("../wiki.js").UttoriWikiDocument, arg1: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => import("../wiki.js").UttoriWikiDocument;
+    static updateDocument(analytics: import("./utilities/analytics-provider.js").default): AnalyticsPluginDocumentHandler;
     /**
      * Wrapper function for calling update.
      * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-     * @returns {function(import('../wiki.js').UttoriWikiDocument, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): number} The provided document.
+     * @returns {AnalyticsPluginGetCountHandler} The view count for the document.
      * @example <caption>AnalyticsPlugin.getCount(analytics, slug)</caption>
      * const context = {
      *   config: {
@@ -130,11 +159,11 @@ declare class AnalyticsPlugin {
      * AnalyticsPlugin.getCount(analytics, slug);
      * @static
      */
-    static getCount(analytics: import("./utilities/analytics-provider.js").default): (arg0: import("../wiki.js").UttoriWikiDocument, arg1: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => number;
+    static getCount(analytics: import("./utilities/analytics-provider.js").default): AnalyticsPluginGetCountHandler;
     /**
      * Wrapper function for calling update.
      * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-     * @returns {function(unknown, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
+     * @returns {AnalyticsPluginGetPopularDocumentsHandler} Popular documents.
      * @example <caption>AnalyticsPlugin.getPopularDocuments(analytics)</caption>
      * const context = {
      *   config: {
@@ -146,6 +175,6 @@ declare class AnalyticsPlugin {
      * AnalyticsPlugin.getPopularDocuments(analytics);
      * @static
      */
-    static getPopularDocuments(analytics: import("./utilities/analytics-provider.js").default): (arg0: unknown, arg1: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-analytics-json-file", AnalyticsPluginConfig>) => Array<AnalyticsPluginPopularDocument>;
+    static getPopularDocuments(analytics: import("./utilities/analytics-provider.js").default): AnalyticsPluginGetPopularDocumentsHandler;
 }
 //# sourceMappingURL=analytics-json-file.d.ts.map

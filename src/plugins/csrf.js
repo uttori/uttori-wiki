@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import crypto from 'node:crypto';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.CsrfProtection'); } catch {}
+const debug = createDebug('Uttori.Plugin.CsrfProtection');
 
 /**
  * @typedef {object} CsrfProtectionConfig

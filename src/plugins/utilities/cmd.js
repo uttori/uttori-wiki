@@ -1,8 +1,7 @@
+import { createDebug } from '../../debug.js';
 import child_process from 'node:child_process';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Utilities.Cmd'); } catch {}
+const debug = createDebug('Uttori.Utilities.Cmd');
 
 /**
  * Runs a command and returns the result as a promise.

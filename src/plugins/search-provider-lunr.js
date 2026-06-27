@@ -1,9 +1,7 @@
+import { createDebug } from '../debug.js';
 import SearchProvider from './utilities/search-lunr.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.SearchProvider.Lunr.Plugin'); } catch {}
+const debug = createDebug('Uttori.SearchProvider.Lunr.Plugin');
 
 /**
  * @typedef {Function} LunrLocale
@@ -60,7 +58,7 @@ class SearchLunrPlugin {
         indexAdd: ['search-add'],
         indexUpdate: ['search-update'],
         indexRemove: ['search-remove'],
-        getPopularSearchTerms: ['popular-search-terms'],
+        getPopularSearchTerms: ['search-popular-terms'],
         validateConfig: ['validate-config'],
       },
     };
@@ -110,7 +108,7 @@ class SearchLunrPlugin {
    *       events: {
    *         search: ['search-query'],
    *         buildIndex: ['search-add', 'search-rebuild', 'search-remove', 'search-update'],
-   *         getPopularSearchTerms: ['popular-search-terms'],
+   *         getPopularSearchTerms: ['search-popular-terms'],
    *         validateConfig: ['validate-config'],
    *       },
    *     },

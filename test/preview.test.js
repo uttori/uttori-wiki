@@ -71,13 +71,23 @@ test('can be replaced', async (t) => {
   t.is(spy.called, true);
 });
 
-test('returns an empty JSON response body when missing POST body', async (t) => {
+test('returns an empty response when the POST body is missing', async (t) => {
   t.plan(2);
 
   const server = serverSetup();
-  const _uttori = new UttoriWiki(config, server);
-  // const response = await uttori.preview({ params: {}, body: undefined }, { setHeader: () => {}, send }, () => {});
-  const response = await request(server).post('/preview').set('Content-type', 'text/plain').send('');
-  t.is(response.status, 200);
-  t.is(response.text, '');
+  const uttori = new UttoriWiki({ ...config, useEditKey: false }, server);
+  /** @type {Record<string, string>} */
+  const headers = {};
+  const response = {
+    statusCode: 0,
+    body: undefined,
+    setHeader(key, value) { headers[key] = value; },
+    status(code) { this.statusCode = code; return this; },
+    send(body) { this.body = body; },
+  };
+
+  await uttori.preview(/** @type {any} */ ({ body: undefined }), /** @type {any} */ (response), () => {});
+
+  t.is(response.statusCode, 200);
+  t.is(response.body, '');
 });

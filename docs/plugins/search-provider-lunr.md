@@ -92,7 +92,7 @@ const context = {
       events: {
         search: ['search-query'],
         buildIndex: ['search-add', 'search-rebuild', 'search-remove', 'search-update'],
-        getPopularSearchTerms: ['popular-search-terms'],
+        getPopularSearchTerms: ['search-popular-terms'],
         validateConfig: ['validate-config'],
       },
     },

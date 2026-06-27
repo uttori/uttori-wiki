@@ -17,7 +17,7 @@ export type ReplacerRendererConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
 };
 /**
  * @typedef {object} ReplacerRendererRule

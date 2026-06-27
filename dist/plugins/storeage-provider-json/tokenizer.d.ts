@@ -33,16 +33,16 @@ export class TokenizeThis {
     escapeCharacter: string;
     /** @type {string[]} Holds the list of tokenizable substrings. */
     tokenizeList: string[];
-    /** @type {Map} Holds an easy lookup map of tokenizable substrings. */
-    tokenizeMap: Map<any, any>;
-    /** @type {Array} Holds the list of quotes to match explicit strings with. */
-    matchList: any[];
-    /** @type {Map} Holds an easy lookup map of quotes to match explicit strings with. */
-    matchMap: Map<any, any>;
-    /** @type {Array} Holds the list of delimiters. */
-    delimiterList: any[];
-    /** @type {Map} Holds an easy lookup map of delimiters. */
-    delimiterMap: Map<any, any>;
+    /** @type {Map<string, string>} Holds an easy lookup map of tokenizable substrings. */
+    tokenizeMap: Map<string, string>;
+    /** @type {string[]} Holds the list of quotes to match explicit strings with. */
+    matchList: string[];
+    /** @type {Map<string, string>} Holds an easy lookup map of quotes to match explicit strings with. */
+    matchMap: Map<string, string>;
+    /** @type {string[]} Holds the list of delimiters. */
+    delimiterList: string[];
+    /** @type {Map<string, string>} Holds an easy lookup map of delimiters. */
+    delimiterMap: Map<string, string>;
     /** @type {TokenizeThisConfig} The current configuration. */
     config: TokenizeThisConfig;
     /**
@@ -62,15 +62,15 @@ export type TokenizeThisConfig = {
     /**
      * The list of tokenizable substrings.
      */
-    shouldTokenize?: string[];
+    shouldTokenize?: string[] | undefined;
     /**
      * The list of quotes to match explicit strings with.
      */
-    shouldMatch?: string[];
+    shouldMatch?: string[] | undefined;
     /**
      * The list of delimiters.
      */
-    shouldDelimitBy?: string[];
+    shouldDelimitBy?: string[] | undefined;
     /**
      * If literals should be converted or not, ie 'true' -> true.
      */

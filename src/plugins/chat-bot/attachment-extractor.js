@@ -1,17 +1,16 @@
+import { createDebug } from '../../debug.js';
 import path from 'node:path';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 
 import { PdfReader } from 'pdfreader';
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot.AttachmentExtractor'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot.AttachmentExtractor');
 
 /**
  * Extract text from an attachment.
  * For PDFs, this now preserves page boundaries to help with chunking.
- * @param {import('../ai-chat-bot.js').AIChatBotConfig} config The configuration.
+ * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The configuration.
  * @param {import('../../wiki.js').UttoriWikiDocumentAttachment} attachment The attachment.
  * @returns {Promise<string>} The text of the attachment.
  */

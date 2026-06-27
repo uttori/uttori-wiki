@@ -1,14 +1,13 @@
+import { createDebug } from '../debug.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import express from 'express';
 
+const debug = createDebug('Uttori.Plugin.MulterUpload');
+
 import multer from 'multer';
 
 import { sanitizeFilename, validateMimeType } from './utilities/security.js';
-
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.MulterUpload'); } catch {}
 
 /**
  * @typedef {object} MulterUploadConfig
@@ -239,7 +238,7 @@ class MulterUpload {
         if (error) {
           debug('Upload Error:', error);
           status = 422;
-          send = error.message || String(error);
+          send = error instanceof Error ? error.message : String(error);
         }
         return response.status(status).send(send);
       });

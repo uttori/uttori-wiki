@@ -3,31 +3,31 @@ export type AuthSimpleConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * The path to the login endpoint.
      */
-    loginPath?: string;
+    loginPath?: string | undefined;
     /**
      * The path to the logout endpoint.
      */
-    logoutPath?: string;
+    logoutPath?: string | undefined;
     /**
      * The path to redirect to after logging in.
      */
-    loginRedirectPath?: string;
+    loginRedirectPath?: string | undefined;
     /**
      * The path to redirect to after logging out.
      */
-    logoutRedirectPath?: string;
+    logoutRedirectPath?: string | undefined;
     /**
      * The middleware to use on the login route.
      */
-    loginMiddleware?: import("express").RequestHandler[];
+    loginMiddleware?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
     /**
      * The middleware to use on the logout route.
      */
-    logoutMiddleware?: import("express").RequestHandler[];
+    logoutMiddleware?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
     /**
      * Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
      */

@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import ejs from 'ejs';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Render.EJSRenderer'); } catch {}
+const debug = createDebug('Uttori.Plugin.Render.EJSRenderer');
 
 /**
  * @typedef {object} EJSRendererConfig

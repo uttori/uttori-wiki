@@ -13,6 +13,15 @@
 <dd></dd>
 <dt><a href="#AnalyticsPluginConfig">AnalyticsPluginConfig</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#AnalyticsPluginContext">AnalyticsPluginContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code></dt>
+<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
+</dd>
+<dt><a href="#AnalyticsPluginDocumentHandler">AnalyticsPluginDocumentHandler</a> ⇒ <code>UttoriWikiDocument</code></dt>
+<dd></dd>
+<dt><a href="#AnalyticsPluginGetCountHandler">AnalyticsPluginGetCountHandler</a> ⇒ <code>number</code></dt>
+<dd></dd>
+<dt><a href="#AnalyticsPluginGetPopularDocumentsHandler">AnalyticsPluginGetPopularDocumentsHandler</a> ⇒ <code><a href="#AnalyticsPluginPopularDocument">Array.&lt;AnalyticsPluginPopularDocument&gt;</a></code></dt>
+<dd></dd>
 </dl>
 
 <a name="AnalyticsPlugin"></a>
@@ -34,9 +43,9 @@ Page view analytics for Uttori documents using JSON files stored on the local fi
     * [.defaultConfig()](#AnalyticsPlugin.defaultConfig) ⇒ [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig)
     * [.validateConfig(_analytics)](#AnalyticsPlugin.validateConfig)
     * [.register(context)](#AnalyticsPlugin.register)
-    * [.updateDocument(analytics)](#AnalyticsPlugin.updateDocument) ⇒ <code>function</code>
-    * [.getCount(analytics)](#AnalyticsPlugin.getCount) ⇒ <code>function</code>
-    * [.getPopularDocuments(analytics)](#AnalyticsPlugin.getPopularDocuments) ⇒ <code>function</code>
+    * [.updateDocument(analytics)](#AnalyticsPlugin.updateDocument) ⇒ [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler)
+    * [.getCount(analytics)](#AnalyticsPlugin.getCount) ⇒ [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler)
+    * [.getPopularDocuments(analytics)](#AnalyticsPlugin.getPopularDocuments) ⇒ [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler)
 
 <a name="new_AnalyticsPlugin_new"></a>
 
@@ -113,11 +122,11 @@ AnalyticsPlugin.register(context);
 ```
 <a name="AnalyticsPlugin.updateDocument"></a>
 
-### AnalyticsPlugin.updateDocument(analytics) ⇒ <code>function</code>
+### AnalyticsPlugin.updateDocument(analytics) ⇒ [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler)
 Wrapper function for calling update.
 
 **Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: <code>function</code> - The provided document.  
+**Returns**: [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler) - The provided document.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -136,11 +145,11 @@ AnalyticsPlugin.updateDocument(document, null);
 ```
 <a name="AnalyticsPlugin.getCount"></a>
 
-### AnalyticsPlugin.getCount(analytics) ⇒ <code>function</code>
+### AnalyticsPlugin.getCount(analytics) ⇒ [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler)
 Wrapper function for calling update.
 
 **Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: <code>function</code> - The provided document.  
+**Returns**: [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler) - The view count for the document.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -159,11 +168,11 @@ AnalyticsPlugin.getCount(analytics, slug);
 ```
 <a name="AnalyticsPlugin.getPopularDocuments"></a>
 
-### AnalyticsPlugin.getPopularDocuments(analytics) ⇒ <code>function</code>
+### AnalyticsPlugin.getPopularDocuments(analytics) ⇒ [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler)
 Wrapper function for calling update.
 
 **Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: <code>function</code> - The provided document.  
+**Returns**: [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler) - Popular documents.  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -204,4 +213,43 @@ AnalyticsPlugin.getPopularDocuments(analytics);
 | [extension] | <code>string</code> | The extension of the analytics file. The default is 'json'. |
 | directory | <code>string</code> | The path to the location you want the JSON file to be writtent to. |
 | [limit] | <code>number</code> | The limit of documents to return. The default is 10. |
+
+<a name="AnalyticsPluginContext"></a>
+
+## AnalyticsPluginContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code>
+Uttori context narrowed to this plugin's config shape.
+
+**Kind**: global typedef  
+<a name="AnalyticsPluginDocumentHandler"></a>
+
+## AnalyticsPluginDocumentHandler ⇒ <code>UttoriWikiDocument</code>
+**Kind**: global typedef  
+**Returns**: <code>UttoriWikiDocument</code> - The provided document.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| document | <code>UttoriWikiDocument</code> | The document being processed. |
+| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
+
+<a name="AnalyticsPluginGetCountHandler"></a>
+
+## AnalyticsPluginGetCountHandler ⇒ <code>number</code>
+**Kind**: global typedef  
+**Returns**: <code>number</code> - The view count.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| document | <code>UttoriWikiDocument</code> | The document being processed. |
+| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
+
+<a name="AnalyticsPluginGetPopularDocumentsHandler"></a>
+
+## AnalyticsPluginGetPopularDocumentsHandler ⇒ [<code>Array.&lt;AnalyticsPluginPopularDocument&gt;</code>](#AnalyticsPluginPopularDocument)
+**Kind**: global typedef  
+**Returns**: [<code>Array.&lt;AnalyticsPluginPopularDocument&gt;</code>](#AnalyticsPluginPopularDocument) - Popular documents.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| data | <code>unknown</code> | Unused request data. |
+| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
 

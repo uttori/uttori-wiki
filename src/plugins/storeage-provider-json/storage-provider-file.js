@@ -1,12 +1,10 @@
+import { createDebug } from '../../debug.js';
 import { promises as fs } from 'node:fs';
 import sanitize from 'sanitize-filename';
 import path from 'node:path';
 import processQuery from './query-tools.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-
-try { const { default: d } = await import('debug'); debug = d('Uttori.StorageProvider.JSON'); } catch {}
+const debug = createDebug('Uttori.StorageProvider.JSON');
 
 /**
  * @typedef StorageProviderJsonFileConfig The configuration object for the StorageProviderJsonFile.
@@ -154,8 +152,9 @@ class StorageProviderJsonFile {
     debug('get: file', file);
     try {
       const content = await fs.readFile(file, 'utf8');
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(content);
+      /** @type {import('../../wiki.js').UttoriWikiDocument} */
+      const parsed = JSON.parse(content);
+      return parsed;
     } catch (error) {
       debug(`get: Error reading "${file}":`, error);
       return undefined;
@@ -241,6 +240,7 @@ class StorageProviderJsonFile {
     }
     debug('update:', document.slug, 'originalSlug:', originalSlug);
     const existing = await this.get(document.slug);
+    /** @type {import('../../wiki.js').UttoriWikiDocument | undefined} */
     let original;
     if (originalSlug) {
       original = await this.get(originalSlug);

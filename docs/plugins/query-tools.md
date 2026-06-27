@@ -16,6 +16,15 @@ Processes a query string.
 processQuery('SELECT name FROM table WHERE age > 1 ORDER BY RANDOM LIMIT 3', [{ ... }, ...]);
 ➜ [{ ... }, ...]
 ```
+
+* [processQuery(query, objects)](#processQuery) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code> \| <code>number</code>
+    * [~output](#processQuery..output) : <code>Array.&lt;UttoriWikiDocument&gt;</code>
+    * [~filtered](#processQuery..filtered) : <code>Array.&lt;UttoriWikiDocument&gt;</code>
+
+<a name="processQuery..output"></a>
+
+### processQuery~output : <code>Array.&lt;UttoriWikiDocument&gt;</code>
+**Kind**: inner property of [<code>processQuery</code>](#processQuery)  
 <a name="processQuery..filtered"></a>
 
 ### processQuery~filtered : <code>Array.&lt;UttoriWikiDocument&gt;</code>

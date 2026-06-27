@@ -1,8 +1,7 @@
+import { createDebug } from '../../debug.js';
 import processQuery from './query-tools.js';
 
-let debug = (..._) => {};
-/* c8 ignore next */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.StorageProvider.JSON'); } catch {}
+const debug = createDebug('Uttori.Plugin.StorageProvider.JSON');
 
 /**
  * @typedef StorageProviderConfig The configuration object for the StorageProvider.

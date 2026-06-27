@@ -1,8 +1,7 @@
+import { createDebug } from '../debug.js';
 import AnalyticsProvider from './utilities/analytics-provider.js';
 
-let debug = (..._) => {};
-/* c8 ignore next 2 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AnalyticsPlugin'); } catch {}
+const debug = createDebug('Uttori.Plugin.AnalyticsPlugin');
 
 /**
  * @typedef {object} AnalyticsPluginPopularDocument
@@ -17,6 +16,32 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.Ana
  * @property {string} [extension] The extension of the analytics file. The default is 'json'.
  * @property {string} directory The path to the location you want the JSON file to be writtent to.
  * @property {number} [limit] The limit of documents to return. The default is 10.
+ */
+
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>} AnalyticsPluginContext
+ */
+
+/**
+ * @callback AnalyticsPluginDocumentHandler
+ * @param {import('../wiki.js').UttoriWikiDocument} document The document being processed.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {import('../wiki.js').UttoriWikiDocument} The provided document.
+ */
+
+/**
+ * @callback AnalyticsPluginGetCountHandler
+ * @param {import('../wiki.js').UttoriWikiDocument} document The document being processed.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {number} The view count.
+ */
+
+/**
+ * @callback AnalyticsPluginGetPopularDocumentsHandler
+ * @param {unknown} data Unused request data.
+ * @param {AnalyticsPluginContext} context A Uttori-like context.
+ * @returns {AnalyticsPluginPopularDocument[]} Popular documents.
  */
 
 /**
@@ -136,7 +161,7 @@ class AnalyticsPlugin {
   /**
    * Wrapper function for calling update.
    * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-   * @returns {function(import('../wiki.js').UttoriWikiDocument, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): import('../wiki.js').UttoriWikiDocument} The provided document.
+   * @returns {AnalyticsPluginDocumentHandler} The provided document.
    * @example <caption>AnalyticsPlugin.updateDocument(analytics)</caption>
    * const context = {
    *   config: {
@@ -151,7 +176,7 @@ class AnalyticsPlugin {
   static updateDocument(analytics) {
     return (document, _context) => {
       debug('updateDocument');
-      if (document && document.slug) {
+      if (document?.slug) {
         analytics.update(document.slug);
       }
       return document;
@@ -161,7 +186,7 @@ class AnalyticsPlugin {
   /**
    * Wrapper function for calling update.
    * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-   * @returns {function(import('../wiki.js').UttoriWikiDocument, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): number} The provided document.
+   * @returns {AnalyticsPluginGetCountHandler} The view count for the document.
    * @example <caption>AnalyticsPlugin.getCount(analytics, slug)</caption>
    * const context = {
    *   config: {
@@ -177,7 +202,7 @@ class AnalyticsPlugin {
     return (document, _context) => {
       debug('getCount');
       let count = 0;
-      if (document && document.slug) {
+      if (document?.slug) {
         count = analytics.get(document.slug);
       }
       return count;
@@ -187,7 +212,7 @@ class AnalyticsPlugin {
   /**
    * Wrapper function for calling update.
    * @param {import('./utilities/analytics-provider.js').default} analytics An AnalyticsProvider instance.
-   * @returns {function(unknown, import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): Array<AnalyticsPluginPopularDocument>} The provided document.
+   * @returns {AnalyticsPluginGetPopularDocumentsHandler} Popular documents.
    * @example <caption>AnalyticsPlugin.getPopularDocuments(analytics)</caption>
    * const context = {
    *   config: {
@@ -204,7 +229,6 @@ class AnalyticsPlugin {
       debug('getPopularDocuments');
       /** @type {AnalyticsPluginPopularDocument[]} */
       let documents = [];
-      /** @type {AnalyticsPluginConfig} */
       const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
       documents = analytics.getPopularDocuments(config.limit);
       return documents;

@@ -67,55 +67,60 @@ export type ImportDocumentApiPayload = {
      */
     redirects: string[];
 };
+export type ImportDocumentContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>;
+/**
+ * Builds an Express request handler from plugin context.
+ */
+export type ImportDocumentRequestHandlerFactory = (ctx: ImportDocumentContext) => import("express").RequestHandler;
 export type ImportDocumentConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]>;
+    events?: Record<string, string[]> | undefined;
     /**
      * The API route for importing documents.
      */
-    apiRoute?: string;
+    apiRoute?: string | undefined;
     /**
      * Server route to show the import interface.
      */
-    publicRoute?: string;
+    publicRoute?: string | undefined;
     /**
      * The path to reference uploaded files by.
      */
-    uploadPath?: string;
+    uploadPath?: string | undefined;
     /**
      * The directory to upload files to.
      */
-    uploadDirectory?: string;
+    uploadDirectory?: string | undefined;
     /**
      * When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
      */
-    allowedReferrers?: string[];
+    allowedReferrers?: string[] | undefined;
     /**
      * A request handler for the interface route.
      */
-    interfaceRequestHandler?: (arg0: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler;
+    interfaceRequestHandler?: ImportDocumentRequestHandlerFactory | undefined;
     /**
      * A request handler for the API route.
      */
-    apiRequestHandler?: (arg0: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>) => import("express").RequestHandler;
+    apiRequestHandler?: ImportDocumentRequestHandlerFactory | undefined;
     /**
      * Custom Middleware for the API route.
      */
-    middlewareApi?: import("express").RequestHandler[];
+    middlewareApi?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
     /**
      * Custom Middleware for the public route.
      */
-    middlewarePublic?: import("express").RequestHandler[];
+    middlewarePublic?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
     /**
      * A function to handle the download.
      */
-    downloadFile?: (arg0: ImportDocumentDownload) => Promise<void>;
+    downloadFile?: ((arg0: ImportDocumentDownload) => Promise<void>) | undefined;
     /**
      * A function to handle the imported page processing.
      */
-    processPage?: (arg0: ImportDocumentConfig, arg1: string, arg2: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>;
+    processPage?: ((arg0: ImportDocumentConfig, arg1: string, arg2: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>) | undefined;
 };
 /**
  * @typedef {object} ImportDocumentConfigPage
@@ -145,6 +150,15 @@ export type ImportDocumentConfig = {
  * @property {string[]} redirects The redirects of the document.
  */
 /**
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>} ImportDocumentContext
+ */
+/**
+ * Builds an Express request handler from plugin context.
+ * @callback ImportDocumentRequestHandlerFactory
+ * @param {ImportDocumentContext} ctx Uttori context for this plugin.
+ * @returns {import('express').RequestHandler} Express middleware.
+ */
+/**
  * @typedef {object} ImportDocumentConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {string} [apiRoute] The API route for importing documents.
@@ -152,8 +166,8 @@ export type ImportDocumentConfig = {
  * @property {string} [uploadPath] The path to reference uploaded files by.
  * @property {string} [uploadDirectory] The directory to upload files to.
  * @property {string[]} [allowedReferrers] When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
- * @property {function(import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler} [apiRequestHandler] A request handler for the API route.
+ * @property {ImportDocumentRequestHandlerFactory} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {ImportDocumentRequestHandlerFactory} [apiRequestHandler] A request handler for the API route.
  * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
  * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.

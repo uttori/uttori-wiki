@@ -6,7 +6,7 @@ export default Plugin;
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
  * @param {import('markdown-it').default} md The MarkdownIt instance.
- * @returns {object} The instance of Plugin.
+ * @returns {import('markdown-it').default} The MarkdownIt instance.
  */
-declare function Plugin(md: import("markdown-it").default): object;
+declare function Plugin(md: import("markdown-it").default): import("markdown-it").default;
 //# sourceMappingURL=markdown-it-plugin.d.ts.map

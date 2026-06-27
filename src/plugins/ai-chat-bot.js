@@ -1,15 +1,10 @@
-import path from 'node:path';
-import fs from 'node:fs';
+import { createDebug } from '../debug.js';
 import url from 'node:url';
 import { WebSocketServer } from 'ws';
-
-import Database from 'better-sqlite3';
-import * as sqliteVec from 'sqlite-vec';
 
 import { extractAttachmentText } from './chat-bot/attachment-extractor.js';
 import { MemoryStore } from './chat-bot/memory.js';
 import OllamaEmbedder from './chat-bot/ollama-embedder.js';
-import { indexAllDocuments, indexDocument, removeIndexedDocument } from './chat-bot/index-documents.js';
 import { buildPromptMessages } from './chat-bot/prompts.js';
 import { buildChatTools, executeChatTool } from './chat-bot/tools.js';
 
@@ -22,72 +17,6 @@ export { extractAttachmentText };
  */
 
 /**
- * @typedef {object} RetrievedChunk
- * @property {number} rowid The rowid of the chunk.
- * @property {string} source_id The source id of the chunk.
- * @property {number} idx The index of the chunk.
- * @property {string} text The text of the chunk.
- * @property {number} token_count The token count of the chunk.
- * @property {string[]} sectionPath The section path of the chunk.
- * @property {object} source The source of the chunk.
- * @property {string} source.id The id of the source.
- * @property {string} [source.title] The title of the source.
- * @property {string} [source.slug] The slug of the source.
- * @property {number} score The score of the chunk.
- */
-
-/**
- * @typedef {object} RetrieveResponse
- * @property {string} query The query.
- * @property {RetrievedChunk[]} chunks The chunks.
- * @property {any[]} citations The citations.
- */
-
-/**
- * @typedef {object} FtsRow
- * @property {number} rowid The rowid of the chunk.
- * @property {string} source_id The source id of the chunk.
- * @property {number} idx The index of the chunk.
- * @property {string} text The text of the chunk.
- * @property {number} token_count The token count of the chunk.
- * @property {string} meta_json The meta JSON of the chunk.
- * @property {string} source_title The title of the source.
- * @property {string} source_slug The slug of the source.
- * @property {number} rank The rank of the chunk.
- */
-
-/**
- * @typedef {object} Block
- * @property {"heading" | "paragraph"} [type] The type of block.
- * @property {number} [idx] The index of the block.
- * @property {number} [level] The level of the heading.
- * @property {string} text The text of the block.
- * @property {string[]} sectionPath The section path of the block.
- * @property {number} [tokenCount] The token count of the block.
- * @property {string[]} [tags] The tags of the block.
- * @property {string} [slug] The slug of the block.
- */
-
-/**
- * @typedef {object} ChunkWithMeta
- * @property {string} text The text of the chunk.
- * @property {number} idx The index of the chunk.
- * @property {number} token_count The token count of the chunk.
- * @property {string[]} sectionPath The section path of the chunk.
- * @property {string} [source_id] The source id of the chunk.
- * @property {number[]} [embedding] The embedding of the chunk.
- * @property {object} [meta] The meta JSON of the chunk.
- */
-
-/**
- * @typedef {object} BlendedChunk
- * @property {number} rowid The rowid of the chunk.
- * @property {number} score The score of the chunk.
- * @property {number} titleBoost The title boost of the chunk.
- * @property {number} textBoost The text boost of the chunk.
- */
-
-/**
  * @typedef {object} ChatBotMessage
  * @property {"system" | "user" | "assistant" | "tool"} role The role of the message.
  * @property {string} content The content of the message.
@@ -96,13 +25,44 @@ export { extractAttachmentText };
  */
 
 /**
+ * Function payload inside an Ollama `/api/chat` tool call.
+ * @typedef {object} OllamaChatToolCallFunction
+ * @property {string} name The function name.
+ * @property {Record<string, unknown>} [arguments] Parsed arguments object.
+ */
+
+/**
+ * A tool call entry returned by Ollama's `/api/chat` endpoint.
+ * @typedef {object} OllamaChatToolCall
+ * @property {OllamaChatToolCallFunction} function The invoked function.
+ */
+
+/**
+ * Message payload in an Ollama `/api/chat` response.
+ * @typedef {object} OllamaChatMessage
+ * @property {"assistant" | "tool"} [role] The message role.
+ * @property {string} [content] Assistant text content.
+ * @property {string} [thinking] Reasoning text for thinking-capable models.
+ * @property {OllamaChatToolCall[]} [tool_calls] Tool calls requested by the model.
+ */
+
+/**
+ * A single Ollama `/api/chat` response (non-streaming body or one NDJSON stream line).
+ * @see {@link https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-chat-completion} Ollama API documentation.
+ * @typedef {object} OllamaChatResponse
+ * @property {string} [model] The model that produced the response.
+ * @property {string} [created_at] ISO timestamp of the response.
+ * @property {OllamaChatMessage} [message] The assistant message payload.
+ * @property {boolean} [done] Whether generation has finished.
+ * @property {string} [done_reason] Why generation stopped.
+ */
+
+/**
  * Setup the memory store.
  */
 const memStore = new MemoryStore(60 * 60 * 1000, 5); // 1h TTL, last 5 turns
 
-let debug = (..._) => {};
-/* c8 ignore next 1 */
-try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIChatBot'); } catch {}
+const debug = createDebug('Uttori.Plugin.AIChatBot');
 
 /**
  * @typedef {object} AIChatBotConfig
@@ -110,38 +70,14 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {string} websocketRoute The WebSocket route for streaming to and from the chat bot interface.
  * @property {string} publicRoute Server route to show the chat bot interface.
  * @property {string} documentsRoute Server route to fetch available documents for the document selector.
- * @property {function(import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>): import('express').RequestHandler} [interfaceRequestHandler] A request handler for the interface route.
+ * @property {AIChatBotInterfaceRequestHandler} [interfaceRequestHandler] A request handler for the interface route.
  * @property {import('express').RequestHandler[]} middlewarePublicRoute Custom Middleware for the public route.
- * @property {string} databasePath The path to the database.
- * @property {Database.Options} databseOptions The options for the database.
  * @property {string} ollamaBaseUrl The base URL for the Ollama server.
- * @property {string} embedModel The model to use for the embedder.
- * @property {function(string, string): string} [embedPrompt] The prompt to use for the embedder.
  * @property {import('./chat-bot/tools.js').OllamaTool[] | null} tools Override tool schemas sent to Ollama. Empty array uses the built-in wiki tools. Null/undefined disables tools entirely.
  * @property {string} chatModel The model to use for the chat.
  * @property {number} maxTokens The maximum number of tokens to generate. The default value for `num_predict` is typically 128 tokens, though it can also be set to -1 for infinite generation (no limit) or -2 to fill the entire context window.
  * @property {number} temperature The temperature for the model.
- * @property {number} chunkLimit The limit for the number of chunks to return.
- * @property {boolean} hybrid Whether to use the hybrid approach of vector & FTS.
- * @property {boolean} fts Whether to use the FTS index.
- * @property {number} ftsWeight The weight for the FTS index.
- * @property {number} titleBoost The title boost for the entities.
- * @property {number} textBoost The text boost for the entities.
- * @property {number} ftsWeightBump The FTS weight bump for the entities.
- * @property {number} maxContextTokens The maximum number of tokens to use for the context.
- * @property {number} maxPerSource The maximum number of sources to use per source.
- * @property {number} batch The batch size for the embedder.
- * @property {string[]} ignoreSlugs Slugs to ignore.
- * @property {string[]} ignoreTags Tags to ignore.
- * @property {boolean} bootstrapIndexOnStartup Whether to create the chat index when index tables are missing on startup.
- * @property {boolean} rebuildIndexOnStartup Whether to rebuild the chat index on startup.
- * @property {string} attachmentsRoot The root path to the attachments.
- * @property {boolean} includeAttachments Whether to include attachments.
- * @property {function(AIChatBotConfig, import('../wiki.js').UttoriWikiDocumentAttachment): Promise<string>} [extractAttachmentText] The function to use to extract text from an attachment.
- * @property {import('./renderer-markdown-it.js').MarkdownItRendererConfig} markdownItPluginConfig The markdown-it plugin configuration.
- * @property {boolean} [tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead. Defaults to false.
- * @property {number} [tableMaxRowsPerChunk] Maximum number of rows per table chunk for embedding.
- * @property {number} [tableMaxTokensPerChunk] Maximum estimated tokens per table chunk for embedding.
+ * @property {number} [retrieveLimit] Default chunk limit injected into the `vectorSearch` tool when the model does not provide one.
  * @property {object} summary The summary configuration.
  * @property {boolean} summary.enabled Whether to use the summary.
  * @property {string} summary.baseUrl The base URL for the summary.
@@ -156,16 +92,17 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  */
 
 /**
- * @typedef {object} AIChatBotSearchUpdate
- * @property {import('../wiki.js').UttoriWikiDocument} document The saved document.
- * @property {string} [originalSlug] The document slug before the save, when renamed.
+ * Sends a JSON-stringified event payload through the SSE bridge.
+ * @callback AIChatBotSSEStreamSend
+ * @param {string} message JSON-stringified event payload.
+ * @returns {void}
  */
 
 /**
  * A duck-typed WebSocket-like send interface used to bridge the POST/SSE path
  * into the same `runChatPass` logic that the real WebSocket connection uses.
  * @typedef {object} AIChatBotSSEStream
- * @property {function(string): void} send Sends a JSON-stringified event payload.
+ * @property {AIChatBotSSEStreamSend} send Sends a JSON-stringified event payload.
  */
 
 /**
@@ -176,12 +113,29 @@ try { const { default: d } = await import('debug'); debug = d('Uttori.Plugin.AIC
  * @property {unknown} [error] Error description for `"error"` events.
  */
 
+/**
+ * Uttori context narrowed to this plugin's config shape.
+ * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} AIChatBotContext
+ */
+
+/**
+ * Builds the Express handler for the chat bot interface route.
+ * @callback AIChatBotInterfaceRequestHandler
+ * @param {AIChatBotContext} context A Uttori-like context.
+ * @returns {import('express').RequestHandler} The Express request handler.
+ */
+
 /** @type {import('ws').WebSocketServer | undefined} */
 let wss = new WebSocketServer({ noServer: true });
 
 /**
  * Uttori AI Chat Bot
  * Search a UttoriWiki database using LLMs.
+ *
+ * The chat bot owns only the chat interface: HTTP/SSE and WebSocket transports, the tool-call
+ * orchestration loop, prompt construction, and the rolling conversation summary. All data access
+ * (retrieval, search, document listing, history) is delegated to the registered storage / search
+ * providers through the Uttori hook system, so the chat bot no longer owns a database of its own.
  * @example <caption>AIChatBot</caption>
  * const content = AIChatBot.chat(context);
  * @class
@@ -211,8 +165,7 @@ class AIChatBot {
       events: {
         bindRoutes: ['bind-routes'],
         bindWebSocket: ['server-listening'],
-        onSearchDelete: ['search-delete'],
-        onSearchUpdate: ['search-update'],
+        chatQuery: ['chat-query'],
       },
       websocketRoute: '/chat-api',
       publicRoute: '/chat',
@@ -220,91 +173,12 @@ class AIChatBot {
       middlewarePublicRoute: [],
       interfaceRequestHandler: undefined,
 
-      ignoreSlugs: [],
-      ignoreTags: [],
-      bootstrapIndexOnStartup: true,
-      rebuildIndexOnStartup: false,
-
-      databasePath: './site/data/uttori-chat.db',
-      databseOptions: {
-        // readonly: true,
-        // verbose: debug,
-      },
-
       chatModel: 'qwen3.5:9b',
       ollamaBaseUrl: 'http://127.0.0.1:11434',
-      embedModel: 'qwen3-embedding:8b', // bge-m3
-      embedPrompt: (task, query) => query,
       tools: [],
       maxTokens: -2,
       temperature: 0.6,
-
-      chunkLimit: 12,
-      hybrid: true,
-      fts: true,
-      ftsWeight: 0.35,
-      titleBoost: 0.25,
-      textBoost: 0.10,
-      ftsWeightBump: 0.15,
-      maxContextTokens: 4096,
-      maxPerSource: Infinity,
-      batch: 8,
-
-      attachmentsRoot: './site/uploads',
-      includeAttachments: true,
-      extractAttachmentText,
-
-      markdownItPluginConfig: {
-        events: {},
-
-        // Uttori Specific Configuration
-        markdownIt: {
-          uttori: {
-            // Prefix for relative URLs, useful when the Express app is not at root.
-            baseUrl: '',
-
-            // Safe List, if a domain is not in this list, it is set to 'external nofollow noreferrer'.
-            allowedExternalDomains: [
-              'eludevisibility.org',
-              'sfc.fm',
-              'snes.in',
-              'satellaview.org',
-              'superfamicom.org',
-              'wiki.superfamicom.org',
-              'mondaybear.com',
-            ],
-
-            // Disable validation
-            disableValidation: false,
-
-            // Open external domains in a new window.
-            openNewWindow: true,
-
-            // Add lazy loading params to image tags.
-            lazyImages: true,
-
-            // Table of Contents
-            toc: {
-              // Extract the table of contents out for better document layout control.
-              extract: false,
-
-              // The opening DOM tag for the TOC container.
-              openingTag: '<nav class="table-of-contents">',
-
-              // The closing DOM tag for the TOC container.
-              closingTag: '</nav>',
-
-              // Slugify options for convering content to anchor links.
-              slugify: {
-                lower: true,
-              },
-            },
-          },
-        },
-      },
-      tableToCSV: false,
-      tableMaxRowsPerChunk: Infinity,
-      tableMaxTokensPerChunk: 1000,
+      retrieveLimit: 12,
 
       summary: {
         enabled: false,
@@ -315,9 +189,27 @@ class AIChatBot {
   }
 
   /**
+   * Merge the default configuration with the provided context configuration.
+   * @param {AIChatBotContext} context A Uttori-like context.
+   * @returns {AIChatBotConfig} The merged configuration.
+   * @static
+   */
+  static mergeConfig(context) {
+    const base = AIChatBot.defaultConfig();
+    return {
+      ...base,
+      ...context.config[AIChatBot.configKey],
+      events: {
+        ...base.events,
+        ...context.config[AIChatBot.configKey]?.events,
+      },
+    };
+  }
+
+  /**
    * Validates the provided configuration for required entries.
    * @param {Record<string, AIChatBotConfig>} config A provided configuration to use.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} [_context] Unused.
+   * @param {AIChatBotContext} [_context] Unused.
    * @example <caption>AIChatBot.validateConfig(config, _context)</caption>
    * AIChatBot.validateConfig({ ... });
    * @static
@@ -329,32 +221,23 @@ class AIChatBot {
       debug(error);
       throw new Error(error);
     }
-    if (typeof config[AIChatBot.configKey].websocketRoute !== 'string') {
+    const pluginConfig = { ...AIChatBot.defaultConfig(), ...config[AIChatBot.configKey] };
+    if (typeof pluginConfig.websocketRoute !== 'string') {
       const error = 'Config Error: `websocketRoute` should be a string server route to where files should be API will be reached from.';
       debug(error);
       throw new Error(error);
     }
-    if (typeof config[AIChatBot.configKey].publicRoute !== 'string') {
+    if (typeof pluginConfig.publicRoute !== 'string') {
       const error = 'Config Error: `publicRoute` should be a string server route to show the chat bot interface.';
       debug(error);
       throw new Error(error);
     }
-    if (!Array.isArray(config[AIChatBot.configKey].middlewarePublicRoute)) {
+    if (!Array.isArray(pluginConfig.middlewarePublicRoute)) {
       const error = 'Config Error: `middlewarePublicRoute` should be an array of middleware.';
       debug(error);
       throw new Error(error);
     }
-    if (!config[AIChatBot.configKey].ignoreSlugs || !Array.isArray(config[AIChatBot.configKey].ignoreSlugs)) {
-      const error = 'Config Error: `ignoreSlugs` should be an array of strings.';
-      debug(error);
-      throw new Error(error);
-    }
-    if (!config[AIChatBot.configKey].ignoreTags || !Array.isArray(config[AIChatBot.configKey].ignoreTags)) {
-      const error = 'Config Error: `ignoreTags` should be an array of strings.';
-      debug(error);
-      throw new Error(error);
-    }
-    if (!config[AIChatBot.configKey].interfaceRequestHandler || typeof config[AIChatBot.configKey].interfaceRequestHandler !== 'function') {
+    if (!pluginConfig.interfaceRequestHandler || typeof pluginConfig.interfaceRequestHandler !== 'function') {
       const error = 'Config Error: `interfaceRequestHandler` should be a function.';
       debug(error);
       throw new Error(error);
@@ -364,7 +247,7 @@ class AIChatBot {
 
   /**
    * Register the plugin with a provided set of events on a provided Hook system.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @param {AIChatBotContext} context A Uttori-like context.
    * @example <caption>AIChatBot.register(context)</caption>
    * const context = {
    *   hooks: {
@@ -388,15 +271,7 @@ class AIChatBot {
       throw new Error('Missing event dispatcher in \'context.hooks.on(event, callback)\' format.');
     }
     /** @type {AIChatBotConfig} */
-    const base = AIChatBot.defaultConfig();
-    const config = {
-      ...base,
-      ...context.config[AIChatBot.configKey],
-      events: {
-        ...base.events,
-        ...context.config[AIChatBot.configKey]?.events,
-      },
-    };
+    const config = AIChatBot.mergeConfig(context);
     if (!config.events) {
       throw new Error('Missing events to listen to for in \'config.events\'.');
     }
@@ -416,93 +291,12 @@ class AIChatBot {
         debug(`Missing function "${method}"`);
       }
     }
-
-    await AIChatBot.bootstrapIndex(config, context);
   }
 
   /**
-   * Bootstrap the chat index at startup when configured.
-   * @param {AIChatBotConfig} config The plugin configuration.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-   * @returns {Promise<void>} The indexing promise.
-   * @static
-   */
-  static async bootstrapIndex(config, context) {
-    if (!config.bootstrapIndexOnStartup && !config.rebuildIndexOnStartup) {
-      return;
-    }
-    const db = AIChatBot.openDatabase(config);
-    try {
-      const vectorTable = db.prepare('SELECT name FROM sqlite_master WHERE type = ? AND name = ?').get('table', 'uttori_chunks_vec');
-      if (config.rebuildIndexOnStartup || !vectorTable) {
-        debug('Bootstrapping document index...', config.embedModel);
-        await indexAllDocuments({ [AIChatBot.configKey]: config }, context);
-      }
-    } finally {
-      db.close();
-    }
-  }
-
-  /**
-   * Update the chat index after documents are saved.
-   * @param {AIChatBotSearchUpdate|AIChatBotSearchUpdate[]} payload The search update payload.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-   * @returns {Promise<void>} The indexing promise.
-   * @static
-   */
-  static async onSearchUpdate(payload, context) {
-    const base = AIChatBot.defaultConfig();
-    const config = {
-      ...base,
-      ...context.config[AIChatBot.configKey],
-      events: {
-        ...base.events,
-        ...context.config[AIChatBot.configKey]?.events,
-      },
-    };
-    const updates = Array.isArray(payload) ? payload : [payload];
-    for (const update of updates) {
-      const document = update?.document;
-      if (!document?.slug) {
-        continue;
-      }
-      if (update.originalSlug && update.originalSlug !== document.slug) {
-        removeIndexedDocument({ [AIChatBot.configKey]: config }, update.originalSlug);
-      }
-      const ignoredSlug = config.ignoreSlugs.includes(document.slug);
-      const tags = Array.isArray(document.tags) ? document.tags : [];
-      const ignoredTag = tags.some((tag) => config.ignoreTags.includes(tag));
-      if (ignoredSlug || ignoredTag) {
-        removeIndexedDocument({ [AIChatBot.configKey]: config }, document.slug);
-        continue;
-      }
-      await indexDocument({ [AIChatBot.configKey]: config }, context, document);
-    }
-  }
-
-  /**
-   * Remove deleted documents from the chat index.
-   * @param {import('../wiki.js').UttoriWikiDocument} document The deleted document.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
-   * @static
-   */
-  static onSearchDelete(document, context) {
-    const base = AIChatBot.defaultConfig();
-    const config = {
-      ...base,
-      ...context.config[AIChatBot.configKey],
-      events: {
-        ...base.events,
-        ...context.config[AIChatBot.configKey]?.events,
-      },
-    };
-    removeIndexedDocument({ [AIChatBot.configKey]: config }, document?.slug);
-  }
-
-  /**
-   * Add the upload route to the server object.
+   * Add the chat routes to the server object.
    * @param {import('express').Application} server An Express server instance.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @param {AIChatBotContext} context A Uttori-like context.
    * @example <caption>AIChatBot.bindRoutes(server, context)</caption>
    * const context = {
    *   config: {
@@ -536,7 +330,7 @@ class AIChatBot {
 
   /**
    * Handle POST requests to stream chat responses as server-sent events.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @param {AIChatBotContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @example <caption>AIChatBot.apiRequestHandler(context)</caption>
    * server.post('/chat-api', AIChatBot.apiRequestHandler(context));
@@ -630,7 +424,7 @@ class AIChatBot {
 
       try {
         for (;;) {
-          const { messages: nextMessages, finished } = await AIChatBot.runChatPass(/** @type {import('ws').WebSocket} */ (stream), messages, config);
+          const { messages: nextMessages, finished } = await AIChatBot.runChatPass(/** @type {import('ws').WebSocket} */ (stream), messages, config, context);
           messages = nextMessages;
           if (finished) break;
         }
@@ -671,7 +465,7 @@ class AIChatBot {
   /**
    * Bind the WebSocket server to the server object.
    * @param {import('http').Server} server An Express server instance.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * @param {AIChatBotContext} context A Uttori-like context.
    * @example <caption>AIChatBot.bindWebSocket(server, context)</caption>
    * AIChatBot.bindWebSocket(server, context);
    * @static
@@ -767,7 +561,7 @@ class AIChatBot {
           try {
             // Keep running passes until there are no more tool calls.
             for (;;) {
-              const { messages: nextMessages, finished } = await AIChatBot.runChatPass(ws, messages, config);
+              const { messages: nextMessages, finished } = await AIChatBot.runChatPass(ws, messages, config, context);
               messages = nextMessages;
               if (finished) break;
             }
@@ -819,6 +613,40 @@ class AIChatBot {
   }
 
   /**
+   * Run a single non-streaming chat turn and return the final assistant message.
+   * Exposed via the `chat-query` hook so other plugins (such as the MCP provider) can ask the
+   * chat bot a question programmatically.
+   * @param {object} payload The chat request.
+   * @param {string} payload.query The user question.
+   * @param {string[]} [payload.slugs] Optional document slugs to focus retrieval on.
+   * @param {AIChatBotContext} context A Uttori-like context.
+   * @returns {Promise<string>} The final assistant message content.
+   * @static
+   */
+  static async chatQuery(payload, context) {
+    debug('chatQuery:', payload?.query);
+    /** @type {AIChatBotConfig} */
+    const config = AIChatBot.mergeConfig(context);
+    const query = typeof payload?.query === 'string' ? payload.query.trim() : '';
+    if (!query) {
+      return '';
+    }
+    const slugs = Array.isArray(payload?.slugs) ? payload.slugs.filter(slug => typeof slug === 'string') : [];
+
+    /** @type {AIChatBotSSEStream} */
+    const sink = { send() {} };
+
+    /** @type {ChatBotMessage[]} */
+    let messages = buildPromptMessages(query, slugs, { maxContextCharacters: 20000 });
+    for (;;) {
+      const { messages: nextMessages, finished } = await AIChatBot.runChatPass(/** @type {import('ws').WebSocket} */ (sink), messages, config, context);
+      messages = nextMessages;
+      if (finished) break;
+    }
+    return messages[messages.length - 1]?.content ?? '';
+  }
+
+  /**
    * Helper: stream one /api/chat call and forward chunks to client,
    * intercepting tool calls. Returns {messages, finished}
    * messages: updated transcript to continue if tool used
@@ -826,9 +654,10 @@ class AIChatBot {
    * @param {import('ws').WebSocket} ws The WebSocket instance.
    * @param {ChatBotMessage[]} messages The messages.
    * @param {AIChatBotConfig} config The configuration.
+   * @param {AIChatBotContext} context A Uttori-like context exposing `context.hooks` for tool execution.
    * @returns {Promise<{messages: ChatBotMessage[], finished: boolean}>} The messages and finished status.
    */
-  static async runChatPass(ws, messages, config) {
+  static async runChatPass(ws, messages, config, context) {
     debug('runChatPass');
     const response = await fetch(`${config.ollamaBaseUrl}/api/chat`, {
       method: 'POST',
@@ -856,7 +685,7 @@ class AIChatBot {
 
     /** The assistant content this pass */
     let assistantAccumulated = '';
-    /** @type {Array<Record<string, any>>} */
+    /** @type {OllamaChatToolCall[]} */
     let pendingToolCalls = []; // collect tool calls observed in this pass
 
     for (;;) {
@@ -873,10 +702,10 @@ class AIChatBot {
           continue;
         }
         // Parse the line as JSON
-        /** @type {Record<string, Record<string, any>>} */
+        /** @type {OllamaChatResponse} */
         let obj;
         try {
-          obj = JSON.parse(line);
+          obj = /** @type {OllamaChatResponse} */ (JSON.parse(line));
         } catch {
           continue;
         }
@@ -893,7 +722,6 @@ class AIChatBot {
         }
 
         // tool calls may appear in-stream
-        /** @type {Array<Record<string, any>>} */
         const calls = obj?.message?.tool_calls;
         if (Array.isArray(calls) && calls.length) {
           // Stop forwarding (optional) and collect calls
@@ -914,12 +742,12 @@ class AIChatBot {
         ws.send(JSON.stringify({ type: 'tool_call', name, args }));
 
         debug('executeChatTool:', name, args);
-        const toolResult = await executeChatTool(name, args, config);
+        const toolResult = await executeChatTool(name, args, config, context);
 
         // Append the tool response as a new message for the next pass
         messages.push({
           role: 'tool',
-          content: JSON.stringify(toolResult),
+          content: typeof toolResult === 'string' ? toolResult : JSON.stringify(toolResult),
           name,
         });
 
@@ -941,29 +769,18 @@ class AIChatBot {
 
   /**
    * Handle requests to fetch available documents for the document selector.
-   * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-ai-chat-bot', AIChatBotConfig>} context A Uttori-like context.
+   * Delegates to the registered search provider via the `search-documents` hook.
+   * @param {AIChatBotContext} context A Uttori-like context.
    * @returns {import('express').RequestHandler} The function to pass to Express.
    * @static
    */
   static documentsHandler(context) {
     debug('documentsHandler');
-    return (_request, response) => {
+    return async (_request, response) => {
       try {
-        // Get all documents from the database
-        /** @type {AIChatBotConfig} */
-        const config = { ...AIChatBot.defaultConfig(), ...context.config[AIChatBot.configKey] };
-        /** @type {import('better-sqlite3/index.js').Database} */
-        const db = new Database(config.databasePath, config.databseOptions);
-        const documents = db.prepare(`
-          SELECT id, slug, title, update_date
-          FROM uttori_sources
-          ORDER BY title COLLATE NOCASE ASC, slug ASC
-        `).all();
-
-        db.close();
-
-        // Return the documents as JSON
-        response.json(documents);
+        /** @type {Array<Array<{id: string, slug: string, title: string, update_date: number}>>} */
+        const results = await context.hooks.fetch('search-documents', {}, context);
+        response.json(results?.[0] ?? []);
       } catch (error) {
         debug('documentsHandler error:', error);
         response.status(500).json({ error: 'Failed to fetch documents' });
@@ -1006,9 +823,9 @@ Write the new summary (<= 60 words).`;
 
     let text = '';
     try {
-      /** @type {Record<string, Record<string, string | any>>} */
+      /** @type {OllamaChatResponse} */
       const data = await response.json();
-      text = data?.message?.content || data?.choices?.[0]?.message?.content || '[]';
+      text = data.message?.content ?? '[]';
       // Remove the <think> and </think> tags from the user and assistant messages
       text = text.replace(/<think>[\S\s]*?<\/think>/g, '').trim();
     } catch (error) {
@@ -1016,44 +833,6 @@ Write the new summary (<= 60 words).`;
     }
     return text.trim();
   }
-
-  /**
-   * Open the database and create the necessary tables if they don't exist.
-   * @param {Partial<AIChatBotConfig>} config The configuration.
-   * @returns {import('better-sqlite3').Database} The database.
-   */
-  static openDatabase(config) {
-    debug('openDatabase', config.databasePath, config.databseOptions);
-    fs.mkdirSync(path.dirname(config.databasePath), { recursive: true });
-
-    /** @type {import('better-sqlite3/index.js').Database} */
-    const db = new Database(config.databasePath, config.databseOptions);
-    sqliteVec.load(db);
-    db.pragma('journal_mode = WAL');
-    db.pragma('synchronous = NORMAL');
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS uttori_sources(
-        id TEXT PRIMARY KEY,
-        slug TEXT,
-        title TEXT,
-        update_date INTEGER,
-        meta_json TEXT,
-        content_hash TEXT
-      );
-
-      CREATE TABLE IF NOT EXISTS uttori_chunks(
-        source_id TEXT NOT NULL,
-        idx INTEGER NOT NULL,
-        text TEXT NOT NULL,
-        token_count INTEGER NOT NULL,
-        meta_json TEXT,
-        FOREIGN KEY(source_id) REFERENCES uttori_sources(id)
-      );
-    `);
-
-    return db;
-  }
-
 }
 
 export default AIChatBot;
