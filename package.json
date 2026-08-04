@@ -84,7 +84,7 @@
     "oxlint-tsgolint": "^0.23.0",
     "pdfreader": "^3.0.8",
     "pre-commit": "^2.0.0",
-    "release-it": "^20.2.1",
+    "release-it": "^21.0.1",
     "sanitize-filename": "^1.6.4",
     "sinon": "^22.0.0",
     "slugify": "^1.6.9",
