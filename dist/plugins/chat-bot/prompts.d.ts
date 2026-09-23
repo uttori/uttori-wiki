@@ -6,7 +6,7 @@
  * @param {number} opts.maxContextCharacters The maximum number of characters to include in the context.
  * @returns {import('../ai-chat-bot.js').ChatBotMessage[]} The messages for the AI chat bot.
  */
-export function buildPromptMessages(userQuestion: string, slugs: string[], opts: {
+export declare function buildPromptMessages(userQuestion: string, slugs: string[], opts: {
     maxContextCharacters: number;
-}): import("../ai-chat-bot.js").ChatBotMessage[];
+}): import('../ai-chat-bot.js').ChatBotMessage[];
 //# sourceMappingURL=prompts.d.ts.map

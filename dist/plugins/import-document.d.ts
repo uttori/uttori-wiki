@@ -1,4 +1,3 @@
-export default ImportDocument;
 export type ImportDocumentConfigPage = {
     /**
      * The URL of the page.
@@ -35,7 +34,7 @@ export type ImportDocumentProcessPage = {
     /**
      * The attachments of the page.
      */
-    attachments: import("../../src/wiki.js").UttoriWikiDocumentAttachment[];
+    attachments: import('../../src/wiki.js').UttoriWikiDocumentAttachment[];
 };
 export type ImportDocumentApiPayload = {
     /**
@@ -67,60 +66,57 @@ export type ImportDocumentApiPayload = {
      */
     redirects: string[];
 };
-export type ImportDocumentContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>;
-/**
- * Builds an Express request handler from plugin context.
- */
-export type ImportDocumentRequestHandlerFactory = (ctx: ImportDocumentContext) => import("express").RequestHandler;
+export type ImportDocumentContext = import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>;
+export type ImportDocumentRequestHandlerFactory = (ctx: ImportDocumentContext) => import('express').RequestHandler;
 export type ImportDocumentConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The API route for importing documents.
      */
-    apiRoute?: string | undefined;
+    apiRoute?: string;
     /**
      * Server route to show the import interface.
      */
-    publicRoute?: string | undefined;
+    publicRoute?: string;
     /**
      * The path to reference uploaded files by.
      */
-    uploadPath?: string | undefined;
+    uploadPath?: string;
     /**
      * The directory to upload files to.
      */
-    uploadDirectory?: string | undefined;
+    uploadDirectory?: string;
     /**
      * When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
      */
-    allowedReferrers?: string[] | undefined;
+    allowedReferrers?: string[];
     /**
      * A request handler for the interface route.
      */
-    interfaceRequestHandler?: ImportDocumentRequestHandlerFactory | undefined;
+    interfaceRequestHandler?: ImportDocumentRequestHandlerFactory;
     /**
      * A request handler for the API route.
      */
-    apiRequestHandler?: ImportDocumentRequestHandlerFactory | undefined;
+    apiRequestHandler?: ImportDocumentRequestHandlerFactory;
     /**
      * Custom Middleware for the API route.
      */
-    middlewareApi?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
+    middlewareApi?: import('express').RequestHandler[];
     /**
      * Custom Middleware for the public route.
      */
-    middlewarePublic?: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
+    middlewarePublic?: import('express').RequestHandler[];
     /**
-     * A function to handle the download.
+     * (ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
      */
-    downloadFile?: ((arg0: ImportDocumentDownload) => Promise<void>) | undefined;
+    : Function;
     /**
-     * A function to handle the imported page processing.
+     * (ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
      */
-    processPage?: ((arg0: ImportDocumentConfig, arg1: string, arg2: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>) | undefined;
+    : Function;
 };
 /**
  * @typedef {object} ImportDocumentConfigPage
@@ -244,7 +240,7 @@ declare class ImportDocument {
      * ImportDocument.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, ImportDocumentConfig>, _context?: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>): void;
+    static validateConfig(config: Record<string, ImportDocumentConfig>, _context?: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>} context A Uttori-like context.
@@ -265,7 +261,7 @@ declare class ImportDocument {
      * ImportDocument.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): void;
     /**
      * Add the upload route to the server object.
      * @param {import('express').Application} server An Express server instance.
@@ -282,7 +278,7 @@ declare class ImportDocument {
      * ImportDocument.bindRoutes(server, context);
      * @static
      */
-    static bindRoutes(server: import("express").Application, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>): void;
+    static bindRoutes(server: import('express').Application, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): void;
     /**
      * The Express route method to process the upload request and provide a response.
      * Supports both file imports and URL scraping through the pages array.
@@ -308,7 +304,7 @@ declare class ImportDocument {
      * server.post('/chat-api', ImportDocument.apiRequestHandler(context));
      * @static
      */
-    static apiRequestHandler(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>): import("express").RequestHandler;
+    static apiRequestHandler(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler;
     /**
      * The Express request handler for the interface route.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>} context A Uttori-like context.
@@ -317,7 +313,7 @@ declare class ImportDocument {
      * server.get('/import', ImportDocument.interfaceRequestHandler(context));
      * @static
      */
-    static interfaceRequestHandler(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-import-document", ImportDocumentConfig>): import("express").RequestHandler;
+    static interfaceRequestHandler(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler;
     /**
      * Downloads a file from a URL and saves it to the uploads directory.
      * @param {object} options The options for the download, represents a page
@@ -340,4 +336,5 @@ declare class ImportDocument {
      */
     static processPage(config: ImportDocumentConfig, slug: string, page: ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>;
 }
+export default ImportDocument;
 //# sourceMappingURL=import-document.d.ts.map

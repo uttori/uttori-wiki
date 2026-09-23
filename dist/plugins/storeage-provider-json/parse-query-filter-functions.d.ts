@@ -1,7 +1,5 @@
-export default parseQueryToFilterFunctions;
-/**
- * Document-like object passed to query filter functions.
- */
+/** @import { SqlWhereParserAst, ParserOperand, Value as SqlWhereParserValue } from '../../../dist/custom.d.ts' */
+import type { SqlWhereParserAst } from '../../../dist/custom.d.ts';
 export type QueryFilterItem = Record<string, unknown>;
 export type QueryFilterFunction = (item: QueryFilterItem) => boolean;
 /**
@@ -14,6 +12,6 @@ export type QueryFilterFunction = (item: QueryFilterItem) => boolean;
  * return objects.filter(whereFunctions);
  * ➜ [{ ... }, { ... }, ...]
  */
-declare function parseQueryToFilterFunctions(ast: SqlWhereParserAst): QueryFilterFunction;
-import type { SqlWhereParserAst } from '../../../dist/custom.d.ts';
+declare const parseQueryToFilterFunctions: (ast: SqlWhereParserAst) => QueryFilterFunction;
+export default parseQueryToFilterFunctions;
 //# sourceMappingURL=parse-query-filter-functions.d.ts.map

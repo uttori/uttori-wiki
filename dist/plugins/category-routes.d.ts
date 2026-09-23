@@ -1,55 +1,54 @@
-export default CategoryRoutesPlugin;
 export type CategoryRoutesPluginConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The default title for category pages.
      */
-    title?: string | undefined;
+    title?: string;
     /**
      * The maximum number of documents to return for a category.
      */
-    limit?: number | undefined;
+    limit?: number;
     /**
      * Middleware for category routes.
      */
-    middleware?: Record<string, import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[]> | undefined;
+    middleware?: Record<string, import("express").RequestHandler[]>;
     /**
      * A replacement route for the category index route.
      */
-    categoryIndexRoute?: string | undefined;
+    categoryIndexRoute?: string;
     /**
      * A replacement route for the category show route.
      */
-    categoryRoute?: string | undefined;
+    categoryRoute?: string;
     /**
      * A replacement route for the category index route.
      */
-    apiRoute?: string | undefined;
+    apiRoute?: string;
     /**
      * A replacement route handler for the category index route.
      */
-    categoryIndexRequestHandler?: CategoryRoutesRequestHandler | undefined;
+    categoryIndexRequestHandler?: CategoryRoutesRequestHandler;
     /**
      * A replacement route handler for the category show route.
      */
-    categoryRequestHandler?: CategoryRoutesRequestHandler | undefined;
+    categoryRequestHandler?: CategoryRoutesRequestHandler;
     /**
      * A request handler for the API route that returns all available categories.
      */
-    apiRequestHandler?: CategoryRoutesRequestHandler | undefined;
+    apiRequestHandler?: CategoryRoutesRequestHandler;
     /**
      * The document field to use for categories (default: 'categories').
      */
-    categoryField?: string | undefined;
+    categoryField?: string;
     /**
      * The separator used in hierarchical categories (default: '/').
      */
-    separator?: string | undefined;
+    separator?: string;
 };
-export type CategoryDocument = import("../wiki.js").UttoriWikiDocument;
+export type CategoryDocument = import('../wiki.js').UttoriWikiDocument;
 export type CategoryBreadcrumb = {
     /**
      * The name of the breadcrumb.
@@ -96,14 +95,8 @@ export type CategoryTreeNode = {
      */
     documents: CategoryDocument[];
 };
-/**
- * Uttori context narrowed to this plugin's config shape.
- */
-export type CategoryRoutesContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-category-routes", CategoryRoutesPluginConfig>;
-/**
- * Builds an Express handler for a category route.
- */
-export type CategoryRoutesRequestHandler = (context: CategoryRoutesContext) => import("express").RequestHandler;
+export type CategoryRoutesContext = import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-category-routes', CategoryRoutesPluginConfig>;
+export type CategoryRoutesRequestHandler = (context: CategoryRoutesContext) => import('express').RequestHandler;
 /**
  * @typedef {object} CategoryRoutesPluginConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
@@ -237,7 +230,7 @@ declare class CategoryRoutesPlugin {
      * CategoryRoutesPlugin.bindRoutes(plugin);
      * @static
      */
-    static bindRoutes(server: import("express").Application, context: CategoryRoutesContext): void;
+    static bindRoutes(server: import('express').Application, context: CategoryRoutesContext): void;
     /**
      * Returns the documents with the provided category, up to the provided limit.
      * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
@@ -276,7 +269,7 @@ declare class CategoryRoutesPlugin {
      * @returns {import('express').RequestHandler} The function to pass to Express.
      * @static
      */
-    static categoryIndexRequestHandler(context: CategoryRoutesContext): import("express").RequestHandler;
+    static categoryIndexRequestHandler(context: CategoryRoutesContext): import('express').RequestHandler;
     /**
      * Renders the category detail page with `category` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -288,7 +281,7 @@ declare class CategoryRoutesPlugin {
      * @returns {import('express').RequestHandler} The function to pass to Express.
      * @static
      */
-    static categoryRequestHandler(context: CategoryRoutesContext): import("express").RequestHandler;
+    static categoryRequestHandler(context: CategoryRoutesContext): import('express').RequestHandler;
     /**
      * Returns all available categories from documents.
      * This is used for auto-completion and category listing.
@@ -303,6 +296,7 @@ declare class CategoryRoutesPlugin {
      * @returns {import('express').RequestHandler} The function to pass to Express.
      * @static
      */
-    static categoryApiRequestHandler(context: CategoryRoutesContext): import("express").RequestHandler;
+    static categoryApiRequestHandler(context: CategoryRoutesContext): import('express').RequestHandler;
 }
+export default CategoryRoutesPlugin;
 //# sourceMappingURL=category-routes.d.ts.map

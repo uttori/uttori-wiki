@@ -5,5 +5,5 @@
  * @param {import('../../wiki.js').UttoriWikiDocumentAttachment} attachment The attachment.
  * @returns {Promise<string>} The text of the attachment.
  */
-export function extractAttachmentText(config: import("../search-provider-sqlite.js").SearchSQLiteConfig, attachment: import("../../wiki.js").UttoriWikiDocumentAttachment): Promise<string>;
+export declare function extractAttachmentText(config: import('../search-provider-sqlite.js').SearchSQLiteConfig, attachment: import('../../wiki.js').UttoriWikiDocumentAttachment): Promise<string>;
 //# sourceMappingURL=attachment-extractor.d.ts.map

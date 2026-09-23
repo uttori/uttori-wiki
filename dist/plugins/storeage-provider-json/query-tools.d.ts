@@ -1,4 +1,3 @@
-export default processQuery;
 /**
  * Processes a query string.
  * @param {string} query - The SQL-like query to parse.
@@ -10,5 +9,6 @@ export default processQuery;
  * ➜ [{ ... }, ...]
  * ```
  */
-declare function processQuery(query: string, objects: import("../../wiki.js").UttoriWikiDocument[]): import("../../wiki.js").UttoriWikiDocument[] | number;
+declare const processQuery: (query: string, objects: import('../../wiki.js').UttoriWikiDocument[]) => import('../../wiki.js').UttoriWikiDocument[] | number;
+export default processQuery;
 //# sourceMappingURL=query-tools.d.ts.map

@@ -1,0 +1,68 @@
+---
+description: Local dev workflow conventions (npm scripts, Node/nvm, JSDoc-safe types, oxlint)
+alwaysApply: true
+---
+
+# Development Workflow
+
+## Use npm scripts only
+
+Run tasks through the `package.json` scripts - never `npx`, global installs, or direct tool binaries. Custom scripts are fine.
+
+- `npm run lint` - oxlint (use `npm run lint:fix` to autofix)
+- `npm run make` - docs + types (`make-types` then `make-docs`)
+- `npm run make-docs` / `npm run make-types` - run individually when iterating
+- `npm test` - ava under `NODE_ENV=test` (starts/stops the test server via pre/post hooks)
+
+## Node version & native modules
+
+- Use `nvm use` to pick up the version in `.nvmrc`.
+- `better-sqlite3` is a native module locked to the Node ABI it was compiled against. If you see
+  `ERR_DLOPEN_FAILED` or a `NODE_MODULE_VERSION`/ABI mismatch, the active Node doesn't match the
+  build. Fix it by rebuilding:
+
+```bash
+npm rebuild better-sqlite3
+```
+
+Note: `.nvmrc` and the version `better-sqlite3` was built against can drift apart - make them agree.
+
+## JSDoc must be jsdoc2md-safe
+
+`npm run make-docs` uses jsdoc2md (catharsis), which rejects TypeScript-only type syntax. Keep types
+in a form both TypeScript (checkJs) and catharsis accept:
+
+```js
+// ❌ Breaks jsdoc2md: arrow-function types and inline optional (?:) object props
+// @param {(text: string, i: number) => string} build
+// @type {(...args: unknown[]) => void}
+// @type {{ embedding?: number[] }}
+
+// ✅ Use @callback for function types
+/**
+ * @callback PromptBuilder
+ * @param {string} text
+ * @param {number} index
+ * @returns {string}
+ */
+
+// ✅ Then reference the named callback from @type casts
+let debug = /** @type {PromptBuilder} */ ((text, index) => `${index}: ${text}`);
+
+// ✅ Use @typedef + optional [prop] for object shapes
+/**
+ * @typedef {object} EmbedResponse
+ * @property {number[]} [embedding]
+ */
+```
+
+Always add JSDoc (with `@param`/`@returns`/`@typedef`) to exported functions and class members.
+Never use TypeScript-only function syntax in any JSDoc tag or cast, including inline `@type`
+annotations. If a function value needs a type, define a named `@callback` and cast to that name.
+
+## oxlint
+
+The `no-unsafe-*` rules are warn-level and fire at untyped boundaries (SQLite rows, `fetch`/SDK
+JSON, markdown-it tokens). Fix them in `src` with a named `@typedef`/`@callback` plus a targeted
+cast (`const data = /** @type {EmbedResponse} */ (await response.json());`), and type caught errors
+as `const error = /** @type {Error} */ (err);`. These rules are intentionally disabled for tests.

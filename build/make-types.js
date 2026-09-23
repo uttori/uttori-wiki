@@ -1,11 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import ts from 'typescript';
+import { execFileSync } from 'node:child_process';
 
 // Configuration
 const CUSTOM_EXPORT = 'export * from "./custom.d.ts";';
 const INDEX_DTS_PATH = 'dist/index.d.ts';
 const DIST_PATH = 'dist';
+const TSC_PATH = path.join(process.cwd(), 'node_modules', 'typescript', 'bin', 'tsc');
 const PRESERVED_DECLARATIONS = new Set(['custom.d.ts']);
 
 /**
@@ -72,75 +73,24 @@ const ensureCustomExport = () => {
   console.log('Added custom export to index.d.ts');
 };
 
-// Compile TypeScript types programmatically
+// Compile TypeScript types with the local TypeScript CLI.
 const compileTypes = async () => {
-  // Read tsconfig.json
-  const configPath = 'tsconfig.json';
-  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
-
-  if (configFile.error) {
-    throw new Error(`Failed to read tsconfig.json: ${configFile.error.messageText}`);
-  }
-
-  const config = ts.parseJsonConfigFileContent(
-    configFile.config,
-    ts.sys,
-    process.cwd()
-  );
-
-  if (config.errors.length > 0) {
-    throw new Error(`TypeScript config errors: ${config.errors.map(e => e.messageText).join(', ')}`);
-  }
-
-  // Override module to nodenext
-  const compilerOptions = {
-    ...config.options,
-    module: ts.ModuleKind.NodeNext,
-    declaration: true,
-    emitDeclarationOnly: true,
-    outDir: 'dist',
-    noEmit: false,
-  };
-
-  // Create program
-  const program = ts.createProgram(config.fileNames, compilerOptions);
-
-  // Get all source files
-  const sourceFiles = program.getSourceFiles();
-
-  // Find wiki.js first (it should be compiled first)
-  const wikiFile = sourceFiles.find(file => file.fileName.includes('src/wiki.js'));
-  // Compile wiki.js first
-  if (wikiFile) {
-    console.log('Compiling wiki.js first...');
-    const wikiResult = program.emit(wikiFile, undefined, undefined, true);
-    if (wikiResult.emitSkipped) {
-      console.warn('Wiki compilation was skipped');
-    }
-  }
-
-  // Then compile all other files
-  console.log('Compiling remaining files...');
-  const result = program.emit(undefined, undefined, undefined, true);
-
-  if (result.emitSkipped) {
-    console.warn('Some files were skipped during compilation');
-  }
-
-  // Report any diagnostics
-  const diagnostics = ts.getPreEmitDiagnostics(program).concat(result.diagnostics);
-  if (diagnostics.length > 0) {
-    console.log('TypeScript diagnostics:');
-    diagnostics.forEach(diagnostic => {
-      const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n');
-      if (diagnostic.file) {
-        const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start ?? 0);
-        console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
-      } else {
-        console.log(message);
-      }
-    });
-  }
+  execFileSync(process.execPath, [
+    TSC_PATH,
+    '--project',
+    'tsconfig.json',
+    '--module',
+    'NodeNext',
+    '--declaration',
+    '--emitDeclarationOnly',
+    '--noCheck',
+    '--rootDir',
+    'src',
+    '--outDir',
+    DIST_PATH,
+    '--noEmit',
+    'false',
+  ], { stdio: 'inherit' });
 
   console.log('TypeScript compilation complete');
 };
@@ -154,7 +104,7 @@ const main = async () => {
     console.log('Cleaning up existing type files...');
     cleanGeneratedDeclarations(DIST_PATH);
 
-    // Run TypeScript compilation programmatically
+    // Run TypeScript declaration generation
     console.log('Running TypeScript compilation...');
     await compileTypes();
 

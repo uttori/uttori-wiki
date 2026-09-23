@@ -1,7 +1,3 @@
-export default StorageProviderJsonFile;
-/**
- * The configuration object for the StorageProviderJsonFile.
- */
 export type StorageProviderJsonFileConfig = {
     /**
      * The directory to store documents.
@@ -14,31 +10,31 @@ export type StorageProviderJsonFileConfig = {
     /**
      * The file extension to use for file.
      */
-    extension?: string | undefined;
+    extension?: string;
     /**
      * Should update times be marked at the time of edit.
      */
-    updateTimestamps?: boolean | undefined;
+    updateTimestamps?: boolean;
     /**
      * Should history entries be created.
      */
-    useHistory?: boolean | undefined;
+    useHistory?: boolean;
     /**
      * Should we cache files in memory?
      */
-    useCache?: boolean | undefined;
+    useCache?: boolean;
     /**
      * The spaces parameter for JSON stringifying documents.
      */
-    spacesDocument?: number | undefined;
+    spacesDocument?: number;
     /**
      * The spaces parameter for JSON stringifying history.
      */
-    spacesHistory?: number | undefined;
+    spacesHistory?: number;
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
 };
 /**
  * @typedef StorageProviderJsonFileConfig The configuration object for the StorageProviderJsonFile.
@@ -61,58 +57,26 @@ export type StorageProviderJsonFileConfig = {
  * @class
  */
 declare class StorageProviderJsonFile {
-    /**
-     * Ensure a directory exists, and if not create it.
-     * @param {string} directory The directory to ensure exists.
-     */
-    static ensureDirectory(directory: string): Promise<void>;
+    config: {
+        contentDirectory: string;
+        historyDirectory: string;
+        events?: Record<string, string[]>;
+        extension: string;
+        updateTimestamps: boolean;
+        useHistory: boolean;
+        useCache: boolean;
+        spacesDocument: number | undefined;
+        spacesHistory: number | undefined;
+    };
+    refresh: boolean;
+    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} */
+    documents: Record<string, import('../../wiki.js').UttoriWikiDocument>;
     /**
      * Creates an instance of StorageProvider.
      * @param {StorageProviderJsonFileConfig} config - A configuration object.
      * @class
      */
     constructor(config: StorageProviderJsonFileConfig);
-    config: {
-        /**
-         * The directory to store documents.
-         */
-        contentDirectory: string;
-        /**
-         * The directory to store document histories.
-         */
-        historyDirectory: string;
-        /**
-         * The file extension to use for file.
-         */
-        extension: string;
-        /**
-         * Should update times be marked at the time of edit.
-         */
-        updateTimestamps: boolean;
-        /**
-         * Should history entries be created.
-         */
-        useHistory: boolean;
-        /**
-         * Should we cache files in memory?
-         */
-        useCache: boolean;
-        /**
-         * The spaces parameter for JSON stringifying documents.
-         */
-        spacesDocument: number | undefined;
-        /**
-         * The spaces parameter for JSON stringifying history.
-         */
-        spacesHistory: number | undefined;
-        /**
-         * The events to listen for.
-         */
-        events?: Record<string, string[]> | undefined;
-    };
-    refresh: boolean;
-    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} */
-    documents: Record<string, import("../../wiki.js").UttoriWikiDocument>;
     /**
      * Returns all documents.
      * @returns {Promise<Record<string, import('../../wiki.js').UttoriWikiDocument>>} All documents.
@@ -120,27 +84,27 @@ declare class StorageProviderJsonFile {
      * storageProvider.all();
      * ➜ { first-document: { slug: 'first-document', ... }, ...}
      */
-    all: () => Promise<Record<string, import("../../wiki.js").UttoriWikiDocument>>;
+    all: () => Promise<Record<string, import('../../wiki.js').UttoriWikiDocument>>;
     /**
      * Returns all documents matching a given query.
      * @async
      * @param {string} query The conditions on which documents should be returned.
      * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]|number>} Promise object represents all matching documents.
      */
-    getQuery: (query: string) => Promise<import("../../wiki.js").UttoriWikiDocument[] | number>;
+    getQuery: (query: string) => Promise<import('../../wiki.js').UttoriWikiDocument[] | number>;
     /**
      * Returns a document for a given slug.
      * @async
      * @param {string} slug The slug of the document to be returned.
      * @returns {Promise<import('../../wiki.js').UttoriWikiDocument|undefined>} Promise object represents the returned UttoriDocument.
      */
-    get: (slug: string) => Promise<import("../../wiki.js").UttoriWikiDocument | undefined>;
+    get: (slug: string) => Promise<import('../../wiki.js').UttoriWikiDocument | undefined>;
     /**
      * Saves a document to the file system.
      * @async
      * @param {import('../../wiki.js').UttoriWikiDocument} document The document to be added to the collection.
      */
-    add: (document: import("../../wiki.js").UttoriWikiDocument) => Promise<void>;
+    add: (document: import('../../wiki.js').UttoriWikiDocument) => Promise<void>;
     /**
      * Updates a document and saves to the file system.
      * @async
@@ -157,7 +121,7 @@ declare class StorageProviderJsonFile {
      * @param {string} params.originalSlug The original slug identifying the document, or the slug if it has not changed.
      */
     update: ({ document, originalSlug }: {
-        document: import("../../wiki.js").UttoriWikiDocument;
+        document: import('../../wiki.js').UttoriWikiDocument;
         originalSlug: string;
     }) => Promise<void>;
     /**
@@ -184,7 +148,7 @@ declare class StorageProviderJsonFile {
     getRevision: ({ slug, revision }: {
         slug: string;
         revision: string | number;
-    }) => Promise<import("../../wiki.js").UttoriWikiDocument | undefined>;
+    }) => Promise<import('../../wiki.js').UttoriWikiDocument | undefined>;
     /**
      * Updates History for a given slug, renaming the store file and history directory as needed.
      * @async
@@ -193,5 +157,11 @@ declare class StorageProviderJsonFile {
      * @param {string} [originalSlug] The original slug identifying the document, or the slug if it has not changed.
      */
     updateHistory: (slug: string, content: string, originalSlug?: string) => Promise<void>;
+    /**
+     * Ensure a directory exists, and if not create it.
+     * @param {string} directory The directory to ensure exists.
+     */
+    static ensureDirectory(directory: string): Promise<void>;
 }
+export default StorageProviderJsonFile;
 //# sourceMappingURL=storage-provider-file.d.ts.map

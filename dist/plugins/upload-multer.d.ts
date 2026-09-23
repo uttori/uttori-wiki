@@ -1,33 +1,32 @@
-export default MulterUpload;
 export type MulterUploadConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * Directory files will be uploaded to. The default is 'uploads'.
      */
-    directory?: string | undefined;
+    directory?: string;
     /**
      * Server route to POST uploads to. The default is '/upload'.
      */
-    route?: string | undefined;
+    route?: string;
     /**
      * Server route to GET uploads from. The default is '/uploads'.
      */
-    publicRoute?: string | undefined;
+    publicRoute?: string;
     /**
      * Custom Middleware for the Upload route
      */
-    middleware?: express.RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[] | undefined;
+    middleware?: import('express').RequestHandler[];
     /**
      * Array of allowed MIME types (e.g., ['image/jpeg', 'image/png']). Empty array allows all.
      */
-    allowedMimeTypes?: string[] | undefined;
+    allowedMimeTypes?: string[];
     /**
      * Maximum file size in bytes. Default: 10MB (10485760).
      */
-    maxFileSize?: number | undefined;
+    maxFileSize?: number;
 };
 /**
  * @typedef {object} MulterUploadConfig
@@ -71,7 +70,7 @@ declare class MulterUpload {
      * MulterUpload.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, MulterUploadConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-upload-multer", MulterUploadConfig>): void;
+    static validateConfig(config: Record<string, MulterUploadConfig>, _context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>} context A Uttori-like context.
@@ -92,7 +91,7 @@ declare class MulterUpload {
      * MulterUpload.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-upload-multer", MulterUploadConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>): void;
     /**
      * Add the upload route to the server object.
      * @param {import('express').Application} server An Express server instance.
@@ -109,7 +108,7 @@ declare class MulterUpload {
      * MulterUpload.bindRoutes(server, context);
      * @static
      */
-    static bindRoutes(server: import("express").Application, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-upload-multer", MulterUploadConfig>): void;
+    static bindRoutes(server: import('express').Application, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>): void;
     /**
      * The Express route method to process the upload request and provide a response.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>} context A Uttori-like context.
@@ -118,9 +117,9 @@ declare class MulterUpload {
      * server.post('/upload', MulterUpload.upload);
      * @static
      */
-    static upload(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-upload-multer", MulterUploadConfig>): import("express").RequestHandler<{}, string, {
+    static upload(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>): import('express').RequestHandler<{}, string, {
         fullPath: string;
     }>;
 }
-import express from 'express';
+export default MulterUpload;
 //# sourceMappingURL=upload-multer.d.ts.map

@@ -1,4 +1,3 @@
-export default Operator;
 /**
  * A wrapper class around operators to distinguish them from regular tokens.
  * @property {string | symbol} value The value.
@@ -9,13 +8,12 @@ export default Operator;
  * @class
  */
 declare class Operator {
-    /**
-     * Returns a type for a given string.
-     * @param {string} type - The type to lookup.
-     * @returns {number | symbol} Either number of parameters or Unary Minus Symbol.
-     * @static
-     */
-    static type(type: string): number | symbol;
+    /** @type {string | symbol} The value. */
+    value: string | symbol;
+    /** @type {number | symbol} The type of operator. */
+    type: number | symbol;
+    /** @type {number} Priority to sort the operators with. */
+    precedence: number;
     /**
      * Creates an instance of Operator.
      * @param {string | symbol} value The value.
@@ -24,12 +22,6 @@ declare class Operator {
      * @class
      */
     constructor(value: string | symbol, type: number | symbol, precedence: number);
-    /** @type {string | symbol} The value. */
-    value: string | symbol;
-    /** @type {number | symbol} The type of operator. */
-    type: number | symbol;
-    /** @type {number} Priority to sort the operators with. */
-    precedence: number;
     /**
      * Returns the value as is for JSON.
      * @returns {*} value.
@@ -40,5 +32,13 @@ declare class Operator {
      * @returns {string} String representation of value.
      */
     toString(): string;
+    /**
+     * Returns a type for a given string.
+     * @param {string} type - The type to lookup.
+     * @returns {number | symbol} Either number of parameters or Unary Minus Symbol.
+     * @static
+     */
+    static type(type: string): number | symbol;
 }
+export default Operator;
 //# sourceMappingURL=operator.d.ts.map

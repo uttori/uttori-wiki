@@ -1,7 +1,4 @@
-export default validateQuery;
-/**
- * A single ORDER BY directive from a validated query.
- */
+import type { SqlWhereParserAst } from '../../../dist/custom.d.ts';
 export type ValidatedQueryOrder = {
     /**
      * Property to sort by (`RANDOM` selects random order).
@@ -10,11 +7,8 @@ export type ValidatedQueryOrder = {
     /**
      * Sort direction.
      */
-    sort: "ASC" | "DESC";
+    sort: 'ASC' | 'DESC';
 };
-/**
- * Parsed and validated pieces of a SQL-like storage query.
- */
 export type ValidatedQuery = {
     /**
      * Selected field names from the SELECT clause.
@@ -49,6 +43,6 @@ export type ValidatedQuery = {
  * // ➜ { fields: ['slug'], table: 'documents', where: { ... }, order: [{ prop: 'updateDate', sort: 'DESC' }], limit: 10 }
  * ```
  */
-declare function validateQuery(query: string): ValidatedQuery;
-import type { SqlWhereParserAst } from '../../../dist/custom.d.ts';
+declare const validateQuery: (query: string) => ValidatedQuery;
+export default validateQuery;
 //# sourceMappingURL=validate-query.d.ts.map

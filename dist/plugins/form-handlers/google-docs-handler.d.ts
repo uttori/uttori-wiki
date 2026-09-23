@@ -1,4 +1,3 @@
-export default GoogleDocsHandler;
 export type GoogleDocsHandlerConfig = {
     /**
      * Path to Google service account credentials JSON file.
@@ -15,7 +14,7 @@ export type GoogleDocsHandlerConfig = {
     /**
      * Whether to prepend a timestamp to each row.
      */
-    prependTimestamp?: boolean | undefined;
+    prependTimestamp?: boolean;
 };
 export type GoogleDocsSheetItem = {
     /**
@@ -52,7 +51,7 @@ declare class GoogleDocsHandler {
      * @returns {import('../form-handler.js').FormHandlerFunction} Form handler function.
      * @static
      */
-    static create(config: GoogleDocsHandlerConfig): import("../form-handler.js").FormHandlerFunction;
+    static create(config: GoogleDocsHandlerConfig): import('../form-handler.js').FormHandlerFunction;
     /**
      * Appends a row to the Google Sheet.
      * @param {GoogleDocsHandlerConfig} config Handler configuration.
@@ -61,7 +60,7 @@ declare class GoogleDocsHandler {
      * @returns {Promise<import('googleapis').sheets_v4.Schema$AppendValuesResponse>} The response from the Google Sheets API.
      * @static
      */
-    static appendRow(config: GoogleDocsHandlerConfig, formData: Record<string, any>, formConfig: import("../form-handler.js").FormConfig): Promise<import("googleapis").sheets_v4.Schema$AppendValuesResponse>;
+    static appendRow(config: GoogleDocsHandlerConfig, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): Promise<import('googleapis').sheets_v4.Schema$AppendValuesResponse>;
     /**
      * Prepares row data for Google Sheets.
      * @param {Record<string, any>} formData Form data.
@@ -70,7 +69,7 @@ declare class GoogleDocsHandler {
      * @returns {string[]} Row data array.
      * @static
      */
-    static prepareRowData(formData: Record<string, any>, formConfig: import("../form-handler.js").FormConfig, config: GoogleDocsHandlerConfig): string[];
+    static prepareRowData(formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig, config: GoogleDocsHandlerConfig): string[];
     /**
      * Creates a new Google Sheet with the specified name and sheet.
      * Not used in this handler but is useful for debugging.
@@ -98,4 +97,5 @@ declare class GoogleDocsHandler {
      */
     static listSpreadsheets(config: GoogleDocsHandlerConfig): Promise<GoogleDocsSheetItem[]>;
 }
+export default GoogleDocsHandler;
 //# sourceMappingURL=google-docs-handler.d.ts.map

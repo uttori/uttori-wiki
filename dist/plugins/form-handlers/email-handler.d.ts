@@ -1,9 +1,8 @@
-export default EmailHandler;
 export type EmailHandlerConfig = {
     /**
      * Nodemailer transport options.
      */
-    transportOptions: import("nodemailer").TransportOptions;
+    transportOptions: import('nodemailer').TransportOptions;
     /**
      * Email address to send from.
      */
@@ -19,7 +18,7 @@ export type EmailHandlerConfig = {
     /**
      * Email body template (optional).
      */
-    template?: string | undefined;
+    template?: string;
 };
 /**
  * @typedef {object} EmailHandlerConfig
@@ -42,7 +41,7 @@ declare class EmailHandler {
      * @returns {import('../form-handler.js').FormHandlerFunction} Form handler function.
      * @static
      */
-    static create(config: EmailHandlerConfig): import("../form-handler.js").FormHandlerFunction;
+    static create(config: EmailHandlerConfig): import('../form-handler.js').FormHandlerFunction;
     /**
      * Generates email subject from template.
      * @param {string} template Subject template.
@@ -51,7 +50,7 @@ declare class EmailHandler {
      * @returns {string} Generated subject.
      * @static
      */
-    static generateSubject(template: string, formData: Record<string, any>, formConfig: import("../form-handler.js").FormConfig): string;
+    static generateSubject(template: string, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
     /**
      * Generates email body from template.
      * @param {string} template Body template.
@@ -60,6 +59,7 @@ declare class EmailHandler {
      * @returns {string} Generated body.
      * @static
      */
-    static generateBody(template: string, formData: Record<string, any>, formConfig: import("../form-handler.js").FormConfig): string;
+    static generateBody(template: string, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
 }
+export default EmailHandler;
 //# sourceMappingURL=email-handler.d.ts.map

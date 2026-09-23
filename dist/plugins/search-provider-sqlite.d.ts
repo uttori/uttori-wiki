@@ -1,11 +1,10 @@
-export default SearchSQLitePlugin;
 export type SearchSQLiteEmbedPrompt = (task: string, query: string) => string;
-export type SearchSQLiteExtractAttachmentText = (config: SearchSQLiteConfig, attachment: import("../wiki.js").UttoriWikiDocumentAttachment) => Promise<string>;
+export type SearchSQLiteExtractAttachmentText = (config: SearchSQLiteConfig, attachment: import('../wiki.js').UttoriWikiDocumentAttachment) => Promise<string>;
 export type SearchSQLiteConfig = {
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The path to the SQLite database.
      */
@@ -13,19 +12,19 @@ export type SearchSQLiteConfig = {
     /**
      * The options for the database.
      */
-    databaseOptions?: import("better-sqlite3").Options | undefined;
+    databaseOptions?: import('better-sqlite3').Options;
     /**
      * Deprecated misspelled alias for `databaseOptions`.
      */
-    databseOptions?: import("better-sqlite3").Options | undefined;
+    databseOptions?: import('better-sqlite3').Options;
     /**
      * Should update times be marked at the time of edit.
      */
-    updateTimestamps?: boolean | undefined;
+    updateTimestamps?: boolean;
     /**
      * Should history entries be created.
      */
-    useHistory?: boolean | undefined;
+    useHistory?: boolean;
     /**
      * The base URL for the Ollama server.
      */
@@ -37,95 +36,92 @@ export type SearchSQLiteConfig = {
     /**
      * The prompt to use for embeddings.
      */
-    embedPrompt?: SearchSQLiteEmbedPrompt | undefined;
+    embedPrompt?: SearchSQLiteEmbedPrompt;
     /**
      * The limit for the number of chunks to return.
      */
-    chunkLimit?: number | undefined;
+    chunkLimit?: number;
     /**
      * Whether to use the hybrid approach of vector & FTS.
      */
-    hybrid?: boolean | undefined;
+    hybrid?: boolean;
     /**
      * Whether to use the FTS index.
      */
-    fts?: boolean | undefined;
+    fts?: boolean;
     /**
      * The weight for the FTS index.
      */
-    ftsWeight?: number | undefined;
+    ftsWeight?: number;
     /**
      * The title boost for query terms.
      */
-    titleBoost?: number | undefined;
+    titleBoost?: number;
     /**
      * The text boost for query terms.
      */
-    textBoost?: number | undefined;
+    textBoost?: number;
     /**
      * The FTS weight bump for query terms.
      */
-    ftsWeightBump?: number | undefined;
+    ftsWeightBump?: number;
     /**
      * The maximum number of tokens to use for context.
      */
-    maxContextTokens?: number | undefined;
+    maxContextTokens?: number;
     /**
      * The maximum number of chunks to use per source.
      */
-    maxPerSource?: number | undefined;
+    maxPerSource?: number;
     /**
      * The embedding batch size.
      */
-    batch?: number | undefined;
+    batch?: number;
     /**
      * Slugs to ignore.
      */
-    ignoreSlugs?: string[] | undefined;
+    ignoreSlugs?: string[];
     /**
      * Tags to ignore.
      */
-    ignoreTags?: string[] | undefined;
+    ignoreTags?: string[];
     /**
      * Whether to create the search index when index tables are missing on startup.
      */
-    bootstrapIndexOnStartup?: boolean | undefined;
+    bootstrapIndexOnStartup?: boolean;
     /**
      * Whether to rebuild the search index on startup.
      */
-    rebuildIndexOnStartup?: boolean | undefined;
+    rebuildIndexOnStartup?: boolean;
     /**
      * The root path to the attachments.
      */
-    attachmentsRoot?: string | undefined;
+    attachmentsRoot?: string;
     /**
      * Whether to include attachments.
      */
-    includeAttachments?: boolean | undefined;
+    includeAttachments?: boolean;
     /**
      * The function to use to extract text from an attachment.
      */
-    extractAttachmentText?: SearchSQLiteExtractAttachmentText | undefined;
+    extractAttachmentText?: SearchSQLiteExtractAttachmentText;
     /**
      * The markdown-it plugin configuration.
      */
-    markdownItPluginConfig?: import("./renderer-markdown-it.js").MarkdownItRendererConfig | undefined;
+    markdownItPluginConfig?: import('./renderer-markdown-it.js').MarkdownItRendererConfig;
     /**
      * Whether to convert tables to CSV format.
      */
-    tableToCSV?: boolean | undefined;
+    tableToCSV?: boolean;
     /**
      * Maximum number of rows per table chunk for embedding.
      */
-    tableMaxRowsPerChunk?: number | undefined;
+    tableMaxRowsPerChunk?: number;
     /**
      * Maximum estimated tokens per table chunk for embedding.
      */
-    tableMaxTokensPerChunk?: number | undefined;
+    tableMaxTokensPerChunk?: number;
 };
-/**
- * A scored chunk returned from a retrieval (RAG) query.
- */
 export type RetrievedChunk = {
     /**
      * The rowid of the chunk.
@@ -156,17 +152,14 @@ export type RetrievedChunk = {
      */
     source: {
         id: string;
-        title?: string | undefined;
-        slug?: string | undefined;
+        title?: string;
+        slug?: string;
     };
     /**
      * The score of the chunk.
      */
     score: number;
 };
-/**
- * The response from a retrieval (RAG) query.
- */
 export type RetrieveResponse = {
     /**
      * The query.
@@ -181,9 +174,6 @@ export type RetrieveResponse = {
      */
     citations: any[];
 };
-/**
- * A row returned from the FTS index.
- */
 export type FtsRow = {
     /**
      * The rowid of the chunk.
@@ -222,22 +212,19 @@ export type FtsRow = {
      */
     rank: number;
 };
-/**
- * A block of content parsed from a document prior to chunking/embedding.
- */
 export type Block = {
     /**
      * The type of block.
      */
-    type?: "paragraph" | "heading" | undefined;
+    type?: "heading" | "paragraph";
     /**
      * The index of the block.
      */
-    idx?: number | undefined;
+    idx?: number;
     /**
      * The level of the heading.
      */
-    level?: number | undefined;
+    level?: number;
     /**
      * The text of the block.
      */
@@ -249,19 +236,16 @@ export type Block = {
     /**
      * The token count of the block.
      */
-    tokenCount?: number | undefined;
+    tokenCount?: number;
     /**
      * The tags of the block.
      */
-    tags?: string[] | undefined;
+    tags?: string[];
     /**
      * The slug of the block.
      */
-    slug?: string | undefined;
+    slug?: string;
 };
-/**
- * A chunk paired with its embedding and metadata for insertion into the index.
- */
 export type ChunkWithMeta = {
     /**
      * The text of the chunk.
@@ -282,19 +266,16 @@ export type ChunkWithMeta = {
     /**
      * The source id of the chunk.
      */
-    source_id?: string | undefined;
+    source_id?: string;
     /**
      * The embedding of the chunk.
      */
-    embedding?: number[] | undefined;
+    embedding?: number[];
     /**
      * The meta JSON of the chunk.
      */
-    meta?: object | undefined;
+    meta?: object;
 };
-/**
- * A candidate chunk with its blended vector + FTS + boost score.
- */
 export type BlendedChunk = {
     /**
      * The rowid of the chunk.
@@ -498,6 +479,7 @@ declare class SearchSQLitePlugin {
      * ```
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-sqlite", SearchSQLiteConfig>): Promise<void>;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-sqlite', SearchSQLiteConfig>): Promise<void>;
 }
+export default SearchSQLitePlugin;
 //# sourceMappingURL=search-provider-sqlite.d.ts.map

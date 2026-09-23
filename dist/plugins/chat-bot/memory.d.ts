@@ -4,6 +4,44 @@
  * @property {string} [assistant] The assistant's message.
  * @property {number} ts The timestamp of the turn.
  */
+export type Turn = {
+    /**
+     * The user's message.
+     */
+    user: string;
+    /**
+     * The assistant's message.
+     */
+    assistant?: string;
+    /**
+     * The timestamp of the turn.
+     */
+    ts: number;
+};
+export type Memory = {
+    /**
+     * The summary of the memory, rolling 1 to 3 sentences.
+     */
+    summary: string;
+    /**
+     * The last N turns.
+     */
+    last: Turn[];
+    /**
+     * The optional entities.
+     */
+    entities?: Record<string, string>;
+};
+export type Memories = {
+    /**
+     * The memory.
+     */
+    mem: Memory;
+    /**
+     * The expiration time.
+     */
+    expires: number;
+};
 /**
  * @typedef {object} Memory
  * @property {string} summary The summary of the memory, rolling 1 to 3 sentences.
@@ -15,13 +53,7 @@
  * @property {Memory} mem The memory.
  * @property {number} expires The expiration time.
  */
-export class MemoryStore {
-    /**
-     * The constructor.
-     * @param {number} [ttlMs] The TTL in milliseconds, defaults to 1 hour.
-     * @param {number} [maxTurns] The maximum number of turns, defaults to 5.
-     */
-    constructor(ttlMs?: number, maxTurns?: number);
+export declare class MemoryStore {
     /**
      * The memories.
      * @type {Map<string, Memories>}
@@ -37,6 +69,12 @@ export class MemoryStore {
      * @type {number}
      */
     maxTurns: number;
+    /**
+     * The constructor.
+     * @param {number} [ttlMs] The TTL in milliseconds, defaults to 1 hour.
+     * @param {number} [maxTurns] The maximum number of turns, defaults to 5.
+     */
+    constructor(ttlMs?: number, maxTurns?: number);
     /**
      * Get the current time.
      * @returns {number} The current time.
@@ -70,42 +108,4 @@ export class MemoryStore {
      */
     cleanup(): void;
 }
-export type Turn = {
-    /**
-     * The user's message.
-     */
-    user: string;
-    /**
-     * The assistant's message.
-     */
-    assistant?: string | undefined;
-    /**
-     * The timestamp of the turn.
-     */
-    ts: number;
-};
-export type Memory = {
-    /**
-     * The summary of the memory, rolling 1 to 3 sentences.
-     */
-    summary: string;
-    /**
-     * The last N turns.
-     */
-    last: Turn[];
-    /**
-     * The optional entities.
-     */
-    entities?: Record<string, string> | undefined;
-};
-export type Memories = {
-    /**
-     * The memory.
-     */
-    mem: Memory;
-    /**
-     * The expiration time.
-     */
-    expires: number;
-};
 //# sourceMappingURL=memory.d.ts.map

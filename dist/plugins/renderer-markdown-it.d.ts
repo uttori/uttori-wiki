@@ -1,4 +1,3 @@
-export default MarkdownItRenderer;
 export type MarkdownItRendererOptionsUttori = {
     /**
      * Prefix for relative URLs, useful when the Express app is not at URI root.
@@ -24,79 +23,55 @@ export type MarkdownItRendererOptionsUttori = {
      * Footnote settings.
      */
     footnotes?: {
-        /**
-         * A funciton to return the default HTML for a footnote reference.
-         */
         referenceTag: Function;
-        /**
-         * A funciton to return the default opening HTML for a footnote definition.
-         */
         definitionOpenTag: Function;
-        /**
-         * The default closing HTML for a footnote definition.
-         */
         definitionCloseTag: string;
-    } | undefined;
+    };
     /**
      * Table of Contents settings.
      */
     toc?: {
-        /**
-         * When true, extract the table of contents to the view model from the content.
-         */
         extract: boolean;
-        /**
-         * The opening DOM tag for the TOC container.
-         */
         openingTag: string;
-        /**
-         * The closing DOM tag for the TOC container.
-         */
         closingTag: string;
-        /**
-         * Slugify options for convering headings to anchor links.
-         */
         slugify: object;
-    } | undefined;
+    };
     /**
      * WikiLinks settings.
      */
     wikilinks?: {
-        /**
-         * Slugify options for convering Wikilinks to anchor links.
-         */
         slugify: object;
-    } | undefined;
+    };
 };
 export type MarkdownItRendererOptions = {
     /**
      * Enable HTML tags in source.
      */
-    html?: boolean | undefined;
+    html?: boolean;
     /**
      * Use '/' to close single tags.
      */
-    xhtmlOut?: boolean | undefined;
+    xhtmlOut?: boolean;
     /**
      * Convert '\n' in paragraphs into <br>.
      */
-    breaks?: boolean | undefined;
+    breaks?: boolean;
     /**
      * CSS language prefix for fenced blocks.
      */
-    langPrefix?: string | undefined;
+    langPrefix?: string;
     /**
      * Autoconvert URL-like text to links.
      */
-    linkify?: boolean | undefined;
+    linkify?: boolean;
     /**
      * Enable some language-neutral replacement + quotes beautification.
      */
-    typographer?: boolean | undefined;
+    typographer?: boolean;
     /**
      * Double + single quotes replacement pairs.
      */
-    quotes?: string | undefined;
+    quotes?: string;
     /**
      * The Uttori specific configuration.
      */
@@ -106,7 +81,7 @@ export type MarkdownItRendererConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The MarkdownIt configuration.
      */
@@ -185,7 +160,7 @@ declare class MarkdownItRenderer {
      * MarkdownItRenderer.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, MarkdownItRendererConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-markdown-it", MarkdownItRendererConfig>): void;
+    static validateConfig(config: Record<string, MarkdownItRendererConfig>, _context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} context A Uttori-like context.
@@ -208,7 +183,7 @@ declare class MarkdownItRenderer {
      * MarkdownItRenderer.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-markdown-it", MarkdownItRendererConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): void;
     /**
      * Renders Markdown for a provided string with a provided context.
      * @param {string} content Markdown content to be converted to HTML.
@@ -225,7 +200,7 @@ declare class MarkdownItRenderer {
      * MarkdownItRenderer.renderContent(content, context);
      * @static
      */
-    static renderContent(content: string, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-markdown-it", MarkdownItRendererConfig>): string;
+    static renderContent(content: string, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): string;
     /**
      * Renders Markdown for a collection of Uttori documents with a provided context.
      * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
@@ -242,7 +217,7 @@ declare class MarkdownItRenderer {
      * MarkdownItRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-markdown-it", MarkdownItRendererConfig>): import("../wiki.js").UttoriWikiDocument[];
+    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
     /**
      * Renders Markdown for a provided string with a provided MarkdownIt configuration.
      * @param {string} content Markdown content to be converted to HTML.
@@ -263,7 +238,7 @@ declare class MarkdownItRenderer {
      * @see {@link https://markdown-it.github.io/markdown-it/#MarkdownIt.parse|MarkdownIt.parse}
      * @static
      */
-    static parse(content: string, config?: MarkdownItRendererConfig): import("markdown-it/index.js").Token[];
+    static parse(content: string, config?: MarkdownItRendererConfig): import('markdown-it/index.js').Token[];
     /**
      * Removes empty links, as these have caused issues.
      * Find missing links, and link them to the slug from the provided text.
@@ -281,8 +256,9 @@ declare class MarkdownItRenderer {
      * viewModel = MarkdownItRenderer.viewModelDetail(viewModel, context);
      * @static
      */
-    static viewModelDetail(viewModel: import("../wiki.js").UttoriWikiViewModel, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-markdown-it", MarkdownItRendererConfig>): import("../wiki.js").UttoriWikiViewModel | {
+    static viewModelDetail(viewModel: import('../wiki.js').UttoriWikiViewModel, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiViewModel | {
         toc: string;
     };
 }
+export default MarkdownItRenderer;
 //# sourceMappingURL=renderer-markdown-it.d.ts.map

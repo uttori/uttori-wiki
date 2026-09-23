@@ -1,4 +1,3 @@
-export default fyShuffle;
 /**
  * Fisher-Yates Shuffle (aka Knuth Shuffle)
  * The algorithm continually determines the next element by randomly drawing an element from the array until no elements remain.
@@ -11,5 +10,6 @@ export default fyShuffle;
  * @see {@link https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle|Fisher-Yates Shuffle (aka Knuth Shuffle)}
  * @see {@link https://bost.ocks.org/mike/shuffle/|Fisher–Yates Shuffle}
  */
-declare function fyShuffle<T>(array: T[]): T[];
+declare const fyShuffle: <T>(array: T[]) => T[];
+export default fyShuffle;
 //# sourceMappingURL=fisher-yates-shuffle.d.ts.map

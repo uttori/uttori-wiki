@@ -1,54 +1,47 @@
-export default TagRoutesPlugin;
 export type TagRoutesPluginConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The default title for tag pages.
      */
-    title?: string | undefined;
+    title?: string;
     /**
      * The maximum number of documents to return for a tag.
      */
-    limit?: number | undefined;
+    limit?: number;
     /**
      * Middleware for tag routes.
      */
-    middleware?: Record<string, import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[]> | undefined;
+    middleware?: Record<string, import("express").RequestHandler[]>;
     /**
      * A replacement route for the tag index route.
      */
-    tagIndexRoute?: string | undefined;
+    tagIndexRoute?: string;
     /**
      * A replacement route for the tag show route.
      */
-    tagRoute?: string | undefined;
+    tagRoute?: string;
     /**
      * A replacement route for the tag index route.
      */
-    apiRoute?: string | undefined;
+    apiRoute?: string;
     /**
      * A replacement route handler for the tag index route.
      */
-    tagIndexRequestHandler?: TagRoutesRequestHandler | undefined;
+    tagIndexRequestHandler?: TagRoutesRequestHandler;
     /**
      * A replacement route handler for the tag show route.
      */
-    tagRequestHandler?: TagRoutesRequestHandler | undefined;
+    tagRequestHandler?: TagRoutesRequestHandler;
     /**
      * A request handler for the API route.
      */
-    apiRequestHandler?: TagRoutesRequestHandler | undefined;
+    apiRequestHandler?: TagRoutesRequestHandler;
 };
-/**
- * Uttori context narrowed to this plugin's config shape.
- */
-export type TagRoutesContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-tag-routes", TagRoutesPluginConfig>;
-/**
- * Builds an Express handler for a tag route.
- */
-export type TagRoutesRequestHandler = (context: TagRoutesContext) => import("express").RequestHandler;
+export type TagRoutesContext = import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>;
+export type TagRoutesRequestHandler = (context: TagRoutesContext) => import('express').RequestHandler;
 /**
  * @typedef {object} TagRoutesPluginConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
@@ -146,7 +139,7 @@ declare class TagRoutesPlugin {
      * TagRoutesPlugin.bindRoutes(plugin);
      * @static
      */
-    static bindRoutes(server: import("express").Application, context: TagRoutesContext): void;
+    static bindRoutes(server: import('express').Application, context: TagRoutesContext): void;
     /**
      * Normalize document tags before the document is saved.
      * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
@@ -154,7 +147,7 @@ declare class TagRoutesPlugin {
      * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
      * @static
      */
-    static normalizeDocumentTags(document: import("../wiki.js").UttoriWikiDocument, _context: TagRoutesContext): import("../wiki.js").UttoriWikiDocument;
+    static normalizeDocumentTags(document: import('../wiki.js').UttoriWikiDocument, _context: TagRoutesContext): import('../wiki.js').UttoriWikiDocument;
     /**
      * Returns the documents with the provided tag, up to the provided limit.
      * This will exclude any documents that have slugs in the `config.ignoreSlugs` array.
@@ -169,7 +162,7 @@ declare class TagRoutesPlugin {
      * plugin.getTaggedDocuments('example', 10);
      * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
      */
-    static getTaggedDocuments(context: TagRoutesContext, tag: string): Promise<import("../wiki.js").UttoriWikiDocument[]>;
+    static getTaggedDocuments(context: TagRoutesContext, tag: string): Promise<import('../wiki.js').UttoriWikiDocument[]>;
     /**
      * Renders the tag index page with the `tags` template.
      *
@@ -179,7 +172,7 @@ declare class TagRoutesPlugin {
      * @returns {import('express').RequestHandler} The function to pass to Express.
      * @static
      */
-    static tagIndexRequestHandler(context: TagRoutesContext): import("express").RequestHandler;
+    static tagIndexRequestHandler(context: TagRoutesContext): import('express').RequestHandler;
     /**
      * Renders the tag detail page with `tag` template.
      * Sets the `X-Robots-Tag` header to `noindex`.
@@ -191,6 +184,7 @@ declare class TagRoutesPlugin {
      * @returns {import('express').RequestHandler} The function to pass to Express.
      * @static
      */
-    static tagRequestHandler(context: TagRoutesContext): import("express").RequestHandler;
+    static tagRequestHandler(context: TagRoutesContext): import('express').RequestHandler;
 }
+export default TagRoutesPlugin;
 //# sourceMappingURL=tag-routes.d.ts.map

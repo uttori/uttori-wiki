@@ -1,22 +1,21 @@
-export default SearchLunrPlugin;
 export type LunrLocale = Function;
 export type SearchLunrConfig = {
     /**
      * A list of locales to add support for from lunr-languages.
      */
-    lunr_locales?: string[] | undefined;
+    lunr_locales?: string[];
     /**
      * A list of locales to add support for from lunr-languages.
      */
-    lunrLocaleFunctions?: Function[] | undefined;
+    lunrLocaleFunctions?: LunrLocale[];
     /**
      * A list of slugs to not consider when indexing documents.
      */
-    ignoreSlugs?: string[] | undefined;
+    ignoreSlugs?: string[];
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
 };
 /**
  * @typedef {Function} LunrLocale
@@ -89,6 +88,7 @@ declare class SearchLunrPlugin {
      * ```
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", SearchLunrConfig>): Promise<void>;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', SearchLunrConfig>): Promise<void>;
 }
+export default SearchLunrPlugin;
 //# sourceMappingURL=search-provider-lunr.d.ts.map

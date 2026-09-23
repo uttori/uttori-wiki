@@ -1,4 +1,5 @@
-export default SqlWhereParser;
+import Operator from './operator.js';
+import type { SqlWhereParserEvaluator, ParserOperand } from '../../../dist/custom.d.ts';
 export type SqlWhereParserConfig = {
     /**
      * A collection of operators in precedence order.
@@ -7,7 +8,7 @@ export type SqlWhereParserConfig = {
     /**
      * A Tokenizer config.
      */
-    tokenizer: import("./tokenizer.js").TokenizeThisConfig;
+    tokenizer: import('./tokenizer.js').TokenizeThisConfig;
     /**
      * Wraps queries in surround parentheses when true.
      */
@@ -33,24 +34,17 @@ export type SqlWhereParserConfig = {
  * @class
  */
 declare class SqlWhereParser {
-    /**
-     * A default fallback evaluator for the parse function.
-     * @param {number|string|symbol} operatorValue The operator to evaluate.
-     * @param {Array<ParserOperand>} operands The list of operands.
-     * @returns {ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
-     */
-    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<ParserOperand>) => ParserOperand;
+    /** @type {import('./tokenizer.js').TokenizeThis} Tokenizer instance. */
+    tokenizer: import('./tokenizer.js').TokenizeThis;
+    /** @type {Record<string | symbol, Operator>} The operators from config converted to Operator objects. */
+    operators: Record<string | symbol, Operator>;
+    config: SqlWhereParserConfig;
     /**
      * Creates an instance of SqlWhereParser.
      * @param {SqlWhereParserConfig} [config] - A configuration object.
      * @class
      */
     constructor(config?: SqlWhereParserConfig);
-    /** @type {import('./tokenizer.js').TokenizeThis} Tokenizer instance. */
-    tokenizer: import("./tokenizer.js").TokenizeThis;
-    /** @type {Record<string | symbol, Operator>} The operators from config converted to Operator objects. */
-    operators: Record<string | symbol, Operator>;
-    config: SqlWhereParserConfig;
     /**
      * Parse a SQL statement with an evaluator function. Uses an implementation of the Shunting-Yard Algorithm.
      * @param {string} sql Query string to process.
@@ -73,8 +67,13 @@ declare class SqlWhereParser {
      * @returns {Operator|null} The operator from the list of operators.
      */
     getOperator: (operatorValue: number | string | symbol) => Operator | null;
+    /**
+     * A default fallback evaluator for the parse function.
+     * @param {number|string|symbol} operatorValue The operator to evaluate.
+     * @param {Array<ParserOperand>} operands The list of operands.
+     * @returns {ParserOperand} Either comma seperated values concated, or an object with the key of the operator and operands as the value.
+     */
+    static defaultEvaluator: (operatorValue: number | string | symbol, operands: Array<ParserOperand>) => ParserOperand;
 }
-import Operator from './operator.js';
-import type { ParserOperand } from '../../../dist/custom.d.ts';
-import type { SqlWhereParserEvaluator } from '../../../dist/custom.d.ts';
+export default SqlWhereParser;
 //# sourceMappingURL=where-parser.d.ts.map

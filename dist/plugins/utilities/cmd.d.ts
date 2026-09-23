@@ -11,11 +11,11 @@
  * const result = await cmd({ file: 'wget', args: ['-O', localImagePath, imageURL] }, { log: (data) => console.log(data) });
  * console.log(result);
  */
-export function cmd(command: {
+export declare function cmd(command: {
     file: string;
     args?: string[];
 }, { log, timeout }?: {
-    log?: Function | undefined;
-    timeout?: number | undefined;
+    log?: Function;
+    timeout?: number;
 }): Promise<string>;
 //# sourceMappingURL=cmd.d.ts.map

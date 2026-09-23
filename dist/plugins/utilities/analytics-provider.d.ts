@@ -1,4 +1,3 @@
-export default AnalyticsProvider;
 export type AnalyticsProviderConfig = {
     /**
      * The directory to store the JSON file containing the page view analytics.
@@ -7,11 +6,11 @@ export type AnalyticsProviderConfig = {
     /**
      * The file name of the file containing the page view analytics.
      */
-    name?: string | undefined;
+    name?: string;
     /**
      * The file extension of the file containing the page view analytics.
      */
-    extension?: string | undefined;
+    extension?: string;
 };
 export type AnalyticsProviderPageVisits = Record<string, number>;
 /**
@@ -34,28 +33,19 @@ export type AnalyticsProviderPageVisits = Record<string, number>;
  * @class
  */
 declare class AnalyticsProvider {
+    config: {
+        directory: string;
+        name: string;
+        extension: string;
+    };
+    /** @type {AnalyticsProviderPageVisits} */
+    pageVisits: AnalyticsProviderPageVisits;
     /**
      * Creates an instance of AnalyticsProvider.
      * @param {AnalyticsProviderConfig} config A configuration object.
      * @class
      */
     constructor(config: AnalyticsProviderConfig);
-    config: {
-        /**
-         * The directory to store the JSON file containing the page view analytics.
-         */
-        directory: string;
-        /**
-         * The file name of the file containing the page view analytics.
-         */
-        name: string;
-        /**
-         * The file extension of the file containing the page view analytics.
-         */
-        extension: string;
-    };
-    /** @type {AnalyticsProviderPageVisits} */
-    pageVisits: AnalyticsProviderPageVisits;
     /**
      * Updates the view count for a given document slug.
      * @param {string} slug The slug of the document to be updated.
@@ -85,4 +75,5 @@ declare class AnalyticsProvider {
         count: number;
     }[];
 }
+export default AnalyticsProvider;
 //# sourceMappingURL=analytics-provider.d.ts.map

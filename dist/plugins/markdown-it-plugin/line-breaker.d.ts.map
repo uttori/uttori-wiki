@@ -1,1 +1,1 @@
-{"version":3,"file":"line-breaker.d.ts","sourceRoot":"","sources":["../../../src/plugins/markdown-it-plugin/line-breaker.js"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,mCAHW,OAAO,sBAAsB,EAAE,SAAS,QA+ClD"}
+{"version":3,"file":"line-breaker.d.ts","sourceRoot":"","sources":["../../../src/plugins/markdown-it-plugin/line-breaker.js"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,wBAAgB,WAAW,CAAC,KAAK,EAHtB,OAAO,sBAAsB,EAAE,SAGT,QA4ChC"}

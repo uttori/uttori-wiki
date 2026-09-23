@@ -1,4 +1,3 @@
-export default StorageProviderJsonFilePlugin;
 /**
  * Uttori Storage Provider - JSON File
  * @example <caption>Plugin</caption>
@@ -23,7 +22,7 @@ declare class StorageProviderJsonFilePlugin {
      * const config = { ...StorageProviderJsonFilePlugin.defaultConfig(), ...context.config[StorageProviderJsonFilePlugin.configKey] };
      * @static
      */
-    static defaultConfig(): import("../plugins/storeage-provider-json/storage-provider-file.js").StorageProviderJsonFileConfig;
+    static defaultConfig(): import('../plugins/storeage-provider-json/storage-provider-file.js').StorageProviderJsonFileConfig;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-storage-provider-json-file', import('../plugins/storeage-provider-json/storage-provider-file.js').StorageProviderJsonFileConfig>} context A Uttori-like context.
@@ -51,6 +50,7 @@ declare class StorageProviderJsonFilePlugin {
      * StorageProviderJsonFilePlugin.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-storage-provider-json-file", import("../plugins/storeage-provider-json/storage-provider-file.js").StorageProviderJsonFileConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-storage-provider-json-file', import('../plugins/storeage-provider-json/storage-provider-file.js').StorageProviderJsonFileConfig>): void;
 }
+export default StorageProviderJsonFilePlugin;
 //# sourceMappingURL=storage-provider-json-file.d.ts.map

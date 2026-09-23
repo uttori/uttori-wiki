@@ -1,9 +1,8 @@
-export default DownloadRouter;
 export type DownloadRouterConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * Directory files will be downloaded from.
      */
@@ -19,7 +18,7 @@ export type DownloadRouterConfig = {
     /**
      * Custom Middleware for the Upload route
      */
-    middleware: import("express").RequestHandler[];
+    middleware: import('express').RequestHandler[];
 };
 /**
  * @typedef {object} DownloadRouterConfig
@@ -125,6 +124,7 @@ declare class DownloadRouter {
      */
     static download(context: {
         config: Record<string, DownloadRouterConfig>;
-    }): import("express").RequestHandler;
+    }): import('express').RequestHandler;
 }
+export default DownloadRouter;
 //# sourceMappingURL=download-route.d.ts.map

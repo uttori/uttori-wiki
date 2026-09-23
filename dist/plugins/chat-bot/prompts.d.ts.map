@@ -1,1 +1,1 @@
-{"version":3,"file":"prompts.d.ts","sourceRoot":"","sources":["../../../src/plugins/chat-bot/prompts.js"],"names":[],"mappings":"AAIA;;;;;;;GAOG;AACH,kDANW,MAAM,SACN,MAAM,EAAE,QAEhB;IAAqB,oBAAoB,EAAjC,MAAM;CACd,GAAU,OAAO,mBAAmB,EAAE,cAAc,EAAE,CAmFxD"}
+{"version":3,"file":"prompts.d.ts","sourceRoot":"","sources":["../../../src/plugins/chat-bot/prompts.js"],"names":[],"mappings":"AAIA;;;;;;;GAOG;AACH,wBAAgB,mBAAmB,CAAC,YAAY,EANrC,MAMqC,EAAE,KAAK,EAL5C,MAAM,EAKsC,EAAE,IAAI,EAH1D;IAAqB,oBAAoB,EAAjC,MAAM,CACd;CAE0D,GAFhD,OAAO,mBAAmB,EAAE,cAAc,EAAE,CAmFxD"}

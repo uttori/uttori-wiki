@@ -1,9 +1,8 @@
-export default MCPProvider;
 export type MCPProviderConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The MCP server name advertised to clients.
      */
@@ -39,18 +38,12 @@ export type MCPProviderConfig = {
     /**
      * Custom middleware for the HTTP route.
      */
-    middleware: import("express").RequestHandler[];
+    middleware: import('express').RequestHandler[];
 };
-/**
- * Uttori context narrowed to this plugin's config shape.
- */
-export type MCPProviderContext = import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-mcp-provider", MCPProviderConfig>;
-export type McpSdkServer = import("@modelcontextprotocol/sdk/server/index.js").Server;
-export type McpStdioServerTransport = import("@modelcontextprotocol/sdk/server/stdio.js").StdioServerTransport;
-export type McpStreamableHttpServerTransport = import("@modelcontextprotocol/sdk/server/streamableHttp.js").StreamableHTTPServerTransport;
-/**
- * MCP SDK request schema constants used by {@link MCPProvider.buildServer}.
- */
+export type MCPProviderContext = import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-mcp-provider', MCPProviderConfig>;
+export type McpSdkServer = import('@modelcontextprotocol/sdk/server/index.js').Server;
+export type McpStdioServerTransport = import('@modelcontextprotocol/sdk/server/stdio.js').StdioServerTransport;
+export type McpStreamableHttpServerTransport = import('@modelcontextprotocol/sdk/server/streamableHttp.js').StreamableHTTPServerTransport;
 export type McpSdkSchemas = {
     /**
      * The list-tools request schema.
@@ -77,13 +70,10 @@ export type McpSdkSchemas = {
      */
     GetPromptRequestSchema: object;
 };
-export type McpCallToolRequest = import("@modelcontextprotocol/sdk/types.js").CallToolRequest;
-export type McpReadResourceRequest = import("@modelcontextprotocol/sdk/types.js").ReadResourceRequest;
-export type McpGetPromptRequest = import("@modelcontextprotocol/sdk/types.js").GetPromptRequest;
-export type McpServerCapabilities = import("@modelcontextprotocol/sdk/types.js").ServerCapabilities;
-/**
- * MCP server metadata passed to the SDK constructor.
- */
+export type McpCallToolRequest = import('@modelcontextprotocol/sdk/types.js').CallToolRequest;
+export type McpReadResourceRequest = import('@modelcontextprotocol/sdk/types.js').ReadResourceRequest;
+export type McpGetPromptRequest = import('@modelcontextprotocol/sdk/types.js').GetPromptRequest;
+export type McpServerCapabilities = import('@modelcontextprotocol/sdk/types.js').ServerCapabilities;
 export type McpSdkServerInfo = {
     /**
      * The server name.
@@ -94,49 +84,12 @@ export type McpSdkServerInfo = {
      */
     version: string;
 };
-/**
- * Options passed when constructing an MCP server instance.
- */
 export type McpSdkServerOptions = {
     /**
      * Advertised server capabilities.
      */
-    capabilities?: {
-        experimental?: {
-            [x: string]: object;
-        } | undefined;
-        logging?: object | undefined;
-        completions?: object | undefined;
-        prompts?: {
-            listChanged?: boolean | undefined;
-        } | undefined;
-        resources?: {
-            subscribe?: boolean | undefined;
-            listChanged?: boolean | undefined;
-        } | undefined;
-        tools?: {
-            listChanged?: boolean | undefined;
-        } | undefined;
-        tasks?: {
-            [x: string]: unknown;
-            list?: object | undefined;
-            cancel?: object | undefined;
-            requests?: {
-                [x: string]: unknown;
-                tools?: {
-                    [x: string]: unknown;
-                    call?: object | undefined;
-                } | undefined;
-            } | undefined;
-        } | undefined;
-        extensions?: {
-            [x: string]: object;
-        } | undefined;
-    } | undefined;
+    capabilities?: McpServerCapabilities;
 };
-/**
- * Lazily loaded MCP SDK modules used by the provider transports.
- */
 export type McpSdkModule = {
     /**
      * MCP Server constructor loaded from the SDK.
@@ -155,9 +108,6 @@ export type McpSdkModule = {
      */
     schemas: McpSdkSchemas;
 };
-/**
- * MCP tool call payload returned by {@link MCPProvider.callTool}.
- */
 export type McpToolResultContent = {
     /**
      * The content block type.
@@ -168,9 +118,6 @@ export type McpToolResultContent = {
      */
     text: string;
 };
-/**
- * MCP tool call payload returned by {@link MCPProvider.callTool}.
- */
 export type McpToolResult = {
     /**
      * The tool result content blocks.
@@ -181,9 +128,6 @@ export type McpToolResult = {
      */
     isError: boolean;
 };
-/**
- * Document summary returned by the `search-documents` hook.
- */
 export type McpWikiDocumentSummary = {
     /**
      * The document id.
@@ -202,18 +146,15 @@ export type McpWikiDocumentSummary = {
      */
     update_date: number;
 };
-/**
- * Arguments accepted by the bundled wiki assistant prompt.
- */
 export type McpPromptArguments = {
     /**
      * The user question.
      */
-    query?: string | undefined;
+    query?: string;
     /**
      * Optional document slugs to focus on.
      */
-    slugs?: string | string[] | undefined;
+    slugs?: string | string[];
 };
 /**
  * Uttori MCP Provider.
@@ -284,7 +225,7 @@ declare class MCPProvider {
      * @returns {import('./chat-bot/tool-registry.js').McpTool[]} The MCP tool descriptors.
      * @static
      */
-    static listTools(): import("./chat-bot/tool-registry.js").McpTool[];
+    static listTools(): import('./chat-bot/tool-registry.js').McpTool[];
     /**
      * Execute a wiki tool and wrap the result in an MCP `CallToolResult`.
      * @param {string} name The tool name.
@@ -360,20 +301,20 @@ declare class MCPProvider {
      * @returns {void}
      * @static
      */
-    static bindRoutes(server: import("express").Application, context: MCPProviderContext): void;
+    static bindRoutes(server: import('express').Application, context: MCPProviderContext): void;
     /**
      * Build the Express handler for the Streamable HTTP transport (stateless mode).
      * @param {MCPProviderContext} context A Uttori-like context.
      * @returns {import('express').RequestHandler} The Express request handler.
      * @static
      */
-    static httpHandler(context: MCPProviderContext): import("express").RequestHandler;
+    static httpHandler(context: MCPProviderContext): import('express').RequestHandler;
     /**
      * Build an Express handler that rejects unsupported HTTP methods for the stateless transport.
      * @returns {import('express').RequestHandler} The Express request handler.
      * @static
      */
-    static methodNotAllowedHandler(): import("express").RequestHandler;
+    static methodNotAllowedHandler(): import('express').RequestHandler;
     /**
      * Start the stdio transport when enabled (for CLI / child-process integrations).
      * @param {import('http').Server} _server An Express server instance (unused).
@@ -381,6 +322,7 @@ declare class MCPProvider {
      * @returns {Promise<void>}
      * @static
      */
-    static bindServer(_server: import("http").Server, context: MCPProviderContext): Promise<void>;
+    static bindServer(_server: import('http').Server, context: MCPProviderContext): Promise<void>;
 }
+export default MCPProvider;
 //# sourceMappingURL=mcp-provider.d.ts.map

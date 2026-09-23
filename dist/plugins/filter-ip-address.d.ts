@@ -1,21 +1,20 @@
-export default FilterIPAddress;
 export type FilterIPAddressConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * Directory where IP logs will be stored.
      */
-    logPath?: string | undefined;
+    logPath?: string;
     /**
      * List of IP addresses to block.
      */
-    blocklist?: string[] | undefined;
+    blocklist?: string[];
     /**
      * Whether to trust the X-Forwarded-For header.
      */
-    trustProxy?: boolean | undefined;
+    trustProxy?: boolean;
 };
 /**
  * @typedef {object} FilterIPAddressConfig
@@ -71,7 +70,7 @@ declare class FilterIPAddress {
      * FilterIPAddress.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-ip-address", FilterIPAddressConfig>): void;
+    static register(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): void;
     /**
      * Gets the real IP address from the request, considering proxy headers if configured.
      * @param {FilterIPAddressConfig} config The configuration object.
@@ -79,7 +78,7 @@ declare class FilterIPAddress {
      * @returns {string} The client's IP address.
      * @static
      */
-    static getClientIP(config: FilterIPAddressConfig, request: import("express").Request): string;
+    static getClientIP(config: FilterIPAddressConfig, request: import('express').Request): string;
     /**
      * Logs the IP address and content to a file.
      * @param {FilterIPAddressConfig} config The configuration object.
@@ -87,7 +86,7 @@ declare class FilterIPAddress {
      * @param {import('express').Request} request The content being submitted.
      * @static
      */
-    static logIPActivity(config: FilterIPAddressConfig, ip: string, request: import("express").Request): void;
+    static logIPActivity(config: FilterIPAddressConfig, ip: string, request: import('express').Request): void;
     /**
      * Validates the request IP against the blocklist and logs the activity.
      * @param {import('express').Request} request The Express request object.
@@ -95,6 +94,7 @@ declare class FilterIPAddress {
      * @returns {boolean} Returns `true` if the IP is blocklisted (invalid), `false` otherwise.
      * @static
      */
-    static validateIP(request: import("express").Request, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-ip-address", FilterIPAddressConfig>): boolean;
+    static validateIP(request: import('express').Request, context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): boolean;
 }
+export default FilterIPAddress;
 //# sourceMappingURL=filter-ip-address.d.ts.map

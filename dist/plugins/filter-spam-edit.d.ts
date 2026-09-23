@@ -4,87 +4,86 @@
  * Entries are pruned on each access. No external store required.
  * @type {Map<string, number[]>}
  */
-export const ipEditHistory: Map<string, number[]>;
-export default FilterSpamEdit;
+export declare const ipEditHistory: Map<string, number[]>;
 export type FilterSpamEditWeights = {
     /**
      * Jaccard distance weight for large content replacement. Set to 0 to disable.
      */
-    contentSimilarity?: number | undefined;
+    contentSimilarity?: number;
     /**
      * Weight for net-new external URLs added. Set to 0 to disable.
      */
-    externalLinksAdded?: number | undefined;
+    externalLinksAdded?: number;
     /**
      * Weight for a high fraction of paragraphs replaced or removed. Set to 0 to disable.
      */
-    paragraphRatio?: number | undefined;
+    paragraphRatio?: number;
     /**
      * Weight for hits from `suspiciousTermList`. Set to 0 to disable.
      */
-    suspiciousTerms?: number | undefined;
+    suspiciousTerms?: number;
     /**
      * Weight for an unusually high links-per-word ratio. Set to 0 to disable.
      */
-    linkDensity?: number | undefined;
+    linkDensity?: number;
     /**
      * Weight applied when the submitting IP exceeds `ipMaxEdits` within `ipWindowMs`. Set to 0 to disable.
      */
-    ipRateLimit?: number | undefined;
+    ipRateLimit?: number;
     /**
      * Weight for content that grows to an implausibly large multiple of the original. Set to 0 to disable.
      */
-    contentGrowth?: number | undefined;
+    contentGrowth?: number;
     /**
      * Weight for a high ratio of non-letter/number characters (obfuscation attempts). Set to 0 to disable.
      */
-    unicodeObfuscation?: number | undefined;
+    unicodeObfuscation?: number;
     /**
      * Weight for external links added to a page that was previously short. Set to 0 to disable.
      */
-    smallPageLinkSpam?: number | undefined;
+    smallPageLinkSpam?: number;
 };
 export type FilterSpamEditConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * Score (0–100 scale) at or above which the edit is blocked.
      */
-    blockThreshold?: number | undefined;
+    blockThreshold?: number;
     /**
      * Slugs known to be frequently targeted by spammers. Edits to these pages have their score multiplied by `targetedSlugMultiplier`.
      */
-    targetedSlugs?: string[] | undefined;
+    targetedSlugs?: string[];
     /**
      * Score multiplier applied when the edited slug is in `targetedSlugs`. Must be >= 1.
      */
-    targetedSlugMultiplier?: number | undefined;
+    targetedSlugMultiplier?: number;
     /**
      * Directory where blocked-edit JSON log files are written.
      */
-    logPath?: string | undefined;
+    logPath?: string;
     /**
      * Rolling time window in milliseconds for IP-based rate limiting.
      */
-    ipWindowMs?: number | undefined;
+    ipWindowMs?: number;
     /**
      * Maximum number of edits permitted from one IP within `ipWindowMs` before the `ipRateLimit` weight fires.
      */
-    ipMaxEdits?: number | undefined;
+    ipMaxEdits?: number;
     /**
      * Per-signal weight values. Set any to 0 to disable that signal entirely.
      */
-    weights?: FilterSpamEditWeights | undefined;
+    weights?: FilterSpamEditWeights;
     /**
      * Known spam keyword list used by the `suspiciousTerms` signal.
      */
-    suspiciousTermList?: string[] | undefined;
+    suspiciousTermList?: string[];
     /**
      * Word count below which the `smallPageLinkSpam` signal is active for old content.
      */
-    smallPageWordThreshold?: number | undefined;
+    smallPageWordThreshold?: number;
 };
 export type SpamSignals = {
     /**
@@ -222,7 +221,7 @@ declare class FilterSpamEdit {
      * @returns {FilterSpamEditConfig} The resolved plugin configuration.
      * @static
      */
-    static resolveConfig(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-spam-edit", FilterSpamEditConfig>): FilterSpamEditConfig;
+    static resolveConfig(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>): FilterSpamEditConfig;
     /**
      * Validates the provided configuration for required entries and correct types.
      * @param {Record<string, FilterSpamEditConfig>} config A Uttori-like context.
@@ -230,14 +229,14 @@ declare class FilterSpamEdit {
      * @throws {Error} When any required config value is missing or invalid.
      * @static
      */
-    static validateConfig(config: Record<string, FilterSpamEditConfig>, _context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-spam-edit", FilterSpamEditConfig>): void;
+    static validateConfig(config: Record<string, FilterSpamEditConfig>, _context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>): void;
     /**
      * Registers the plugin with the provided hook system, binding configured events to static methods.
      * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>} context A Uttori-like context.
      * @throws {Error} When the context or hook system is missing.
      * @static
      */
-    static register(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-spam-edit", FilterSpamEditConfig>): void;
+    static register(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>): void;
     /**
      * Normalizes wiki text for content-similarity comparison.
      * Strips markdown syntax, HTML tags, collapses whitespace, and lowercases.
@@ -388,8 +387,9 @@ declare class FilterSpamEdit {
      * @returns {Promise<boolean>} Resolves to `true` to block the save, `false` to allow it.
      * @static
      */
-    static validateEdit(request: import("express").Request<{
+    static validateEdit(request: import('express').Request<{
         slug: string;
-    }, {}, import("../wiki.js").UttoriWikiDocument>, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-filter-spam-edit", FilterSpamEditConfig>): Promise<boolean>;
+    }, {}, import('../wiki.js').UttoriWikiDocument>, context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-spam-edit', FilterSpamEditConfig>): Promise<boolean>;
 }
+export default FilterSpamEdit;
 //# sourceMappingURL=filter-spam-edit.d.ts.map

@@ -1,20 +1,16 @@
-export default StorageProvider;
-/**
- * The configuration object for the StorageProvider.
- */
 export type StorageProviderConfig = {
     /**
      * Should update times be marked at the time of edit.
      */
-    updateTimestamps?: boolean | undefined;
+    updateTimestamps?: boolean;
     /**
      * Should history entries be created.
      */
-    useHistory?: boolean | undefined;
+    useHistory?: boolean;
     /**
      * The events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
 };
 /**
  * @typedef StorageProviderConfig The configuration object for the StorageProvider.
@@ -32,32 +28,23 @@ export type StorageProviderConfig = {
  * @class
  */
 declare class StorageProvider {
+    config: {
+        events?: Record<string, string[]>;
+        updateTimestamps: boolean;
+        useHistory: boolean;
+    };
+    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of documents where the slug is the key and the value is the document. */
+    documents: Record<string, import('../../wiki.js').UttoriWikiDocument>;
+    /** @type {Record<string, string[]>} The collection of document histories indexes. */
+    history: Record<string, string[]>;
+    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of document revisions by timestamp. */
+    histories: Record<string, import('../../wiki.js').UttoriWikiDocument>;
     /**
      * Creates an instance of StorageProvider.
      * @param {StorageProviderConfig} [config] A configuration object.
      * @class
      */
     constructor(config?: StorageProviderConfig);
-    config: {
-        /**
-         * Should update times be marked at the time of edit.
-         */
-        updateTimestamps: boolean;
-        /**
-         * Should history entries be created.
-         */
-        useHistory: boolean;
-        /**
-         * The events to listen for.
-         */
-        events?: Record<string, string[]> | undefined;
-    };
-    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of documents where the slug is the key and the value is the document. */
-    documents: Record<string, import("../../wiki.js").UttoriWikiDocument>;
-    /** @type {Record<string, string[]>} The collection of document histories indexes. */
-    history: Record<string, string[]>;
-    /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} The collection of document revisions by timestamp. */
-    histories: Record<string, import("../../wiki.js").UttoriWikiDocument>;
     /**
      * Returns all documents.
      * @returns {Promise<Record<string, import('../../wiki.js').UttoriWikiDocument>>} All documents.
@@ -67,19 +54,19 @@ declare class StorageProvider {
      * ➜ { 'first-document': { slug: 'first-document', ... }, ... }
      * ```
      */
-    all: () => Promise<Record<string, import("../../wiki.js").UttoriWikiDocument>>;
+    all: () => Promise<Record<string, import('../../wiki.js').UttoriWikiDocument>>;
     /**
      * Returns all documents matching a given query.
      * @param {string} query The conditions on which documents should be returned.
      * @returns {Promise<number | import('../../wiki.js').UttoriWikiDocument[]>} The items matching the supplied query.
      */
-    getQuery: (query: string) => Promise<number | import("../../wiki.js").UttoriWikiDocument[]>;
+    getQuery: (query: string) => Promise<number | import('../../wiki.js').UttoriWikiDocument[]>;
     /**
      * Returns a document for a given slug.
      * @param {string} slug The slug of the document to be returned.
      * @returns {Promise<import('../../wiki.js').UttoriWikiDocument|undefined>} The returned UttoriDocument.
      */
-    get: (slug: string) => Promise<import("../../wiki.js").UttoriWikiDocument | undefined>;
+    get: (slug: string) => Promise<import('../../wiki.js').UttoriWikiDocument | undefined>;
     /**
      * Returns the history of edits for a given slug.
      * @param {string} slug The slug of the document to get history for.
@@ -96,12 +83,12 @@ declare class StorageProvider {
     getRevision: ({ slug, revision }: {
         slug: string;
         revision: string | number;
-    }) => Promise<import("../../wiki.js").UttoriWikiDocument | undefined>;
+    }) => Promise<import('../../wiki.js').UttoriWikiDocument | undefined>;
     /**
      * Saves a document to internal array.
      * @param {import('../../wiki.js').UttoriWikiDocument} document The document to be added to the collection.
      */
-    add: (document: import("../../wiki.js").UttoriWikiDocument) => Promise<void>;
+    add: (document: import('../../wiki.js').UttoriWikiDocument) => Promise<void>;
     /**
      * Updates a document and saves to memory.
      * @private
@@ -118,7 +105,7 @@ declare class StorageProvider {
      * @param {string} params.originalSlug The original slug identifying the document, or the slug if it has not changed.
      */
     update: ({ document, originalSlug }: {
-        document: import("../../wiki.js").UttoriWikiDocument;
+        document: import('../../wiki.js').UttoriWikiDocument;
         originalSlug: string;
     }) => Promise<void>;
     /**
@@ -139,8 +126,9 @@ declare class StorageProvider {
      */
     updateHistory: ({ slug, content, originalSlug }: {
         slug: string;
-        content: import("../../wiki.js").UttoriWikiDocument;
-        originalSlug?: string | undefined;
+        content: import('../../wiki.js').UttoriWikiDocument;
+        originalSlug?: string;
     }) => Promise<void>;
 }
+export default StorageProvider;
 //# sourceMappingURL=storage-provider-memory.d.ts.map

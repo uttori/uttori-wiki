@@ -1,4 +1,3 @@
-export default StorageProviderJsonMemoryPlugin;
 /**
  * Uttori Storage Provider - JSON Memory
  * @example <caption>StorageProviderJsonMemoryPlugin</caption>
@@ -23,7 +22,7 @@ declare class StorageProviderJsonMemoryPlugin {
      * const config = { ...StorageProviderJsonMemoryPlugin.defaultConfig(), ...context.config[StorageProviderJsonMemoryPlugin.configKey] };
      * @static
      */
-    static defaultConfig(): import("./storeage-provider-json/storage-provider-memory.js").StorageProviderConfig;
+    static defaultConfig(): import('./storeage-provider-json/storage-provider-memory.js').StorageProviderConfig;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-storage-provider-json-memory', import('../plugins/storeage-provider-json/storage-provider-memory.js').StorageProviderConfig>} context A Uttori-like context.
@@ -50,6 +49,7 @@ declare class StorageProviderJsonMemoryPlugin {
      * StorageProviderJsonMemoryPlugin.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-storage-provider-json-memory", import("../plugins/storeage-provider-json/storage-provider-memory.js").StorageProviderConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-storage-provider-json-memory', import('../plugins/storeage-provider-json/storage-provider-memory.js').StorageProviderConfig>): void;
 }
+export default StorageProviderJsonMemoryPlugin;
 //# sourceMappingURL=storage-provider-json-memory.d.ts.map

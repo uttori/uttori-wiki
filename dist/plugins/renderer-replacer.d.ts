@@ -1,4 +1,3 @@
-export default ReplacerRenderer;
 export type ReplacerRendererRule = {
     /**
      * The test to use for replacing content.
@@ -17,7 +16,7 @@ export type ReplacerRendererConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
 };
 /**
  * @typedef {object} ReplacerRendererRule
@@ -61,7 +60,7 @@ declare class ReplacerRenderer {
      * ReplacerRenderer.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, ReplacerRendererConfig>, _context?: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): void;
+    static validateConfig(config: Record<string, ReplacerRendererConfig>, _context?: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>} context A Uttori-like context.
@@ -84,7 +83,7 @@ declare class ReplacerRenderer {
      * ReplacerRenderer.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): void;
     /**
      * Replace content in a provided string with a provided context.
      * @param {string} content Content to be converted to HTML.
@@ -101,7 +100,7 @@ declare class ReplacerRenderer {
      * ReplacerRenderer.renderContent(content, context);
      * @static
      */
-    static renderContent(content: string, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): string;
+    static renderContent(content: string, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): string;
     /**
      * Replace content in a collection of Uttori documents with a provided context.
      * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
@@ -118,7 +117,7 @@ declare class ReplacerRenderer {
      * ReplacerRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-replacer", ReplacerRendererConfig>): import("../wiki.js").UttoriWikiDocument[];
+    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
     /**
      * Replace content in a provided string with a provided set of rules.
      * @param {string} content Content to be searched through to make replacements.
@@ -130,4 +129,5 @@ declare class ReplacerRenderer {
      */
     static render(content: string, config: ReplacerRendererConfig): string;
 }
+export default ReplacerRenderer;
 //# sourceMappingURL=renderer-replacer.d.ts.map

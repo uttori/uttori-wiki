@@ -1,4 +1,3 @@
-export default SitemapGenerator;
 export type SitemapGeneratorUrl = {
     /**
      * The URL of the document.
@@ -15,14 +14,14 @@ export type SitemapGeneratorUrl = {
     /**
      * The change frequency of the document.
      */
-    changefreq?: string | undefined;
+    changefreq?: string;
 };
 export type SitemapUrlFilter = (route: SitemapGeneratorUrl) => boolean;
 export type SitemapGeneratorConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * A collection of Uttori documents.
      */
@@ -30,7 +29,7 @@ export type SitemapGeneratorConfig = {
     /**
      * A collection of Regular Expression URL filters to exclude documents.
      */
-    url_filters?: RegExp[] | undefined;
+    url_filters?: RegExp[];
     /**
      * The base URL (ie https://domain.tld) for all documents.
      */
@@ -42,23 +41,23 @@ export type SitemapGeneratorConfig = {
     /**
      * The file name to use for the generated file.
      */
-    filename?: string | undefined;
+    filename?: string;
     /**
      * The file extension to use for the generated file.
      */
-    extension?: string | undefined;
+    extension?: string;
     /**
      * Sitemap default page priority.
      */
-    page_priority?: string | undefined;
+    page_priority?: string;
     /**
      * Sitemap XML Header, standard XML sitemap header is the default.
      */
-    xml_header?: string | undefined;
+    xml_header?: string;
     /**
      * Sitemap XML Footer, standard XML sitemap closing tag is the default.
      */
-    xml_footer?: string | undefined;
+    xml_footer?: string;
 };
 /**
  * @typedef {object} SitemapGeneratorUrl
@@ -119,7 +118,7 @@ declare class SitemapGenerator {
      * @example <caption>SitemapGenerator.validateConfig(config, _context)</caption>
      * SitemapGenerator.validateConfig({ ... });
      */
-    static validateConfig(config: Record<string, SitemapGeneratorConfig>, _context?: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-generator-sitemap", SitemapGeneratorConfig>): void;
+    static validateConfig(config: Record<string, SitemapGeneratorConfig>, _context?: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>} context A Uttori-like context.
@@ -141,7 +140,7 @@ declare class SitemapGenerator {
      * SitemapGenerator.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-generator-sitemap", SitemapGeneratorConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>): void;
     /**
      * Wrapper function for calling generating and writing the sitemap file.
      * @static
@@ -162,7 +161,7 @@ declare class SitemapGenerator {
      * };
      * SitemapGenerator.callback(null, context);
      */
-    static callback(document: import("../../src/wiki.js").UttoriWikiDocument, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-generator-sitemap", SitemapGeneratorConfig>): Promise<object>;
+    static callback(document: import('../../src/wiki.js').UttoriWikiDocument, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>): Promise<object>;
     /**
      * Generates a sitemap from the provided context.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>} context A Uttori-like context.
@@ -182,6 +181,7 @@ declare class SitemapGenerator {
      * SitemapGenerator.generateSitemap(context);
      * @static
      */
-    static generateSitemap(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-generator-sitemap", SitemapGeneratorConfig>): Promise<string>;
+    static generateSitemap(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>): Promise<string>;
 }
+export default SitemapGenerator;
 //# sourceMappingURL=sitemap-generator.d.ts.map

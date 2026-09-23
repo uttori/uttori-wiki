@@ -1,4 +1,4 @@
-export default SearchProvider;
+import lunr from 'lunr';
 export type SearchLunrConfigSearchOptions = {
     /**
      * The value to search for.
@@ -7,7 +7,7 @@ export type SearchLunrConfigSearchOptions = {
     /**
      * Limit for the number of returned documents.
      */
-    limit?: number | undefined;
+    limit?: number;
 };
 /**
  * @typedef {object} SearchLunrConfigSearchOptions
@@ -26,33 +26,21 @@ export type SearchLunrConfigSearchOptions = {
  * ```
  */
 declare class SearchProvider {
+    searchTerms: {};
+    /** @type {lunr.Index} */
+    index: lunr.Index;
+    config: {
+        ignoreSlugs: string[];
+        lunr_locales: string[];
+        lunrLocaleFunctions: Function[];
+        events?: Record<string, string[]>;
+    };
     /**
      * Creates an instance of SearchProvider.
      * @class
      * @param {import('../search-provider-lunr.js').SearchLunrConfig} [config] - Configuration object for the class.
      */
-    constructor(config?: import("../search-provider-lunr.js").SearchLunrConfig);
-    searchTerms: {};
-    /** @type {lunr.Index} */
-    index: lunr.Index;
-    config: {
-        /**
-         * A list of locales to add support for from lunr-languages.
-         */
-        lunr_locales: string[];
-        /**
-         * A list of locales to add support for from lunr-languages.
-         */
-        lunrLocaleFunctions: import("../search-provider-lunr.js").LunrLocale[];
-        /**
-         * A list of slugs to not consider when indexing documents.
-         */
-        ignoreSlugs: string[];
-        /**
-         * The events to listen for.
-         */
-        events?: Record<string, string[]> | undefined;
-    };
+    constructor(config?: import('../search-provider-lunr.js').SearchLunrConfig);
     /**
      * Sets up the search provider with any `lunr_locales` supplied.
      */
@@ -66,7 +54,7 @@ declare class SearchProvider {
      * await searchProvider.buildIndex(_data, context);
      * ```
      */
-    buildIndex: (_data: any, context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
+    buildIndex: (_data: any, context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
     /**
      * Searches for documents matching the provided query with Lunr.
      * @param {SearchLunrConfigSearchOptions} options The passed in options.
@@ -74,7 +62,7 @@ declare class SearchProvider {
      * @returns {Promise<import('../../wiki.js').UttoriWikiDocument[]>} Returns an array of search results no longer than limit.
      * @async
      */
-    internalSearch: ({ query, limit }: SearchLunrConfigSearchOptions, context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<import("../../wiki.js").UttoriWikiDocument[]>;
+    internalSearch: ({ query, limit }: SearchLunrConfigSearchOptions, context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<import('../../wiki.js').UttoriWikiDocument[]>;
     /**
      * External method for searching documents matching the provided query and updates the count for the query used.
      * Uses the `internalSearch` method internally.
@@ -88,28 +76,28 @@ declare class SearchProvider {
      * ➜ [{ ref: 'first-matching-document', ... }, { ref: 'another-matching-document', ... }, ...]
      * ```
      */
-    search: ({ query, limit }: SearchLunrConfigSearchOptions, context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<import("../../wiki.js").UttoriWikiDocument[]>;
+    search: ({ query, limit }: SearchLunrConfigSearchOptions, context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<import('../../wiki.js').UttoriWikiDocument[]>;
     /**
      * Adds documents to the index.
      * For this implementation, it is rebuilding the index.
      * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
      * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
      */
-    indexAdd: (documents: import("../../wiki.js").UttoriWikiDocument[], context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
+    indexAdd: (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
     /**
      * Updates documents in the index.
      * For this implementation, it is rebuilding the index.
      * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
      * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
      */
-    indexUpdate: (documents: import("../../wiki.js").UttoriWikiDocument[], context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
+    indexUpdate: (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
     /**
      * Removes documents from the index.
      * For this implementation, it is rebuilding the index.
      * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Unused. An array of documents to be indexed.
      * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.
      */
-    indexRemove: (documents: import("../../wiki.js").UttoriWikiDocument[], context: import("../../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-search-provider-lunr", import("../search-provider-lunr.js").SearchLunrConfig>) => Promise<void>;
+    indexRemove: (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
     /**
      * Updates the search query in the query counts.
      * @param {string} query The query to increment.
@@ -127,5 +115,5 @@ declare class SearchProvider {
      */
     getPopularSearchTerms: ({ limit }: SearchLunrConfigSearchOptions) => string[];
 }
-import lunr from 'lunr';
+export default SearchProvider;
 //# sourceMappingURL=search-lunr.d.ts.map

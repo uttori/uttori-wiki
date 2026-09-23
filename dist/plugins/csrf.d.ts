@@ -1,41 +1,40 @@
-export default CsrfProtection;
 export type CsrfProtectionConfig = {
     /**
      * An object whose keys correspond to plugin methods, and whose values are arrays of hook event names to listen for.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * The hidden form field name that themes should render and that is read from the POST body on save.
      */
-    fieldName?: string | undefined;
+    fieldName?: string;
     /**
      * The HTTP request header name that JavaScript clients can use to submit the token instead of a form field.
      */
-    headerName?: string | undefined;
+    headerName?: string;
     /**
      * The key used to store the CSRF token on `request.session`. Change this if it collides with another session value.
      */
-    sessionKey?: string | undefined;
+    sessionKey?: string;
     /**
      * Number of random bytes to generate. Each byte becomes two hex characters, so the default produces a 64-character token.
      */
-    tokenBytes?: number | undefined;
+    tokenBytes?: number;
     /**
      * Ordered list of sources to search for the submitted token. The first source that contains a non-empty value is used.
      */
-    sources?: ("header" | "body")[] | undefined;
+    sources?: Array<'body' | 'header'>;
     /**
      * When `true`, a missing or unavailable `request.session` causes the token to be skipped on injection and the request to be blocked on validation. Set to `false` only if your setup guarantees cookies can never be forged (e.g. purely API clients with custom headers).
      */
-    requireSession?: boolean | undefined;
+    requireSession?: boolean;
     /**
      * When `true`, a fresh token is written to the session every time a valid save request completes. This limits replay-window but will break any browser tabs that still hold the old token. Leave `false` for typical wikis where multiple tabs are common.
      */
-    rotateOnValidation?: boolean | undefined;
+    rotateOnValidation?: boolean;
     /**
      * When `true`, the `Sec-Fetch-Site` header is also checked as a defense-in-depth measure. Requests that arrive as `cross-site` are rejected even if the CSRF token matches. Has no effect on browsers that do not send Fetch Metadata headers (e.g. some older browsers), so this is supplemental, not a replacement for token checks.
      */
-    checkFetchMetadata?: boolean | undefined;
+    checkFetchMetadata?: boolean;
 };
 export type CsrfViewModel = {
     /**
@@ -121,7 +120,7 @@ declare class CsrfProtection {
      * @returns {CsrfProtectionConfig} The resolved plugin configuration.
      * @static
      */
-    static resolveConfig(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-csrf", CsrfProtectionConfig>): CsrfProtectionConfig;
+    static resolveConfig(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>): CsrfProtectionConfig;
     /**
      * Validates the provided configuration for required entries and correct types.
      * Called automatically on the `validate-config` hook.
@@ -132,7 +131,7 @@ declare class CsrfProtection {
      * CsrfProtection.validateConfig({ [CsrfProtection.configKey]: { ...CsrfProtection.defaultConfig() } });
      * @static
      */
-    static validateConfig(config: Record<string, CsrfProtectionConfig>, _context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-csrf", CsrfProtectionConfig>): void;
+    static validateConfig(config: Record<string, CsrfProtectionConfig>, _context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>): void;
     /**
      * Registers the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>} context A Uttori-like context.
@@ -151,7 +150,7 @@ declare class CsrfProtection {
      * CsrfProtection.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-csrf", CsrfProtectionConfig>): void;
+    static register(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>): void;
     /**
      * Generates a cryptographically random CSRF token as a hexadecimal string.
      * @param {number} tokenBytes Number of random bytes to generate. The resulting hex string will be twice this length.
@@ -183,7 +182,7 @@ declare class CsrfProtection {
      * const submittedToken = CsrfProtection.getSubmittedToken(request, config);
      * @static
      */
-    static getSubmittedToken(request: import("express").Request, config: CsrfProtectionConfig): string | null;
+    static getSubmittedToken(request: import('express').Request, config: CsrfProtectionConfig): string | null;
     /**
      * Compares two normalized token strings using a constant-time comparison.
      * `crypto.timingSafeEqual` requires buffers of identical byte length, so length
@@ -217,9 +216,9 @@ declare class CsrfProtection {
      * // <%- csrf?.input || '' -%>
      * @static
      */
-    static injectToken<T extends import("../wiki.js").UttoriWikiViewModel & {
+    static injectToken<T extends import('../wiki.js').UttoriWikiViewModel & {
         csrf?: CsrfViewModel;
-    }>(viewModel: T, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-csrf", CsrfProtectionConfig>): T;
+    }>(viewModel: T, context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>): T;
     /**
      * Validation hook for the `validate-save` event.
      * Returns `true` to block the save request if any of the following conditions are met:
@@ -238,6 +237,7 @@ declare class CsrfProtection {
      * const blocked = CsrfProtection.validateToken(request, context);
      * @static
      */
-    static validateToken(request: import("express").Request, context: import("../../dist/custom.js").UttoriContextWithPluginConfig<"uttori-plugin-csrf", CsrfProtectionConfig>): boolean;
+    static validateToken(request: import('express').Request, context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-csrf', CsrfProtectionConfig>): boolean;
 }
+export default CsrfProtection;
 //# sourceMappingURL=csrf.d.ts.map

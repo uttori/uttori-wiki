@@ -1,13 +1,13 @@
-export default EJSRenderer;
+import ejs from 'ejs';
 export type EJSRendererConfig = {
     /**
      * Events to bind to.
      */
-    events?: Record<string, string[]> | undefined;
+    events?: Record<string, string[]>;
     /**
      * EJS configuration.
      */
-    ejs?: ejs.Options | undefined;
+    ejs?: ejs.Options;
 };
 /**
  * @typedef {object} EJSRendererConfig
@@ -46,7 +46,7 @@ declare class EJSRenderer {
      * EJSRenderer.validateConfig({ ... });
      * @static
      */
-    static validateConfig(config: Record<string, EJSRendererConfig>, _context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): void;
+    static validateConfig(config: Record<string, EJSRendererConfig>, _context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
      * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>} context A Uttori-like context.
@@ -69,7 +69,7 @@ declare class EJSRenderer {
      * EJSRenderer.register(context);
      * @static
      */
-    static register(context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): void;
+    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>): void;
     /**
      * Replace content in a provided string with a provided context.
      * @param {string} content Content to be converted to HTML.
@@ -86,7 +86,7 @@ declare class EJSRenderer {
      * EJSRenderer.renderContent(content, context);
      * @static
      */
-    static renderContent(content: string, context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): string;
+    static renderContent(content: string, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>): string;
     /**
      * Replace content in a collection of Uttori documents with a provided context.
      * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
@@ -103,7 +103,7 @@ declare class EJSRenderer {
      * EJSRenderer.renderCollection(collection, context);
      * @static
      */
-    static renderCollection(collection: import("../wiki.js").UttoriWikiDocument[], context: import("../../dist/custom.d.ts").UttoriContextWithPluginConfig<"uttori-plugin-renderer-ejs", EJSRendererConfig>): import("../wiki.js").UttoriWikiDocument[];
+    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-ejs', EJSRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
     /**
      * Render EJS content in a provided string.
      * @param {string} content Content to be searched through to make replacements.
@@ -115,5 +115,5 @@ declare class EJSRenderer {
      */
     static render(content: string, config: ejs.Options): string;
 }
-import ejs from 'ejs';
+export default EJSRenderer;
 //# sourceMappingURL=ejs-includes.d.ts.map
