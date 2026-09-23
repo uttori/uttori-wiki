@@ -9,6 +9,9 @@
 ## Typedefs
 
 <dl>
+<dt><a href="#AuthSimpleValidateLogin">AuthSimpleValidateLogin</a> ⇒ <code>Promise.&lt;(object|null)&gt;</code></dt>
+<dd><p>Validates a login request and returns session data, or null for invalid credentials.</p>
+</dd>
 <dt><a href="#AuthSimpleConfig">AuthSimpleConfig</a> : <code>object</code></dt>
 <dd></dd>
 </dl>
@@ -164,6 +167,18 @@ The Express route method to process the logout request and clear the session.
 ```js
 server.post('/logout', AuthSimple.login(context));
 ```
+<a name="AuthSimpleValidateLogin"></a>
+
+## AuthSimpleValidateLogin ⇒ <code>Promise.&lt;(object\|null)&gt;</code>
+Validates a login request and returns session data, or null for invalid credentials.
+
+**Kind**: global typedef  
+**Returns**: <code>Promise.&lt;(object\|null)&gt;</code> - Session data or null.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| request | <code>module:express~Request</code> | The login request. |
+
 <a name="AuthSimpleConfig"></a>
 
 ## AuthSimpleConfig : <code>object</code>
@@ -179,5 +194,5 @@ server.post('/logout', AuthSimple.login(context));
 | [logoutRedirectPath] | <code>string</code> | The path to redirect to after logging out. |
 | [loginMiddleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | The middleware to use on the login route. |
 | [logoutMiddleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | The middleware to use on the logout route. |
-| validateLogin | <code>function</code> | Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null. |
+| validateLogin | [<code>AuthSimpleValidateLogin</code>](#AuthSimpleValidateLogin) | Validation function for the login request. |
 

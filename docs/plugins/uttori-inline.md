@@ -19,7 +19,7 @@ External Domains are filtered for SEO and security.</p>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| token | <code>module:markdown-it/index.js~Token</code> | The MarkdownIt token we are reading. |
+| token | <code>module:markdown-it~Token</code> | The MarkdownIt token we are reading. |
 | key | <code>string</code> | The key is the attribute name, like `src` or `href`. |
 
 <a name="updateValue"></a>
@@ -29,7 +29,7 @@ External Domains are filtered for SEO and security.</p>
 
 | Param | Type | Description |
 | --- | --- | --- |
-| token | <code>module:markdown-it/index.js~Token</code> | The MarkdownIt token we are updating. |
+| token | <code>module:markdown-it~Token</code> | The MarkdownIt token we are updating. |
 | key | <code>string</code> | The key is the attribute name, like `src` or `href`. |
 | value | <code>string</code> | The value we want to set to the provided key. |
 
@@ -44,5 +44,5 @@ External Domains are filtered for SEO and security.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateCore</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
 

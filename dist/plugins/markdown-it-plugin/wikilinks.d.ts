@@ -1,10 +1,10 @@
 /**
  * Converts WikiLinks to anchor tags.
- * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.
+ * @param {import('markdown-it').StateInline} state State of MarkdownIt.
  * @returns {boolean} Returns true when able to parse the wikilinks.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.before|Ruler.before}
  */
-export declare function wikilinks(state: import('markdown-it/index.js').StateInline): boolean;
+export declare function wikilinks(state: import('markdown-it').StateInline): boolean;
 declare const _default: {
     wikilinks: typeof wikilinks;
 };

@@ -4,6 +4,24 @@ import { createTransport } from 'nodemailer';
 const debug = createDebug('Uttori.Plugin.FormHandler.Email');
 
 /**
+ * Replaces form placeholders as literal text so field names and values cannot change replacement syntax.
+ * @param {string} template Subject or HTML template.
+ * @param {Record<string, any>} formData Submitted field values.
+ * @param {import('../form-handler.js').FormConfig} formConfig Form metadata.
+ * @returns {string} Template with known placeholders filled in.
+ */
+const fillTemplate = (template, formData, formConfig) => {
+  let result = template.replaceAll('{formName}', () => formConfig.name);
+  result = result.replaceAll('{timestamp}', () => new Date().toISOString());
+
+  for (const [key, value] of Object.entries(formData)) {
+    result = result.replaceAll(`{${key}}`, () => String(value));
+  }
+
+  return result;
+};
+
+/**
  * @typedef {object} EmailHandlerConfig
  * @property {import('nodemailer').TransportOptions} transportOptions Nodemailer transport options.
  * @property {string} from Email address to send from.
@@ -88,31 +106,19 @@ class EmailHandler {
 
   /**
    * Generates email subject from template.
-   * @param {string} template Subject template.
+   * @param {string | undefined} template Subject template; an empty value uses the default subject.
    * @param {Record<string, any>} formData Form data.
    * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
    * @returns {string} Generated subject.
    * @static
    */
   static generateSubject(template, formData, formConfig) {
-    let subject = template || `Form Submission: ${formConfig.name}`;
-
-    // Replace placeholders
-    subject = subject.replace(/\{formName\}/g, formConfig.name);
-    subject = subject.replace(/\{timestamp\}/g, new Date().toISOString());
-
-    // Replace field placeholders
-    for (const [key, value] of Object.entries(formData)) {
-      const placeholder = new RegExp(`\\{${key}\\}`, 'g');
-      subject = subject.replace(placeholder, String(value));
-    }
-
-    return subject;
+    return fillTemplate(template || `Form Submission: ${formConfig.name}`, formData, formConfig);
   }
 
   /**
    * Generates email body from template.
-   * @param {string} template Body template.
+   * @param {string | null | undefined} template Body template; an empty value uses the default HTML body.
    * @param {Record<string, any>} formData Form data.
    * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
    * @returns {string} Generated body.
@@ -120,19 +126,7 @@ class EmailHandler {
    */
   static generateBody(template, formData, formConfig) {
     if (template) {
-      let body = template;
-
-      // Replace placeholders
-      body = body.replace(/\{formName\}/g, formConfig.name);
-      body = body.replace(/\{timestamp\}/g, new Date().toISOString());
-
-      // Replace field placeholders
-      for (const [key, value] of Object.entries(formData)) {
-        const placeholder = new RegExp(`\\{${key}\\}`, 'g');
-        body = body.replace(placeholder, String(value));
-      }
-
-      return body;
+      return fillTemplate(template, formData, formConfig);
     }
 
     // Default template

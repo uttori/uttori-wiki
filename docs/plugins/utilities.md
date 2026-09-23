@@ -219,7 +219,7 @@ Create a node from a MarkdownIt Token.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [token] | <code>module:markdown-it/index.js~Token</code> | A token to convert. |
+| [token] | <code>module:markdown-it~Token</code> | A token to convert. |
 
 <a name="stripImagesFromMarkdown"></a>
 
@@ -426,7 +426,7 @@ Convert MarkdownIt Tokens to an AST.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Tokens to convert. |
+| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Tokens to convert. |
 | title | <code>string</code> | The document title used as the H1 in the header stack. |
 | options | <code>object</code> | The options for the conversion. |
 | [options.tableToCSV] | <code>boolean</code> | Whether to convert tables to CSV format. If false, converts to Markdown format instead. |
@@ -462,8 +462,8 @@ Convert MarkdownIt Tokens to an AST.
 | type | <code>string</code> | The type of node. |
 | content | <code>Array.&lt;(string\|Array.&lt;string&gt;)&gt;</code> | Text content for the node. |
 | headers | [<code>Array.&lt;MarkdownASTHeaderValue&gt;</code>](#MarkdownASTHeaderValue) | The relevant headers for this node. |
-| [open] | <code>module:markdown-it/index.js~Token</code> \| <code>null</code> | The MarkdownIt Token object for the opening tag. |
-| [close] | <code>module:markdown-it/index.js~Token</code> \| <code>null</code> | The MarkdownIt Token object for the closing tag. |
+| [open] | <code>module:markdown-it~Token</code> \| <code>null</code> | The MarkdownIt Token object for the opening tag. |
+| [close] | <code>module:markdown-it~Token</code> \| <code>null</code> | The MarkdownIt Token object for the closing tag. |
 | children | [<code>Array.&lt;MarkdownASTNode&gt;</code>](#MarkdownASTNode) | The child nodes for this node. |
 
 <a name="MarkdownASTHeaderEntry"></a>

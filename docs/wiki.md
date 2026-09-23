@@ -583,8 +583,8 @@ Check whether an attachment has an image MIME type.
 | [excerpt] | <code>string</code> | A succinct deescription of the document, think meta description. |
 | content | <code>string</code> | All text content for the doucment. |
 | [html] | <code>string</code> | All rendered HTML content for the doucment that will be presented to the user. |
-| createDate | <code>number</code> | The Unix timestamp of the creation date of the document. |
-| updateDate | <code>number</code> | The Unix timestamp of the last update date to the document. |
+| createDate | <code>number</code> | Milliseconds since the Unix epoch when the document was created. |
+| updateDate | <code>number</code> | Milliseconds since the Unix epoch when the document was last updated. |
 | tags | <code>string</code> \| <code>Array.&lt;string&gt;</code> | A collection of tags that represent the document. |
 | [redirects] | <code>string</code> \| <code>Array.&lt;string&gt;</code> | An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks. |
 | [layout] | <code>string</code> | The layout to use when rendering the document. |

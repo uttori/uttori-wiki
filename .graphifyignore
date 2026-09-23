@@ -1,0 +1,5 @@
+# Generated declarations duplicate the source relationships in the code graph.
+dist/
+
+# SQLite databases created by the slow integration tests.
+test/site-search-sqlite/

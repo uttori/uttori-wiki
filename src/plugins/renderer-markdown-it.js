@@ -7,12 +7,21 @@ import { referenceTag, definitionOpenTag } from './markdown-it-plugin/footnotes.
 const debug = createDebug('Uttori.Plugin.Render.MarkdownIt');
 
 /**
+ * @typedef {object} MarkdownItExample
+ * @property {string} source Editable input shown in the rendered block.
+ * @property {string} expectedOutput Output visible before client-side enhancement.
+ * @property {string} [inputLabel] Input field label; defaults to "Input".
+ * @property {string} [outputLabel] Output field label; defaults to "Output".
+ */
+
+/**
  * @typedef {object} MarkdownItRendererOptionsUttori
  * @property {string} baseUrl Prefix for relative URLs, useful when the Express app is not at URI root.
  * @property {string[]} allowedExternalDomains Allowed External Domains, if a domain is not in this list, it is set to 'nofollow'. Values should be strings of the hostname portion of the URL object (like example.org).
  * @property {boolean} disableValidation Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled.
  * @property {boolean} openNewWindow Open external domains in a new window.
  * @property {boolean} lazyImages Add lazy loading params to image tags.
+ * @property {Record<string, MarkdownItExample>} [examples] Registered editable input and expected output for `[example:id]` blocks.
  * @property {object} [footnotes] Footnote settings.
  * @property {Function} footnotes.referenceTag A funciton to return the default HTML for a footnote reference.
  * @property {Function} footnotes.definitionOpenTag A funciton to return the default opening HTML for a footnote definition.
@@ -22,6 +31,7 @@ const debug = createDebug('Uttori.Plugin.Render.MarkdownIt');
  * @property {string} toc.openingTag The opening DOM tag for the TOC container.
  * @property {string} toc.closingTag The closing DOM tag for the TOC container.
  * @property {object} toc.slugify Slugify options for convering headings to anchor links.
+ * @property {boolean} [toc.stableIds=false] Use semantic heading IDs with deterministic duplicate suffixes instead of source line numbers.
  * @property {object} [wikilinks] WikiLinks settings.
  * @property {object} wikilinks.slugify Slugify options for convering Wikilinks to anchor links.
  */
@@ -43,6 +53,25 @@ const debug = createDebug('Uttori.Plugin.Render.MarkdownIt');
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
  * @property {MarkdownItRendererOptions} markdownIt The MarkdownIt configuration.
  */
+
+/**
+ * Creates the parser shared by render and parse so both paths use the same link rules.
+ * @param {MarkdownItRendererConfig} config Renderer configuration.
+ * @returns {import('markdown-it').MarkdownIt} Configured parser.
+ */
+const createParser = (config) => {
+  const md = new MarkdownIt(config.markdownIt).use(markdownItPlugin);
+
+  // linkify-it 6 disabled bare-domain links by default; keep existing linkify:true output stable.
+  if (config.markdownIt.linkify) {
+    md.linkify.set({ fuzzyLink: true });
+  }
+  if (config.markdownIt.uttori?.disableValidation) {
+    md.validateLink = () => true;
+  }
+
+  return md;
+};
 
 /**
  * Uttori MarkdownIt Renderer
@@ -93,6 +122,7 @@ class MarkdownItRenderer {
           },
           toc: {
             extract: false,
+            stableIds: false,
             openingTag: '<nav class="table-of-contents">',
             closingTag: '</nav>',
             slugify: {
@@ -287,10 +317,7 @@ class MarkdownItRenderer {
       debug('No input provided, returning a blank string.');
       return '';
     }
-    const md = new MarkdownIt(config.markdownIt).use(markdownItPlugin);
-    if (config?.markdownIt?.uttori?.disableValidation) {
-      md.validateLink = () => true;
-    }
+    const md = createParser(config);
 
     // Clean up the content.
     content = MarkdownItRenderer.cleanContent(content);
@@ -301,7 +328,7 @@ class MarkdownItRenderer {
    * Parse Markdown for a provided string with a provided MarkdownIt configuration.
    * @param {string} content Markdown content to be converted to HTML.
    * @param {MarkdownItRendererConfig} [config] A provided MarkdownIt configuration to use.
-   * @returns {import('markdown-it/index.js').Token[]} The rendered content.
+   * @returns {import('markdown-it').Token[]} The rendered content.
    * @example <caption>MarkdownItRenderer.parse(content, config)</caption>
    * const tokens = MarkdownItRenderer.parse(content, config);
    * @see {@link https://markdown-it.github.io/markdown-it/#MarkdownIt.parse|MarkdownIt.parse}
@@ -313,10 +340,7 @@ class MarkdownItRenderer {
       return [];
     }
 
-    const md = new MarkdownIt(config.markdownIt).use(markdownItPlugin);
-    if (config?.markdownIt?.uttori?.disableValidation) {
-      md.validateLink = () => true;
-    }
+    const md = createParser(config);
 
     // Clean up the content.
     content = MarkdownItRenderer.cleanContent(content);

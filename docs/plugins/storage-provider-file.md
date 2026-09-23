@@ -31,6 +31,7 @@ Storage for Uttori documents using JSON files stored on the local file system.
     * [new StorageProviderJsonFile(config)](#new_StorageProviderJsonFile_new)
     * _instance_
         * [.documents](#StorageProviderJsonFile+documents) : <code>Record.&lt;string, UttoriWikiDocument&gt;</code>
+        * [.loadSidecar](#StorageProviderJsonFile+loadSidecar) ⇒ <code>Promise.&lt;UttoriWikiDocument&gt;</code>
         * [.all](#StorageProviderJsonFile+all) ⇒ <code>Promise.&lt;Record.&lt;string, UttoriWikiDocument&gt;&gt;</code>
         * [.getQuery](#StorageProviderJsonFile+getQuery) ⇒ <code>Promise.&lt;(Array.&lt;UttoriWikiDocument&gt;\|number)&gt;</code>
         * [.get](#StorageProviderJsonFile+get) ⇒ <code>Promise.&lt;(UttoriWikiDocument\|undefined)&gt;</code>
@@ -62,6 +63,19 @@ const storageProvider = new StorageProviderJsonFile({ contentDirectory: 'content
 
 ### storageProviderJsonFile.documents : <code>Record.&lt;string, UttoriWikiDocument&gt;</code>
 **Kind**: instance property of [<code>StorageProviderJsonFile</code>](#StorageProviderJsonFile)  
+<a name="StorageProviderJsonFile+loadSidecar"></a>
+
+### storageProviderJsonFile.loadSidecar ⇒ <code>Promise.&lt;UttoriWikiDocument&gt;</code>
+Read and validate one metadata/Markdown pair. Sidecar mode is intentionally
+strict so a partial checkout cannot silently produce an incomplete site.
+
+**Kind**: instance property of [<code>StorageProviderJsonFile</code>](#StorageProviderJsonFile)  
+**Returns**: <code>Promise.&lt;UttoriWikiDocument&gt;</code> - The complete document.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| name | <code>string</code> | Metadata filename, relative to contentDirectory. |
+
 <a name="StorageProviderJsonFile+all"></a>
 
 ### storageProviderJsonFile.all ⇒ <code>Promise.&lt;Record.&lt;string, UttoriWikiDocument&gt;&gt;</code>
@@ -207,6 +221,7 @@ Ensure a directory exists, and if not create it.
 | contentDirectory | <code>string</code> | The directory to store documents. |
 | historyDirectory | <code>string</code> | The directory to store document histories. |
 | [extension] | <code>string</code> | The file extension to use for file. |
+| [sidecarContentExtension] | <code>string</code> | When set, load Markdown content from a matching sidecar file and reject writes. For example, `md` pairs `page.json` with `page.md`. |
 | [updateTimestamps] | <code>boolean</code> | Should update times be marked at the time of edit. |
 | [useHistory] | <code>boolean</code> | Should history entries be created. |
 | [useCache] | <code>boolean</code> | Should we cache files in memory? |

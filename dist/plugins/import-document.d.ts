@@ -26,6 +26,8 @@ export type ImportDocumentDownload = {
      */
     type: string;
 };
+export type ImportDocumentDownloadFile = (download: ImportDocumentDownload) => Promise<void>;
+export type ImportDocumentProcessPageFunction = (config: ImportDocumentConfig, content: string, page: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>;
 export type ImportDocumentProcessPage = {
     /**
      * The content of the page.
@@ -110,13 +112,13 @@ export type ImportDocumentConfig = {
      */
     middlewarePublic?: import('express').RequestHandler[];
     /**
-     * (ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
+     * Downloads an imported page.
      */
-    : Function;
+    downloadFile?: ImportDocumentDownloadFile;
     /**
-     * (ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
+     * Processes an imported page.
      */
-    : Function;
+    processPage?: ImportDocumentProcessPageFunction;
 };
 /**
  * @typedef {object} ImportDocumentConfigPage
@@ -129,6 +131,20 @@ export type ImportDocumentConfig = {
  * @property {string} url The URL of the page.
  * @property {string} fileName The name of the file.
  * @property {string} type The type of the page.
+ */
+/**
+ * Downloads an imported page.
+ * @callback ImportDocumentDownloadFile
+ * @param {ImportDocumentDownload} download The file to download.
+ * @returns {Promise<void>} Completes when the download finishes.
+ */
+/**
+ * Processes an imported page after download.
+ * @callback ImportDocumentProcessPageFunction
+ * @param {ImportDocumentConfig} config Import configuration.
+ * @param {string} content Downloaded page content.
+ * @param {ImportDocumentConfigPage} page Page metadata.
+ * @returns {Promise<ImportDocumentProcessPage>} Processed page content and attachments.
  */
 /**
  * @typedef {object} ImportDocumentProcessPage
@@ -166,8 +182,8 @@ export type ImportDocumentConfig = {
  * @property {ImportDocumentRequestHandlerFactory} [apiRequestHandler] A request handler for the API route.
  * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
- * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
- * @property {function(ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
+ * @property {ImportDocumentDownloadFile} [downloadFile] Downloads an imported page.
+ * @property {ImportDocumentProcessPageFunction} [processPage] Processes an imported page.
  * @example <caption>ImportDocumentConfig</caption>
  * const config = {
  *   events: {

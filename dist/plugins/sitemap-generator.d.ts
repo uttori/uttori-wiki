@@ -182,6 +182,14 @@ declare class SitemapGenerator {
      * @static
      */
     static generateSitemap(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-generator-sitemap', SitemapGeneratorConfig>): Promise<string>;
+    /**
+     * Render an explicit finite route list without querying storage.
+     * Static exports use this so the sitemap has exactly the pages in the artifact.
+     * @param {SitemapGeneratorUrl[]} routes Public paths and their content dates.
+     * @param {SitemapGeneratorConfig} config Sitemap formatting and canonical origin.
+     * @returns {string} Sitemap XML.
+     */
+    static generateRoutes(routes: SitemapGeneratorUrl[], config: SitemapGeneratorConfig): string;
 }
 export default SitemapGenerator;
 //# sourceMappingURL=sitemap-generator.d.ts.map

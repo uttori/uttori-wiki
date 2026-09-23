@@ -47,7 +47,7 @@ Ensure footnotes state exists on the MarkdownIt env object.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateBlock</code> \| <code>module:markdown-it/index.js~StateInline</code> | MarkdownIt state. |
+| state | <code>module:markdown-it~StateBlock</code> \| <code>module:markdown-it~StateInline</code> | MarkdownIt state. |
 
 <a name="getFootnotesEnv..env"></a>
 
@@ -64,7 +64,7 @@ Converts Footnote definitions to linkable anchor tags.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateBlock</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateBlock</code> | State of MarkdownIt. |
 | startLine | <code>number</code> | The starting line of the block. |
 | endLine | <code>number</code> | The ending line of the block. |
 | silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
@@ -84,7 +84,7 @@ Converts Footnote definitions to linkable anchor tags.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateInline</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateInline</code> | State of MarkdownIt. |
 | silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
 
 
@@ -138,15 +138,15 @@ Creates the tag for the Footnote reference.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens to render. |
+| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
 | index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it/index.js~Options</code> \| <code>Object</code> | Option parameters of the parser instance. |
+| options | <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code> | Option parameters of the parser instance. |
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
+| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
 
 <a name="configFootnoteReference..opts"></a>
 
-### configFootnoteReference~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+### configFootnoteReference~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>configFootnoteReference</code>](#configFootnoteReference)  
 <a name="configFootnoteOpen"></a>
 
@@ -158,15 +158,15 @@ Creates the opening tag of the Footnote items block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens to render. |
+| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
 | index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it/index.js~Options</code> | Option parameters of the parser instance. |
+| options | <code>module:markdown-it~MarkdownItOptions</code> | Option parameters of the parser instance. |
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
+| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
 
 <a name="configFootnoteOpen..opts"></a>
 
-### configFootnoteOpen~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+### configFootnoteOpen~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>configFootnoteOpen</code>](#configFootnoteOpen)  
 <a name="configFootnoteClose"></a>
 
@@ -178,15 +178,15 @@ Creates the closing tag of the Footnote items block.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens to render. |
+| _tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it/index.js~Options</code> | Option parameters of the parser instance. |
+| options | <code>module:markdown-it~MarkdownItOptions</code> | Option parameters of the parser instance. |
 | _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
+| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
 
 <a name="configFootnoteClose..opts"></a>
 
-### configFootnoteClose~opts : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+### configFootnoteClose~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>configFootnoteClose</code>](#configFootnoteClose)  
 <a name="MarkdownItFootnotesEnv"></a>
 

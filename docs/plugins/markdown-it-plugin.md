@@ -1,6 +1,6 @@
 <a name="Plugin"></a>
 
-## Plugin(md) ⇒ <code>module:markdown-it~default</code>
+## Plugin(md) ⇒ <code>module:markdown-it~MarkdownIt</code>
 Extend MarkdownIt with Uttori specific items:
 - Table of Contents with `[toc]`
 - External Links with Domain Filters
@@ -8,9 +8,9 @@ Extend MarkdownIt with Uttori specific items:
 - Image Lazyloading
 
 **Kind**: global function  
-**Returns**: <code>module:markdown-it~default</code> - The MarkdownIt instance.  
+**Returns**: <code>module:markdown-it~MarkdownIt</code> - The MarkdownIt instance.  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| md | <code>module:markdown-it~default</code> | The MarkdownIt instance. |
+| md | <code>module:markdown-it~MarkdownIt</code> | The MarkdownIt instance. |
 

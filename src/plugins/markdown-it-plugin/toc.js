@@ -6,6 +6,7 @@ import slugify from 'slugify';
  * @property {string|number} index Heading map index.
  * @property {number} level Heading level (1-6).
  * @property {string} slug Slugified heading id prefix.
+ * @property {string} [id] The final heading ID, including duplicate suffixes in stable mode.
  */
 
 /**
@@ -16,7 +17,7 @@ import slugify from 'slugify';
 
 /**
  * Adds deep links to the opening of the heading tags with IDs.
- * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} tokens Collection of tokens.
  * @param {number} index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The modified header tag with ID.
@@ -26,6 +27,10 @@ export function headingOpen(tokens, index, options) {
   const { tag } = tokens[index];
   // The text content inside of that tag (# Heading, Heading in this example)
   const label = tokens[index + 1];
+  const assignedId = tokens[index].attrGet?.('id');
+  if (assignedId) {
+    return `<${tag} id="${assignedId}">`;
+  }
   // Guard against empty headers
   if (label.type === 'inline' && Array.isArray(label.children) && label.children.length > 0) {
     // We want to use slugify to provide nicer deep links
@@ -39,7 +44,7 @@ export function headingOpen(tokens, index, options) {
 
 /**
  * Creates the opening tag of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The opening tag of the TOC.
@@ -50,7 +55,7 @@ export function tocOpen(_tokens, _index, options) {
 
 /**
  * Creates the closing tag of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The closing tag of the TOC.
@@ -61,11 +66,11 @@ export function tocClose(_tokens, _index, options) {
 
 /**
  * Creates the contents of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} _options Option parameters of the parser instance.
  * @param {MarkdownItTocStateEnv} env Additional data from parsed input (the toc_headings, for example).
- * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
+ * @param {import('markdown-it').Renderer} _slf The current parser instance.
  * @returns {string} The contents tag of the TOC.
  */
 export function tocBody(_tokens, _index, _options, env, _slf) {
@@ -89,7 +94,8 @@ export function tocBody(_tokens, _index, _options, env, _slf) {
       }
     }
     // New item at the current level
-    accumulator += `<li><a href="#${heading.slug}-${heading.index}" title="${heading.content}">${heading.content}</a></li>`;
+    const id = heading.id || `${heading.slug}-${heading.index}`;
+    accumulator += `<li><a href="#${id}" title="${heading.content}">${heading.content}</a></li>`;
     return accumulator;
   }, '');
 
@@ -112,7 +118,7 @@ export function tocBody(_tokens, _index, _options, env, _slf) {
 
 /**
  * Find and replace the TOC tag with the TOC itself.
- * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.
+ * @param {import('markdown-it').StateInline} state State of MarkdownIt.
  * @returns {boolean} Returns true when able to parse a TOC.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
  */
@@ -127,7 +133,7 @@ export function tocRule(state) {
     return false;
   }
 
-  /** @type {import('markdown-it/index.js').Token} */
+  /** @type {import('markdown-it').Token} */
   let token;
   token = state.push('toc_open', 'toc', 1);
   token.markup = '[toc]';
@@ -144,7 +150,7 @@ export function tocRule(state) {
 
 /**
  * Caches the headers for use in building the TOC body.
- * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
+ * @param {import('markdown-it').StateCore} state State of MarkdownIt.
  */
 export function collectHeaders(state) {
   /** @type {MarkdownItTocStateEnv} */
@@ -152,15 +158,40 @@ export function collectHeaders(state) {
   const mdOptions = /** @type {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} */ (state.md.options);
 
   // Create a mapping of all the headers, their indentation level, content and slug.
-  env.toc_headings = env.toc_headings || [];
+  env.toc_headings = [];
+  const usedIds = new Set();
   state.tokens.forEach((token, i, tokens) => {
     if (token.type === 'heading_close') {
       const inline = tokens[i - 1];
+      const opening = tokens[i - 2];
+      let id;
+      if (mdOptions.uttori.toc.stableIds) {
+        const explicit = /\s*\{#([A-Za-z][A-Za-z0-9_-]*)\}$/.exec(inline.content);
+        if (explicit) {
+          inline.content = inline.content.slice(0, explicit.index);
+          // MarkdownIt has already parsed inline children. Remove the marker
+          // there as well so an explicit ID does not appear in the heading.
+          const last = inline.children?.at(-1);
+          if (last?.type === 'text') {
+            last.content = last.content.replace(/\s*\{#[A-Za-z][A-Za-z0-9_-]*\}$/, '');
+          }
+        }
+        const base = explicit?.[1] || slugify(inline.content, mdOptions.uttori.toc.slugify) || 'section';
+        id = base;
+        let suffix = 2;
+        while (usedIds.has(id)) {
+          id = `${base}-${suffix}`;
+          suffix++;
+        }
+        usedIds.add(id);
+        opening.attrSet('id', id);
+      }
       env.toc_headings.push({
         content: inline.content,
         index: inline.map ? inline.map[0] : 'MISSING_MAP',
         level: Number.parseInt(token.tag.slice(1, 2), 10),
         slug: slugify(inline.content, mdOptions.uttori.toc.slugify),
+        id,
       });
     }
   });

@@ -6,9 +6,19 @@
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#createParser">createParser(config)</a> ⇒ <code>module:markdown-it~MarkdownIt</code></dt>
+<dd><p>Creates the parser shared by render and parse so both paths use the same link rules.</p>
+</dd>
+</dl>
+
 ## Typedefs
 
 <dl>
+<dt><a href="#MarkdownItExample">MarkdownItExample</a> : <code>object</code></dt>
+<dd></dd>
 <dt><a href="#MarkdownItRendererOptionsUttori">MarkdownItRendererOptionsUttori</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#MarkdownItRendererOptions">MarkdownItRendererOptions</a> : <code>object</code></dt>
@@ -34,7 +44,7 @@ Uttori MarkdownIt Renderer
     * [.renderContent(content, context)](#MarkdownItRenderer.renderContent) ⇒ <code>string</code>
     * [.renderCollection(collection, context)](#MarkdownItRenderer.renderCollection) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
     * [.render(content, [config])](#MarkdownItRenderer.render) ⇒ <code>string</code>
-    * [.parse(content, [config])](#MarkdownItRenderer.parse) ⇒ <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code>
+    * [.parse(content, [config])](#MarkdownItRenderer.parse) ⇒ <code>Array.&lt;module:markdown-it~Token&gt;</code>
     * [.cleanContent(content)](#MarkdownItRenderer.cleanContent) ⇒ <code>string</code>
     * [.viewModelDetail(viewModel, context)](#MarkdownItRenderer.viewModelDetail) ⇒ <code>UttoriWikiViewModel</code> \| <code>Object</code>
 
@@ -192,11 +202,11 @@ const html = MarkdownItRenderer.render(content, config);
 ```
 <a name="MarkdownItRenderer.parse"></a>
 
-### MarkdownItRenderer.parse(content, [config]) ⇒ <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code>
+### MarkdownItRenderer.parse(content, [config]) ⇒ <code>Array.&lt;module:markdown-it~Token&gt;</code>
 Parse Markdown for a provided string with a provided MarkdownIt configuration.
 
 **Kind**: static method of [<code>MarkdownItRenderer</code>](#MarkdownItRenderer)  
-**Returns**: <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> - The rendered content.  
+**Returns**: <code>Array.&lt;module:markdown-it~Token&gt;</code> - The rendered content.  
 **See**: [MarkdownIt.parse](https://markdown-it.github.io/markdown-it/#MarkdownIt.parse)  
 
 | Param | Type | Description |
@@ -238,30 +248,57 @@ Will attempt to extract the table of contents when set to and add it to the view
 ```js
 viewModel = MarkdownItRenderer.viewModelDetail(viewModel, context);
 ```
+<a name="createParser"></a>
+
+## createParser(config) ⇒ <code>module:markdown-it~MarkdownIt</code>
+Creates the parser shared by render and parse so both paths use the same link rules.
+
+**Kind**: global function  
+**Returns**: <code>module:markdown-it~MarkdownIt</code> - Configured parser.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | [<code>MarkdownItRendererConfig</code>](#MarkdownItRendererConfig) | Renderer configuration. |
+
+<a name="MarkdownItExample"></a>
+
+## MarkdownItExample : <code>object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| source | <code>string</code> | Editable input shown in the rendered block. |
+| expectedOutput | <code>string</code> | Output visible before client-side enhancement. |
+| [inputLabel] | <code>string</code> | Input field label; defaults to "Input". |
+| [outputLabel] | <code>string</code> | Output field label; defaults to "Output". |
+
 <a name="MarkdownItRendererOptionsUttori"></a>
 
 ## MarkdownItRendererOptionsUttori : <code>object</code>
 **Kind**: global typedef  
 **Properties**
 
-| Name | Type | Description |
-| --- | --- | --- |
-| baseUrl | <code>string</code> | Prefix for relative URLs, useful when the Express app is not at URI root. |
-| allowedExternalDomains | <code>Array.&lt;string&gt;</code> | Allowed External Domains, if a domain is not in this list, it is set to 'nofollow'. Values should be strings of the hostname portion of the URL object (like example.org). |
-| disableValidation | <code>boolean</code> | Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled. |
-| openNewWindow | <code>boolean</code> | Open external domains in a new window. |
-| lazyImages | <code>boolean</code> | Add lazy loading params to image tags. |
-| [footnotes] | <code>object</code> | Footnote settings. |
-| footnotes.referenceTag | <code>function</code> | A funciton to return the default HTML for a footnote reference. |
-| footnotes.definitionOpenTag | <code>function</code> | A funciton to return the default opening HTML for a footnote definition. |
-| footnotes.definitionCloseTag | <code>string</code> | The default closing HTML for a footnote definition. |
-| [toc] | <code>object</code> | Table of Contents settings. |
-| toc.extract | <code>boolean</code> | When true, extract the table of contents to the view model from the content. |
-| toc.openingTag | <code>string</code> | The opening DOM tag for the TOC container. |
-| toc.closingTag | <code>string</code> | The closing DOM tag for the TOC container. |
-| toc.slugify | <code>object</code> | Slugify options for convering headings to anchor links. |
-| [wikilinks] | <code>object</code> | WikiLinks settings. |
-| wikilinks.slugify | <code>object</code> | Slugify options for convering Wikilinks to anchor links. |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| baseUrl | <code>string</code> |  | Prefix for relative URLs, useful when the Express app is not at URI root. |
+| allowedExternalDomains | <code>Array.&lt;string&gt;</code> |  | Allowed External Domains, if a domain is not in this list, it is set to 'nofollow'. Values should be strings of the hostname portion of the URL object (like example.org). |
+| disableValidation | <code>boolean</code> |  | Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled. |
+| openNewWindow | <code>boolean</code> |  | Open external domains in a new window. |
+| lazyImages | <code>boolean</code> |  | Add lazy loading params to image tags. |
+| [examples] | <code>Record.&lt;string, MarkdownItExample&gt;</code> |  | Registered editable input and expected output for `[example:id]` blocks. |
+| [footnotes] | <code>object</code> |  | Footnote settings. |
+| footnotes.referenceTag | <code>function</code> |  | A funciton to return the default HTML for a footnote reference. |
+| footnotes.definitionOpenTag | <code>function</code> |  | A funciton to return the default opening HTML for a footnote definition. |
+| footnotes.definitionCloseTag | <code>string</code> |  | The default closing HTML for a footnote definition. |
+| [toc] | <code>object</code> |  | Table of Contents settings. |
+| toc.extract | <code>boolean</code> |  | When true, extract the table of contents to the view model from the content. |
+| toc.openingTag | <code>string</code> |  | The opening DOM tag for the TOC container. |
+| toc.closingTag | <code>string</code> |  | The closing DOM tag for the TOC container. |
+| toc.slugify | <code>object</code> |  | Slugify options for convering headings to anchor links. |
+| [toc.stableIds] | <code>boolean</code> | <code>false</code> | Use semantic heading IDs with deterministic duplicate suffixes instead of source line numbers. |
+| [wikilinks] | <code>object</code> |  | WikiLinks settings. |
+| wikilinks.slugify | <code>object</code> |  | Slugify options for convering Wikilinks to anchor links. |
 
 <a name="MarkdownItRendererOptions"></a>
 

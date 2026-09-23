@@ -26,6 +26,14 @@ export type UttoriWikiConfig = {
      */
     publicUrl?: string;
     /**
+     * Optional mounted path for canonical URLs; unlike publicUrl it contains no origin.
+     */
+    canonicalPathPrefix?: string;
+    /**
+     * Append a slash to canonical document, search, and home paths.
+     */
+    canonicalTrailingSlash?: boolean;
+    /**
      * The object containing the route strings for search.
      */
     routes: Record<string, string>;
@@ -167,6 +175,8 @@ export type UttoriWikiConfig = {
  * @property {string[]} ignoreTags Tags to ignore when generating the tags page, default is an empty array;
  * @property {number} [excerptLength=400] Excerpt length, used in search result previews.
  * @property {string} [publicUrl=''] Application base URL. Used for canonical URLs and redirects, do not include a trailing slash.
+ * @property {string} [canonicalPathPrefix=''] Optional mounted path for canonical URLs; unlike publicUrl it contains no origin.
+ * @property {boolean} [canonicalTrailingSlash=false] Append a slash to canonical document, search, and home paths.
  * @property {Record<string, string>} routes The object containing the route strings for search.
  * @property {Record<string, string>} titles The object containing the default titles for search.
  * @property {string} [themePath=''] Specify the path to the theme directory, no trailing slash.

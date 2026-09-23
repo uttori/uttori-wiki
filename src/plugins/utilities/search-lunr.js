@@ -73,7 +73,7 @@ class SearchProvider {
       return;
     }
     debug('buildIndex');
-    const { lunr_locales, ignoreSlugs } = this.config;
+    const { ignoreSlugs } = this.config;
     /** @type {import('../../wiki.js').UttoriWikiDocument[]} */
     let documents = [];
     const not_in = `"${ignoreSlugs.join('", "')}"`;
@@ -90,6 +90,16 @@ class SearchProvider {
       return;
     }
 
+    this.indexDocuments(documents);
+  };
+
+  /**
+   * Build the same Lunr index for server queries and offline static search.
+   * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Complete documents to index.
+   * @returns {object} A JSON-safe Lunr index for browser loading.
+   */
+  indexDocuments = (documents) => {
+    const { lunr_locales } = this.config;
     this.index = lunr(function lunrSetup() {
       if (Array.isArray(lunr_locales) && lunr_locales.length > 0 && lunr?.multiLanguage) {
         this.use(lunr.multiLanguage(...lunr_locales));
@@ -106,6 +116,7 @@ class SearchProvider {
         this.add(document);
       }
     });
+    return this.index.toJSON();
   };
 
   /**

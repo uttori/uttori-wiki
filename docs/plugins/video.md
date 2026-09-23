@@ -8,13 +8,13 @@ Find and replace the <video> tags with safe <video> tags.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateCore</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
 
 
 * [video(state)](#video)
     * [~parts](#video..parts) : <code>IterableIterator.&lt;RegExpMatchArray&gt;</code>
     * [~keys](#video..keys) : <code>Record.&lt;string, string&gt;</code>
-    * [~options](#video..options) : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+    * [~options](#video..options) : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
 
 <a name="video..parts"></a>
 
@@ -26,5 +26,5 @@ Find and replace the <video> tags with safe <video> tags.
 **Kind**: inner constant of [<code>video</code>](#video)  
 <a name="video..options"></a>
 
-### video~options : <code>module:markdown-it/index.js~Options</code> \| <code>Object</code>
+### video~options : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
 **Kind**: inner constant of [<code>video</code>](#video)  

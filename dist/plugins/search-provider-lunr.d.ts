@@ -38,6 +38,12 @@ export type SearchLunrConfig = {
  */
 declare class SearchLunrPlugin {
     /**
+     * Export the provider's actual indexing logic for a static browser search.
+     * @param {import('../wiki.js').UttoriWikiDocument[]} documents Public documents.
+     * @returns {object} A serialized Lunr index.
+     */
+    static exportIndex(documents: import('../wiki.js').UttoriWikiDocument[]): object;
+    /**
      * The configuration key for plugin to look for in the provided configuration.
      * @type {string}
      * @returns {string} The configuration key.

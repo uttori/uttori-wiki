@@ -56,6 +56,12 @@ declare class SearchProvider {
      */
     buildIndex: (_data: any, context: import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
     /**
+     * Build the same Lunr index for server queries and offline static search.
+     * @param {import('../../wiki.js').UttoriWikiDocument[]} documents Complete documents to index.
+     * @returns {object} A JSON-safe Lunr index for browser loading.
+     */
+    indexDocuments: (documents: import('../../wiki.js').UttoriWikiDocument[]) => object;
+    /**
      * Searches for documents matching the provided query with Lunr.
      * @param {SearchLunrConfigSearchOptions} options The passed in options.
      * @param {import('../../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>} context A Uttori-like context.

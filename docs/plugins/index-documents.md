@@ -73,7 +73,7 @@ Ensure the chat index tables exist.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | config | <code>SearchSQLiteConfig</code> | The options. |
 | [options] | [<code>ChatIndexSchemaOptions</code>](#ChatIndexSchemaOptions) | Schema options. |
 
@@ -86,7 +86,7 @@ Remove a document and all of its chunks from the chat index.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | slug | <code>string</code> | The source slug to remove. |
 
 <a name="indexDocumentInDatabase"></a>
@@ -99,7 +99,7 @@ Index one document using an already-open database.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | config | <code>SearchSQLiteConfig</code> | The options. |
 | embedder | <code>OllamaEmbedder</code> | The embedder. |
 | document | <code>UttoriWikiDocument</code> | The document to index. |

@@ -4,6 +4,21 @@ import { google } from 'googleapis';
 const debug = createDebug('Uttori.Plugin.FormHandler.GoogleDocs');
 
 /**
+ * Converts a one-based column number to a Sheets column label, including columns after Z.
+ * @param {number} column One-based column number.
+ * @returns {string} Column label.
+ */
+const columnLabel = (column) => {
+  let label = '';
+  while (column > 0) {
+    column -= 1;
+    label = String.fromCharCode(65 + (column % 26)) + label;
+    column = Math.floor(column / 26);
+  }
+  return label;
+};
+
+/**
  * @typedef {object} GoogleDocsHandlerConfig
  * @property {string} credentialsPath Path to Google service account credentials JSON file.
  * @property {string} spreadsheetId Google Sheets spreadsheet ID.
@@ -122,7 +137,8 @@ class GoogleDocsHandler {
 
     // Use form field order
     for (const field of formConfig.fields) {
-      rowData.push(String(formData[field.name] || ''));
+      // Preserve submitted 0 and false; only missing or null values become blank cells.
+      rowData.push(String(formData[field.name] ?? ''));
     }
 
     return rowData;
@@ -168,33 +184,34 @@ class GoogleDocsHandler {
       });
 
       const spreadsheetId = createResponse.data.spreadsheetId;
+      if (!spreadsheetId) {
+        throw new Error('Google Sheets did not return a spreadsheet ID');
+      }
       debug('Created Google Sheet with ID:', spreadsheetId);
 
       // Set up headers if they exist
       if (headers && headers.length > 0) {
         /** @type {string[]} */
-        const headers = [];
+        const headerRow = [];
 
         // Add timestamp header if requested
         if (config.prependTimestamp) {
-          headers.push('Timestamp');
+          headerRow.push('Timestamp');
         }
 
         // Add form name header
-        headers.push('Form Name');
+        headerRow.push('Form Name');
 
-        // Add field headers
-        if (headers && headers.length > 0) {
-          headers.push(...headers);
-        }
+        // Match the field columns written by prepareRowData, in the caller's order.
+        headerRow.push(...headers);
 
         // Write headers to sheet
         await sheets.spreadsheets.values.update({
           spreadsheetId,
-          range: `${config.sheetName}!A1:${String.fromCharCode(65 + headers.length - 1)}1`,
+          range: `${config.sheetName}!A1:${columnLabel(headerRow.length)}1`,
           valueInputOption: 'RAW',
           requestBody: {
-            values: [headers],
+            values: [headerRow],
           },
         });
       }

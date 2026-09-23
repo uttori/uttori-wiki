@@ -155,6 +155,13 @@ test('MarkdownItRenderer.render(content, config): handles empty values', (t) => 
   t.is(MarkdownItRenderer.render(), '');
 });
 
+test('MarkdownItRenderer preserves bare-domain links when linkify is enabled', (t) => {
+  const config = MarkdownItRenderer.extendConfig({ markdownIt: { linkify: true } });
+
+  t.is(MarkdownItRenderer.render('Visit example.com', config), '<p>Visit <a href="http://example.com">example.com</a></p>');
+  t.true(MarkdownItRenderer.parse('Visit example.com', config)[1].children.some((token) => token.type === 'link_open'));
+});
+
 test('MarkdownItRenderer.render(content, config): replaces missing links with a slugified link', (t) => {
   t.is(MarkdownItRenderer.render('[Test]'), '<p>[Test]</p>');
   t.is(MarkdownItRenderer.render('[Test]()'), '<p><a href="/test">Test</a></p>');

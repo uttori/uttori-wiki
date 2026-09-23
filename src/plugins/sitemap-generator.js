@@ -226,9 +226,11 @@ class SitemapGenerator {
       debug('Error geting documents:', error);
     }
 
+    // Keep configured URLs immutable across repeated builds and callbacks.
+    const routes = [...urls];
     // Add all documents to the urls array
     for (const document of documents) {
-      urls.push({
+      routes.push({
         url: `/${document.slug}`,
         lastmod: document.updateDate ? new Date(document.updateDate).toISOString() : new Date(document.createDate).toISOString(),
         priority: page_priority,
@@ -256,7 +258,7 @@ class SitemapGenerator {
       };
     }
 
-    const data = urls.reduce((accumulator, route) => {
+    const data = routes.reduce((accumulator, route) => {
       if (urlFilter(route)) {
         accumulator += `<url><loc>${base_url}${route.url}</loc>`;
         if (route.lastmod) {
@@ -274,6 +276,33 @@ class SitemapGenerator {
     }, '');
 
     return `${xml_header}${data}${xml_footer}`;
+  }
+
+  /**
+   * Render an explicit finite route list without querying storage.
+   * Static exports use this so the sitemap has exactly the pages in the artifact.
+   * @param {SitemapGeneratorUrl[]} routes Public paths and their content dates.
+   * @param {SitemapGeneratorConfig} config Sitemap formatting and canonical origin.
+   * @returns {string} Sitemap XML.
+   */
+  static generateRoutes(routes, config) {
+    const { base_url, xml_header, xml_footer } = { ...SitemapGenerator.defaultConfig(), ...config };
+    if (!/^https?:\/\//.test(base_url)) {
+      throw new Error('Sitemap canonical base_url must be an HTTP(S) origin.');
+    }
+    const unique = new Set();
+    const entries = routes.map((route) => {
+      if (!route.url.startsWith('/') || unique.has(route.url)) {
+        throw new Error(`Invalid or duplicate sitemap URL: ${route.url}`);
+      }
+      unique.add(route.url);
+      let entry = `<url><loc>${base_url.replace(/\/$/, '')}${route.url}</loc>`;
+      if (route.lastmod) entry += `<lastmod>${route.lastmod}</lastmod>`;
+      if (route.priority) entry += `<priority>${route.priority}</priority>`;
+      if (route.changefreq) entry += `<changefreq>${route.changefreq}</changefreq>`;
+      return `${entry}</url>`;
+    }).join('');
+    return `${xml_header}${entries}${xml_footer}`;
   }
 }
 

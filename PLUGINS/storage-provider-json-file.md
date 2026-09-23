@@ -60,3 +60,17 @@ const config = {
 - The default `events` already wire `add ➜ storage-add`, `get ➜ storage-get`, `getQuery ➜ storage-query`, and so on. You usually don't touch them.
 - Set `spacesDocument: 2` if you want human-readable, diff-friendly files in version control.
 - Turning off `useCache` trades speed for always-fresh reads if something else edits the files out from under the process.
+
+## Markdown/JSON sidecars
+
+Set `sidecarContentExtension: 'md'` and `useHistory: false` to read matching `page.json` and `page.md` files. The JSON file supplies metadata only; the Markdown file supplies `content`. The provider validates every pair and exposes the result as an ordinary wiki document to render and query hooks. Missing partners, malformed metadata, and slug mismatches fail the build. Sidecar mode is read-only, so the wiki's CRUD routes should be disabled. The two files can be reviewed in Git without storing rendered HTML or revision history.
+
+```javascript
+[StorageProviderJsonFile.configKey]: {
+  contentDirectory: './content',
+  extension: 'json',
+  sidecarContentExtension: 'md',
+  useHistory: false,
+  useCache: true,
+}
+```

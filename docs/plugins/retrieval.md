@@ -102,7 +102,7 @@ Run the vector search query.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | queryVectors | <code>Float32Array</code> | The embedded query vectors. |
 | config | <code>SearchSQLiteConfig</code> | The plugin config. |
 | slugFilter | [<code>SlugFilter</code>](#SlugFilter) | The slug filter. |
@@ -129,7 +129,7 @@ Run the optional FTS search.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | entities | <code>Array.&lt;string&gt;</code> | The query entities. |
 | config | <code>SearchSQLiteConfig</code> | The plugin config. |
 | slugFilter | [<code>SlugFilter</code>](#SlugFilter) | The slug filter. |
@@ -191,7 +191,7 @@ Fetch all candidate rows before blending.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| db | <code>module:better-sqlite3/index.js~Database</code> | The database. |
+| db | <code>module:better-sqlite3~Database</code> | The database. |
 | candidateRowids | <code>Array.&lt;number&gt;</code> | The candidate rowids. |
 
 <a name="calculateMatchCounts"></a>

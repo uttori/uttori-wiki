@@ -44,22 +44,22 @@ declare class EmailHandler {
     static create(config: EmailHandlerConfig): import('../form-handler.js').FormHandlerFunction;
     /**
      * Generates email subject from template.
-     * @param {string} template Subject template.
+     * @param {string | undefined} template Subject template; an empty value uses the default subject.
      * @param {Record<string, any>} formData Form data.
      * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
      * @returns {string} Generated subject.
      * @static
      */
-    static generateSubject(template: string, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
+    static generateSubject(template: string | undefined, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
     /**
      * Generates email body from template.
-     * @param {string} template Body template.
+     * @param {string | null | undefined} template Body template; an empty value uses the default HTML body.
      * @param {Record<string, any>} formData Form data.
      * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
      * @returns {string} Generated body.
      * @static
      */
-    static generateBody(template: string, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
+    static generateBody(template: string | null | undefined, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
 }
 export default EmailHandler;
 //# sourceMappingURL=email-handler.d.ts.map

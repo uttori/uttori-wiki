@@ -3,8 +3,9 @@ import MarkdownItRenderer from '../../../src/plugins/renderer-markdown-it.js';
 
 test('MarkdownItRenderer.render(content, config): prepends the baseURL when set', (t) => {
   t.is(MarkdownItRenderer.render('[Test]', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p>[Test]</p>');
-  t.is(MarkdownItRenderer.render('[Test]()', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p><a href="/wiki/test">Test</a></p>');
-  t.is(MarkdownItRenderer.render('[CrAzY CaSe SpAcEd]()', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p><a href="/wiki/crazy-case-spaced">CrAzY CaSe SpAcEd</a></p>');
+  t.is(MarkdownItRenderer.render('[Test]()', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p><a href="/test">Test</a></p>');
+  t.is(MarkdownItRenderer.render('[CrAzY CaSe SpAcEd]()', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p><a href="/crazy-case-spaced">CrAzY CaSe SpAcEd</a></p>');
+  t.is(MarkdownItRenderer.render('[Relative](page/) [Fragment](#part) [Root](/docs/) [Mail](mailto:hi@example.org)', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p><a href="/wiki/page/">Relative</a> <a href="#part">Fragment</a> <a href="/docs/">Root</a> <a href="mailto:hi@example.org">Mail</a></p>');
 });
 
 test('MarkdownItRenderer.render(content, config): protects SEO by ignoring unknown domains', (t) => {

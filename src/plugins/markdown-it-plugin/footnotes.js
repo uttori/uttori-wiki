@@ -12,7 +12,7 @@
 
 /**
  * Ensure footnotes state exists on the MarkdownIt env object.
- * @param {import('markdown-it/index.js').StateBlock | import('markdown-it/index.js').StateInline} state MarkdownIt state.
+ * @param {import('markdown-it').StateBlock | import('markdown-it').StateInline} state MarkdownIt state.
  * @returns {MarkdownItFootnotesEnv} Footnotes env state.
  */
 function getFootnotesEnv(state) {
@@ -26,7 +26,7 @@ function getFootnotesEnv(state) {
 
 /**
  * Converts Footnote definitions to linkable anchor tags.
- * @param {import('markdown-it/index.js').StateBlock} state State of MarkdownIt.
+ * @param {import('markdown-it').StateBlock} state State of MarkdownIt.
  * @param {number} startLine The starting line of the block.
  * @param {number} endLine The ending line of the block.
  * @param {boolean} silent Used to validating parsing without output in MarkdownIt.
@@ -140,7 +140,7 @@ export function footnoteDefinition(state, startLine, endLine, silent) {
 
 /**
  * Converts Footnote definitions to linkable anchor tags.
- * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.
+ * @param {import('markdown-it').StateInline} state State of MarkdownIt.
  * @param {boolean} silent Used to validating parsing without output in MarkdownIt.
  * @returns {boolean} Returns if parsing was successful or not.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
@@ -220,15 +220,15 @@ export function definitionOpenTag({ id, label }) {
 
 /**
  * Creates the tag for the Footnote reference.
- * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens to render.
+ * @param {import('markdown-it').Token[]} tokens Collection of tokens to render.
  * @param {number} index The index of the current token in the Tokens array.
- * @param {import('markdown-it/index.js').Options | { uttori: { footnotes: { referenceTag: Function } } }} options Option parameters of the parser instance.
+ * @param {import('markdown-it').MarkdownItOptions | { uttori: { footnotes: { referenceTag: Function } } }} options Option parameters of the parser instance.
  * @param {object} _env Additional data from parsed input (references, for example).
- * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
+ * @param {import('markdown-it').Renderer} _slf The current parser instance.
  * @returns {string} The tag for the Footnote reference.
  */
 export function configFootnoteReference(tokens, index, options, _env, _slf) {
-  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { referenceTag: Function } } }} */
+  /** @type {import('markdown-it').MarkdownItOptions | { uttori: { footnotes: { referenceTag: Function } } }} */
   const opts = { uttori: { footnotes: { referenceTag: () => '' } }, ...options };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return opts.uttori.footnotes.referenceTag(tokens[index].meta);
@@ -236,15 +236,15 @@ export function configFootnoteReference(tokens, index, options, _env, _slf) {
 
 /**
  * Creates the opening tag of the Footnote items block.
- * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens to render.
+ * @param {import('markdown-it').Token[]} tokens Collection of tokens to render.
  * @param {number} index The index of the current token in the Tokens array.
- * @param {import('markdown-it/index.js').Options} options Option parameters of the parser instance.
+ * @param {import('markdown-it').MarkdownItOptions} options Option parameters of the parser instance.
  * @param {object} _env Additional data from parsed input (references, for example).
- * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
+ * @param {import('markdown-it').Renderer} _slf The current parser instance.
  * @returns {string} The opening tag of the Footnote items block.
  */
 export function configFootnoteOpen(tokens, index, options, _env, _slf) {
-  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { definitionOpenTag: Function } } }} */
+  /** @type {import('markdown-it').MarkdownItOptions | { uttori: { footnotes: { definitionOpenTag: Function } } }} */
   const opts = { uttori: { footnotes: { definitionOpenTag: () => '' } }, ...options };
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return opts.uttori.footnotes.definitionOpenTag(tokens[index].meta);
@@ -252,15 +252,15 @@ export function configFootnoteOpen(tokens, index, options, _env, _slf) {
 
 /**
  * Creates the closing tag of the Footnote items block.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens to render.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens to render.
  * @param {number} _index The index of the current token in the Tokens array.
- * @param {import('markdown-it/index.js').Options} options Option parameters of the parser instance.
+ * @param {import('markdown-it').MarkdownItOptions} options Option parameters of the parser instance.
  * @param {object} _env Additional data from parsed input (references, for example).
- * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
+ * @param {import('markdown-it').Renderer} _slf The current parser instance.
  * @returns {string} The closing tag of the Footnote section block.
  */
 export function configFootnoteClose(_tokens, _index, options, _env, _slf) {
-  /** @type {import('markdown-it/index.js').Options | { uttori: { footnotes: { definitionCloseTag: string } } }} */
+  /** @type {import('markdown-it').MarkdownItOptions | { uttori: { footnotes: { definitionCloseTag: string } } }} */
   const opts = { uttori: { footnotes: { definitionCloseTag: '' } }, ...options };
   return opts.uttori.footnotes.definitionCloseTag;
 }

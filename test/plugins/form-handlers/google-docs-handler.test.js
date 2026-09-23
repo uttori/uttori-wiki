@@ -242,6 +242,18 @@ test('prepareRowData: converts all values to strings', (t) => {
   t.deepEqual(result, ['test-form', '123', 'true', '', '']);
 });
 
+test('prepareRowData: preserves zero and false values', (t) => {
+  const formConfig = /** @type {any} */ ({
+    name: 'survey',
+    fields: [{ name: 'count' }, { name: 'accepted' }],
+  });
+
+  t.deepEqual(
+    GoogleDocsHandler.prepareRowData({ count: 0, accepted: false }, formConfig, baseConfig()),
+    ['survey', '0', 'false'],
+  );
+});
+
 test('prepareRowData: handles empty form data', (t) => {
   const formConfig = /** @type {any} */ ({
     name: 'empty-form',
@@ -355,8 +367,19 @@ test.serial('createSpreadsheet: writes headers when headers array is provided', 
 
   await GoogleDocsHandler.createSpreadsheet(baseConfig(), 'My Sheet', ['Col A', 'Col B']);
 
-  // update should have been called to write the headers
   t.true(updateStub.calledOnce);
+  t.deepEqual(updateStub.firstCall.args[0].requestBody.values, [['Form Name', 'Col A', 'Col B']]);
+  t.is(updateStub.firstCall.args[0].range, 'Sheet1!A1:C1');
+});
+
+test.serial('createSpreadsheet: handles header ranges beyond column Z', async (t) => {
+  const { updateStub } = stubGoogleSheets();
+  const headers = Array.from({ length: 26 }, (_, index) => `Column ${index + 1}`);
+
+  await GoogleDocsHandler.createSpreadsheet({ ...baseConfig(), prependTimestamp: true }, 'Wide Sheet', headers);
+
+  t.deepEqual(updateStub.firstCall.args[0].requestBody.values, [['Timestamp', 'Form Name', ...headers]]);
+  t.is(updateStub.firstCall.args[0].range, 'Sheet1!A1:AB1');
 });
 
 test.serial('createSpreadsheet: throws when sheets API rejects', async (t) => {

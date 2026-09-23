@@ -41,7 +41,7 @@ Adds deep links to the opening of the heading tags with IDs.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
+| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens. |
 | index | <code>number</code> | The index of the current token in the Tokens array. |
 | options | <code>MarkdownItRendererOptions</code> | The options for the current MarkdownIt instance. |
 
@@ -55,7 +55,7 @@ Creates the opening tag of the TOC.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
+| _tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
 | options | <code>MarkdownItRendererOptions</code> | The options for the current MarkdownIt instance. |
 
@@ -69,7 +69,7 @@ Creates the closing tag of the TOC.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
+| _tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
 | options | <code>MarkdownItRendererOptions</code> | The options for the current MarkdownIt instance. |
 
@@ -83,11 +83,11 @@ Creates the contents of the TOC.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| _tokens | <code>Array.&lt;module:markdown-it/index.js~Token&gt;</code> | Collection of tokens. |
+| _tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens. |
 | _index | <code>number</code> | The index of the current token in the Tokens array. |
 | _options | <code>MarkdownItRendererOptions</code> | Option parameters of the parser instance. |
 | env | [<code>MarkdownItTocStateEnv</code>](#MarkdownItTocStateEnv) | Additional data from parsed input (the toc_headings, for example). |
-| _slf | <code>module:markdown-it/index.js~Renderer</code> | The current parser instance. |
+| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
 
 <a name="tocRule"></a>
 
@@ -100,11 +100,11 @@ Find and replace the TOC tag with the TOC itself.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateInline</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateInline</code> | State of MarkdownIt. |
 
 <a name="tocRule..token"></a>
 
-### tocRule~token : <code>module:markdown-it/index.js~Token</code>
+### tocRule~token : <code>module:markdown-it~Token</code>
 **Kind**: inner property of [<code>tocRule</code>](#tocRule)  
 <a name="collectHeaders"></a>
 
@@ -115,7 +115,7 @@ Caches the headers for use in building the TOC body.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateCore</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
 
 <a name="collectHeaders..env"></a>
 
@@ -133,6 +133,7 @@ Caches the headers for use in building the TOC body.
 | index | <code>string</code> \| <code>number</code> | Heading map index. |
 | level | <code>number</code> | Heading level (1-6). |
 | slug | <code>string</code> | Slugified heading id prefix. |
+| [id] | <code>string</code> | The final heading ID, including duplicate suffixes in stable mode. |
 
 <a name="MarkdownItTocStateEnv"></a>
 

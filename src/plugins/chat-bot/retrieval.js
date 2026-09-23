@@ -85,7 +85,7 @@ export async function embedQuery(baseUrl, model, input, prompt) {
 
 /**
  * Run the vector search query.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {Float32Array} queryVectors The embedded query vectors.
  * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
  * @param {SlugFilter} slugFilter The slug filter.
@@ -137,7 +137,7 @@ function buildFtsQuery(entities) {
 
 /**
  * Run the optional FTS search.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {string[]} entities The query entities.
  * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The plugin config.
  * @param {SlugFilter} slugFilter The slug filter.
@@ -235,7 +235,7 @@ function ftsWeight(query, entities, ftsRows, config) {
 
 /**
  * Fetch all candidate rows before blending.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {number[]} candidateRowids The candidate rowids.
  * @returns {CandidateRow[]} The candidate rows.
  */

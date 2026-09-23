@@ -1,5 +1,5 @@
 /**
- * @param {import('markdown-it/index.js').Token} token The MarkdownIt token we are reading.
+ * @param {import('markdown-it').Token} token The MarkdownIt token we are reading.
  * @param {string} key The key is the attribute name, like `src` or `href`.
  * @returns {*|undefined} The read value or undefined.
  */
@@ -20,7 +20,7 @@ export function getValue(token, key) {
 }
 
 /**
- * @param {import('markdown-it/index.js').Token} token The MarkdownIt token we are updating.
+ * @param {import('markdown-it').Token} token The MarkdownIt token we are updating.
  * @param {string} key The key is the attribute name, like `src` or `href`.
  * @param {string} value The value we want to set to the provided key.
  */
@@ -46,14 +46,14 @@ export function updateValue(token, key, value) {
 /**
  * Uttori specific rules for manipulating the markup.
  * External Domains are filtered for SEO and security.
- * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
+ * @param {import('markdown-it').StateCore} state State of MarkdownIt.
  * @returns {boolean} Returns if parsing was successful or not.
  */
 export function uttoriInline(state) {
   state.tokens.forEach((blockToken) => {
     if (blockToken.type === 'inline' && blockToken.children) {
       // https://markdown-it.github.io/markdown-it/#Token
-      /** @type {import('markdown-it/index.js').Options | { uttori: { lazyImages: boolean, allowedExternalDomains: string[], openNewWindow: boolean, baseUrl: string } }} */
+      /** @type {import('markdown-it').MarkdownItOptions | { uttori: { lazyImages: boolean, allowedExternalDomains: string[], openNewWindow: boolean, baseUrl: string } }} */
       const options = {
         uttori: {
           lazyImages: false,
@@ -94,12 +94,12 @@ export function uttoriInline(state) {
                 token.attrs = [
                   ['style', `color: ${href.slice(6)}`],
                 ];
-              } else {
-                // Prefix for relative URLs
-                if (options?.uttori?.baseUrl) {
-                  // Check for opening slash
-                  updateValue(token, 'href', `${options.uttori.baseUrl}/${href.startsWith('/') ? href.substring(1) : href}`);
-                }
+              } else if (options?.uttori?.baseUrl && !href.startsWith('/') && !href.startsWith('#')
+                && !href.startsWith('//') && !/^[a-z][a-z\d+.-]*:/i.test(href)) {
+                // Only document-relative paths belong under the mounted base.
+                // Fragments, site-root paths and URI schemes already identify a destination.
+                const prefix = options.uttori.baseUrl.replace(/\/$/, '');
+                updateValue(token, 'href', `${prefix}/${href}`);
               }
             }
             break;

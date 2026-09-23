@@ -1,6 +1,6 @@
 /**
  * Find and replace the <video> tags with safe <video> tags.
- * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
+ * @param {import('markdown-it').StateCore} state State of MarkdownIt.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
  */
 export function video(state) {
@@ -40,7 +40,7 @@ export function video(state) {
     if (src.startsWith('http://') || src.startsWith('https://')) {
       const url = new URL(src);
       // If a domain is not in this list, it is set to 'nofollow'.
-      /** @type {import('markdown-it/index.js').Options | { uttori: { allowedExternalDomains: string[] } }} */
+      /** @type {import('markdown-it').MarkdownItOptions | { uttori: { allowedExternalDomains: string[] } }} */
       const options = { uttori: { allowedExternalDomains: [] }, ...state.md.options };
       if (options?.uttori?.allowedExternalDomains?.includes(url.hostname)) {
         token = new state.Token('video_open', 'video', 1);

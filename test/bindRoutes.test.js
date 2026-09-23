@@ -44,3 +44,12 @@ test('should handle not found route', async (t) => {
   const express_response = await request(server).get('/non-existent-route');
   t.is(express_response.status, 404);
 });
+
+test('read-only wiki does not register save routes', async (t) => {
+  const server = serverSetup();
+  const uttori = new UttoriWiki({ ...config, allowCRUDRoutes: false }, server);
+  await seed(uttori);
+  t.is((await request(server).get('/')).status, 200);
+  t.is((await request(server).post('/new')).status, 404);
+  t.is((await request(server).post('/new/key')).status, 404);
+});

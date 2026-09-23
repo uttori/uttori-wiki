@@ -15,6 +15,10 @@ export type MarkdownItTocHeading = {
      * Slugified heading id prefix.
      */
     slug: string;
+    /**
+     * The final heading ID, including duplicate suffixes in stable mode.
+     */
+    id?: string;
 };
 export type MarkdownItTocStateEnv = {
     /**
@@ -28,6 +32,7 @@ export type MarkdownItTocStateEnv = {
  * @property {string|number} index Heading map index.
  * @property {number} level Heading level (1-6).
  * @property {string} slug Slugified heading id prefix.
+ * @property {string} [id] The final heading ID, including duplicate suffixes in stable mode.
  */
 /**
  * MarkdownIt env object extended with cached TOC headings.
@@ -36,50 +41,50 @@ export type MarkdownItTocStateEnv = {
  */
 /**
  * Adds deep links to the opening of the heading tags with IDs.
- * @param {import('markdown-it/index.js').Token[]} tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} tokens Collection of tokens.
  * @param {number} index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The modified header tag with ID.
  */
-export declare function headingOpen(tokens: import('markdown-it/index.js').Token[], index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
+export declare function headingOpen(tokens: import('markdown-it').Token[], index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
 /**
  * Creates the opening tag of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The opening tag of the TOC.
  */
-export declare function tocOpen(_tokens: import('markdown-it/index.js').Token[], _index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
+export declare function tocOpen(_tokens: import('markdown-it').Token[], _index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
 /**
  * Creates the closing tag of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} options The options for the current MarkdownIt instance.
  * @returns {string} The closing tag of the TOC.
  */
-export declare function tocClose(_tokens: import('markdown-it/index.js').Token[], _index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
+export declare function tocClose(_tokens: import('markdown-it').Token[], _index: number, options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions): string;
 /**
  * Creates the contents of the TOC.
- * @param {import('markdown-it/index.js').Token[]} _tokens Collection of tokens.
+ * @param {import('markdown-it').Token[]} _tokens Collection of tokens.
  * @param {number} _index The index of the current token in the Tokens array.
  * @param {import('./../renderer-markdown-it.js').MarkdownItRendererOptions} _options Option parameters of the parser instance.
  * @param {MarkdownItTocStateEnv} env Additional data from parsed input (the toc_headings, for example).
- * @param {import('markdown-it/index.js').Renderer} _slf The current parser instance.
+ * @param {import('markdown-it').Renderer} _slf The current parser instance.
  * @returns {string} The contents tag of the TOC.
  */
-export declare function tocBody(_tokens: import('markdown-it/index.js').Token[], _index: number, _options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions, env: MarkdownItTocStateEnv, _slf: import('markdown-it/index.js').Renderer): string;
+export declare function tocBody(_tokens: import('markdown-it').Token[], _index: number, _options: import('./../renderer-markdown-it.js').MarkdownItRendererOptions, env: MarkdownItTocStateEnv, _slf: import('markdown-it').Renderer): string;
 /**
  * Find and replace the TOC tag with the TOC itself.
- * @param {import('markdown-it/index.js').StateInline} state State of MarkdownIt.
+ * @param {import('markdown-it').StateInline} state State of MarkdownIt.
  * @returns {boolean} Returns true when able to parse a TOC.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
  */
-export declare function tocRule(state: import('markdown-it/index.js').StateInline): boolean;
+export declare function tocRule(state: import('markdown-it').StateInline): boolean;
 /**
  * Caches the headers for use in building the TOC body.
- * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
+ * @param {import('markdown-it').StateCore} state State of MarkdownIt.
  */
-export declare function collectHeaders(state: import('markdown-it/index.js').StateCore): void;
+export declare function collectHeaders(state: import('markdown-it').StateCore): void;
 declare const _default: {
     headingOpen: typeof headingOpen;
     tocOpen: typeof tocOpen;

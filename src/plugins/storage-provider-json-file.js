@@ -35,6 +35,7 @@ class StorageProviderJsonFilePlugin {
       contentDirectory: '',
       historyDirectory: '',
       extension: 'json',
+      sidecarContentExtension: undefined,
       updateTimestamps: true,
       useHistory: true,
       useCache: true,
@@ -93,6 +94,10 @@ class StorageProviderJsonFilePlugin {
 
     const storage = new StorageProvider(config);
     for (const [method, eventNames] of Object.entries(config.events)) {
+      // Git-owned sidecar documents have no paired-write or history contract.
+      if (config.sidecarContentExtension && ['add', 'update', 'delete', 'getHistory', 'getRevision'].includes(method)) {
+        continue;
+      }
       if (typeof storage[method] === 'function') {
         for (const event of eventNames) {
           /** @type {import('@uttori/event-dispatcher').UttoriEventCallback} */

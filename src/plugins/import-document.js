@@ -25,6 +25,22 @@ import { sanitizeSlug, sanitizeFilename, validateAndSanitizeUrl } from './utilit
  */
 
 /**
+ * Downloads an imported page.
+ * @callback ImportDocumentDownloadFile
+ * @param {ImportDocumentDownload} download The file to download.
+ * @returns {Promise<void>} Completes when the download finishes.
+ */
+
+/**
+ * Processes an imported page after download.
+ * @callback ImportDocumentProcessPageFunction
+ * @param {ImportDocumentConfig} config Import configuration.
+ * @param {string} content Downloaded page content.
+ * @param {ImportDocumentConfigPage} page Page metadata.
+ * @returns {Promise<ImportDocumentProcessPage>} Processed page content and attachments.
+ */
+
+/**
  * @typedef {object} ImportDocumentProcessPage
  * @property {string} content The content of the page.
  * @property {import('../../src/wiki.js').UttoriWikiDocumentAttachment[]} attachments The attachments of the page.
@@ -64,8 +80,8 @@ import { sanitizeSlug, sanitizeFilename, validateAndSanitizeUrl } from './utilit
  * @property {ImportDocumentRequestHandlerFactory} [apiRequestHandler] A request handler for the API route.
  * @property {import('express').RequestHandler[]} [middlewareApi] Custom Middleware for the API route.
  * @property {import('express').RequestHandler[]} [middlewarePublic] Custom Middleware for the public route.
- * @property {function(ImportDocumentDownload): Promise<void>} [downloadFile] A function to handle the download.
- * @property {function(ImportDocumentConfig, string, ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>} [processPage] A function to handle the imported page processing.
+ * @property {ImportDocumentDownloadFile} [downloadFile] Downloads an imported page.
+ * @property {ImportDocumentProcessPageFunction} [processPage] Processes an imported page.
  * @example <caption>ImportDocumentConfig</caption>
  * const config = {
  *   events: {

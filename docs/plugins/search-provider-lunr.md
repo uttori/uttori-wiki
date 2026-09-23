@@ -25,6 +25,7 @@ Uttori Search Provider - Lunr, Uttori Plugin Adapter
 * [SearchLunrPlugin](#SearchLunrPlugin)
     * [new SearchLunrPlugin()](#new_SearchLunrPlugin_new)
     * [.configKey](#SearchLunrPlugin.configKey) ⇒ <code>string</code>
+    * [.exportIndex(documents)](#SearchLunrPlugin.exportIndex) ⇒ <code>object</code>
     * [.defaultConfig()](#SearchLunrPlugin.defaultConfig) ⇒ [<code>SearchLunrConfig</code>](#SearchLunrConfig)
     * [.validateConfig(config)](#SearchLunrPlugin.validateConfig)
     * [.register(context)](#SearchLunrPlugin.register)
@@ -47,6 +48,18 @@ The configuration key for plugin to look for in the provided configuration.
 ```js
 const config = { ...Plugin.defaultConfig(), ...context.config[Plugin.configKey] };
 ```
+<a name="SearchLunrPlugin.exportIndex"></a>
+
+### SearchLunrPlugin.exportIndex(documents) ⇒ <code>object</code>
+Export the provider's actual indexing logic for a static browser search.
+
+**Kind**: static method of [<code>SearchLunrPlugin</code>](#SearchLunrPlugin)  
+**Returns**: <code>object</code> - A serialized Lunr index.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| documents | <code>Array.&lt;UttoriWikiDocument&gt;</code> | Public documents. |
+
 <a name="SearchLunrPlugin.defaultConfig"></a>
 
 ### SearchLunrPlugin.defaultConfig() ⇒ [<code>SearchLunrConfig</code>](#SearchLunrConfig)

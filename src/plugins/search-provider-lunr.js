@@ -26,6 +26,14 @@ const debug = createDebug('Uttori.SearchProvider.Lunr.Plugin');
  */
 class SearchLunrPlugin {
   /**
+   * Export the provider's actual indexing logic for a static browser search.
+   * @param {import('../wiki.js').UttoriWikiDocument[]} documents Public documents.
+   * @returns {object} A serialized Lunr index.
+   */
+  static exportIndex(documents) {
+    return new SearchProvider().indexDocuments(documents);
+  }
+  /**
    * The configuration key for plugin to look for in the provided configuration.
    * @type {string}
    * @returns {string} The configuration key.

@@ -9,5 +9,5 @@ Converts WikiLinks to anchor tags.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateInline</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateInline</code> | State of MarkdownIt. |
 

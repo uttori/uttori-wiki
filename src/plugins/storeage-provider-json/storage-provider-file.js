@@ -11,6 +11,7 @@ const debug = createDebug('Uttori.StorageProvider.JSON');
  * @property {string} contentDirectory The directory to store documents.
  * @property {string} historyDirectory The directory to store document histories.
  * @property {string} [extension] The file extension to use for file.
+ * @property {string} [sidecarContentExtension] When set, load Markdown content from a matching sidecar file and reject writes. For example, `md` pairs `page.json` with `page.md`.
  * @property {boolean} [updateTimestamps] Should update times be marked at the time of edit.
  * @property {boolean} [useHistory] Should history entries be created.
  * @property {boolean} [useCache] Should we cache files in memory?
@@ -43,7 +44,7 @@ class StorageProviderJsonFile {
       debug('No content directory provided.');
       throw new Error('No content directory provided.');
     }
-    if (!config.historyDirectory) {
+    if (!config.sidecarContentExtension && !config.historyDirectory) {
       debug('No history directory provided.');
       throw new Error('No history directory provided.');
     }
@@ -55,8 +56,12 @@ class StorageProviderJsonFile {
       useCache: true,
       spacesDocument: undefined,
       spacesHistory: undefined,
+      sidecarContentExtension: undefined,
       ...config,
     };
+    if (this.config.sidecarContentExtension && (this.config.useHistory || !/^[a-z0-9]+$/i.test(this.config.sidecarContentExtension))) {
+      throw new Error('Sidecar content requires useHistory: false and a simple content extension.');
+    }
 
     this.refresh = true;
     // The collection of documents where the slug is the key and the value is the document.
@@ -65,10 +70,46 @@ class StorageProviderJsonFile {
 
     // Ensure the directories exist.
 
-    StorageProviderJsonFile.ensureDirectory(this.config.contentDirectory).catch(console.error);
-
-    StorageProviderJsonFile.ensureDirectory(this.config.historyDirectory).catch(console.error);
+    if (!this.config.sidecarContentExtension) {
+      StorageProviderJsonFile.ensureDirectory(this.config.contentDirectory).catch(console.error);
+      StorageProviderJsonFile.ensureDirectory(this.config.historyDirectory).catch(console.error);
+    }
   }
+
+  /**
+   * Read and validate one metadata/Markdown pair. Sidecar mode is intentionally
+   * strict so a partial checkout cannot silently produce an incomplete site.
+   * @param {string} name Metadata filename, relative to contentDirectory.
+   * @returns {Promise<import('../../wiki.js').UttoriWikiDocument>} The complete document.
+   */
+  loadSidecar = async (name) => {
+    const metadataPath = path.join(this.config.contentDirectory, name);
+    const slug = path.basename(name, `.${this.config.extension}`);
+    const contentPath = path.join(this.config.contentDirectory, `${slug}.${this.config.sidecarContentExtension}`);
+    let metadata;
+    try {
+      metadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
+    } catch (error) {
+      throw new Error(`Invalid metadata at ${metadataPath}: ${error.message}`, { cause: error });
+    }
+    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)
+      || metadata.slug !== slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)
+      || typeof metadata.title !== 'string' || !metadata.title.trim()
+      || (metadata.excerpt !== undefined && typeof metadata.excerpt !== 'string')
+      || (metadata.tags !== undefined && !Array.isArray(metadata.tags))
+      || (metadata.createDate !== undefined && !Number.isFinite(metadata.createDate))
+      || (metadata.updateDate !== undefined && !Number.isFinite(metadata.updateDate))
+      || Object.hasOwn(metadata, 'content') || Object.hasOwn(metadata, 'html')) {
+      throw new Error(`Invalid sidecar metadata or mismatched slug at ${metadataPath}`);
+    }
+    let content;
+    try {
+      content = await fs.readFile(contentPath, 'utf8');
+    } catch (error) {
+      throw new Error(`Missing or unreadable content at ${contentPath}: ${error.message}`, { cause: error });
+    }
+    return { ...metadata, content };
+  };
 
   /**
    * Returns all documents.
@@ -87,6 +128,30 @@ class StorageProviderJsonFile {
     const documents = {};
     try {
       const fileNames = await fs.readdir(this.config.contentDirectory);
+      if (this.config.sidecarContentExtension) {
+        const metadataSuffix = `.${this.config.extension}`;
+        const contentSuffix = `.${this.config.sidecarContentExtension}`;
+        const metadataNames = fileNames.filter((name) => name.endsWith(metadataSuffix)).sort();
+        const contentNames = fileNames.filter((name) => name.endsWith(contentSuffix)).sort();
+        const expectedContent = new Set(metadataNames.map((name) => `${name.slice(0, -metadataSuffix.length)}${contentSuffix}`));
+        for (const name of contentNames) {
+          if (!expectedContent.has(name)) {
+            throw new Error(`Missing metadata for ${path.join(this.config.contentDirectory, name)}`);
+          }
+        }
+        const loadedDocuments = await Promise.all(metadataNames.map((name) => this.loadSidecar(name)));
+        for (const document of loadedDocuments) {
+          if (documents[document.slug]) {
+            throw new Error(`Duplicate sidecar slug ${document.slug} in ${this.config.contentDirectory}`);
+          }
+          documents[document.slug] = document;
+        }
+        if (this.config.useCache) {
+          this.documents = documents;
+          this.refresh = false;
+        }
+        return documents;
+      }
       const validFiles = fileNames.filter((name) => (name.length >= 6) && name.endsWith(this.config.extension));
       const readPromises = validFiles.map(async (name) => {
         const file = path.join(this.config.contentDirectory, name);
@@ -113,6 +178,9 @@ class StorageProviderJsonFile {
       }
     } /* c8 ignore next 2 */ catch (error) {
       debug('all: Error:', error);
+      if (this.config.sidecarContentExtension) {
+        throw error;
+      }
     }
     return documents;
   };
@@ -142,6 +210,12 @@ class StorageProviderJsonFile {
     }
     slug = sanitize(`${slug}`);
 
+    // Collection and direct reads share validation, including missing partners.
+    if (this.config.sidecarContentExtension) {
+      const document = (await this.all())[slug];
+      return document ? { ...document } : undefined;
+    }
+
     // Check the cache, fall back to reading the file.
     if (this.config.useCache && this.documents[slug]) {
       return { ...this.documents[slug] };
@@ -167,6 +241,9 @@ class StorageProviderJsonFile {
    * @param {import('../../wiki.js').UttoriWikiDocument} document The document to be added to the collection.
    */
   add = async (document) => {
+    if (this.config.sidecarContentExtension) {
+      throw new Error('Sidecar content is read-only.');
+    }
     if (!document || !document.slug) {
       debug('add: Cannot add, missing slug.');
       return;
@@ -233,6 +310,9 @@ class StorageProviderJsonFile {
    * @param {string} params.originalSlug The original slug identifying the document, or the slug if it has not changed.
    */
   update = async ({ document, originalSlug }) => {
+    if (this.config.sidecarContentExtension) {
+      throw new Error('Sidecar content is read-only.');
+    }
     debug('update');
     if (!document || !document.slug) {
       debug('Cannot update, missing slug.');
@@ -279,6 +359,9 @@ class StorageProviderJsonFile {
    * @param {string} slug The slug identifying the document.
    */
   delete = async (slug) => {
+    if (this.config.sidecarContentExtension) {
+      throw new Error('Sidecar content is read-only.');
+    }
     debug('delete:', slug);
     const existing = await this.get(slug);
     if (existing) {
@@ -309,6 +392,9 @@ class StorageProviderJsonFile {
    * @returns {Promise<string[]>} Promise object represents the returned history.
    */
   getHistory = async (slug) => {
+    if (this.config.sidecarContentExtension) {
+      return [];
+    }
     debug('getHistory', slug);
     if (!slug) {
       debug('Cannot get document history without slug.', slug);
@@ -341,6 +427,9 @@ class StorageProviderJsonFile {
    * @returns {Promise<import('../../wiki.js').UttoriWikiDocument|undefined>} Promise object represents the returned revision of the document.
    */
   getRevision = async ({ slug, revision }) => {
+    if (this.config.sidecarContentExtension) {
+      return undefined;
+    }
     debug('getRevision', slug, revision);
     if (!slug) {
       debug('getRevision: Cannot get document history without slug.', slug);

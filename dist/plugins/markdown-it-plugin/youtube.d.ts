@@ -30,10 +30,10 @@ export type YoutubeTagAttributes = {
  */
 /**
  * Find and replace the <youtube> tags with safe iframes.
- * @param {import('markdown-it/index.js').StateCore} state State of MarkdownIt.
+ * @param {import('markdown-it').StateCore} state State of MarkdownIt.
  * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
  */
-export declare function youtube(state: import('markdown-it/index.js').StateCore): void;
+export declare function youtube(state: import('markdown-it').StateCore): void;
 declare const _default: {
     youtube: typeof youtube;
 };

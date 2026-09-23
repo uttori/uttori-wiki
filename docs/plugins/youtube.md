@@ -23,7 +23,7 @@ Find and replace the <youtube> tags with safe iframes.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| state | <code>module:markdown-it/index.js~StateCore</code> | State of MarkdownIt. |
+| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
 
 <a name="youtube..keys"></a>
 

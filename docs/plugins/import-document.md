@@ -14,6 +14,12 @@ Imports documents from a variety of sources, including markdown, PDF, and image 
 <dd></dd>
 <dt><a href="#ImportDocumentDownload">ImportDocumentDownload</a> : <code>object</code></dt>
 <dd></dd>
+<dt><a href="#ImportDocumentDownloadFile">ImportDocumentDownloadFile</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
+<dd><p>Downloads an imported page.</p>
+</dd>
+<dt><a href="#ImportDocumentProcessPageFunction">ImportDocumentProcessPageFunction</a> ⇒ <code><a href="#ImportDocumentProcessPage">Promise.&lt;ImportDocumentProcessPage&gt;</a></code></dt>
+<dd><p>Processes an imported page after download.</p>
+</dd>
 <dt><a href="#ImportDocumentProcessPage">ImportDocumentProcessPage</a> : <code>object</code></dt>
 <dd></dd>
 <dt><a href="#ImportDocumentApiPayload">ImportDocumentApiPayload</a> : <code>object</code></dt>
@@ -237,6 +243,32 @@ Processes a page and returns the content and attachment.
 | fileName | <code>string</code> | The name of the file. |
 | type | <code>string</code> | The type of the page. |
 
+<a name="ImportDocumentDownloadFile"></a>
+
+## ImportDocumentDownloadFile ⇒ <code>Promise.&lt;void&gt;</code>
+Downloads an imported page.
+
+**Kind**: global typedef  
+**Returns**: <code>Promise.&lt;void&gt;</code> - Completes when the download finishes.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| download | [<code>ImportDocumentDownload</code>](#ImportDocumentDownload) | The file to download. |
+
+<a name="ImportDocumentProcessPageFunction"></a>
+
+## ImportDocumentProcessPageFunction ⇒ [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage)
+Processes an imported page after download.
+
+**Kind**: global typedef  
+**Returns**: [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage) - Processed page content and attachments.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| config | [<code>ImportDocumentConfig</code>](#ImportDocumentConfig) | Import configuration. |
+| content | <code>string</code> | Downloaded page content. |
+| page | [<code>ImportDocumentConfigPage</code>](#ImportDocumentConfigPage) | Page metadata. |
+
 <a name="ImportDocumentProcessPage"></a>
 
 ## ImportDocumentProcessPage : <code>object</code>
@@ -298,8 +330,8 @@ Builds an Express request handler from plugin context.
 | [apiRequestHandler] | [<code>ImportDocumentRequestHandlerFactory</code>](#ImportDocumentRequestHandlerFactory) | A request handler for the API route. |
 | [middlewareApi] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the API route. |
 | [middlewarePublic] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the public route. |
-| [downloadFile] | <code>function</code> | A function to handle the download. |
-| [processPage] | <code>function</code> | A function to handle the imported page processing. |
+| [downloadFile] | [<code>ImportDocumentDownloadFile</code>](#ImportDocumentDownloadFile) | Downloads an imported page. |
+| [processPage] | [<code>ImportDocumentProcessPageFunction</code>](#ImportDocumentProcessPageFunction) | Processes an imported page. |
 
 **Example** *(ImportDocumentConfig)*  
 ```js

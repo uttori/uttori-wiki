@@ -12,6 +12,10 @@ export type StorageProviderJsonFileConfig = {
      */
     extension?: string;
     /**
+     * When set, load Markdown content from a matching sidecar file and reject writes. For example, `md` pairs `page.json` with `page.md`.
+     */
+    sidecarContentExtension?: string;
+    /**
      * Should update times be marked at the time of edit.
      */
     updateTimestamps?: boolean;
@@ -41,6 +45,7 @@ export type StorageProviderJsonFileConfig = {
  * @property {string} contentDirectory The directory to store documents.
  * @property {string} historyDirectory The directory to store document histories.
  * @property {string} [extension] The file extension to use for file.
+ * @property {string} [sidecarContentExtension] When set, load Markdown content from a matching sidecar file and reject writes. For example, `md` pairs `page.json` with `page.md`.
  * @property {boolean} [updateTimestamps] Should update times be marked at the time of edit.
  * @property {boolean} [useHistory] Should history entries be created.
  * @property {boolean} [useCache] Should we cache files in memory?
@@ -67,6 +72,7 @@ declare class StorageProviderJsonFile {
         useCache: boolean;
         spacesDocument: number | undefined;
         spacesHistory: number | undefined;
+        sidecarContentExtension: string | undefined;
     };
     refresh: boolean;
     /** @type {Record<string, import('../../wiki.js').UttoriWikiDocument>} */
@@ -77,6 +83,13 @@ declare class StorageProviderJsonFile {
      * @class
      */
     constructor(config: StorageProviderJsonFileConfig);
+    /**
+     * Read and validate one metadata/Markdown pair. Sidecar mode is intentionally
+     * strict so a partial checkout cannot silently produce an incomplete site.
+     * @param {string} name Metadata filename, relative to contentDirectory.
+     * @returns {Promise<import('../../wiki.js').UttoriWikiDocument>} The complete document.
+     */
+    loadSidecar: (name: string) => Promise<import('../../wiki.js').UttoriWikiDocument>;
     /**
      * Returns all documents.
      * @returns {Promise<Record<string, import('../../wiki.js').UttoriWikiDocument>>} All documents.

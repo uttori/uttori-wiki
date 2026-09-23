@@ -6,6 +6,14 @@
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#columnLabel">columnLabel(column)</a> ⇒ <code>string</code></dt>
+<dd><p>Converts a one-based column number to a Sheets column label, including columns after Z.</p>
+</dd>
+</dl>
+
 ## Typedefs
 
 <dl>
@@ -118,6 +126,18 @@ Not used in this handler but is useful for debugging.
 | Param | Type | Description |
 | --- | --- | --- |
 | config | [<code>GoogleDocsHandlerConfig</code>](#GoogleDocsHandlerConfig) | Handler configuration. |
+
+<a name="columnLabel"></a>
+
+## columnLabel(column) ⇒ <code>string</code>
+Converts a one-based column number to a Sheets column label, including columns after Z.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - Column label.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| column | <code>number</code> | One-based column number. |
 
 <a name="GoogleDocsHandlerConfig"></a>
 

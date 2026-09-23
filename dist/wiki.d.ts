@@ -190,11 +190,11 @@ export type UttoriWikiDocument = {
      */
     html?: string;
     /**
-     * The Unix timestamp of the creation date of the document.
+     * Milliseconds since the Unix epoch when the document was created.
      */
     createDate: number;
     /**
-     * The Unix timestamp of the last update date to the document.
+     * Milliseconds since the Unix epoch when the document was last updated.
      */
     updateDate: number;
     /**
@@ -302,8 +302,8 @@ export type UttoriWikiDocumentAttachment = {
  * @property {string} [excerpt] A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
- * @property {number} createDate The Unix timestamp of the creation date of the document.
- * @property {number} updateDate The Unix timestamp of the last update date to the document.
+ * @property {number} createDate Milliseconds since the Unix epoch when the document was created.
+ * @property {number} updateDate Milliseconds since the Unix epoch when the document was last updated.
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.

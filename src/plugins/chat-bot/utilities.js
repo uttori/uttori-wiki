@@ -3,8 +3,8 @@
  * @property {string} type The type of node.
  * @property {Array<string | string[]>} content Text content for the node.
  * @property {MarkdownASTHeaderValue[]} headers The relevant headers for this node.
- * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
- * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
+ * @property {import('markdown-it').Token | null} [open] The MarkdownIt Token object for the opening tag.
+ * @property {import('markdown-it').Token | null} [close] The MarkdownIt Token object for the closing tag.
  * @property {MarkdownASTNode[]} children The child nodes for this node.
  */
 
@@ -246,7 +246,7 @@ export function chunkTable(header, bodyRows, options = {}) {
 
 /**
  * Create a node from a MarkdownIt Token.
- * @param {import('markdown-it/index.js').Token} [token] A token to convert.
+ * @param {import('markdown-it').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
  */
 export function genTreeNode(token) {
@@ -795,7 +795,7 @@ export function consolidateSectionsByHeader(items, maximumTokenCount = Infinity,
 
 /**
  * Convert MarkdownIt Tokens to an AST.
- * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
+ * @param {import('markdown-it').Token[]} tokens Tokens to convert.
  * @param {string} title The document title used as the H1 in the header stack.
  * @param {object} options The options for the conversion.
  * @param {boolean} [options.tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead.

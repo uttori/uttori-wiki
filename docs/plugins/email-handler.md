@@ -6,6 +6,14 @@
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#fillTemplate">fillTemplate(template, formData, formConfig)</a> ⇒ <code>string</code></dt>
+<dd><p>Replaces form placeholders as literal text so field names and values cannot change replacement syntax.</p>
+</dd>
+</dl>
+
 ## Typedefs
 
 <dl>
@@ -55,7 +63,7 @@ Generates email subject from template.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| template | <code>string</code> | Subject template. |
+| template | <code>string</code> \| <code>undefined</code> | Subject template; an empty value uses the default subject. |
 | formData | <code>Record.&lt;string, any&gt;</code> | Form data. |
 | formConfig | <code>FormConfig</code> | Form configuration. |
 
@@ -69,9 +77,23 @@ Generates email body from template.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| template | <code>string</code> | Body template. |
+| template | <code>string</code> \| <code>null</code> \| <code>undefined</code> | Body template; an empty value uses the default HTML body. |
 | formData | <code>Record.&lt;string, any&gt;</code> | Form data. |
 | formConfig | <code>FormConfig</code> | Form configuration. |
+
+<a name="fillTemplate"></a>
+
+## fillTemplate(template, formData, formConfig) ⇒ <code>string</code>
+Replaces form placeholders as literal text so field names and values cannot change replacement syntax.
+
+**Kind**: global function  
+**Returns**: <code>string</code> - Template with known placeholders filled in.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| template | <code>string</code> | Subject or HTML template. |
+| formData | <code>Record.&lt;string, any&gt;</code> | Submitted field values. |
+| formConfig | <code>FormConfig</code> | Form metadata. |
 
 <a name="EmailHandlerConfig"></a>
 

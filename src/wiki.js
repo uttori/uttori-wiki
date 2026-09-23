@@ -124,8 +124,8 @@ const isImageAttachment = (attachment) => typeof attachment?.type === 'string' &
  * @property {string} [excerpt] A succinct deescription of the document, think meta description.
  * @property {string} content All text content for the doucment.
  * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
- * @property {number} createDate The Unix timestamp of the creation date of the document.
- * @property {number} updateDate The Unix timestamp of the last update date to the document.
+ * @property {number} createDate Milliseconds since the Unix epoch when the document was created.
+ * @property {number} updateDate Milliseconds since the Unix epoch when the document was last updated.
  * @property {string|string[]} tags A collection of tags that represent the document.
  * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
  * @property {string} [layout] The layout to use when rendering the document.
@@ -206,12 +206,9 @@ class UttoriWiki {
     }
     debug('Registering Plugins: ', config.plugins.length);
     for (const plugin of config.plugins) {
-      try {
-        plugin.register(this);
-      } catch (error) {
-        debug('Plugin:', plugin);
-        debug('Plugin Error:', error);
-      }
+      // A plugin that did not register can leave read and render hooks absent.
+      // Failing here is safer than exporting an apparently empty wiki.
+      plugin.register(this);
     }
     debug('Registered Plugins');
   }
@@ -275,7 +272,17 @@ class UttoriWiki {
    * }
    */
   async buildMetadata(document, path = '', robots = '') {
-    const canonical = `${this.config.publicUrl}${path.trim()}`;
+    let canonicalPath = path.trim();
+    // Mounted wikis opt into their public prefix and trailing slash here. Keep
+    // legacy canonical paths unchanged when neither option is configured.
+    if (this.config.canonicalPathPrefix || this.config.canonicalTrailingSlash) {
+      const prefix = this.config.canonicalPathPrefix?.replace(/^\/+|\/+$/g, '') || '';
+      canonicalPath = `/${[prefix, canonicalPath.replace(/^\/+|\/+$/g, '')].filter(Boolean).join('/')}`;
+      if (this.config.canonicalTrailingSlash && !canonicalPath.endsWith('/')) {
+        canonicalPath += '/';
+      }
+    }
+    const canonical = `${this.config.publicUrl}${canonicalPath}`;
     let title = '';
     let description = '';
     let modified = '';
@@ -376,6 +383,11 @@ class UttoriWiki {
       router.get('/:slug/edit', this.config.routeMiddleware.edit, this.edit);
       router.get('/:slug/delete/:key', this.config.routeMiddleware.delete, this.delete);
       router.get('/:slug/delete', this.config.routeMiddleware.delete, this.delete);
+      // Save endpoints must share the CRUD gate with their edit forms.
+      router.post('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+      router.post('/:slug/save', this.config.routeMiddleware.save, this.save);
+      router.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
+      router.put('/:slug/save', this.config.routeMiddleware.save, this.save);
     }
 
     // Document History
@@ -388,12 +400,6 @@ class UttoriWiki {
       router.get('/:slug/history/:revision', this.config.routeMiddleware.historyDetail, this.notFound);
       router.get('/:slug/history/:revision/restore', this.config.routeMiddleware.historyRestore, this.notFound);
     }
-
-    // Document Update
-    router.post('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
-    router.post('/:slug/save', this.config.routeMiddleware.save, this.save);
-    router.put('/:slug/save/:key', this.config.routeMiddleware.save, this.save);
-    router.put('/:slug/save', this.config.routeMiddleware.save, this.save);
 
     // Handle Redirects
     for (const redirect of this.config?.redirects ?? []) {

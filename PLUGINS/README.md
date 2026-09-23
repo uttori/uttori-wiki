@@ -49,6 +49,7 @@ const config = {
 ### Insight & SEO
 - [Analytics (JSON File)](analytics-json-file.md) - file-based page-view counts.
 - [Sitemap Generator](sitemap-generator.md) - writes `sitemap.xml`.
+- [Static Site Generator](static-site-generator.md) - exports the public wiki as a validated directory of HTML and assets.
 
 ### Safety & access
 - [Auth (Simple)](auth-simple.md) - minimal login/logout routes.

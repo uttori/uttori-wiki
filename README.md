@@ -610,6 +610,7 @@ You can create custom handlers by providing a function that accepts form data, f
 Forms are accessible at: `{baseRoute}{formRoute}`
 
 For example, with `baseRoute: '/forms'` and form `route: '/contact'`:
+
 - POST `/forms/contact`
 
 ### Request/Response Format

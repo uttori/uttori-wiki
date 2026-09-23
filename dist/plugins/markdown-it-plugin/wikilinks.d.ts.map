@@ -1,1 +1,1 @@
-{"version":3,"file":"wikilinks.d.ts","sourceRoot":"","sources":["../../../src/plugins/markdown-it-plugin/wikilinks.js"],"names":[],"mappings":"AAEA;;;;;GAKG;AACH,wBAAgB,SAAS,CAAC,KAAK,EAJpB,OAAO,sBAAsB,EAAE,WAIX,GAHlB,OAAO,CA4EnB"}
+{"version":3,"file":"wikilinks.d.ts","sourceRoot":"","sources":["../../../src/plugins/markdown-it-plugin/wikilinks.js"],"names":[],"mappings":"AAEA;;;;;GAKG;AACH,wBAAgB,SAAS,CAAC,KAAK,EAJpB,OAAO,aAAa,EAAE,WAIF,GAHlB,OAAO,CA4EnB"}

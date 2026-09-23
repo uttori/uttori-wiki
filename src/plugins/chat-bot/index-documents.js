@@ -196,7 +196,7 @@ export async function buildBlocks(document, config) {
 
 /**
  * Ensure the chat index tables exist.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options.
  * @param {ChatIndexSchemaOptions} [options] Schema options.
  * @returns {Promise<{ embedder: OllamaEmbedder, dim: number }>} The embedder and vector dimension.
@@ -255,7 +255,7 @@ export async function ensureChatIndexSchema(db, config, options = {}) {
 
 /**
  * Remove a document and all of its chunks from the chat index.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {string} slug The source slug to remove.
  */
 export function removeIndexedDocumentFromDatabase(db, slug) {
@@ -282,7 +282,7 @@ export function removeIndexedDocumentFromDatabase(db, slug) {
 
 /**
  * Index one document using an already-open database.
- * @param {import('better-sqlite3/index.js').Database} db The database.
+ * @param {import('better-sqlite3').Database} db The database.
  * @param {import('../search-provider-sqlite.js').SearchSQLiteConfig} config The options.
  * @param {OllamaEmbedder} embedder The embedder.
  * @param {import('../../wiki.js').UttoriWikiDocument} document The document to index.

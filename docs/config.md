@@ -36,6 +36,8 @@
 | ignoreTags | <code>Array.&lt;string&gt;</code> |  | Tags to ignore when generating the tags page, default is an empty array; |
 | [excerptLength] | <code>number</code> | <code>400</code> | Excerpt length, used in search result previews. |
 | [publicUrl] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Application base URL. Used for canonical URLs and redirects, do not include a trailing slash. |
+| [canonicalPathPrefix] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Optional mounted path for canonical URLs; unlike publicUrl it contains no origin. |
+| [canonicalTrailingSlash] | <code>boolean</code> | <code>false</code> | Append a slash to canonical document, search, and home paths. |
 | routes | <code>Record.&lt;string, string&gt;</code> |  | The object containing the route strings for search. |
 | titles | <code>Record.&lt;string, string&gt;</code> |  | The object containing the default titles for search. |
 | [themePath] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Specify the path to the theme directory, no trailing slash. |

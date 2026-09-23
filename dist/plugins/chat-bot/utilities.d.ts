@@ -3,8 +3,8 @@
  * @property {string} type The type of node.
  * @property {Array<string | string[]>} content Text content for the node.
  * @property {MarkdownASTHeaderValue[]} headers The relevant headers for this node.
- * @property {import('markdown-it/index.js').Token | null} [open] The MarkdownIt Token object for the opening tag.
- * @property {import('markdown-it/index.js').Token | null} [close] The MarkdownIt Token object for the closing tag.
+ * @property {import('markdown-it').Token | null} [open] The MarkdownIt Token object for the opening tag.
+ * @property {import('markdown-it').Token | null} [close] The MarkdownIt Token object for the closing tag.
  * @property {MarkdownASTNode[]} children The child nodes for this node.
  */
 export type MarkdownASTNode = {
@@ -23,11 +23,11 @@ export type MarkdownASTNode = {
     /**
      * The MarkdownIt Token object for the opening tag.
      */
-    open?: import('markdown-it/index.js').Token | null;
+    open?: import('markdown-it').Token | null;
     /**
      * The MarkdownIt Token object for the closing tag.
      */
-    close?: import('markdown-it/index.js').Token | null;
+    close?: import('markdown-it').Token | null;
     /**
      * The child nodes for this node.
      */
@@ -91,10 +91,10 @@ export declare function chunkTable(header: string[], bodyRows: string[][], optio
 }>;
 /**
  * Create a node from a MarkdownIt Token.
- * @param {import('markdown-it/index.js').Token} [token] A token to convert.
+ * @param {import('markdown-it').Token} [token] A token to convert.
  * @returns {MarkdownASTNode} A newly created node.
  */
-export declare function genTreeNode(token?: import('markdown-it/index.js').Token): MarkdownASTNode;
+export declare function genTreeNode(token?: import('markdown-it').Token): MarkdownASTNode;
 /**
  * Strip images from markdown text, leaving only the text content.
  * @param {string} text The markdown text to clean.
@@ -174,7 +174,7 @@ export declare function splitTextToTokenBudget(text: string, maxTokens: number):
 export declare function consolidateSectionsByHeader(items: import('../search-provider-sqlite.js').Block[], maximumTokenCount?: number, softMinTokens?: number, minAnchorDecrease?: number): import('../search-provider-sqlite.js').Block[];
 /**
  * Convert MarkdownIt Tokens to an AST.
- * @param {import('markdown-it/index.js').Token[]} tokens Tokens to convert.
+ * @param {import('markdown-it').Token[]} tokens Tokens to convert.
  * @param {string} title The document title used as the H1 in the header stack.
  * @param {object} options The options for the conversion.
  * @param {boolean} [options.tableToCSV] Whether to convert tables to CSV format. If false, converts to Markdown format instead.
@@ -182,7 +182,7 @@ export declare function consolidateSectionsByHeader(items: import('../search-pro
  * @param {number} [options.tableMaxTokensPerChunk] The maximum number of tokens per chunk for tables.
  * @returns {MarkdownASTNode[]} The MarkdownIt tokens processed to a collection of MarkdownASTNodes.
  */
-export declare function markdownItAST(tokens: import('markdown-it/index.js').Token[], title: string, options?: {
+export declare function markdownItAST(tokens: import('markdown-it').Token[], title: string, options?: {
     tableToCSV?: boolean;
     tableMaxRowsPerChunk?: number;
     tableMaxTokensPerChunk?: number;

@@ -5,6 +5,7 @@ import { youtube } from './youtube.js';
 import { video } from './video.js';
 import { uttoriInline } from './uttori-inline.js';
 import { lineBreaker } from './line-breaker.js';
+import { exampleBlock } from './examples.js';
 
 /**
  * Extend MarkdownIt with Uttori specific items:
@@ -12,10 +13,12 @@ import { lineBreaker } from './line-breaker.js';
  * - External Links with Domain Filters
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
- * @param {import('markdown-it').default} md The MarkdownIt instance.
- * @returns {import('markdown-it').default} The MarkdownIt instance.
+ * @param {import('markdown-it').MarkdownIt} md The MarkdownIt instance.
+ * @returns {import('markdown-it').MarkdownIt} The MarkdownIt instance.
  */
 function Plugin(md) {
+  // Registered examples become trusted static components before paragraphs are parsed.
+  md.block.ruler.before('paragraph', 'example', exampleBlock);
   /**
    * Adds deep links to the opening of the heading tags with IDs.
    */

@@ -35,6 +35,7 @@ Generates a valid sitemap.xml file for submitting to search engines.
     * [.register(context)](#SitemapGenerator.register)
     * [.callback(document, context)](#SitemapGenerator.callback) ⇒ <code>Promise.&lt;object&gt;</code>
     * [.generateSitemap(context)](#SitemapGenerator.generateSitemap) ⇒ <code>Promise.&lt;string&gt;</code>
+    * [.generateRoutes(routes, config)](#SitemapGenerator.generateRoutes) ⇒ <code>string</code>
 
 <a name="new_SitemapGenerator_new"></a>
 
@@ -164,6 +165,20 @@ const context = {
 };
 SitemapGenerator.generateSitemap(context);
 ```
+<a name="SitemapGenerator.generateRoutes"></a>
+
+### SitemapGenerator.generateRoutes(routes, config) ⇒ <code>string</code>
+Render an explicit finite route list without querying storage.
+Static exports use this so the sitemap has exactly the pages in the artifact.
+
+**Kind**: static method of [<code>SitemapGenerator</code>](#SitemapGenerator)  
+**Returns**: <code>string</code> - Sitemap XML.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| routes | [<code>Array.&lt;SitemapGeneratorUrl&gt;</code>](#SitemapGeneratorUrl) | Public paths and their content dates. |
+| config | [<code>SitemapGeneratorConfig</code>](#SitemapGeneratorConfig) | Sitemap formatting and canonical origin. |
+
 <a name="SitemapGeneratorUrl"></a>
 
 ## SitemapGeneratorUrl : <code>object</code>

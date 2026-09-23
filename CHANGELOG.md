@@ -6,6 +6,23 @@ All notable changes to this project will be documented in this file. This projec
 
 - Discord Notifications
 
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/v9.0.0...HEAD)
+
+## [9.1.0](https://github.com/uttori/uttori-wiki/compare/v9.0.0...v9.1.0) - 2026-09-23
+
+- 🎁 Upgrade `better-sqlite3`, `@types/better-sqlite3`, `googleapis`, `markdown-it`, and `nodemailer`; use Nodemailer's bundled types instead of `@types/nodemailer`.
+- 🧰 Add Markdown content with JSON metadata sidecars (`*.md` + `*.json`) to `StorageProviderJsonFile`, while retaining embedded-JSON documents.
+- 🧰 Add `StaticSiteGenerator` for validated, read-only HTML exports with search data, sitemap output, copied assets, and a previous-build rollback artifact.
+- 🧰 Add registered `[example:id]` blocks with neutral, escaped input/output markup; add stable heading IDs and keep site-root and external links intact.
+- 🛠 Add opt-in canonical path prefixes and trailing slashes for mounted wikis, reusable Lunr index export, and sitemap route generation.
+- 🛠 Document wiki document dates as Unix milliseconds.
+- 🛠 Preserve bare-domain autolinks when Markdown rendering enables `linkify` under markdown-it 15, and update Markdown and SQLite type imports for the new packages.
+- 🪲 Honor `allowCRUDRoutes` for save routes and surface plugin registration errors.
+- 🪲 Prevent sitemap configuration reuse from duplicating routes across builds.
+- 🪲 Fix Google Sheets creation to write the supplied headers in order and support column ranges beyond Z; preserve zero and false form values.
+- 🪲 Treat email template field names and replacement values literally, including punctuation and dollar signs.
+- 🪲 Fix callback type declarations emitted for the auth and import plugins.
+
 ## [9.0.0](https://github.com/uttori/uttori-wiki/compare/v8.1.0...v9.0.0) - 2026-06-26
 
 - 💥 BREAKING CHANGES!

@@ -4,7 +4,8 @@ import { execSync } from 'child_process';
 import { glob } from 'glob';
 
 // Configuration
-const config = '--configure ./jsdoc.conf.json --private --example-lang js';
+// jsdoc-api stores its cache under the user's home directory, which may be read-only in build environments.
+const config = '--no-cache --configure ./jsdoc.conf.json --private --example-lang js';
 // const template = '--template rm.hbs';
 
 // Ensure docs directories exist
@@ -51,11 +52,7 @@ const main = async () => {
   pluginFiles.forEach(file => {
     const baseName = path.basename(file, '.js');
     const outputPath = `docs/plugins/${baseName}.md`;
-    try {
-      generateDoc(file, outputPath, false);
-    } catch (error) {
-      console.error(`File ${file}`, error);
-    }
+    generateDoc(file, outputPath, false);
   });
 
   console.log('Documentation generation complete!');
@@ -63,7 +60,11 @@ const main = async () => {
 
 // Run if called directly
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch(console.error);
+  main().catch(error => {
+    console.error(error);
+    // Propagate JSDoc failures to `npm run make` so broken generated docs cannot pass a build.
+    process.exitCode = 1;
+  });
 }
 
 export { main };

@@ -1,3 +1,4 @@
+export type AuthSimpleValidateLogin = (request: import('express').Request) => Promise<object | null>;
 export type AuthSimpleConfig = {
     /**
      * An object whose keys correspond to methods, and contents are events to listen for.
@@ -28,10 +29,16 @@ export type AuthSimpleConfig = {
      */
     logoutMiddleware?: import('express').RequestHandler[];
     /**
-     * (import('express').Request): Promise<object | null>} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
+     * Validation function for the login request.
      */
-    : Function;
+    validateLogin: AuthSimpleValidateLogin;
 };
+/**
+ * Validates a login request and returns session data, or null for invalid credentials.
+ * @callback AuthSimpleValidateLogin
+ * @param {import('express').Request} request The login request.
+ * @returns {Promise<object | null>} Session data or null.
+ */
 /**
  * @typedef {object} AuthSimpleConfig
  * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
@@ -41,7 +48,7 @@ export type AuthSimpleConfig = {
  * @property {string} [logoutRedirectPath] The path to redirect to after logging out.
  * @property {import('express').RequestHandler[]} [loginMiddleware] The middleware to use on the login route.
  * @property {import('express').RequestHandler[]} [logoutMiddleware] The middleware to use on the logout route.
- * @property {function(import('express').Request): Promise<object | null>} validateLogin Validation function that will recieve the request body that returns an object to be used as the session payload. If the session is invalid it should return null.
+ * @property {AuthSimpleValidateLogin} validateLogin Validation function for the login request.
  */
 /**
  * Uttori Auth (Simple)

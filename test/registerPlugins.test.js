@@ -15,8 +15,8 @@ test('registerPlugins(config): does not fail when plugins is broken', (t) => {
   });
 });
 
-test('registerPlugins(config): does not fail when plugin.register throws an error', (t) => {
-  t.notThrows(() => {
+test('registerPlugins(config): surfaces plugin registration failures', (t) => {
+  t.throws(() => {
     const server = serverSetup();
     const _uttori = new UttoriWiki({
       themePath: '/tmp',
@@ -27,5 +27,5 @@ test('registerPlugins(config): does not fail when plugin.register throws an erro
         },
       }],
     }, server);
-  });
+  }, { message: 'test' });
 });
