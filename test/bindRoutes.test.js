@@ -1,7 +1,7 @@
 import test from 'ava';
 import request from 'supertest';
 
-import { UttoriWiki } from '../src/index.js';
+import { UttoriWiki } from '../dist/index.js';
 
 import { config, seed, serverSetup } from './_helpers/server.js';
 

@@ -3,13 +3,13 @@ import sinon from 'sinon';
 import Database from 'better-sqlite3';
 import * as sqliteVec from 'sqlite-vec';
 
-import SearchSQLitePlugin from '../../../src/plugins/search-provider-sqlite.js';
+import SearchSQLitePlugin from '../../../dist/plugins/search-provider-sqlite.js';
 import {
   buildBlocks,
   ensureChatIndexSchema,
   removeIndexedDocumentFromDatabase,
   indexDocumentInDatabase,
-} from '../../../src/plugins/chat-bot/index-documents.js';
+} from '../../../dist/plugins/chat-bot/index-documents.js';
 
 const DIM = 3;
 
@@ -30,7 +30,7 @@ try {
   canIntegrate = true;
 } catch { /* native binding unavailable */ }
 
-/** @returns {import('better-sqlite3').Database} */
+/** @returns {import('better-sqlite3').Database} In-memory database with search tables. */
 function makeBaseDb() {
   const db = new Database(':memory:');
   sqliteVec.load(db);
@@ -55,7 +55,11 @@ function makeBaseDb() {
   return db;
 }
 
-/** @param {Record<string, unknown>} [overrides] */
+/**
+ * Build search settings for indexing tests.
+ * @param {Record<string, unknown>} [overrides] Settings to replace.
+ * @returns {object} Search plugin configuration.
+ */
 function makeConfig(overrides = {}) {
   return {
     ...SearchSQLitePlugin.defaultConfig(),
@@ -67,7 +71,11 @@ function makeConfig(overrides = {}) {
   };
 }
 
-/** @returns {import('../../wiki.js').UttoriWikiDocument} */
+/**
+ * Build a document for indexing tests.
+ * @param {object} [overrides] Document fields to replace.
+ * @returns {import('../../wiki.js').UttoriWikiDocument} Document fixture.
+ */
 function makeDocument(overrides = {}) {
   return {
     slug: 'doc-a',
@@ -80,7 +88,7 @@ function makeDocument(overrides = {}) {
   };
 }
 
-/** @returns {{ probeDimension: sinon.SinonStub, embedBatch: sinon.SinonStub }} */
+/** @returns {{ probeDimension: sinon.SinonStub, embedBatch: sinon.SinonStub }} Embedder stubs for assertions. */
 function makeMockEmbedder() {
   return {
     probeDimension: sinon.stub().resolves(DIM),

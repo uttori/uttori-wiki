@@ -1,64 +1,46 @@
-## Classes
-
-<dl>
-<dt><a href="#AuthSimple">AuthSimple</a></dt>
-<dd><p>Uttori Auth (Simple)</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#AuthSimpleValidateLogin">AuthSimpleValidateLogin</a> ⇒ <code>Promise.&lt;(object|null)&gt;</code></dt>
-<dd><p>Validates a login request and returns session data, or null for invalid credentials.</p>
-</dd>
-<dt><a href="#AuthSimpleConfig">AuthSimpleConfig</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
 <a name="AuthSimple"></a>
 
 ## AuthSimple
 Uttori Auth (Simple)
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [AuthSimple](#AuthSimple)
     * [new AuthSimple()](#new_AuthSimple_new)
-    * [.configKey](#AuthSimple.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#AuthSimple.defaultConfig) ⇒ [<code>AuthSimpleConfig</code>](#AuthSimpleConfig)
+    * [.configKey](#AuthSimple.configKey) ⇒
+    * [.defaultConfig()](#AuthSimple.defaultConfig) ⇒
     * [.validateConfig(config, _context)](#AuthSimple.validateConfig)
     * [.register(context)](#AuthSimple.register)
     * [.bindRoutes(server, context)](#AuthSimple.bindRoutes)
-    * [.login(context)](#AuthSimple.login) ⇒ <code>module:express~RequestHandler.&lt;{}, {}, {}, {}&gt;</code>
-    * [.logout(context)](#AuthSimple.logout) ⇒ <code>module:express~RequestHandler</code>
+    * [.login(context)](#AuthSimple.login) ⇒
+    * [.logout(context)](#AuthSimple.logout) ⇒
 
 <a name="new_AuthSimple_new"></a>
 
 ### new AuthSimple()
-**Example** *(AuthSimple)*  
+**Example** *(AuthSimple)*\
 ```js
 const content = AuthSimple.storeFile(request);
 ```
 <a name="AuthSimple.configKey"></a>
 
-### AuthSimple.configKey ⇒ <code>string</code>
+### AuthSimple.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>AuthSimple</code>](#AuthSimple)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(AuthSimple.configKey)*  
+**Kind**: static property of [<code>AuthSimple</code>](#AuthSimple)\
+**Returns**: The configuration key.\
+**Example** *(AuthSimple.configKey)*\
 ```js
 const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
 ```
 <a name="AuthSimple.defaultConfig"></a>
 
-### AuthSimple.defaultConfig() ⇒ [<code>AuthSimpleConfig</code>](#AuthSimpleConfig)
+### AuthSimple.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
-**Returns**: [<code>AuthSimpleConfig</code>](#AuthSimpleConfig) - The configuration.  
-**Example** *(AuthSimple.defaultConfig())*  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
+**Returns**: The configuration.\
+**Example** *(AuthSimple.defaultConfig())*\
 ```js
 const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
 ```
@@ -67,14 +49,14 @@ const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.con
 ### AuthSimple.validateConfig(config, _context)
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>Record.&lt;string, AuthSimpleConfig&gt;</code> | A configuration object. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-auth-simple&#x27;, AuthSimpleConfig&gt;</code> | Unused. |
+| Param | Description |
+| --- | --- |
+| config | A configuration object. |
+| _context | Unused. |
 
-**Example** *(AuthSimple.validateConfig(config, _context))*  
+**Example** *(AuthSimple.validateConfig(config, _context))*\
 ```js
 AuthSimple.validateConfig({ ... });
 ```
@@ -83,13 +65,13 @@ AuthSimple.validateConfig({ ... });
 ### AuthSimple.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-auth-simple&#x27;, AuthSimpleConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(AuthSimple.register(context))*  
+**Example** *(AuthSimple.register(context))*\
 ```js
 const context = {
   hooks: {
@@ -111,14 +93,14 @@ AuthSimple.register(context);
 ### AuthSimple.bindRoutes(server, context)
 Add the login & logout routes to the server object.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| server | <code>module:express~Application</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-auth-simple&#x27;, AuthSimpleConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| server | An Express server instance. |
+| context | A Uttori-like context. |
 
-**Example** *(AuthSimple.bindRoutes(server, context))*  
+**Example** *(AuthSimple.bindRoutes(server, context))*\
 ```js
 const context = {
   hooks: {
@@ -137,62 +119,154 @@ AuthSimple.bindRoutes(server, context);
 ```
 <a name="AuthSimple.login"></a>
 
-### AuthSimple.login(context) ⇒ <code>module:express~RequestHandler.&lt;{}, {}, {}, {}&gt;</code>
+### AuthSimple.login(context) ⇒
 The Express route method to process the login request and provide a response or redirect.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
-**Returns**: <code>module:express~RequestHandler.&lt;{}, {}, {}, {}&gt;</code> - The function to pass to Express.  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
+**Returns**: The function to pass to Express.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-auth-simple&#x27;, AuthSimpleConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(AuthSimple.login(context)(request, response, next))*  
+**Example** *(AuthSimple.login(context)(request, response, next))*\
 ```js
 server.post('/login', AuthSimple.login(context));
 ```
 <a name="AuthSimple.logout"></a>
 
-### AuthSimple.logout(context) ⇒ <code>module:express~RequestHandler</code>
+### AuthSimple.logout(context) ⇒
 The Express route method to process the logout request and clear the session.
 
-**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)  
-**Returns**: <code>module:express~RequestHandler</code> - The function to pass to Express.  
+**Kind**: static method of [<code>AuthSimple</code>](#AuthSimple)\
+**Returns**: The function to pass to Express.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-auth-simple&#x27;, AuthSimpleConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(AuthSimple.login(context)(request, response, _next))*  
+**Example** *(AuthSimple.login(context)(request, response, _next))*\
 ```js
 server.post('/logout', AuthSimple.login(context));
 ```
-<a name="AuthSimpleValidateLogin"></a>
 
-## AuthSimpleValidateLogin ⇒ <code>Promise.&lt;(object\|null)&gt;</code>
-Validates a login request and returns session data, or null for invalid credentials.
+## TypeScript declarations
 
-**Kind**: global typedef  
-**Returns**: <code>Promise.&lt;(object\|null)&gt;</code> - Session data or null.  
+<details>
+<summary>View documented types and signatures</summary>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| request | <code>module:express~Request</code> | The login request. |
+```typescript
+import type { AuthSimpleConfig } from '../types/plugins/auth-simple.js';
+export type { AuthSimpleValidateLogin, AuthSimpleConfig } from '../types/plugins/auth-simple.js';
+/**
+ * Uttori Auth (Simple)
+ * @example <caption>AuthSimple</caption>
+ * const content = AuthSimple.storeFile(request);
+ */
+declare class AuthSimple {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>AuthSimple.configKey</caption>
+     * const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-auth-simple';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>AuthSimple.defaultConfig()</caption>
+     * const config = { ...AuthSimple.defaultConfig(), ...context.config[AuthSimple.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<AuthSimpleConfig, 'events' | 'loginPath' | 'loginRedirectPath' | 'loginMiddleware' | 'logoutPath' | 'logoutRedirectPath' | 'logoutMiddleware' | 'validateLogin'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param config A configuration object.
+     * @param _context Unused.
+     * @example <caption>AuthSimple.validateConfig(config, _context)</caption>
+     * AuthSimple.validateConfig({ ... });
+     */
+    static validateConfig(config: Record<string, AuthSimpleConfig>, _context: unknown): void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example <caption>AuthSimple.register(context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [AuthSimple.configKey]: {
+     *       ...,
+     *       events: {
+     *         bindRoutes: ['bind-routes'],
+     *       },
+     *     },
+     *   },
+     * };
+     * AuthSimple.register(context);
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>): void;
+    /**
+     * Add the login & logout routes to the server object.
+     * @param server An Express server instance.
+     * @param context A Uttori-like context.
+     * @example <caption>AuthSimple.bindRoutes(server, context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [AuthSimple.configKey]: {
+     *       loginPath: '/login',
+     *       logoutPath: '/logout',
+     *       loginMiddleware: [ ... ],
+     *       logoutMiddleware: [ ... ],
+     *     },
+     *   },
+     * };
+     * AuthSimple.bindRoutes(server, context);
+     */
+    static bindRoutes(server: import('express').Application, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>): void;
+    /**
+     * The Express route method to process the login request and provide a response or redirect.
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
+     * @example <caption>AuthSimple.login(context)(request, response, next)</caption>
+     * server.post('/login', AuthSimple.login(context));
+     */
+    static login(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>): import('express').RequestHandler<Record<string, never>, unknown, Record<string, never>, Record<string, never>>;
+    /**
+     * The Express route method to process the logout request and clear the session.
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
+     * @example <caption>AuthSimple.login(context)(request, response, _next)</caption>
+     * server.post('/logout', AuthSimple.login(context));
+     */
+    static logout(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-auth-simple', AuthSimpleConfig>): import('express').RequestHandler;
+}
+export default AuthSimple;
 
-<a name="AuthSimpleConfig"></a>
+/** Validates a login request and returns session data, or null for invalid credentials. */
+export type AuthSimpleValidateLogin = (request: import('express').Request) => Promise<Record<string, unknown> | null>;
+export interface AuthSimpleConfig {
+    /** An object whose keys correspond to methods, and contents are events to listen for. */
+    events?: Record<string, string[]>;
+    /** The path to the login endpoint. */
+    loginPath?: string;
+    /** The path to the logout endpoint. */
+    logoutPath?: string;
+    /** The path to redirect to after logging in. */
+    loginRedirectPath?: string;
+    /** The path to redirect to after logging out. */
+    logoutRedirectPath?: string;
+    /** The middleware to use on the login route. */
+    loginMiddleware?: import('express').RequestHandler[];
+    /** The middleware to use on the logout route. */
+    logoutMiddleware?: import('express').RequestHandler[];
+    /** Validation function for the login request. */
+    validateLogin: AuthSimpleValidateLogin;
+}
+```
 
-## AuthSimpleConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
-| [loginPath] | <code>string</code> | The path to the login endpoint. |
-| [logoutPath] | <code>string</code> | The path to the logout endpoint. |
-| [loginRedirectPath] | <code>string</code> | The path to redirect to after logging in. |
-| [logoutRedirectPath] | <code>string</code> | The path to redirect to after logging out. |
-| [loginMiddleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | The middleware to use on the login route. |
-| [logoutMiddleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | The middleware to use on the logout route. |
-| validateLogin | [<code>AuthSimpleValidateLogin</code>](#AuthSimpleValidateLogin) | Validation function for the login request. |
-
+</details>

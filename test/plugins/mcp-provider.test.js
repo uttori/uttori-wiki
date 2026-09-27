@@ -1,12 +1,12 @@
 import test from 'ava';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
-import MCPProvider from '../../src/plugins/mcp-provider.js';
+import MCPProvider from '../../dist/plugins/mcp-provider.js';
 
 /**
  * Build a minimal Uttori-like context with a fake hooks dispatcher.
  * @param {Record<string, any>} responses A map of hook label to the single value returned by fetch.
- * @param {Partial<import('../../src/plugins/mcp-provider.js').MCPProviderConfig>} [pluginConfig] Optional plugin config overrides.
+ * @param {Partial<import('../../dist/plugins/mcp-provider.js').MCPProviderConfig>} [pluginConfig] Optional plugin config overrides.
  * @returns {{ hooks: { fetch: Function }, config: Record<string, any> }} The fake context.
  */
 function makeContext(responses = {}, pluginConfig = {}) {

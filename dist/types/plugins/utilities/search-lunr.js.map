@@ -1,0 +1,1 @@
+{"version":3,"file":"search-lunr.js","sourceRoot":"","sources":["../../../../src/types/plugins/utilities/search-lunr.ts"],"names":[],"mappings":"","sourcesContent":["export interface SearchLunrConfigSearchOptions {\n  /** The value to search for. */\n  query: string;\n  /** Limit for the number of returned documents. */\n  limit?: number;\n}\n"]}

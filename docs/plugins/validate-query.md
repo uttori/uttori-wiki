@@ -9,45 +9,34 @@
 ## Functions
 
 <dl>
-<dt><a href="#invalidQuery">invalidQuery(message, ...details)</a> ⇒ <code>never</code></dt>
+<dt><a href="#invalidQuery">invalidQuery(message, ...details)</a></dt>
 <dd><p>Log and throw a query validation error.</p>
 </dd>
-<dt><a href="#splitQuerySegments">splitQuerySegments(query)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
+<dt><a href="#splitQuerySegments">splitQuerySegments(query)</a> ⇒</dt>
 <dd><p>Split a SQL-like query into alternating keyword and value segments.</p>
 </dd>
-<dt><a href="#readSegment">readSegment(segments, keywordIndex, keyword)</a> ⇒ <code>string</code></dt>
+<dt><a href="#readSegment">readSegment(segments, keywordIndex, keyword)</a> ⇒</dt>
 <dd><p>Require a keyword at the expected segment index.</p>
 </dd>
-<dt><a href="#parseSelectFields">parseSelectFields(fieldClause)</a> ⇒ <code>Array.&lt;string&gt;</code></dt>
+<dt><a href="#parseSelectFields">parseSelectFields(fieldClause)</a> ⇒</dt>
 <dd><p>Parse the SELECT field list.</p>
 </dd>
-<dt><a href="#parseTableName">parseTableName(tableClause)</a> ⇒ <code>string</code></dt>
+<dt><a href="#parseTableName">parseTableName(tableClause)</a> ⇒</dt>
 <dd><p>Parse the FROM table name.</p>
 </dd>
-<dt><a href="#parseWhereClause">parseWhereClause(whereClause)</a> ⇒ <code>SqlWhereParserAst</code></dt>
+<dt><a href="#parseWhereClause">parseWhereClause(whereClause)</a> ⇒</dt>
 <dd><p>Parse the WHERE clause into an AST.</p>
 </dd>
-<dt><a href="#parseOrderClause">parseOrderClause(orderClause)</a> ⇒ <code><a href="#ValidatedQueryOrder">Array.&lt;ValidatedQueryOrder&gt;</a></code></dt>
+<dt><a href="#parseOrderClause">parseOrderClause(orderClause)</a> ⇒</dt>
 <dd><p>Parse the ORDER BY clause into sort directives.</p>
 </dd>
-<dt><a href="#parseLimitClause">parseLimitClause(limitClause)</a> ⇒ <code>number</code></dt>
+<dt><a href="#parseLimitClause">parseLimitClause(limitClause)</a> ⇒</dt>
 <dd><p>Parse the LIMIT clause.</p>
 </dd>
-<dt><a href="#validateQuery">validateQuery(query)</a> ⇒ <code><a href="#ValidatedQuery">ValidatedQuery</a></code></dt>
+<dt><a href="#validateQuery">validateQuery(query)</a> ⇒</dt>
 <dd><p>Validates and parses a SQL-like query structure.
 Pass in: fields, table, conditions, order, limit as a query string:
 <code>SELECT {fields} FROM {table} WHERE {conditions} ORDER BY {order} LIMIT {limit}</code></p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#ValidatedQueryOrder">ValidatedQueryOrder</a> : <code>object</code></dt>
-<dd><p>A single ORDER BY directive from a validated query.</p>
-</dd>
-<dt><a href="#ValidatedQuery">ValidatedQuery</a> : <code>object</code></dt>
-<dd><p>Parsed and validated pieces of a SQL-like storage query.</p>
 </dd>
 </dl>
 
@@ -56,158 +45,169 @@ Pass in: fields, table, conditions, order, limit as a query string:
 ## QUERY\_SEGMENT\_PATTERN
 Regex that splits a query into keywords and their value segments.
 
-**Kind**: global constant  
+**Kind**: global constant\
 <a name="invalidQuery"></a>
 
-## invalidQuery(message, ...details) ⇒ <code>never</code>
+## invalidQuery(message, ...details)
 Log and throw a query validation error.
 
-**Kind**: global function  
+**Kind**: global function\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>string</code> | The error message. |
-| ...details | <code>unknown</code> | Additional values to log. |
+| Param | Description |
+| --- | --- |
+| message | The error message. |
+| ...details | Additional values to log. |
 
 <a name="splitQuerySegments"></a>
 
-## splitQuerySegments(query) ⇒ <code>Array.&lt;string&gt;</code>
+## splitQuerySegments(query) ⇒
 Split a SQL-like query into alternating keyword and value segments.
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;string&gt;</code> - Trimmed segments after the leading empty split.  
+**Kind**: global function\
+**Returns**: Trimmed segments after the leading empty split.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| query | <code>string</code> | The full query string. |
+| Param | Description |
+| --- | --- |
+| query | The full query string. |
 
-<a name="splitQuerySegments..segments"></a>
-
-### splitQuerySegments~segments : <code>Array.&lt;string&gt;</code>
-**Kind**: inner constant of [<code>splitQuerySegments</code>](#splitQuerySegments)  
 <a name="readSegment"></a>
 
-## readSegment(segments, keywordIndex, keyword) ⇒ <code>string</code>
+## readSegment(segments, keywordIndex, keyword) ⇒
 Require a keyword at the expected segment index.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The value segment immediately following the keyword.  
+**Kind**: global function\
+**Returns**: The value segment immediately following the keyword.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| segments | <code>Array.&lt;string&gt;</code> | Query segments from [splitQuerySegments](#splitQuerySegments). |
-| keywordIndex | <code>number</code> | Index of the keyword segment. |
-| keyword | <code>string</code> | Expected keyword text. |
+| Param | Description |
+| --- | --- |
+| segments | Query segments from [splitQuerySegments](#splitQuerySegments). |
+| keywordIndex | Index of the keyword segment. |
+| keyword | Expected keyword text. |
 
 <a name="parseSelectFields"></a>
 
-## parseSelectFields(fieldClause) ⇒ <code>Array.&lt;string&gt;</code>
+## parseSelectFields(fieldClause) ⇒
 Parse the SELECT field list.
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;string&gt;</code> - Normalized field names.  
+**Kind**: global function\
+**Returns**: Normalized field names.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| fieldClause | <code>string</code> | Raw field list text. |
+| Param | Description |
+| --- | --- |
+| fieldClause | Raw field list text. |
 
 <a name="parseTableName"></a>
 
-## parseTableName(tableClause) ⇒ <code>string</code>
+## parseTableName(tableClause) ⇒
 Parse the FROM table name.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - Normalized table name.  
+**Kind**: global function\
+**Returns**: Normalized table name.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| tableClause | <code>string</code> | Raw table text. |
+| Param | Description |
+| --- | --- |
+| tableClause | Raw table text. |
 
 <a name="parseWhereClause"></a>
 
-## parseWhereClause(whereClause) ⇒ <code>SqlWhereParserAst</code>
+## parseWhereClause(whereClause) ⇒
 Parse the WHERE clause into an AST.
 
-**Kind**: global function  
-**Returns**: <code>SqlWhereParserAst</code> - Parsed WHERE AST.  
+**Kind**: global function\
+**Returns**: Parsed WHERE AST.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| whereClause | <code>string</code> | Raw WHERE text. |
+| Param | Description |
+| --- | --- |
+| whereClause | Raw WHERE text. |
 
 <a name="parseOrderClause"></a>
 
-## parseOrderClause(orderClause) ⇒ [<code>Array.&lt;ValidatedQueryOrder&gt;</code>](#ValidatedQueryOrder)
+## parseOrderClause(orderClause) ⇒
 Parse the ORDER BY clause into sort directives.
 
-**Kind**: global function  
-**Returns**: [<code>Array.&lt;ValidatedQueryOrder&gt;</code>](#ValidatedQueryOrder) - Validated sort directives.  
+**Kind**: global function\
+**Returns**: Validated sort directives.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| orderClause | <code>string</code> | Raw ORDER BY text. |
+| Param | Description |
+| --- | --- |
+| orderClause | Raw ORDER BY text. |
 
-<a name="parseOrderClause..order"></a>
-
-### parseOrderClause~order : [<code>Array.&lt;ValidatedQueryOrder&gt;</code>](#ValidatedQueryOrder)
-**Kind**: inner constant of [<code>parseOrderClause</code>](#parseOrderClause)  
 <a name="parseLimitClause"></a>
 
-## parseLimitClause(limitClause) ⇒ <code>number</code>
+## parseLimitClause(limitClause) ⇒
 Parse the LIMIT clause.
 
-**Kind**: global function  
-**Returns**: <code>number</code> - Parsed limit.  
+**Kind**: global function\
+**Returns**: Parsed limit.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| limitClause | <code>string</code> | Raw LIMIT text. |
+| Param | Description |
+| --- | --- |
+| limitClause | Raw LIMIT text. |
 
 <a name="validateQuery"></a>
 
-## validateQuery(query) ⇒ [<code>ValidatedQuery</code>](#ValidatedQuery)
+## validateQuery(query) ⇒
 Validates and parses a SQL-like query structure.
 Pass in: fields, table, conditions, order, limit as a query string:
 `SELECT {fields} FROM {table} WHERE {conditions} ORDER BY {order} LIMIT {limit}`
 
-**Kind**: global function  
-**Returns**: [<code>ValidatedQuery</code>](#ValidatedQuery) - Parsed SELECT, FROM, WHERE, ORDER BY, and LIMIT parts.  
+**Kind**: global function\
+**Returns**: Parsed SELECT, FROM, WHERE, ORDER BY, and LIMIT parts.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| query | <code>string</code> | The SQL-like query to parse. |
+| Param | Description |
+| --- | --- |
+| query | The SQL-like query to parse. |
 
-**Example**  
+**Example**\
 ```js
 validateQuery('SELECT slug FROM documents WHERE slug IS "home" ORDER BY updateDate DESC LIMIT 10');
 // ➜ { fields: ['slug'], table: 'documents', where: { ... }, order: [{ prop: 'updateDate', sort: 'DESC' }], limit: 10 }
 ```
-<a name="ValidatedQueryOrder"></a>
 
-## ValidatedQueryOrder : <code>object</code>
-A single ORDER BY directive from a validated query.
+## TypeScript declarations
 
-**Kind**: global typedef  
-**Properties**
+<details>
+<summary>View documented types and signatures</summary>
 
-| Name | Type | Description |
-| --- | --- | --- |
-| prop | <code>string</code> | Property to sort by (`RANDOM` selects random order). |
-| sort | <code>&#x27;ASC&#x27;</code> \| <code>&#x27;DESC&#x27;</code> | Sort direction. |
+```typescript
+import type { ValidatedQuery } from '../../types/plugins/storeage-provider-json/validate-query.js';
+export type { ValidatedQueryOrder, ValidatedQuery } from '../../types/plugins/storeage-provider-json/validate-query.js';
+/**
+ * Validates and parses a SQL-like query structure.
+ * Pass in: fields, table, conditions, order, limit as a query string:
+ * `SELECT {fields} FROM {table} WHERE {conditions} ORDER BY {order} LIMIT {limit}`
+ * @param query The SQL-like query to parse.
+ * @returns Parsed SELECT, FROM, WHERE, ORDER BY, and LIMIT parts.
+ * @example
+ * ```js
+ * validateQuery('SELECT slug FROM documents WHERE slug IS "home" ORDER BY updateDate DESC LIMIT 10');
+ * // ➜ { fields: ['slug'], table: 'documents', where: { ... }, order: [{ prop: 'updateDate', sort: 'DESC' }], limit: 10 }
+ * ```
+ */
+declare const validateQuery: (query: string) => ValidatedQuery;
+export default validateQuery;
 
-<a name="ValidatedQuery"></a>
+import type { SqlWhereParserAst } from '../../../custom.js';
+/** A single ORDER BY directive from a validated query. */
+export interface ValidatedQueryOrder {
+    /** Property to sort by (`RANDOM` selects random order). */
+    prop: string;
+    /** Sort direction. */
+    sort: 'ASC' | 'DESC';
+}
+/** Parsed and validated pieces of a SQL-like storage query. */
+export interface ValidatedQuery {
+    /** Selected field names from the SELECT clause. */
+    fields: string[];
+    /** Source table name from the FROM clause. */
+    table: string;
+    /** Parsed WHERE clause AST. */
+    where: SqlWhereParserAst;
+    /** Sort directives from the ORDER BY clause. */
+    order: ValidatedQueryOrder[];
+    /** Maximum number of results from the LIMIT clause. */
+    limit: number;
+}
+```
 
-## ValidatedQuery : <code>object</code>
-Parsed and validated pieces of a SQL-like storage query.
-
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| fields | <code>Array.&lt;string&gt;</code> | Selected field names from the SELECT clause. |
-| table | <code>string</code> | Source table name from the FROM clause. |
-| where | <code>SqlWhereParserAst</code> | Parsed WHERE clause AST. |
-| order | [<code>Array.&lt;ValidatedQueryOrder&gt;</code>](#ValidatedQueryOrder) | Sort directives from the ORDER BY clause. |
-| limit | <code>number</code> | Maximum number of results from the LIMIT clause. |
-
+</details>

@@ -3,7 +3,7 @@ import request from 'supertest';
 import express from 'express';
 
 import session from 'express-session';
-import { middleware } from '../src/wiki-flash.js';
+import { middleware } from '../dist/wiki-flash.js';
 
 test('middleware: returns with no session', (t) => {
   t.notThrows(() => {

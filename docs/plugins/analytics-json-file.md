@@ -1,78 +1,46 @@
-## Classes
-
-<dl>
-<dt><a href="#AnalyticsPlugin">AnalyticsPlugin</a></dt>
-<dd><p>Page view analytics for Uttori documents using JSON files stored on the local file system.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#AnalyticsPluginPopularDocument">AnalyticsPluginPopularDocument</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#AnalyticsPluginConfig">AnalyticsPluginConfig</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#AnalyticsPluginContext">AnalyticsPluginContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code></dt>
-<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
-</dd>
-<dt><a href="#AnalyticsPluginDocumentHandler">AnalyticsPluginDocumentHandler</a> ⇒ <code>UttoriWikiDocument</code></dt>
-<dd></dd>
-<dt><a href="#AnalyticsPluginGetCountHandler">AnalyticsPluginGetCountHandler</a> ⇒ <code>number</code></dt>
-<dd></dd>
-<dt><a href="#AnalyticsPluginGetPopularDocumentsHandler">AnalyticsPluginGetPopularDocumentsHandler</a> ⇒ <code><a href="#AnalyticsPluginPopularDocument">Array.&lt;AnalyticsPluginPopularDocument&gt;</a></code></dt>
-<dd></dd>
-</dl>
-
 <a name="AnalyticsPlugin"></a>
 
 ## AnalyticsPlugin
 Page view analytics for Uttori documents using JSON files stored on the local file system.
 
-**Kind**: global class  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| config | [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig) | The configuration object. |
-
+**Kind**: global class\
 
 * [AnalyticsPlugin](#AnalyticsPlugin)
     * [new AnalyticsPlugin()](#new_AnalyticsPlugin_new)
-    * [.configKey](#AnalyticsPlugin.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#AnalyticsPlugin.defaultConfig) ⇒ [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig)
+    * [.configKey](#AnalyticsPlugin.configKey) ⇒
+    * [.defaultConfig()](#AnalyticsPlugin.defaultConfig) ⇒
     * [.validateConfig(_analytics)](#AnalyticsPlugin.validateConfig)
     * [.register(context)](#AnalyticsPlugin.register)
-    * [.updateDocument(analytics)](#AnalyticsPlugin.updateDocument) ⇒ [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler)
-    * [.getCount(analytics)](#AnalyticsPlugin.getCount) ⇒ [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler)
-    * [.getPopularDocuments(analytics)](#AnalyticsPlugin.getPopularDocuments) ⇒ [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler)
+    * [.updateDocument(analytics)](#AnalyticsPlugin.updateDocument) ⇒
+    * [.getCount(analytics)](#AnalyticsPlugin.getCount) ⇒
+    * [.getPopularDocuments(analytics)](#AnalyticsPlugin.getPopularDocuments) ⇒
 
 <a name="new_AnalyticsPlugin_new"></a>
 
 ### new AnalyticsPlugin()
-**Example** *(Init AnalyticsProvider)*  
+**Example** *(Init AnalyticsProvider)*\
 ```js
 const analyticsProvider = new AnalyticsProvider({ directory: 'data' });
 ```
 <a name="AnalyticsPlugin.configKey"></a>
 
-### AnalyticsPlugin.configKey ⇒ <code>string</code>
+### AnalyticsPlugin.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(AnalyticsPlugin.configKey)*  
+**Kind**: static property of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
+**Returns**: The configuration key.\
+**Example** *(AnalyticsPlugin.configKey)*\
 ```js
 const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
 ```
 <a name="AnalyticsPlugin.defaultConfig"></a>
 
-### AnalyticsPlugin.defaultConfig() ⇒ [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig)
+### AnalyticsPlugin.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: [<code>AnalyticsPluginConfig</code>](#AnalyticsPluginConfig) - The configuration.  
-**Example** *(AnalyticsPlugin.defaultConfig())*  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
+**Returns**: The configuration.\
+**Example** *(AnalyticsPlugin.defaultConfig())*\
 ```js
 const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
 ```
@@ -81,13 +49,13 @@ const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[Analytics
 ### AnalyticsPlugin.validateConfig(_analytics)
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| _analytics | [<code>AnalyticsPlugin</code>](#AnalyticsPlugin) | An AnalyticsProvider instance (unused). |
+| Param | Description |
+| --- | --- |
+| _analytics | An AnalyticsProvider instance (unused). |
 
-**Example** *(AnalyticsPlugin.validateConfig(config, _context))*  
+**Example** *(AnalyticsPlugin.validateConfig(config, _context))*\
 ```js
 AnalyticsPlugin.validateConfig({ ... });
 ```
@@ -96,13 +64,13 @@ AnalyticsPlugin.validateConfig({ ... });
 ### AnalyticsPlugin.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(AnalyticsPlugin.register(context))*  
+**Example** *(AnalyticsPlugin.register(context))*\
 ```js
 const context = {
   hooks: {
@@ -122,134 +90,202 @@ AnalyticsPlugin.register(context);
 ```
 <a name="AnalyticsPlugin.updateDocument"></a>
 
-### AnalyticsPlugin.updateDocument(analytics) ⇒ [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler)
+### AnalyticsPlugin.updateDocument(analytics) ⇒
 Wrapper function for calling update.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: [<code>AnalyticsPluginDocumentHandler</code>](#AnalyticsPluginDocumentHandler) - The provided document.  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
+**Returns**: The provided document.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| analytics | <code>default</code> | An AnalyticsProvider instance. |
+| Param | Description |
+| --- | --- |
+| analytics | An AnalyticsProvider instance. |
 
-**Example** *(AnalyticsPlugin.updateDocument(analytics))*  
+**Example** *(AnalyticsPlugin.updateDocument(analytics))*\
 ```js
 const context = {
-  config: {
-    [AnalyticsPlugin.configKey]: {
-      ...,
-    },
-  },
+config: {
+[AnalyticsPlugin.configKey]: {
+...,
+},
+},
 };
 AnalyticsPlugin.updateDocument(document, null);
 ```
 <a name="AnalyticsPlugin.getCount"></a>
 
-### AnalyticsPlugin.getCount(analytics) ⇒ [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler)
+### AnalyticsPlugin.getCount(analytics) ⇒
 Wrapper function for calling update.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: [<code>AnalyticsPluginGetCountHandler</code>](#AnalyticsPluginGetCountHandler) - The view count for the document.  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
+**Returns**: The view count for the document.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| analytics | <code>default</code> | An AnalyticsProvider instance. |
+| Param | Description |
+| --- | --- |
+| analytics | An AnalyticsProvider instance. |
 
-**Example** *(AnalyticsPlugin.getCount(analytics, slug))*  
+**Example** *(AnalyticsPlugin.getCount(analytics, slug))*\
 ```js
 const context = {
-  config: {
-    [AnalyticsPlugin.configKey]: {
-      ...,
-    },
-  },
+config: {
+[AnalyticsPlugin.configKey]: {
+...,
+},
+},
 };
 AnalyticsPlugin.getCount(analytics, slug);
 ```
 <a name="AnalyticsPlugin.getPopularDocuments"></a>
 
-### AnalyticsPlugin.getPopularDocuments(analytics) ⇒ [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler)
+### AnalyticsPlugin.getPopularDocuments(analytics) ⇒
 Wrapper function for calling update.
 
-**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)  
-**Returns**: [<code>AnalyticsPluginGetPopularDocumentsHandler</code>](#AnalyticsPluginGetPopularDocumentsHandler) - Popular documents.  
+**Kind**: static method of [<code>AnalyticsPlugin</code>](#AnalyticsPlugin)\
+**Returns**: Popular documents.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| analytics | <code>default</code> | An AnalyticsProvider instance. |
+| Param | Description |
+| --- | --- |
+| analytics | An AnalyticsProvider instance. |
 
-**Example** *(AnalyticsPlugin.getPopularDocuments(analytics))*  
+**Example** *(AnalyticsPlugin.getPopularDocuments(analytics))*\
 ```js
 const context = {
-  config: {
-    [AnalyticsPlugin.configKey]: {
-      ...,
-    },
-  },
+config: {
+[AnalyticsPlugin.configKey]: {
+...,
+},
+},
 };
 AnalyticsPlugin.getPopularDocuments(analytics);
 ```
-<a name="AnalyticsPluginPopularDocument"></a>
 
-## AnalyticsPluginPopularDocument : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+## TypeScript declarations
 
-| Name | Type | Description |
-| --- | --- | --- |
-| slug | <code>string</code> | The slug of the document. |
-| count | <code>number</code> | The count of the document. |
+<details>
+<summary>View documented types and signatures</summary>
 
-<a name="AnalyticsPluginConfig"></a>
+```typescript
+import type { AnalyticsPluginConfig, AnalyticsPluginDocumentHandler, AnalyticsPluginGetCountHandler, AnalyticsPluginGetPopularDocumentsHandler } from '../types/plugins/analytics-json-file.js';
+export type { AnalyticsPluginPopularDocument, AnalyticsPluginConfig, AnalyticsPluginContext, AnalyticsPluginDocumentHandler, AnalyticsPluginGetCountHandler, AnalyticsPluginGetPopularDocumentsHandler, } from '../types/plugins/analytics-json-file.js';
+/**
+ * Page view analytics for Uttori documents using JSON files stored on the local file system.
+ * @example <caption>Init AnalyticsProvider</caption>
+ * const analyticsProvider = new AnalyticsProvider({ directory: 'data' });
+ */
+declare class AnalyticsPlugin {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>AnalyticsPlugin.configKey</caption>
+     * const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-analytics-json-file';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>AnalyticsPlugin.defaultConfig()</caption>
+     * const config = { ...AnalyticsPlugin.defaultConfig(), ...context.config[AnalyticsPlugin.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<AnalyticsPluginConfig, 'name' | 'extension' | 'limit' | 'events' | 'directory'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param _analytics - An AnalyticsProvider instance (unused).
+     * @example <caption>AnalyticsPlugin.validateConfig(config, _context)</caption>
+     * AnalyticsPlugin.validateConfig({ ... });
+     */
+    static validateConfig(_analytics: AnalyticsPlugin): (config: Record<string, AnalyticsPluginConfig>, _context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>) => void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example <caption>AnalyticsPlugin.register(context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [AnalyticsPlugin.configKey]: {
+     *       ...,
+     *       events: {
+     *         updateDocument: ['document-save', 'document-delete'],
+     *         validateConfig: ['validate-config'],
+     *       },
+     *     },
+     *   },
+     * };
+     * AnalyticsPlugin.register(context);
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>): void;
+    /**
+     * Wrapper function for calling update.
+     * @param analytics An AnalyticsProvider instance.
+     * @returns The provided document.
+     * @example <caption>AnalyticsPlugin.updateDocument(analytics)</caption>
+     * const context = {
+     * config: {
+     * [AnalyticsPlugin.configKey]: {
+     * ...,
+     * },
+     * },
+     * };
+     * AnalyticsPlugin.updateDocument(document, null);
+     */
+    static updateDocument(analytics: import('./utilities/analytics-provider.js').default): AnalyticsPluginDocumentHandler;
+    /**
+     * Wrapper function for calling update.
+     * @param analytics An AnalyticsProvider instance.
+     * @returns The view count for the document.
+     * @example <caption>AnalyticsPlugin.getCount(analytics, slug)</caption>
+     * const context = {
+     * config: {
+     * [AnalyticsPlugin.configKey]: {
+     * ...,
+     * },
+     * },
+     * };
+     * AnalyticsPlugin.getCount(analytics, slug);
+     */
+    static getCount(analytics: import('./utilities/analytics-provider.js').default): AnalyticsPluginGetCountHandler;
+    /**
+     * Wrapper function for calling update.
+     * @param analytics An AnalyticsProvider instance.
+     * @returns Popular documents.
+     * @example <caption>AnalyticsPlugin.getPopularDocuments(analytics)</caption>
+     * const context = {
+     * config: {
+     * [AnalyticsPlugin.configKey]: {
+     * ...,
+     * },
+     * },
+     * };
+     * AnalyticsPlugin.getPopularDocuments(analytics);
+     */
+    static getPopularDocuments(analytics: import('./utilities/analytics-provider.js').default): AnalyticsPluginGetPopularDocumentsHandler;
+}
+export default AnalyticsPlugin;
 
-## AnalyticsPluginConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+export interface AnalyticsPluginPopularDocument {
+    /** The slug of the document. */
+    slug: string;
+    /** The count of the document. */
+    count: number;
+}
+export interface AnalyticsPluginConfig {
+    /** An object whose keys correspond to methods, and contents are events to listen for. */
+    events?: Record<string, string[]>;
+    /** The name of the analytics file. The default is 'visits'. */
+    name?: string;
+    /** The extension of the analytics file. The default is 'json'. */
+    extension?: string;
+    /** The path to the location you want the JSON file to be writtent to. */
+    directory: string;
+    /** The limit of documents to return. The default is 10. */
+    limit?: number;
+}
+/** Uttori context narrowed to this plugin's config shape. */
+export type AnalyticsPluginContext = import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', AnalyticsPluginConfig>;
+export type AnalyticsPluginDocumentHandler = (document: import('../../wiki.js').UttoriWikiDocument, context: AnalyticsPluginContext) => import('../../wiki.js').UttoriWikiDocument;
+export type AnalyticsPluginGetCountHandler = (document: import('../../wiki.js').UttoriWikiDocument, context: AnalyticsPluginContext) => number;
+export type AnalyticsPluginGetPopularDocumentsHandler = (data: unknown, context: AnalyticsPluginContext) => AnalyticsPluginPopularDocument[];
+```
 
-| Name | Type | Description |
-| --- | --- | --- |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
-| [name] | <code>string</code> | The name of the analytics file. The default is 'visits'. |
-| [extension] | <code>string</code> | The extension of the analytics file. The default is 'json'. |
-| directory | <code>string</code> | The path to the location you want the JSON file to be writtent to. |
-| [limit] | <code>number</code> | The limit of documents to return. The default is 10. |
-
-<a name="AnalyticsPluginContext"></a>
-
-## AnalyticsPluginContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-analytics-json-file&#x27;, AnalyticsPluginConfig&gt;</code>
-Uttori context narrowed to this plugin's config shape.
-
-**Kind**: global typedef  
-<a name="AnalyticsPluginDocumentHandler"></a>
-
-## AnalyticsPluginDocumentHandler ⇒ <code>UttoriWikiDocument</code>
-**Kind**: global typedef  
-**Returns**: <code>UttoriWikiDocument</code> - The provided document.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| document | <code>UttoriWikiDocument</code> | The document being processed. |
-| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
-
-<a name="AnalyticsPluginGetCountHandler"></a>
-
-## AnalyticsPluginGetCountHandler ⇒ <code>number</code>
-**Kind**: global typedef  
-**Returns**: <code>number</code> - The view count.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| document | <code>UttoriWikiDocument</code> | The document being processed. |
-| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
-
-<a name="AnalyticsPluginGetPopularDocumentsHandler"></a>
-
-## AnalyticsPluginGetPopularDocumentsHandler ⇒ [<code>Array.&lt;AnalyticsPluginPopularDocument&gt;</code>](#AnalyticsPluginPopularDocument)
-**Kind**: global typedef  
-**Returns**: [<code>Array.&lt;AnalyticsPluginPopularDocument&gt;</code>](#AnalyticsPluginPopularDocument) - Popular documents.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| data | <code>unknown</code> | Unused request data. |
-| context | [<code>AnalyticsPluginContext</code>](#AnalyticsPluginContext) | A Uttori-like context. |
-
+</details>

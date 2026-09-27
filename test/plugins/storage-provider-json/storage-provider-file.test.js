@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import test from 'ava';
-import StorageProvider from '../../../src/plugins/storeage-provider-json/storage-provider-file.js';
+import StorageProvider from '../../../dist/plugins/storeage-provider-json/storage-provider-file.js';
 
 const tagExample = 'Example Tag';
 const tagFake = 'Fake';

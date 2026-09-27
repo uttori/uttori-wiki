@@ -2,7 +2,7 @@ import test from 'ava';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import StorageProvider from '../../src/plugins/storeage-provider-json/storage-provider-file.js';
+import StorageProvider from '../../dist/plugins/storeage-provider-json/storage-provider-file.js';
 
 test('sidecar Markdown loads as an ordinary read-only document', async (t) => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'uttori-sidecar-'));

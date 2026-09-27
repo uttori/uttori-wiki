@@ -1,5 +1,5 @@
 import test from 'ava';
-import { MemoryStore } from '../../../src/plugins/chat-bot/memory.js';
+import { MemoryStore } from '../../../dist/plugins/chat-bot/memory.js';
 
 test('MemoryStore: constructor with default values', (t) => {
   const store = new MemoryStore();

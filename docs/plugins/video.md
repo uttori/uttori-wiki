@@ -3,28 +3,29 @@
 ## video(state)
 Find and replace the <video> tags with safe <video> tags.
 
-**Kind**: global function  
-**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)  
+**Kind**: global function\
+**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
+| Param | Description |
+| --- | --- |
+| state | State of MarkdownIt. |
 
+## TypeScript declarations
 
-* [video(state)](#video)
-    * [~parts](#video..parts) : <code>IterableIterator.&lt;RegExpMatchArray&gt;</code>
-    * [~keys](#video..keys) : <code>Record.&lt;string, string&gt;</code>
-    * [~options](#video..options) : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
+<details>
+<summary>View documented types and signatures</summary>
 
-<a name="video..parts"></a>
+```typescript
+/**
+ * Find and replace the <video> tags with safe <video> tags.
+ * @param state State of MarkdownIt.
+ * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
+ */
+export declare function video(state: import('markdown-it').StateCore): void;
+declare const _default: {
+    video: typeof video;
+};
+export default _default;
+```
 
-### video~parts : <code>IterableIterator.&lt;RegExpMatchArray&gt;</code>
-**Kind**: inner constant of [<code>video</code>](#video)  
-<a name="video..keys"></a>
-
-### video~keys : <code>Record.&lt;string, string&gt;</code>
-**Kind**: inner constant of [<code>video</code>](#video)  
-<a name="video..options"></a>
-
-### video~options : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
-**Kind**: inner constant of [<code>video</code>](#video)  
+</details>

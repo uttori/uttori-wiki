@@ -1,17 +1,31 @@
 <a name="extractAttachmentText"></a>
 
-## extractAttachmentText(config, attachment) ⇒ <code>Promise.&lt;string&gt;</code>
-Extract text from an attachment.For PDFs, this now preserves page boundaries to help with chunking.
+## extractAttachmentText(config, attachment) ⇒
+Extract text from an attachment.
+For PDFs, this now preserves page boundaries to help with chunking.
 
-**Kind**: global function  
-**Returns**: <code>Promise.&lt;string&gt;</code> - The text of the attachment.  
+**Kind**: global function\
+**Returns**: The text of the attachment.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>SearchSQLiteConfig</code> | The configuration. |
-| attachment | <code>UttoriWikiDocumentAttachment</code> | The attachment. |
+| Param | Description |
+| --- | --- |
+| config | The configuration. |
+| attachment | The attachment. |
 
-<a name="extractAttachmentText..text"></a>
+## TypeScript declarations
 
-### extractAttachmentText~text : <code>string</code>
-**Kind**: inner constant of [<code>extractAttachmentText</code>](#extractAttachmentText)  
+<details>
+<summary>View documented types and signatures</summary>
+
+```typescript
+/**
+ * Extract text from an attachment.
+ * For PDFs, this now preserves page boundaries to help with chunking.
+ * @param config The configuration.
+ * @param attachment The attachment.
+ * @returns The text of the attachment.
+ */
+export declare function extractAttachmentText(config: import('../search-provider-sqlite.js').SearchSQLiteConfig, attachment: import('../../wiki.js').UttoriWikiDocumentAttachment): Promise<string>;
+```
+
+</details>

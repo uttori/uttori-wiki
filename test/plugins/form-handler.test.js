@@ -1,7 +1,7 @@
 import test from 'ava';
 import express from 'express';
 import request from 'supertest';
-import FormHandler from '../../src/plugins/form-handler.js';
+import FormHandler from '../../dist/plugins/form-handler.js';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
 test('configKey: has correct configKey', (t) => {

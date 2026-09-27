@@ -1,5 +1,5 @@
 import test from 'ava';
-import ReplacerRenderer from '../../src/plugins/renderer-replacer.js';
+import ReplacerRenderer from '../../dist/plugins/renderer-replacer.js';
 
 const context = {
   config: {

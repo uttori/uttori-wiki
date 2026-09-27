@@ -1,0 +1,1 @@
+{"version":3,"file":"analytics-provider.d.ts","sourceRoot":"","sources":["../../../../src/types/plugins/utilities/analytics-provider.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,uBAAuB;IACtC,+EAA+E;IAC/E,SAAS,EAAE,MAAM,CAAC;IAClB,oEAAoE;IACpE,IAAI,CAAC,EAAE,MAAM,CAAC;IACd,yEAAyE;IACzE,SAAS,CAAC,EAAE,MAAM,CAAC;CACpB;AAED,MAAM,MAAM,2BAA2B,GAAG,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,CAAC"}

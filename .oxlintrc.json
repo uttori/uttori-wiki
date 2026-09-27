@@ -70,6 +70,35 @@
     ],
     "no-useless-constructor": "error",
 
+    "import/namespace": "error",
+    "import/default": "error",
+    "import/no-named-as-default": "warn",
+    "import/no-named-as-default-member": "warn",
+    "import/no-duplicates": "warn",
+
+    "jsdoc/check-access": "error",
+    "jsdoc/check-property-names": "error",
+    "jsdoc/check-tag-names": "error",
+    "jsdoc/empty-tags": "error",
+    "jsdoc/implements-on-classes": "error",
+    "jsdoc/no-defaults": "error",
+    "jsdoc/require-param": "error",
+    "jsdoc/require-param-description": "error",
+    "jsdoc/require-param-name": "error",
+    "jsdoc/require-param-type": "error",
+    "jsdoc/require-property": "error",
+    "jsdoc/require-property-description": "error",
+    "jsdoc/require-property-name": "error",
+    "jsdoc/require-property-type": "error",
+    "jsdoc/require-returns": "error",
+    "jsdoc/require-returns-description": "error",
+    "jsdoc/require-returns-type": "error",
+    "jsdoc/require-throws-type": "error",
+    "jsdoc/require-yields": "error",
+    "jsdoc/require-yields-type": "error",
+
+    "node/no-exports-assign": "error",
+
     "@stylistic/indent": [
       "error",
       2
@@ -88,6 +117,7 @@
     ],
     "@stylistic/no-trailing-spaces": "error",
     "@stylistic/eol-last": "error",
+
     "typescript/ban-ts-comment": [
       "error",
       {
@@ -156,6 +186,14 @@
         "**/*.cts"
       ],
       "rules": {
+        "jsdoc/require-param": "off",
+        "jsdoc/require-param-type": "off",
+        "jsdoc/require-property-type": "off",
+        "jsdoc/require-returns": "off",
+        "jsdoc/require-returns-type": "off",
+        "jsdoc/require-throws-type": "off",
+        "jsdoc/require-yields-type": "off",
+
         "constructor-super": "off",
         "getter-return": "off",
         "no-class-assign": "off",

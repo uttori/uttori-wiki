@@ -1,5 +1,5 @@
 import test from 'ava';
-import { buildPromptMessages } from '../../../src/plugins/chat-bot/prompts.js';
+import { buildPromptMessages } from '../../../dist/plugins/chat-bot/prompts.js';
 
 test('buildPromptMessages: returns two messages with system and user roles', (t) => {
   const messages = buildPromptMessages('What is this?', [], {});

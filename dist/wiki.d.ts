@@ -1,353 +1,32 @@
+import type { UttoriWikiBuildViewModelBaseOptions, UttoriWikiBaseViewModel, UttoriWikiDocument, UttoriWikiDocumentMetaData } from './types/wiki.js';
+export type { UttoriWikiViewModel, UttoriWikiBuildViewModelBaseOptions, UttoriWikiBaseViewModel, UttoriWikiDocument, UttoriWikiDocumentAttachment, UttoriWikiDocumentMetaData, } from './types/wiki.js';
 /**
  * Normalize an Express route parameter to a single string.
- * @param {string | string[] | undefined} value The route parameter value.
- * @returns {string} The normalized route parameter.
+ * @param value The route parameter value.
+ * @returns The normalized route parameter.
  */
 export declare const routeParamToString: (value: string | string[] | undefined) => string;
-export type UttoriWikiDocumentMetaData = {
-    /**
-     * `${this.config.publicUrl}/private-document-path`
-     */
-    canonical: string;
-    /**
-     * 'no-index'
-     */
-    robots: string;
-    /**
-     * document.title
-     */
-    title: string;
-    /**
-     * document.excerpt || document.content.slice(0, 160)
-     */
-    description: string;
-    /**
-     * new Date(document.updateDate).toISOString()
-     */
-    modified: string;
-    /**
-     * new Date(document.createDate).toISOString()
-     */
-    published: string;
-    /**
-     * OpenGraph Image
-     */
-    image: string;
-};
-export type UttoriWikiViewModel = {
-    /**
-     * The document title to be used anywhere a title may be needed.
-     */
-    title: string;
-    /**
-     * The configuration object.
-     */
-    config: import('./config.js').UttoriWikiConfig;
-    /**
-     * The metadata object.
-     */
-    meta: UttoriWikiDocumentMetaData;
-    /**
-     * The base path of the request.
-     */
-    basePath: string;
-    /**
-     * The document object.
-     */
-    document?: UttoriWikiDocument;
-    /**
-     * The Express session object.
-     */
-    session?: import('express-session').Session;
-    /**
-     * The flash object.
-     */
-    flash?: (boolean | object | Array<string>);
-    /**
-     * Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
-     */
-    taggedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
-    /**
-     * Category Routes Plugin: documents grouped by category, or documents for a category detail route.
-     */
-    categorizedDocuments?: UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>;
-    /**
-     * Category Routes Plugin: hierarchical category data for the category index.
-     */
-    categoryTree?: Record<string, object>;
-    /**
-     * Category Routes Plugin: flattened category data for the category index.
-     */
-    flattenedCategories?: Array<object>;
-    /**
-     * Category Routes Plugin: the active category path for a category detail route.
-     */
-    categoryPath?: string;
-    /**
-     * Category Routes Plugin: breadcrumb data for a category detail route.
-     */
-    breadcrumbs?: Array<object>;
-    /**
-     * The search term to be used in the search results.
-     */
-    searchTerm?: string;
-    /**
-     * An array of search results.
-     */
-    searchResults?: UttoriWikiDocument[];
-    /**
-     * The slug of the document.
-     */
-    slug?: string;
-    /**
-     * The action to be used in the form.
-     */
-    action?: string;
-    /**
-     * The revision of the document.
-     */
-    revision?: string;
-    /**
-     * An object of history by day.
-     */
-    historyByDay?: Record<string, string[]>;
-    /**
-     * The current version of the document for comparison.
-     */
-    currentDocument?: UttoriWikiDocument;
-    /**
-     * An object containing HTML table diffs for changed fields.
-     */
-    diffs?: Record<string, string>;
-};
-export type UttoriWikiBuildViewModelBaseOptions = {
-    /**
-     * The title for the view model.
-     */
-    title?: string;
-    /**
-     * The metadata for the view model.
-     */
-    meta?: UttoriWikiDocumentMetaData;
-    /**
-     * The slug for the view model.
-     */
-    slug?: string;
-};
-export type UttoriWikiBaseViewModel = {
-    /**
-     * The document title to be used anywhere a title may be needed.
-     */
-    title: string;
-    /**
-     * The configuration object.
-     */
-    config: import('./config.js').UttoriWikiConfig;
-    /**
-     * The Express session object.
-     */
-    session?: import('express-session').Session;
-    /**
-     * The metadata object.
-     */
-    meta: UttoriWikiDocumentMetaData;
-    /**
-     * The base path of the request.
-     */
-    basePath: string;
-    /**
-     * The flash object.
-     */
-    flash?: (boolean | object | Array<string>);
-    /**
-     * The slug of the document.
-     */
-    slug?: string;
-};
-export type UttoriWikiDocument = {
-    /**
-     * The document slug to be used in the URL and as a unique ID.
-     */
-    slug: string;
-    /**
-     * The document title to be used anywhere a title may be needed.
-     */
-    title: string;
-    /**
-     * An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
-     */
-    image?: string;
-    /**
-     * A succinct deescription of the document, think meta description.
-     */
-    excerpt?: string;
-    /**
-     * All text content for the doucment.
-     */
-    content: string;
-    /**
-     * All rendered HTML content for the doucment that will be presented to the user.
-     */
-    html?: string;
-    /**
-     * Milliseconds since the Unix epoch when the document was created.
-     */
-    createDate: number;
-    /**
-     * Milliseconds since the Unix epoch when the document was last updated.
-     */
-    updateDate: number;
-    /**
-     * A collection of tags that represent the document.
-     */
-    tags: string | string[];
-    /**
-     * An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
-     */
-    redirects?: string | string[];
-    /**
-     * The layout to use when rendering the document.
-     */
-    layout?: string;
-    /**
-     * An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
-     */
-    attachments?: UttoriWikiDocumentAttachment[];
-};
-export type UttoriWikiDocumentAttachment = {
-    /**
-     * The unique identifier of the attachment.
-     */
-    id: string;
-    /**
-     * The display name of the attachment.
-     */
-    name: string;
-    /**
-     * The path to the attachment.
-     */
-    path: string;
-    /**
-     * The MIME type of the attachment.
-     */
-    type: string;
-    /**
-     * The size of the attachment in bytes.
-     */
-    size: number;
-    /**
-     * The metadata of the attachment.
-     */
-    metadata: {
-        gps?: string;
-    };
-    /**
-     * The latitude of the GPS coordinates.
-     */
-    lat?: number;
-    /**
-     * The longitude of the GPS coordinates.
-     */
-    lon?: number;
-    /**
-     * Whether to skip the attachment. Used to control whether to index the attachment.
-     */
-    skip?: boolean;
-};
-/**
- * @typedef {object} UttoriWikiViewModel
- * @property {string} title The document title to be used anywhere a title may be needed.
- * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
- * @property {UttoriWikiDocumentMetaData} meta The metadata object.
- * @property {string} basePath The base path of the request.
- * @property {UttoriWikiDocument} [document] The document object.
- * @property {import('express-session').Session} [session] The Express session object.
- * @property {(boolean | object | Array<string>)} [flash] The flash object.
- * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [taggedDocuments] Tag Routes Plugin: documents grouped by tag, or documents for a tag detail route.
- * @property {UttoriWikiDocument[] | Record<string, UttoriWikiDocument[]>} [categorizedDocuments] Category Routes Plugin: documents grouped by category, or documents for a category detail route.
- * @property {Record<string, object>} [categoryTree] Category Routes Plugin: hierarchical category data for the category index.
- * @property {Array<object>} [flattenedCategories] Category Routes Plugin: flattened category data for the category index.
- * @property {string} [categoryPath] Category Routes Plugin: the active category path for a category detail route.
- * @property {Array<object>} [breadcrumbs] Category Routes Plugin: breadcrumb data for a category detail route.
- * @property {string} [searchTerm] The search term to be used in the search results.
- * @property {UttoriWikiDocument[]} [searchResults] An array of search results.
- * @property {string} [slug] The slug of the document.
- * @property {string} [action] The action to be used in the form.
- * @property {string} [revision] The revision of the document.
- * @property {Record<string, string[]>} [historyByDay] An object of history by day.
- * @property {UttoriWikiDocument} [currentDocument] The current version of the document for comparison.
- * @property {Record<string, string>} [diffs] An object containing HTML table diffs for changed fields.
- */
-/**
- * @typedef {object} UttoriWikiBuildViewModelBaseOptions
- * @property {string} [title] The title for the view model.
- * @property {UttoriWikiDocumentMetaData} [meta] The metadata for the view model.
- * @property {string} [slug] The slug for the view model.
- */
-/**
- * @typedef {object} UttoriWikiBaseViewModel
- * @property {string} title The document title to be used anywhere a title may be needed.
- * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
- * @property {import('express-session').Session} [session] The Express session object.
- * @property {UttoriWikiDocumentMetaData} meta The metadata object.
- * @property {string} basePath The base path of the request.
- * @property {(boolean | object | Array<string>)} [flash] The flash object.
- * @property {string} [slug] The slug of the document.
- */
-/**
- * @typedef {object} UttoriWikiDocument
- * @property {string} slug The document slug to be used in the URL and as a unique ID.
- * @property {string} title The document title to be used anywhere a title may be needed.
- * @property {string} [image] An ID reference to an attachment in the attachments array that represents the document in Open Graph or elsewhere.
- * @property {string} [excerpt] A succinct deescription of the document, think meta description.
- * @property {string} content All text content for the doucment.
- * @property {string} [html] All rendered HTML content for the doucment that will be presented to the user.
- * @property {number} createDate Milliseconds since the Unix epoch when the document was created.
- * @property {number} updateDate Milliseconds since the Unix epoch when the document was last updated.
- * @property {string|string[]} tags A collection of tags that represent the document.
- * @property {string|string[]} [redirects] An array of slug like strings that will redirect to this document. Useful for renaming and keeping links valid or for short form WikiLinks.
- * @property {string} [layout] The layout to use when rendering the document.
- * @property {UttoriWikiDocumentAttachment[]} [attachments] An array of attachments to the document with name being a display name, path being the path to the file, and type being the MIME type of the file. Useful for storing files like PDFs, images, etc.
- */
-/**
- * @typedef UttoriWikiDocumentAttachment
- * @type {object}
- * @property {string} id The unique identifier of the attachment.
- * @property {string} name The display name of the attachment.
- * @property {string} path The path to the attachment.
- * @property {string} type The MIME type of the attachment.
- * @property {number} size The size of the attachment in bytes.
- * @property {object} metadata The metadata of the attachment.
- * @property {string} [metadata.gps] The GPS coordinates of the attachment.
- * @property {number} [metadata.gps.lat] The latitude of the GPS coordinates.
- * @property {number} [metadata.gps.lon] The longitude of the GPS coordinates.
- * @property {boolean} [skip] Whether to skip the attachment. Used to control whether to index the attachment.
- */
 /**
  * UttoriWiki is a fast, simple, wiki knowledge base.
- * @property {import('./config.js').UttoriWikiConfig} config The configuration object.
- * @property {import('@uttori/event-dispatcher').EventDispatcher} hooks The hook / event dispatching object.
  * @example <caption>Init UttoriWiki</caption>
  * const server = express();
  * const wiki = new UttoriWiki(config, server);
  * server.listen(server.get('port'), server.get('ip'), () => { ... });
- * @class
  */
 declare class UttoriWiki {
-    /** @type {import('./config.js').UttoriWikiConfig} */
+    /** User configuration merged with wiki defaults before plugins register. */
     config: import('./config.js').UttoriWikiConfig;
-    /** @type {import('@uttori/event-dispatcher').EventDispatcher} */
+    /** Event dispatcher owned by this wiki instance and shared with its plugins. */
     hooks: import('@uttori/event-dispatcher').EventDispatcher;
     /**
      * Creates an instance of UttoriWiki.
-     * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
-     * @param {import('express').Application} server The Express server instance.
-     * @class
+     * @param config A configuration object.
+     * @param server The Express server instance.
      */
     constructor(config: import('./config.js').UttoriWikiConfig, server: import('express').Application);
     /**
      * Registers plugins with the Event Dispatcher.
-     * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
+     * @param config A configuration object.
      */
     registerPlugins(config: import('./config.js').UttoriWikiConfig): void;
     /**
@@ -355,46 +34,36 @@ declare class UttoriWiki {
      *
      * Hooks:
      * - `dispatch` - `validate-config` - Passes in the config object.
-     * @param {import('./config.js').UttoriWikiConfig} config A configuration object.
+     * @param config A configuration object.
      */
     validateConfig(config: import('./config.js').UttoriWikiConfig): void;
-    /**
-     * @typedef {object} UttoriWikiDocumentMetaData
-     * @property {string} canonical `${this.config.publicUrl}/private-document-path`
-     * @property {string} robots 'no-index'
-     * @property {string} title document.title
-     * @property {string} description document.excerpt || document.content.slice(0, 160)
-     * @property {string} modified new Date(document.updateDate).toISOString()
-     * @property {string} published new Date(document.createDate).toISOString()
-     * @property {string} image OpenGraph Image
-     */
     /**
      * Builds the metadata for the view model.
      *
      * Hooks:
      * - `filter` - `render-content` - Passes in the meta description.
      * @async
-     * @param {Partial<UttoriWikiDocument>} document A UttoriWikiDocument.
-     * @param {string} [path] The URL path to build meta data for with leading slash.
-     * @param {string} [robots] A meta robots tag value.
-     * @returns {Promise<UttoriWikiDocumentMetaData>} Metadata object.
+     * @param document A UttoriWikiDocument.
+     * @param [path] The URL path to build meta data for with leading slash.
+     * @param [robots] A meta robots tag value.
+     * @returns Metadata object.
      * @example
      * const metadata = await wiki.buildMetadata(document, '/private-document-path', 'no-index');
      * ➜ {
-     *   canonical,   // `${this.config.publicUrl}/private-document-path`
-     *   robots,      // 'no-index'
-     *   title,       // document.title
+     *   canonical, // `${this.config.publicUrl}/private-document-path`
+     *   robots, // 'no-index'
+     *   title, // document.title
      *   description, // document.excerpt || document.content.slice(0, 160)
-     *   modified,    // new Date(document.updateDate).toISOString()
-     *   published,   // new Date(document.createDate).toISOString()
+     *   modified, // new Date(document.updateDate).toISOString()
+     *   published, // new Date(document.createDate).toISOString()
      * }
      */
     buildMetadata(document: Partial<UttoriWikiDocument>, path?: string, robots?: string): Promise<UttoriWikiDocumentMetaData>;
     /**
      * Builds the base view model object for all routes.
-     * @param {import('express').Request} request The Express Request object.
-     * @param {UttoriWikiBuildViewModelBaseOptions} [options] Base view model values.
-     * @returns {UttoriWikiBaseViewModel} Base view model.
+     * @param request The Express Request object.
+     * @param [options] Base view model values.
+     * @returns Base view model.
      */
     buildViewModelBase(request: import('express').Request, options?: UttoriWikiBuildViewModelBaseOptions): UttoriWikiBaseViewModel;
     /**
@@ -403,7 +72,7 @@ declare class UttoriWiki {
      *
      * Hooks:
      * - `dispatch` - `bind-routes` - Passes in the server instance.
-     * @param {import('express').Application} server The Express server instance.
+     * @param server The Express server instance.
      */
     bindRoutes(server: import('express').Application): void;
     /**
@@ -413,14 +82,14 @@ declare class UttoriWiki {
      * - `filter` - `render-content` - Passes in the home-page content.
      * - `filter` - `view-model-home` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     home: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Redirects to the homepage.
-     * @type {import('express').RequestHandler}
+     *
      */
     homepageRedirect: import('express').RequestHandler;
     /**
@@ -430,11 +99,11 @@ declare class UttoriWiki {
      * - `filter` - `render-search-results` - Passes in the search results.
      * - `filter` - `view-model-search` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request<{}, {}, {}, { s: string }>} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
-    search: (request: import('express').Request<{}, {}, {}, {
+    search: (request: import('express').Request<Record<string, never>, Record<string, never>, Record<string, never>, {
         s: string;
     }>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -443,9 +112,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `view-model-edit` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     edit: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -455,9 +124,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `dispatch` - `document-delete` - Passes in the document beind deleted.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     delete: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -468,11 +137,11 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
-    save: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
+    save: (request: import('express').Request<import('./custom.js').SaveParams, Record<string, never>, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Attempts to save a new document and redirects to the detail view of that document when successful.
      *
@@ -481,20 +150,20 @@ declare class UttoriWiki {
      * - `dispatch` - `validate-invalid` - Passes in the request.
      * - `dispatch` - `validate-valid` - Passes in the request.
      * @async
-     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
-    saveNew: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
+    saveNew: (request: import('express').Request<import('./custom.js').SaveParams, Record<string, never>, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
      * Renders the creation page using the `edit` template.
      *
      * Hooks:
      * - `filter` - `view-model-new` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     create: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -505,9 +174,9 @@ declare class UttoriWiki {
      * - `filter` - `render-content` - Passes in the document content.
      * - `filter` - `view-model-detail` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     detail: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -517,9 +186,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `render-content` - Passes in the request body content.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     preview: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -529,9 +198,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `view-model-history-index` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     historyIndex: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -545,9 +214,9 @@ declare class UttoriWiki {
      * - `fetch` - `storage-get-history` - Lists revisions to detect the newest and choose a diff baseline.
      * - `filter` - `view-model-history-detail` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     historyDetail: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -557,9 +226,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `view-model-history-restore` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     historyRestore: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -569,9 +238,9 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `view-model-error-404` - Passes in the viewModel.
      * @async
-     * @param {import('express').Request} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
     notFound: (request: import('express').Request, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
     /**
@@ -584,11 +253,11 @@ declare class UttoriWiki {
      * Hooks:
      * - `filter` - `document-save` - Passes in the document.
      * @async
-     * @param {import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>} request The Express Request object.
-     * @param {import('express').Response} response The Express Response object.
-     * @param {import('express').NextFunction} next The Express Next function.
+     * @param request The Express Request object.
+     * @param response The Express Response object.
+     * @param next The Express Next function.
      */
-    saveValid: (request: import('express').Request<import('../dist/custom.js').SaveParams, {}, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
+    saveValid: (request: import('express').Request<import('./custom.js').SaveParams, Record<string, never>, UttoriWikiDocument>, response: import('express').Response, next: import('express').NextFunction) => Promise<void>;
 }
 export default UttoriWiki;
 //# sourceMappingURL=wiki.d.ts.map

@@ -5,7 +5,7 @@ import path from 'node:path';
 import express from 'express';
 import request from 'supertest';
 
-import DownloadRouter from '../../src/plugins/download-route.js';
+import DownloadRouter from '../../dist/plugins/download-route.js';
 
 
 let sandbox;

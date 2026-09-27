@@ -1,12 +1,12 @@
 import test from 'ava';
 import sinon from 'sinon';
 import fs from 'node:fs';
-import FilterSpamEdit, { ipEditHistory } from '../../src/plugins/filter-spam-edit.js';
+import FilterSpamEdit, { ipEditHistory } from '../../dist/plugins/filter-spam-edit.js';
 
 /**
  * Builds a minimal valid plugin config for use in tests.
- * @param {object} [overrides]
- * @returns {Record<string, object>}
+ * @param {object} [overrides] Plugin settings to replace.
+ * @returns {Record<string, object>} Minimal plugin configuration.
  */
 const makeConfig = (overrides = {}) => ({
   [FilterSpamEdit.configKey]: {
@@ -18,10 +18,10 @@ const makeConfig = (overrides = {}) => ({
 
 /**
  * Builds a minimal Uttori context object for `validateEdit` tests.
- * @param {object} [opts]
+ * @param {object} [opts] Context fixture settings.
  * @param {object|null} [opts.existingDoc] Document returned by storage-get (null = new page).
- * @param {object} [opts.configOverrides]
- * @returns {{ hooks: { fetch: sinon.SinonStub }, config: object }}
+ * @param {object} [opts.configOverrides] Plugin configuration overrides.
+ * @returns {{ hooks: { fetch: sinon.SinonStub }, config: object }} Minimal wiki context.
  */
 const makeContext = ({ existingDoc = null, configOverrides = {} } = {}) => ({
   hooks: {
@@ -32,11 +32,11 @@ const makeContext = ({ existingDoc = null, configOverrides = {} } = {}) => ({
 
 /**
  * Builds a minimal Express-like request object.
- * @param {object} [opts]
- * @param {string} [opts.slug]
- * @param {string} [opts.content]
- * @param {string} [opts.ip]
- * @returns {{ params: object, body: object, ip: string }}
+ * @param {object} [opts] Request fixture settings.
+ * @param {string} [opts.slug] Document slug in the route.
+ * @param {string} [opts.content] Submitted document body.
+ * @param {string} [opts.ip] Remote IP address.
+ * @returns {{ params: object, body: object, ip: string }} Fake edit request.
  */
 const makeRequest = ({ slug = 'test-page', content = 'Hello world.', ip = '1.2.3.4' } = {}) => ({
   params: { slug },

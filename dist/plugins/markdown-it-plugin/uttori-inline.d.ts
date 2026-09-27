@@ -1,20 +1,20 @@
 /**
- * @param {import('markdown-it').Token} token The MarkdownIt token we are reading.
- * @param {string} key The key is the attribute name, like `src` or `href`.
- * @returns {*|undefined} The read value or undefined.
+ * @param token The MarkdownIt token we are reading.
+ * @param key The key is the attribute name, like `src` or `href`.
+ * @returns The read value or undefined.
  */
-export declare function getValue(token: import('markdown-it').Token, key: string): any | undefined;
+export declare function getValue(token: import('markdown-it').Token, key: string): string | undefined;
 /**
- * @param {import('markdown-it').Token} token The MarkdownIt token we are updating.
- * @param {string} key The key is the attribute name, like `src` or `href`.
- * @param {string} value The value we want to set to the provided key.
+ * @param token The MarkdownIt token we are updating.
+ * @param key The key is the attribute name, like `src` or `href`.
+ * @param value The value we want to set to the provided key.
  */
 export declare function updateValue(token: import('markdown-it').Token, key: string, value: string): void;
 /**
  * Uttori specific rules for manipulating the markup.
  * External Domains are filtered for SEO and security.
- * @param {import('markdown-it').StateCore} state State of MarkdownIt.
- * @returns {boolean} Returns if parsing was successful or not.
+ * @param state State of MarkdownIt.
+ * @returns Returns if parsing was successful or not.
  */
 export declare function uttoriInline(state: import('markdown-it').StateCore): boolean;
 declare const _default: {

@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import { UttoriWiki } from '../src/index.js';
+import { UttoriWiki } from '../dist/index.js';
 
 import { serverSetup } from './_helpers/server.js';
 

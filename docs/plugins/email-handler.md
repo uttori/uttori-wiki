@@ -9,16 +9,9 @@
 ## Functions
 
 <dl>
-<dt><a href="#fillTemplate">fillTemplate(template, formData, formConfig)</a> ⇒ <code>string</code></dt>
+<dt><a href="#fillTemplate">fillTemplate(template, formData, formConfig)</a> ⇒</dt>
 <dd><p>Replaces form placeholders as literal text so field names and values cannot change replacement syntax.</p>
 </dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#EmailHandlerConfig">EmailHandlerConfig</a> : <code>object</code></dt>
-<dd></dd>
 </dl>
 
 <a name="EmailHandler"></a>
@@ -26,86 +19,126 @@
 ## EmailHandler
 Email handler for form submissions.
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [EmailHandler](#EmailHandler)
     * [new EmailHandler()](#new_EmailHandler_new)
-    * [.create(config)](#EmailHandler.create) ⇒ <code>FormHandlerFunction</code>
-    * [.generateSubject(template, formData, formConfig)](#EmailHandler.generateSubject) ⇒ <code>string</code>
-    * [.generateBody(template, formData, formConfig)](#EmailHandler.generateBody) ⇒ <code>string</code>
+    * [.create(config)](#EmailHandler.create) ⇒
+    * [.generateSubject(template, formData, formConfig)](#EmailHandler.generateSubject) ⇒
+    * [.generateBody(template, formData, formConfig)](#EmailHandler.generateBody) ⇒
 
 <a name="new_EmailHandler_new"></a>
 
 ### new EmailHandler()
-**Example** *(EmailHandler)*  
+**Example** *(EmailHandler)*\
 ```js
 const emailHandler = EmailHandler.create(config);
 ```
 <a name="EmailHandler.create"></a>
 
-### EmailHandler.create(config) ⇒ <code>FormHandlerFunction</code>
+### EmailHandler.create(config) ⇒
 Creates an email handler with the provided configuration.
 
-**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)  
-**Returns**: <code>FormHandlerFunction</code> - Form handler function.  
+**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)\
+**Returns**: Form handler function.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | [<code>EmailHandlerConfig</code>](#EmailHandlerConfig) | Email configuration. |
+| Param | Description |
+| --- | --- |
+| config | Email configuration. |
 
 <a name="EmailHandler.generateSubject"></a>
 
-### EmailHandler.generateSubject(template, formData, formConfig) ⇒ <code>string</code>
+### EmailHandler.generateSubject(template, formData, formConfig) ⇒
 Generates email subject from template.
 
-**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)  
-**Returns**: <code>string</code> - Generated subject.  
+**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)\
+**Returns**: Generated subject.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| template | <code>string</code> \| <code>undefined</code> | Subject template; an empty value uses the default subject. |
-| formData | <code>Record.&lt;string, any&gt;</code> | Form data. |
-| formConfig | <code>FormConfig</code> | Form configuration. |
+| Param | Description |
+| --- | --- |
+| template | Subject template; an empty value uses the default subject. |
+| formData | Form data. |
+| formConfig | Form configuration. |
 
 <a name="EmailHandler.generateBody"></a>
 
-### EmailHandler.generateBody(template, formData, formConfig) ⇒ <code>string</code>
+### EmailHandler.generateBody(template, formData, formConfig) ⇒
 Generates email body from template.
 
-**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)  
-**Returns**: <code>string</code> - Generated body.  
+**Kind**: static method of [<code>EmailHandler</code>](#EmailHandler)\
+**Returns**: Generated body.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| template | <code>string</code> \| <code>null</code> \| <code>undefined</code> | Body template; an empty value uses the default HTML body. |
-| formData | <code>Record.&lt;string, any&gt;</code> | Form data. |
-| formConfig | <code>FormConfig</code> | Form configuration. |
+| Param | Description |
+| --- | --- |
+| template | Body template; an empty value uses the default HTML body. |
+| formData | Form data. |
+| formConfig | Form configuration. |
 
 <a name="fillTemplate"></a>
 
-## fillTemplate(template, formData, formConfig) ⇒ <code>string</code>
+## fillTemplate(template, formData, formConfig) ⇒
 Replaces form placeholders as literal text so field names and values cannot change replacement syntax.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - Template with known placeholders filled in.  
+**Kind**: global function\
+**Returns**: Template with known placeholders filled in.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| template | <code>string</code> | Subject or HTML template. |
-| formData | <code>Record.&lt;string, any&gt;</code> | Submitted field values. |
-| formConfig | <code>FormConfig</code> | Form metadata. |
+| Param | Description |
+| --- | --- |
+| template | Subject or HTML template. |
+| formData | Submitted field values. |
+| formConfig | Form metadata. |
 
-<a name="EmailHandlerConfig"></a>
+## TypeScript declarations
 
-## EmailHandlerConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+<details>
+<summary>View documented types and signatures</summary>
 
-| Name | Type | Description |
-| --- | --- | --- |
-| transportOptions | <code>module:nodemailer~TransportOptions</code> | Nodemailer transport options. |
-| from | <code>string</code> | Email address to send from. |
-| to | <code>string</code> | Email address to send to. |
-| subject | <code>string</code> | Email subject template. |
-| [template] | <code>string</code> | Email body template (optional). |
+```typescript
+import type { EmailHandlerConfig } from '../../types/plugins/form-handlers/email-handler.js';
+export type { EmailHandlerConfig } from '../../types/plugins/form-handlers/email-handler.js';
+/**
+ * Email handler for form submissions.
+ * @example <caption>EmailHandler</caption>
+ * const emailHandler = EmailHandler.create(config);
+ */
+declare class EmailHandler {
+    /**
+     * Creates an email handler with the provided configuration.
+     * @param config Email configuration.
+     * @returns Form handler function.
+     */
+    static create(config: EmailHandlerConfig): import('../form-handler.js').FormHandlerFunction;
+    /**
+     * Generates email subject from template.
+     * @param template Subject template; an empty value uses the default subject.
+     * @param formData Form data.
+     * @param formConfig Form configuration.
+     * @returns Generated subject.
+     */
+    static generateSubject(template: string | undefined, formData: Record<string, unknown>, formConfig: import('../form-handler.js').FormConfig): string;
+    /**
+     * Generates email body from template.
+     * @param template Body template; an empty value uses the default HTML body.
+     * @param formData Form data.
+     * @param formConfig Form configuration.
+     * @returns Generated body.
+     */
+    static generateBody(template: string | null | undefined, formData: Record<string, unknown>, formConfig: import('../form-handler.js').FormConfig): string;
+}
+export default EmailHandler;
 
+export interface EmailHandlerConfig {
+    /** Nodemailer transport options. */
+    transportOptions: import('nodemailer').TransportOptions;
+    /** Email address to send from. */
+    from: string;
+    /** Email address to send to. */
+    to: string;
+    /** Email subject template. */
+    subject: string;
+    /** Email body template (optional). */
+    template?: string;
+}
+```
+
+</details>

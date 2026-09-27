@@ -1,5 +1,5 @@
 import test from 'ava';
-import MarkdownItRenderer from '../../../src/plugins/renderer-markdown-it.js';
+import MarkdownItRenderer from '../../../dist/plugins/renderer-markdown-it.js';
 
 test('MarkdownItRenderer.render(content, config): can render a YouTube video', (t) => {
   const markdown = '<youtube v="aR3fVuLEtj8" width="560" height="315" title="YouTube Video Player" start="0">';

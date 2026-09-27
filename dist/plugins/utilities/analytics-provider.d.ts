@@ -1,62 +1,31 @@
-export type AnalyticsProviderConfig = {
-    /**
-     * The directory to store the JSON file containing the page view analytics.
-     */
-    directory: string;
-    /**
-     * The file name of the file containing the page view analytics.
-     */
-    name?: string;
-    /**
-     * The file extension of the file containing the page view analytics.
-     */
-    extension?: string;
-};
-export type AnalyticsProviderPageVisits = Record<string, number>;
-/**
- * @typedef {object} AnalyticsProviderConfig
- * @property {string} directory The directory to store the JSON file containing the page view analytics.
- * @property {string} [name] The file name of the file containing the page view analytics.
- * @property {string} [extension] The file extension of the file containing the page view analytics.
- */
-/**
- * @typedef {Record<string, number>} AnalyticsProviderPageVisits
- * @property {string} slug The slug of the document to be updated.
- * @property {number} count The number of hits for a given slug.
- */
+import type { AnalyticsProviderConfig, AnalyticsProviderPageVisits } from '../../types/plugins/utilities/analytics-provider.js';
+export type { AnalyticsProviderConfig, AnalyticsProviderPageVisits, } from '../../types/plugins/utilities/analytics-provider.js';
 /**
  * Page view analytics for Uttori documents using JSON files stored on the local file system.
- * @property {AnalyticsProviderConfig} config The configuration object.
- * @property {AnalyticsProviderPageVisits} pageVisits The page visits object.
  * @example <caption>Init AnalyticsProvider</caption>
  * const analyticsProvider = new AnalyticsProvider({ directory: 'data' });
- * @class
  */
 declare class AnalyticsProvider {
-    config: {
-        directory: string;
-        name: string;
-        extension: string;
-    };
-    /** @type {AnalyticsProviderPageVisits} */
+    /** The configuration object. */
+    config: Required<AnalyticsProviderConfig>;
+    /** The page visits object. */
     pageVisits: AnalyticsProviderPageVisits;
     /**
      * Creates an instance of AnalyticsProvider.
-     * @param {AnalyticsProviderConfig} config A configuration object.
-     * @class
+     * @param config A configuration object.
      */
     constructor(config: AnalyticsProviderConfig);
     /**
      * Updates the view count for a given document slug.
-     * @param {string} slug The slug of the document to be updated.
-     * @param {string} [value] An optional value to set the count to exactly.
-     * @returns {number} The number of hits for a given slug after updating.
+     * @param slug The slug of the document to be updated.
+     * @param [value] An optional value to set the count to exactly.
+     * @returns The number of hits for a given slug after updating.
      */
     update(slug: string, value?: string): number;
     /**
      * Returns the view count for a given document slug.
-     * @param {string} slug The slug of the document to be looked up.
-     * @returns {number} View count for the given slug.
+     * @param slug The slug of the document to be looked up.
+     * @returns View count for the given slug.
      * @example
      * analyticsProvider.get('faq');
      * ➜ 10
@@ -64,8 +33,8 @@ declare class AnalyticsProvider {
     get(slug: string): number;
     /**
      * Returns the most popular documents.
-     * @param {number} limit The number of documents to return.
-     * @returns {{ slug: string; count: number; }[]} View count for the given slug.
+     * @param limit The number of documents to return.
+     * @returns View count for the given slug.
      * @example
      * analyticsProvider.getPopularDocuments(10);
      * ➜ [ { slug: 'faq', count: 10 } ]

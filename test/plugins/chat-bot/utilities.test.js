@@ -14,7 +14,7 @@ import {
   consolidateSectionsByHeader,
   longestCommonPrefix,
   splitTextToTokenBudget,
-} from '../../../src/plugins/chat-bot/utilities.js';
+} from '../../../dist/plugins/chat-bot/utilities.js';
 
 test('oneLine: should convert newlines to spaces', (t) => {
   const input = 'Line 1\nLine 2\n\nLine 3';

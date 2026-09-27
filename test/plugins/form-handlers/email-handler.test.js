@@ -1,10 +1,10 @@
 import test from 'ava';
 import sinon from 'sinon';
-import EmailHandler from '../../../src/plugins/form-handlers/email-handler.js';
+import EmailHandler from '../../../dist/plugins/form-handlers/email-handler.js';
 
 /**
  * Builds a nodemailer-compatible transport plugin object.
- * @param {{ reject?: boolean }} [opts]
+ * @param {{ reject?: boolean }} [opts] Whether sending should reject for failure tests.
  * @returns {object} Transport plugin
  */
 const makeTransport = ({ reject = false } = {}) => ({
@@ -65,7 +65,7 @@ test('create: handler resolves with success on successful send', async (t) => {
     subject: 'Hello {name}',
   });
 
-  /** @type {import('../../../src/plugins/form-handler.js').FormConfig} */
+  /** @type {import('../../../dist/plugins/form-handler.js').FormConfig} */
   const formConfig = /** @type {any} */ ({ name: 'contact', fields: [] });
 
   const result = await handler({ name: 'World' }, formConfig, null, null);
@@ -82,7 +82,7 @@ test('create: handler resolves with failure when sendMail throws', async (t) => 
     subject: 'Test',
   });
 
-  /** @type {import('../../../src/plugins/form-handler.js').FormConfig} */
+  /** @type {import('../../../dist/plugins/form-handler.js').FormConfig} */
   const formConfig = /** @type {any} */ ({ name: 'contact', fields: [] });
 
   const result = await handler({}, formConfig, null, null);
@@ -109,7 +109,7 @@ test('create: handler uses template for both subject and body', async (t) => {
     template: '<p>Body: {formName}</p>',
   });
 
-  /** @type {import('../../../src/plugins/form-handler.js').FormConfig} */
+  /** @type {import('../../../dist/plugins/form-handler.js').FormConfig} */
   const formConfig = /** @type {any} */ ({ name: 'my-form', fields: [] });
   await handler({}, formConfig, null, null);
 

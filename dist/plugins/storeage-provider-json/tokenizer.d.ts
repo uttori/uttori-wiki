@@ -1,176 +1,126 @@
+import type { TokenizeThisConfig } from '../../types/plugins/storeage-provider-json/tokenizer.js';
+export type { TokenizeThisConfig } from '../../types/plugins/storeage-provider-json/tokenizer.js';
 declare const MODE_NONE = "modeNone";
 declare const MODE_DEFAULT = "modeDefault";
 declare const MODE_MATCH = "modeMatch";
 /**
  * Parse a string into a token structure.
  * Create an instance of this class for each new string you wish to parse.
- * @property {TokenizeThis} factory Holds the processed configuration.
- * @property {string} str The string to tokenize.
- * @property {Function} forEachToken The function to call for teach token.
- * @property {string} previousCharacter The previous character consumed.
- * @property {string} toMatch The current quote to match.
- * @property {string} currentToken The current token being created.
- * @property {string[]} modeStack Keeps track of the current "mode" of tokenization. The tokenization rules are different depending if you are tokenizing an explicit string (surrounded by quotes), versus a non-explicit string (not surrounded by quotes).
  * @example <caption>Init Tokenizer</caption>
  * const tokenizerInstance = new Tokenizer(this, str, forEachToken);
  * return tokenizerInstance.tokenize();
- * @class
  */
 declare class Tokenizer {
-    /** @type {TokenizeThis} Holds the processed configuration. */
+    /** Holds the processed configuration. */
     factory: TokenizeThis;
-    /** @type {string} The string to tokenize. */
+    /** The string to tokenize. */
     str: string;
-    /** @type {Function} The function to call for teach token. */
-    forEachToken: Function;
-    /** @type {string} The previous character consumed. */
+    /** The function to call for teach token. */
+    forEachToken: (token: string | number | boolean | null, quote: string) => void;
+    /** The previous character consumed. */
     previousCharacter: string;
-    /** @type {string} The current quote to match. */
+    /** The current quote to match. */
     toMatch: string;
-    /** @type {string} The current token being created. */
+    /** The current token being created. */
     currentToken: string;
-    /** @type {Array<'modeNone' | 'modeDefault' | 'modeMatch'>} Keeps track of the current "mode" of tokenization. The tokenization rules are different depending if you are tokenizing an explicit string (surrounded by quotes), versus a non-explicit string (not surrounded by quotes). */
-    modeStack: Array<'modeNone' | 'modeDefault' | 'modeMatch'>;
+    /** Keeps track of the current "mode" of tokenization. The tokenization rules are different depending if you are tokenizing an explicit string (surrounded by quotes), versus a non-explicit string (not surrounded by quotes). */
+    modeStack: ('modeNone' | 'modeDefault' | 'modeMatch')[];
     /**
-     * @param {TokenizeThis} factory Holds the processed configuration.
-     * @param {string} str The string to tokenize.
-     * @param {function((null | true | false | number | string), string): void} forEachToken The function to call for teach token.
+     * @param factory Holds the processed configuration.
+     * @param str The string to tokenize.
+     * @param forEachToken The function to call for teach token.
      */
-    constructor(factory: TokenizeThis, str: string, forEachToken: Function);
+    constructor(factory: TokenizeThis, str: string, forEachToken: (arg0: (null | true | false | number | string), arg1: string) => void);
     /**
      * Get the current mode from the stack.
-     * @returns {('modeNone' | 'modeDefault' | 'modeMatch' | string)} The current mode from the stack.
+     * @returns The current mode from the stack.
      */
-    getCurrentMode(): ('modeNone' | 'modeDefault' | 'modeMatch' | string);
+    getCurrentMode(): 'modeNone' | 'modeDefault' | 'modeMatch';
     /**
      * Set the current mode on the stack.
-     * @param {'modeNone' | 'modeDefault' | 'modeMatch'} mode The mode to set on the stack.
-     * @returns {number} The size of the mode stack.
+     * @param mode The mode to set on the stack.
+     * @returns The size of the mode stack.
      */
     setCurrentMode(mode: 'modeNone' | 'modeDefault' | 'modeMatch'): number;
     /**
      * Ends the current mode and removes it from the stack.
-     * @returns {string | undefined} The last mode of the stack.
+     * @returns The last mode of the stack.
      */
     completeCurrentMode(): string | undefined;
     /**
      * Parse the provided token.
-     * @param {string} token The token to parse.
+     * @param token The token to parse.
      */
     push(token: string): void;
     /**
      * Convert the string version of literals into their literal types.
-     * @param {string} token The token to convert.
-     * @returns {null | true | false | number | string} The converted token.
+     * @param token The token to convert.
+     * @returns The converted token.
      */
     convertToken(token: string): null | true | false | number | string;
-    /**
-     * Process the string.
-     */
+    /** Process the string. */
     tokenize(): void;
     /**
      * Adds a character with the current mode.
-     * @param {string} character The character to process.
+     * @param character The character to process.
      */
     consume(character: string): void;
     /**
      * Changes the current mode depending on the character.
-     * @param {string} character The character to consider.
+     * @param character The character to consider.
      */
     [MODE_NONE](character: string): void;
     /**
      * Checks the token for delimiter or quotes, else continue building token.
-     * @param {string} character The character to consider.
-     * @returns {string | undefined} The current token.
+     * @param character The character to consider.
+     * @returns The current token.
      */
     [MODE_DEFAULT](character: string): string | undefined;
-    /**
-     * Parse out potential tokenizable substrings out of the current token.
-     */
+    /** Parse out potential tokenizable substrings out of the current token. */
     pushDefaultModeTokenizables(): void;
     /**
      * Checks for a completed match between characters.
-     * @param {string} character The character to match.
-     * @returns {string | undefined} The current token.
+     * @param character The character to match.
+     * @returns The current token.
      */
     [MODE_MATCH](character: string): string | undefined;
 }
-export type TokenizeThisConfig = {
-    /**
-     * The list of tokenizable substrings.
-     */
-    shouldTokenize?: string[];
-    /**
-     * The list of quotes to match explicit strings with.
-     */
-    shouldMatch?: string[];
-    /**
-     * The list of delimiters.
-     */
-    shouldDelimitBy?: string[];
-    /**
-     * If literals should be converted or not, ie 'true' -> true.
-     */
-    convertLiterals: boolean;
-    /**
-     * Character to use as an escape in strings.
-     */
-    escapeCharacter: string;
-};
-/**
- * @typedef {object} TokenizeThisConfig
- * @property {string[]} [shouldTokenize] The list of tokenizable substrings.
- * @property {string[]} [shouldMatch] The list of quotes to match explicit strings with.
- * @property {string[]} [shouldDelimitBy] The list of delimiters.
- * @property {boolean} convertLiterals If literals should be converted or not, ie 'true' -> true.
- * @property {string} escapeCharacter Character to use as an escape in strings.
- */
 /**
  * Takes in the config, processes it, and creates tokenizer instances based on that config.
- * @property {TokenizeThisConfig} config The configuration object.
- * @property {boolean} convertLiterals If literals should be converted or not, ie 'true' -> true.
- * @property {string} escapeCharacter Character to use as an escape in strings.
- * @property {string[]} tokenizeList Holds the list of tokenizable substrings.
- * @property {object} tokenizeMap Holds an easy lookup map of tokenizable substrings.
- * @property {object} matchList Holds the list of quotes to match explicit strings with.
- * @property {object} matchMap Holds an easy lookup map of quotes to match explicit strings with.
- * @property {object} delimiterList Holds the list of delimiters.
- * @property {object} delimiterMap Holds an easy lookup map of delimiters.
  * @example <caption>Init TokenizeThis</caption>
  * const tokenizer = new TokenizeThis(config.tokenizer);
  * this.tokenizer.tokenize('(sql)', (token, surroundedBy) => { ... });
- * @class
  */
 export declare class TokenizeThis {
-    /** @type {TokenizeThisConfig} The current configuration. */
+    /** The current configuration. */
     config: TokenizeThisConfig;
-    /** @type {boolean} If literals should be converted or not, ie 'true' -> true. */
+    /** If literals should be converted or not, ie 'true' -> true. */
     convertLiterals: boolean;
-    /** @type {string} Character to use as an escape in strings. */
+    /** Character to use as an escape in strings. */
     escapeCharacter: string;
-    /** @type {string[]} Holds the list of tokenizable substrings. */
+    /** Holds the list of tokenizable substrings. */
     tokenizeList: string[];
-    /** @type {Map<string, string>} Holds an easy lookup map of tokenizable substrings. */
+    /** Holds an easy lookup map of tokenizable substrings. */
     tokenizeMap: Map<string, string>;
-    /** @type {string[]} Holds the list of quotes to match explicit strings with. */
+    /** Holds the list of quotes to match explicit strings with. */
     matchList: string[];
-    /** @type {Map<string, string>} Holds an easy lookup map of quotes to match explicit strings with. */
+    /** Holds an easy lookup map of quotes to match explicit strings with. */
     matchMap: Map<string, string>;
-    /** @type {string[]} Holds the list of delimiters. */
+    /** Holds the list of delimiters. */
     delimiterList: string[];
-    /** @type {Map<string, string>} Holds an easy lookup map of delimiters. */
+    /** Holds an easy lookup map of delimiters. */
     delimiterMap: Map<string, string>;
     /**
-     * @param {TokenizeThisConfig} config The configuration object.
+     * @param config The configuration object.
      */
-    constructor(config: TokenizeThisConfig);
+    constructor(config: Partial<TokenizeThisConfig>);
     /**
      * Creates a Tokenizer, then immediately calls "tokenize".
-     * @param {string} input The string to scan for tokens.
-     * @param {function((null | true | false | number | string), string): void} forEachToken Function to run over each token.
-     * @returns {void} The new Tokenizer instance after being tokenized.
+     * @param input The string to scan for tokens.
+     * @param forEachToken Function to run over each token.
+     * @returns The new Tokenizer instance after being tokenized.
      */
-    tokenize(input: string, forEachToken: Function): void;
+    tokenize(input: string, forEachToken: (arg0: (null | true | false | number | string), arg1: string) => void): void;
 }
 declare const _default: {
     Tokenizer: typeof Tokenizer;

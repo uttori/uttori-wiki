@@ -1,0 +1,244 @@
+import { createDebug } from '../../debug.js';
+import lunr from 'lunr';
+import lunrMulti from 'lunr-languages/lunr.multi.js';
+import stemmerSupport from 'lunr-languages/lunr.stemmer.support.js';
+import type { SearchLunrConfigSearchOptions } from '../../types/plugins/utilities/search-lunr.js';
+
+export type { SearchLunrConfigSearchOptions } from '../../types/plugins/utilities/search-lunr.js';
+
+const debug = createDebug('Uttori.SearchProvider.Lunr');
+
+/**
+ * Uttori Search Provider powered by Lunr.js.
+ * @example
+ * ```js
+ * const searchProvider = new SearchProvider();
+ * const searchProvider = new SearchProvider({ lunr_locales: ['de', 'fr', 'jp'], lunrLocaleFunctions: [localeDe, localeFr, localeJp] });
+ * ```
+ */
+class SearchProvider {
+  /** The collection of search terms and their counts. */
+  declare searchTerms: Record<string, number>;
+
+  /** The Lunr instance. */
+  declare index: lunr.Index | undefined;
+  declare config: {
+    ignoreSlugs: string[];
+    lunr_locales: string[];
+    lunrLocaleFunctions: ((lunrModule: typeof import('lunr')) => void)[];
+    events?: Record<string, string[]>;
+  };
+
+  /**
+   * Creates an instance of SearchProvider.
+   * @param [config] - Configuration object for the class.
+   */
+  constructor(config: import('../search-provider-lunr.js').SearchLunrConfig = {}) {
+    debug('constructor');
+    this.searchTerms = {};
+
+    this.index = undefined;
+
+    this.config = {
+      ignoreSlugs: [],
+      lunr_locales: [],
+      lunrLocaleFunctions: [],
+      ...config,
+    };
+
+    this.setup();
+  }
+
+  /** Sets up the search provider with any `lunr_locales` supplied. */
+  setup = () => {
+    // Check for additional locale support.
+    if (this.config.lunrLocaleFunctions.length > 0) {
+      stemmerSupport(lunr);
+      lunrMulti(lunr);
+      for (const locale of this.config.lunrLocaleFunctions) {
+        locale(lunr);
+      }
+    }
+  };
+
+  /**
+   * Rebuild the search index of documents.
+   * @param _data Unused.
+   * @param context A Uttori-like context.
+   * @example
+   * ```js
+   * await searchProvider.buildIndex(_data, context);
+   * ```
+   */
+  buildIndex = async (_data: unknown, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
+    if (!context || !context.hooks || !context.hooks.fetch) {
+      debug('buildIndex: context or hooks missing');
+      return;
+    }
+    debug('buildIndex');
+    const { ignoreSlugs } = this.config;
+
+    let documents: import('../../wiki.js').UttoriWikiDocument[] = [];
+    const not_in = `"${ignoreSlugs.join('", "')}"`;
+    const query = `SELECT 'slug', 'title', 'tags', 'content' FROM documents WHERE slug NOT_IN (${not_in}) ORDER BY title ASC LIMIT 10000`;
+    debug('buildIndex: query:', query);
+    try {
+      [documents] = await context.hooks.fetch('storage-query', query, context);
+    } /* c8 ignore next 3 */ catch (error) {
+      debug('Error:', error);
+    }
+
+    if (!Array.isArray(documents)) {
+      debug('Documents Error: documents was not an array', typeof documents);
+      return;
+    }
+
+    this.indexDocuments(documents);
+  };
+
+  /**
+   * Build the same Lunr index for server queries and offline static search.
+   * @param documents Complete documents to index.
+   * @returns A JSON-safe Lunr index for browser loading.
+   */
+  indexDocuments = (documents: import('../../wiki.js').UttoriWikiDocument[]): object => {
+    const { lunr_locales } = this.config;
+    this.index = lunr(function lunrSetup() {
+      if (Array.isArray(lunr_locales) && lunr_locales.length > 0 && lunr?.multiLanguage) {
+        this.use(lunr.multiLanguage(...lunr_locales));
+      }
+
+      this.field('title');
+      this.field('content');
+      this.field('tags', { boost: 100 });
+      this.ref('slug');
+
+      debug('buildIndex: indexing total:', documents.length);
+      for (const document of documents) {
+        debug('buildIndex: indexing document:', document.slug);
+        this.add(document);
+      }
+    });
+    return this.index.toJSON();
+  };
+
+  /**
+   * Searches for documents matching the provided query with Lunr.
+   * @param options The passed in options.
+   * @param context A Uttori-like context.
+   * @returns Returns an array of search results no longer than limit.
+   * @async
+   */
+  internalSearch = async ({ query, limit = 100 }: SearchLunrConfigSearchOptions, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>): Promise<import('../../wiki.js').UttoriWikiDocument[]> => {
+    debug('internalSearch:', { query, limit });
+    const results = this.index?.search(query) || [];
+    debug('internalSearch: results:', results.length);
+
+    const slugs = results.map((r) => r.ref).filter(Boolean).slice(0, limit);
+    if (slugs.length === 0) {
+      debug('internalSearch: no results found');
+      return [];
+    }
+
+    // Find the full documents from the slugs returned.
+    const { ignoreSlugs } = this.config;
+
+    let documents: import('../../wiki.js').UttoriWikiDocument[] = [];
+    const not_in = `"${ignoreSlugs.join('", "')}"`;
+    const slug_in = `"${slugs.join('", "')}"`;
+    const fetch_query = `SELECT * FROM documents WHERE slug NOT_IN (${not_in}) AND slug in (${slug_in}) ORDER BY title ASC LIMIT 10000`;
+    try {
+      [documents] = await context.hooks.fetch('storage-query', fetch_query, context);
+      debug('internalSearch: indexable documents:', documents.length);
+    } /* c8 ignore next 3 */ catch (error) {
+      debug('internalSearch: error:', error);
+    }
+
+    return documents;
+  };
+
+  /**
+   * External method for searching documents matching the provided query and updates the count for the query used.
+   * Uses the `internalSearch` method internally.
+   * @param options The passed in options.
+   * @param context A Uttori-like context.
+   * @returns Returns an array of search results no longer than limit.
+   * @async
+   * @example
+   * ```js
+   * searchProvider.search('matching');
+   * ➜ [{ ref: 'first-matching-document', ... }, { ref: 'another-matching-document', ... }, ...]
+   * ```
+   */
+  search = async ({ query, limit = 100 }: SearchLunrConfigSearchOptions, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>): Promise<import('../../wiki.js').UttoriWikiDocument[]> => {
+    debug('search', query, limit);
+    this.updateTermCount(query);
+    return this.internalSearch({ query, limit }, context);
+  };
+
+  /**
+   * Adds documents to the index.
+   * For this implementation, it is rebuilding the index.
+   * @param documents Unused. An array of documents to be indexed.
+   * @param context A Uttori-like context.
+   */
+  indexAdd = async (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
+    debug('indexAdd');
+    await this.buildIndex(undefined, context);
+  };
+
+  /**
+   * Updates documents in the index.
+   * For this implementation, it is rebuilding the index.
+   * @param documents Unused. An array of documents to be indexed.
+   * @param context A Uttori-like context.
+   */
+  indexUpdate = async (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
+    debug('indexUpdate');
+    await this.buildIndex(undefined, context);
+  };
+
+  /**
+   * Removes documents from the index.
+   * For this implementation, it is rebuilding the index.
+   * @param documents Unused. An array of documents to be indexed.
+   * @param context A Uttori-like context.
+   */
+  indexRemove = async (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
+    debug('indexRemove', documents);
+    await this.buildIndex(undefined, context);
+  };
+
+  /**
+   * Updates the search query in the query counts.
+   * @param query The query to increment.
+   */
+  updateTermCount = (query: string) => {
+    debug('updateTermCount:', query);
+    if (!query) return;
+    if (this.searchTerms[query]) {
+      this.searchTerms[query]++;
+    } else {
+      this.searchTerms[query] = 1;
+    }
+  };
+
+  /**
+   * Returns the most popular search terms.
+   * @param options The passed in options.
+   * @returns Returns an array of search results no longer than limit.
+   * @example
+   * ```js
+   * searchProvider.getPopularSearchTerms();
+   * ➜ ['popular', 'cool', 'helpful']
+   * ```
+   */
+  getPopularSearchTerms = ({ limit = 10 }: SearchLunrConfigSearchOptions): string[] => {
+    debug('getPopularSearchTerms:', { limit });
+    const output = Object.keys(this.searchTerms).sort((a, b) => (this.searchTerms[b] - this.searchTerms[a])).slice(0, limit);
+    debug('getPopularSearchTerms:', output);
+    return output;
+  };
+}
+
+export default SearchProvider;

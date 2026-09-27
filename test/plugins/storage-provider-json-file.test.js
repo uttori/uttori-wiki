@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 import test from 'ava';
 import { EventDispatcher } from '@uttori/event-dispatcher';
-import Plugin from '../../src/plugins/storage-provider-json-file.js';
-import StorageProvider from '../../src/plugins/storeage-provider-json/storage-provider-file.js';
+import Plugin from '../../dist/plugins/storage-provider-json-file.js';
+import StorageProvider from '../../dist/plugins/storeage-provider-json/storage-provider-file.js';
 
 const folder = 'test/site-json-file';
 

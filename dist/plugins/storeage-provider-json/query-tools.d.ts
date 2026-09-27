@@ -1,8 +1,8 @@
 /**
  * Processes a query string.
- * @param {string} query - The SQL-like query to parse.
- * @param {import('../../wiki.js').UttoriWikiDocument[]} objects - An array of object to search within.
- * @returns {import('../../wiki.js').UttoriWikiDocument[]|number} Returns an array of all matched documents, or a count.
+ * @param query - The SQL-like query to parse.
+ * @param objects - An array of object to search within.
+ * @returns Returns an array of all matched documents, or a count.
  * @example
  * ```js
  * processQuery('SELECT name FROM table WHERE age > 1 ORDER BY RANDOM LIMIT 3', [{ ... }, ...]);

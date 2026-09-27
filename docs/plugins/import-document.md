@@ -1,76 +1,41 @@
-## Classes
-
-<dl>
-<dt><a href="#ImportDocument">ImportDocument</a></dt>
-<dd><p>Uttori Import Document
-Imports documents from a variety of sources, including markdown, PDF, and image files.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#ImportDocumentConfigPage">ImportDocumentConfigPage</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ImportDocumentDownload">ImportDocumentDownload</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ImportDocumentDownloadFile">ImportDocumentDownloadFile</a> ⇒ <code>Promise.&lt;void&gt;</code></dt>
-<dd><p>Downloads an imported page.</p>
-</dd>
-<dt><a href="#ImportDocumentProcessPageFunction">ImportDocumentProcessPageFunction</a> ⇒ <code><a href="#ImportDocumentProcessPage">Promise.&lt;ImportDocumentProcessPage&gt;</a></code></dt>
-<dd><p>Processes an imported page after download.</p>
-</dd>
-<dt><a href="#ImportDocumentProcessPage">ImportDocumentProcessPage</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ImportDocumentApiPayload">ImportDocumentApiPayload</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ImportDocumentContext">ImportDocumentContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code></dt>
-<dd></dd>
-<dt><a href="#ImportDocumentRequestHandlerFactory">ImportDocumentRequestHandlerFactory</a> ⇒ <code>module:express~RequestHandler</code></dt>
-<dd><p>Builds an Express request handler from plugin context.</p>
-</dd>
-<dt><a href="#ImportDocumentConfig">ImportDocumentConfig</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
 <a name="ImportDocument"></a>
 
 ## ImportDocument
 Uttori Import Document
 Imports documents from a variety of sources, including markdown, PDF, and image files.
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [ImportDocument](#ImportDocument)
-    * [.configKey](#ImportDocument.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#ImportDocument.defaultConfig) ⇒ [<code>ImportDocumentConfig</code>](#ImportDocumentConfig)
+    * [.configKey](#ImportDocument.configKey) ⇒
+    * [.defaultConfig()](#ImportDocument.defaultConfig) ⇒
     * [.validateConfig(config, [_context])](#ImportDocument.validateConfig)
     * [.register(context)](#ImportDocument.register)
     * [.bindRoutes(server, context)](#ImportDocument.bindRoutes)
-    * [.apiRequestHandler(context)](#ImportDocument.apiRequestHandler) ⇒ <code>module:express~RequestHandler</code>
-    * [.interfaceRequestHandler(context)](#ImportDocument.interfaceRequestHandler) ⇒ <code>module:express~RequestHandler</code>
-    * [.downloadFile(options)](#ImportDocument.downloadFile) ⇒ <code>Promise.&lt;void&gt;</code>
-    * [.processPage(config, slug, page)](#ImportDocument.processPage) ⇒ [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage)
+    * [.apiRequestHandler(context)](#ImportDocument.apiRequestHandler) ⇒
+    * [.interfaceRequestHandler(context)](#ImportDocument.interfaceRequestHandler) ⇒
+    * [.downloadFile(options)](#ImportDocument.downloadFile)
+    * [.processPage(config, slug, page)](#ImportDocument.processPage) ⇒
 
 <a name="ImportDocument.configKey"></a>
 
-### ImportDocument.configKey ⇒ <code>string</code>
+### ImportDocument.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>ImportDocument</code>](#ImportDocument)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(ImportDocument.configKey)*  
+**Kind**: static property of [<code>ImportDocument</code>](#ImportDocument)\
+**Returns**: The configuration key.\
+**Example** *(ImportDocument.configKey)*\
 ```js
 const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
 ```
 <a name="ImportDocument.defaultConfig"></a>
 
-### ImportDocument.defaultConfig() ⇒ [<code>ImportDocumentConfig</code>](#ImportDocumentConfig)
+### ImportDocument.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
-**Returns**: [<code>ImportDocumentConfig</code>](#ImportDocumentConfig) - The configuration.  
-**Example** *(ImportDocument.defaultConfig())*  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
+**Returns**: The configuration.\
+**Example** *(ImportDocument.defaultConfig())*\
 ```js
 const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
 ```
@@ -79,14 +44,14 @@ const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocu
 ### ImportDocument.validateConfig(config, [_context])
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>Record.&lt;string, ImportDocumentConfig&gt;</code> | A provided configuration to use. |
-| [_context] | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code> | Unused. |
+| Param | Description |
+| --- | --- |
+| config | A provided configuration to use. |
+| [_context] | Unused. |
 
-**Example** *(ImportDocument.validateConfig(config, _context))*  
+**Example** *(ImportDocument.validateConfig(config, _context))*\
 ```js
 ImportDocument.validateConfig({ ... });
 ```
@@ -95,13 +60,13 @@ ImportDocument.validateConfig({ ... });
 ### ImportDocument.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(ImportDocument.register(context))*  
+**Example** *(ImportDocument.register(context))*\
 ```js
 const context = {
   hooks: {
@@ -123,14 +88,14 @@ ImportDocument.register(context);
 ### ImportDocument.bindRoutes(server, context)
 Add the upload route to the server object.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| server | <code>module:express~Application</code> | An Express server instance. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| server | An Express server instance. |
+| context | A Uttori-like context. |
 
-**Example** *(ImportDocument.bindRoutes(server, context))*  
+**Example** *(ImportDocument.bindRoutes(server, context))*\
 ```js
 const context = {
   config: {
@@ -144,7 +109,7 @@ ImportDocument.bindRoutes(server, context);
 ```
 <a name="ImportDocument.apiRequestHandler"></a>
 
-### ImportDocument.apiRequestHandler(context) ⇒ <code>module:express~RequestHandler</code>
+### ImportDocument.apiRequestHandler(context) ⇒
 The Express route method to process the upload request and provide a response.
 Supports both file imports and URL scraping through the pages array.
 
@@ -164,214 +129,272 @@ Request body structure:
 - pages: Array of page objects (files or URLs)
 - title, image, excerpt, tags, slug, redirects: Document metadata
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
-**Returns**: <code>module:express~RequestHandler</code> - The function to pass to Express.  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
+**Returns**: The function to pass to Express.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(ImportDocument.apiRequestHandler(context)(request, response, _next))*  
+**Example** *(ImportDocument.apiRequestHandler(context)(request, response, _next))*\
 ```js
 server.post('/chat-api', ImportDocument.apiRequestHandler(context));
 ```
 <a name="ImportDocument.interfaceRequestHandler"></a>
 
-### ImportDocument.interfaceRequestHandler(context) ⇒ <code>module:express~RequestHandler</code>
+### ImportDocument.interfaceRequestHandler(context) ⇒
 The Express request handler for the interface route.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
-**Returns**: <code>module:express~RequestHandler</code> - The function to pass to Express.  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
+**Returns**: The function to pass to Express.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(ImportDocument.interfaceRequestHandler(context)(request, response, _next))*  
+**Example** *(ImportDocument.interfaceRequestHandler(context)(request, response, _next))*\
 ```js
 server.get('/import', ImportDocument.interfaceRequestHandler(context));
 ```
 <a name="ImportDocument.downloadFile"></a>
 
-### ImportDocument.downloadFile(options) ⇒ <code>Promise.&lt;void&gt;</code>
+### ImportDocument.downloadFile(options)
 Downloads a file from a URL and saves it to the uploads directory.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>object</code> | The options for the download, represents a page |
-| options.url | <code>string</code> | The URL of the file to download. |
-| options.fileName | <code>string</code> | The name of the file to save the file to. |
-| options.type | <code>string</code> | The type of the file to download. |
+| Param | Description |
+| --- | --- |
+| options | The options for the download, represents a page |
+| options.url | The URL of the file to download. |
+| options.fileName | The name of the file to save the file to. |
+| options.type | The type of the file to download. |
 
 <a name="ImportDocument.processPage"></a>
 
-### ImportDocument.processPage(config, slug, page) ⇒ [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage)
+### ImportDocument.processPage(config, slug, page) ⇒
 Processes a page and returns the content and attachment.
 
-**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)  
-**Returns**: [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage) - The content and attachments.  
+**Kind**: static method of [<code>ImportDocument</code>](#ImportDocument)\
+**Returns**: The content and attachments.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | [<code>ImportDocumentConfig</code>](#ImportDocumentConfig) | The configuration object. |
-| slug | <code>string</code> | The slug of the document. |
-| page | [<code>ImportDocumentConfigPage</code>](#ImportDocumentConfigPage) | The page to process. |
+| Param | Description |
+| --- | --- |
+| config | The configuration object. |
+| slug | The slug of the document. |
+| page | The page to process. |
 
-<a name="ImportDocumentConfigPage"></a>
+## TypeScript declarations
 
-## ImportDocumentConfigPage : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+<details>
+<summary>View documented types and signatures</summary>
 
-| Name | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | The URL of the page. |
-| name | <code>string</code> | The name of the page. |
-| type | <code>string</code> | The type of the page. |
+```typescript
+import type { ImportDocumentConfigPage, ImportDocumentProcessConfig, ImportDocumentProcessPage, ImportDocumentConfig } from '../types/plugins/import-document.js';
+export type { ImportDocumentConfigPage, ImportDocumentDownload, ImportDocumentDownloadFile, ImportDocumentProcessConfig, ImportDocumentProcessPageFunction, ImportDocumentProcessPage, ImportDocumentApiPayload, ImportDocumentContext, ImportDocumentRequestHandlerFactory, ImportDocumentConfig, ImportDocumentPayload, } from '../types/plugins/import-document.js';
+/**
+ * Uttori Import Document
+ * Imports documents from a variety of sources, including markdown, PDF, and image files.
+ */
+declare class ImportDocument {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>ImportDocument.configKey</caption>
+     * const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-import-document';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>ImportDocument.defaultConfig()</caption>
+     * const config = { ...ImportDocument.defaultConfig(), ...context.config[ImportDocument.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<ImportDocumentConfig, 'apiRoute' | 'publicRoute' | 'uploadPath' | 'uploadDirectory' | 'allowedReferrers' | 'middlewarePublic' | 'middlewareApi' | 'downloadFile' | 'processPage' | 'apiRequestHandler' | 'interfaceRequestHandler'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param config A provided configuration to use.
+     * @param [_context] Unused.
+     * @example <caption>ImportDocument.validateConfig(config, _context)</caption>
+     * ImportDocument.validateConfig({ ... });
+     */
+    static validateConfig(config: Record<string, ImportDocumentConfig>, _context?: unknown): void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example <caption>ImportDocument.register(context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [ImportDocument.configKey]: {
+     *       ...,
+     *       events: {
+     *         bindRoutes: ['bind-routes'],
+     *       },
+     *     },
+     *   },
+     * };
+     * ImportDocument.register(context);
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): void;
+    /**
+     * Add the upload route to the server object.
+     * @param server An Express server instance.
+     * @param context A Uttori-like context.
+     * @example <caption>ImportDocument.bindRoutes(server, context)</caption>
+     * const context = {
+     *   config: {
+     *     [ImportDocument.configKey]: {
+     *       middleware: [],
+     *       publicRoute: '/download',
+     *     },
+     *   },
+     * };
+     * ImportDocument.bindRoutes(server, context);
+     */
+    static bindRoutes(server: import('express').Application, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): void;
+    /**
+     * The Express route method to process the upload request and provide a response.
+     * Supports both file imports and URL scraping through the pages array.
+     *
+     * File handling (detected by file extension in page.name):
+     * - Markdown files (.md/.markdown): Used directly as content (supports URLs and local paths)
+     * - PDF files (.pdf): Stored as attachments (supports URLs and local paths, stub articles only when PDF is the only page)
+     * - Image files (.jpg/.jpeg/.png/.gif/.webp/.svg): Stored as attachments (supports URLs and local paths)
+     * - Other files: Treated as URLs for web scraping
+     *
+     * File processing:
+     * - All file types support both URLs and local file paths
+     * - URLs are downloaded using wget, local files are copied
+     * - Provided 'image' parameter (URL) is downloaded to uploads directory
+     * - Document image priority: downloaded image > first image page > provided image URL
+     *
+     * Request body structure:
+     * - pages: Array of page objects (files or URLs)
+     * - title, image, excerpt, tags, slug, redirects: Document metadata
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
+     * @example <caption>ImportDocument.apiRequestHandler(context)(request, response, _next)</caption>
+     * server.post('/chat-api', ImportDocument.apiRequestHandler(context));
+     */
+    static apiRequestHandler(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler;
+    /**
+     * The Express request handler for the interface route.
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
+     * @example <caption>ImportDocument.interfaceRequestHandler(context)(request, response, _next)</caption>
+     * server.get('/import', ImportDocument.interfaceRequestHandler(context));
+     */
+    static interfaceRequestHandler(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>): import('express').RequestHandler;
+    /**
+     * Downloads a file from a URL and saves it to the uploads directory.
+     * @param options The options for the download, represents a page
+     * @param options.url The URL of the file to download.
+     * @param options.fileName The name of the file to save the file to.
+     * @param options.type The type of the file to download.
+     */
+    static downloadFile({ url, fileName, type }: {
+        url: string;
+        fileName: string;
+        type: string;
+    }): Promise<void>;
+    /**
+     * Processes a page and returns the content and attachment.
+     * @param config The configuration object.
+     * @param slug The slug of the document.
+     * @param page The page to process.
+     * @returns The content and attachments.
+     */
+    static processPage(config: ImportDocumentProcessConfig, slug: string, page: ImportDocumentConfigPage): Promise<ImportDocumentProcessPage>;
+}
+export default ImportDocument;
 
-<a name="ImportDocumentDownload"></a>
-
-## ImportDocumentDownload : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | The URL of the page. |
-| fileName | <code>string</code> | The name of the file. |
-| type | <code>string</code> | The type of the page. |
-
-<a name="ImportDocumentDownloadFile"></a>
-
-## ImportDocumentDownloadFile ⇒ <code>Promise.&lt;void&gt;</code>
-Downloads an imported page.
-
-**Kind**: global typedef  
-**Returns**: <code>Promise.&lt;void&gt;</code> - Completes when the download finishes.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| download | [<code>ImportDocumentDownload</code>](#ImportDocumentDownload) | The file to download. |
-
-<a name="ImportDocumentProcessPageFunction"></a>
-
-## ImportDocumentProcessPageFunction ⇒ [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage)
-Processes an imported page after download.
-
-**Kind**: global typedef  
-**Returns**: [<code>Promise.&lt;ImportDocumentProcessPage&gt;</code>](#ImportDocumentProcessPage) - Processed page content and attachments.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| config | [<code>ImportDocumentConfig</code>](#ImportDocumentConfig) | Import configuration. |
-| content | <code>string</code> | Downloaded page content. |
-| page | [<code>ImportDocumentConfigPage</code>](#ImportDocumentConfigPage) | Page metadata. |
-
-<a name="ImportDocumentProcessPage"></a>
-
-## ImportDocumentProcessPage : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| content | <code>string</code> | The content of the page. |
-| attachments | <code>Array.&lt;UttoriWikiDocumentAttachment&gt;</code> | The attachments of the page. |
-
-<a name="ImportDocumentApiPayload"></a>
-
-## ImportDocumentApiPayload : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| title | <code>string</code> | The title of the document. |
-| image | <code>string</code> | The image of the document. |
-| excerpt | <code>string</code> | The excerpt of the document. |
-| pages | [<code>Array.&lt;ImportDocumentConfigPage&gt;</code>](#ImportDocumentConfigPage) | The pages of the document. |
-| tags | <code>Array.&lt;string&gt;</code> | The tags of the document. |
-| slug | <code>string</code> | The slug of the document. |
-| redirects | <code>Array.&lt;string&gt;</code> | The redirects of the document. |
-
-<a name="ImportDocumentContext"></a>
-
-## ImportDocumentContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-import-document&#x27;, ImportDocumentConfig&gt;</code>
-**Kind**: global typedef  
-<a name="ImportDocumentRequestHandlerFactory"></a>
-
-## ImportDocumentRequestHandlerFactory ⇒ <code>module:express~RequestHandler</code>
-Builds an Express request handler from plugin context.
-
-**Kind**: global typedef  
-**Returns**: <code>module:express~RequestHandler</code> - Express middleware.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| ctx | [<code>ImportDocumentContext</code>](#ImportDocumentContext) | Uttori context for this plugin. |
-
-<a name="ImportDocumentConfig"></a>
-
-## ImportDocumentConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
-| [apiRoute] | <code>string</code> | The API route for importing documents. |
-| [publicRoute] | <code>string</code> | Server route to show the import interface. |
-| [uploadPath] | <code>string</code> | The path to reference uploaded files by. |
-| [uploadDirectory] | <code>string</code> | The directory to upload files to. |
-| [allowedReferrers] | <code>Array.&lt;string&gt;</code> | When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all. |
-| [interfaceRequestHandler] | [<code>ImportDocumentRequestHandlerFactory</code>](#ImportDocumentRequestHandlerFactory) | A request handler for the interface route. |
-| [apiRequestHandler] | [<code>ImportDocumentRequestHandlerFactory</code>](#ImportDocumentRequestHandlerFactory) | A request handler for the API route. |
-| [middlewareApi] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the API route. |
-| [middlewarePublic] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom Middleware for the public route. |
-| [downloadFile] | [<code>ImportDocumentDownloadFile</code>](#ImportDocumentDownloadFile) | Downloads an imported page. |
-| [processPage] | [<code>ImportDocumentProcessPageFunction</code>](#ImportDocumentProcessPageFunction) | Processes an imported page. |
-
-**Example** *(ImportDocumentConfig)*  
-```js
-const config = {
-  events: {
-    bindRoutes: ['bind-routes'],
-    validateConfig: ['validate-config'],
-  },
-  middleware: {
-    apiRoute: [],
-    publicRoute: [],
-  },
-  apiRoute: '/import-api',
-  publicRoute: '/import',
-  uploadPath: 'uploads',
-  uploadDirectory: path.join(__dirname, 'uploads'),
-  allowedReferrers: [],
-  apiRequestHandler: (context) => async (request, response, next) => {
-    debug('apiRequestHandler');
-    const { title, image, excerpt, pages, tags, slug, redirects } = request.body;
-    const uploadDir = path.join(config.uploadDirectory, slug);
-    await fs.promises.mkdir(uploadDir, { recursive: true });
-    response.status(200).send({ ...document, error: null });
-  },
-  interfaceRequestHandler: (context) => async (request, response, next) => {
-    debug('interfaceRequestHandler');
-    let viewModel = {
-      title: 'Import Document',
-      config: context.config,
-      session: request.session || {},
-      slug: 'import-document',
-      meta: {},
-      basePath: request.baseUrl,
-      flash: request.wikiFlash(),
-    };
-    viewModel = await context.hooks.filter('view-model-import-document', viewModel, this);
-    response.set('X-Robots-Tag', 'noindex');
-    response.render('import', viewModel);
-  },
-  middlewareApi: [],
-  middlewarePublic: [],
-};
+import type { UttoriWikiDocument as ImportDocumentFields } from '../../wiki.js';
+export interface ImportDocumentConfigPage {
+    /** The URL of the page. */
+    url: string;
+    /** The name of the page. */
+    name: string;
+    /** The type of the page. */
+    type: string;
+}
+export interface ImportDocumentDownload {
+    /** The URL of the page. */
+    url: string;
+    /** The name of the file. */
+    fileName: string;
+    /** The type of the page. */
+    type: string;
+}
+/** Downloads an imported page. */
+export type ImportDocumentDownloadFile = (download: ImportDocumentDownload) => Promise<void>;
+/** Configuration passed to page processors after upload paths and the downloader are resolved. */
+export type ImportDocumentProcessConfig = ImportDocumentConfig & Required<Pick<ImportDocumentConfig, 'uploadDirectory' | 'uploadPath' | 'downloadFile'>>;
+/** Processes an imported page after download. */
+export type ImportDocumentProcessPageFunction = (config: ImportDocumentProcessConfig, content: string, page: ImportDocumentConfigPage) => Promise<ImportDocumentProcessPage>;
+export interface ImportDocumentProcessPage {
+    /** The content of the page. */
+    content: string;
+    /** The attachments of the page. */
+    attachments: import('../../wiki.js').UttoriWikiDocumentAttachment[];
+}
+export interface ImportDocumentApiPayload {
+    /** The title of the document. */
+    title: string;
+    /** The image of the document. */
+    image: string;
+    /** The excerpt of the document. */
+    excerpt: string;
+    /** The pages of the document. */
+    pages: ImportDocumentConfigPage[];
+    /** The tags of the document. */
+    tags: string[];
+    /** The slug of the document. */
+    slug: string;
+    /** The redirects of the document. */
+    redirects: string[];
+}
+export type ImportDocumentContext = import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-import-document', ImportDocumentConfig>;
+/** Builds an Express request handler from plugin context. */
+export type ImportDocumentRequestHandlerFactory = (ctx: ImportDocumentContext) => import('express').RequestHandler;
+export interface ImportDocumentConfig {
+    /** An object whose keys correspond to methods, and contents are events to listen for. */
+    events?: Record<string, string[]>;
+    /** The API route for importing documents. */
+    apiRoute?: string;
+    /** Server route to show the import interface. */
+    publicRoute?: string;
+    /** The path to reference uploaded files by. */
+    uploadPath?: string;
+    /** The directory to upload files to. */
+    uploadDirectory?: string;
+    /**
+     * When not an empty attay, check to see if the current referrer starts with any of the items in this list. When an empty array don't check at all.
+     */
+    allowedReferrers?: string[];
+    /** A request handler for the interface route. */
+    interfaceRequestHandler?: ImportDocumentRequestHandlerFactory;
+    /** A request handler for the API route. */
+    apiRequestHandler?: ImportDocumentRequestHandlerFactory;
+    /** Custom Middleware for the API route. */
+    middlewareApi?: import('express').RequestHandler[];
+    /** Custom Middleware for the public route. */
+    middlewarePublic?: import('express').RequestHandler[];
+    /** Downloads an imported page. */
+    downloadFile?: ImportDocumentDownloadFile;
+    /** Processes an imported page. */
+    processPage?: ImportDocumentProcessPageFunction;
+}
+/** JSON fields accepted by the document-import route before its existing validation runs. */
+export interface ImportDocumentPayload extends Partial<ImportDocumentFields> {
+    /** Tags submitted by the import form; an empty array selects no tags. */
+    tags: ImportDocumentFields['tags'];
+    /** Remote pages appended to the new document. */
+    pages?: ImportDocumentConfigPage[];
+}
 ```
+
+</details>

@@ -1,5 +1,5 @@
 import test from 'ava';
-import fyShuffle from '../../../src/plugins/storeage-provider-json/fisher-yates-shuffle.js';
+import fyShuffle from '../../../dist/plugins/storeage-provider-json/fisher-yates-shuffle.js';
 
 test('fyShuffle(array): returns a randomized array', (t) => {
   const output = fyShuffle(['1', '2', '3']);

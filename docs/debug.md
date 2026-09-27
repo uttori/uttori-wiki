@@ -1,53 +1,32 @@
-## Functions
-
-<dl>
-<dt><a href="#createDebugLogger">createDebugLogger()</a> : <code><a href="#CreateDebugLogger">CreateDebugLogger</a></code></dt>
-<dd></dd>
-<dt><a href="#createDebug">createDebug(namespace)</a> ⇒ <code><a href="#DebugLogger">DebugLogger</a></code></dt>
-<dd><p>Create a namespaced debug logger.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#DebugLogger">DebugLogger</a> ⇒ <code>void</code></dt>
-<dd></dd>
-<dt><a href="#CreateDebugLogger">CreateDebugLogger</a> ⇒ <code><a href="#DebugLogger">DebugLogger</a></code></dt>
-<dd></dd>
-</dl>
-
-<a name="createDebugLogger"></a>
-
-## createDebugLogger() : [<code>CreateDebugLogger</code>](#CreateDebugLogger)
-**Kind**: global function  
 <a name="createDebug"></a>
 
-## createDebug(namespace) ⇒ [<code>DebugLogger</code>](#DebugLogger)
+## createDebug(namespace) ⇒
 Create a namespaced debug logger.
 
-**Kind**: global function  
-**Returns**: [<code>DebugLogger</code>](#DebugLogger) - The debug logger, or a noop logger when debug is unavailable.  
+**Kind**: global function\
+**Returns**: The debug logger, or a noop logger when debug is unavailable.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| namespace | <code>string</code> | The debug namespace. |
+| Param | Description |
+| --- | --- |
+| namespace | The debug namespace. |
 
-<a name="DebugLogger"></a>
+## TypeScript declarations
 
-## DebugLogger ⇒ <code>void</code>
-**Kind**: global typedef  
+<details>
+<summary>View documented types and signatures</summary>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| ...args | <code>unknown</code> | Debug arguments. |
+```typescript
+import type { DebugLogger } from './types/debug.js';
+export type { DebugLogger, CreateDebugLogger } from './types/debug.js';
+/**
+ * Create a namespaced debug logger.
+ * @param namespace The debug namespace.
+ * @returns The debug logger, or a noop logger when debug is unavailable.
+ */
+export declare function createDebug(namespace: string): DebugLogger;
 
-<a name="CreateDebugLogger"></a>
+export type DebugLogger = (...args: unknown[]) => void;
+export type CreateDebugLogger = (namespace: string) => DebugLogger;
+```
 
-## CreateDebugLogger ⇒ [<code>DebugLogger</code>](#DebugLogger)
-**Kind**: global typedef  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| namespace | <code>string</code> | The debug namespace. |
-
+</details>

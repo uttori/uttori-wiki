@@ -2,7 +2,7 @@ import { promises as fs } from 'node:fs';
 import test from 'ava';
 
 import { slow } from '../_helpers/slow.js';
-import SearchProvider from '../../src/plugins/utilities/search-sqlite.js';
+import SearchProvider from '../../dist/plugins/utilities/search-sqlite.js';
 
 const folder = 'test/site-search-sqlite';
 

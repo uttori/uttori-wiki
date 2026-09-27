@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import test from 'ava';
-import SitemapGenerator from '../../src/plugins/sitemap-generator.js';
+import SitemapGenerator from '../../dist/plugins/sitemap-generator.js';
 
 const config = SitemapGenerator.defaultConfig();
 const context = {

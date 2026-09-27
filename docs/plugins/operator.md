@@ -28,26 +28,18 @@
 ## Operator
 A wrapper class around operators to distinguish them from regular tokens.
 
-**Kind**: global class  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> \| <code>symbol</code> | The value. |
-| type | <code>number</code> \| <code>symbol</code> | The type of operator. |
-| precedence | <code>number</code> | Priority to sort the operators with. |
-
+**Kind**: global class\
 
 * [Operator](#Operator)
     * [new Operator(value, type, precedence)](#new_Operator_new)
     * _instance_
-        * [.value](#Operator+value) : <code>string</code> \| <code>symbol</code>
-        * [.type](#Operator+type) : <code>number</code> \| <code>symbol</code>
-        * [.precedence](#Operator+precedence) : <code>number</code>
-        * [.toJSON()](#Operator+toJSON) ⇒ <code>\*</code>
-        * [.toString()](#Operator+toString) ⇒ <code>string</code>
+        * [.value](#Operator+value)
+        * [.type](#Operator+type)
+        * [.precedence](#Operator+precedence)
+        * [.toJSON()](#Operator+toJSON) ⇒
+        * [.toString()](#Operator+toString) ⇒
     * _static_
-        * [.type(type)](#Operator.type) ⇒ <code>number</code> \| <code>symbol</code>
+        * [.type(type)](#Operator.type) ⇒
 
 <a name="new_Operator_new"></a>
 
@@ -55,81 +47,128 @@ A wrapper class around operators to distinguish them from regular tokens.
 Creates an instance of Operator.
 
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> \| <code>symbol</code> | The value. |
-| type | <code>number</code> \| <code>symbol</code> | The type of operator. |
-| precedence | <code>number</code> | Priority to sort the operators with. |
+| Param | Description |
+| --- | --- |
+| value | The value. |
+| type | The type of operator. |
+| precedence | Priority to sort the operators with. |
 
-**Example** *(Init TokenizeThis)*  
+**Example** *(Init TokenizeThis)*\
 ```js
 const op = new Operator(value, type, precedence);
 ```
 <a name="Operator+value"></a>
 
-### operator.value : <code>string</code> \| <code>symbol</code>
+### operator.value
 The value.
 
-**Kind**: instance property of [<code>Operator</code>](#Operator)  
+**Kind**: instance property of [<code>Operator</code>](#Operator)\
 <a name="Operator+type"></a>
 
-### operator.type : <code>number</code> \| <code>symbol</code>
+### operator.type
 The type of operator.
 
-**Kind**: instance property of [<code>Operator</code>](#Operator)  
+**Kind**: instance property of [<code>Operator</code>](#Operator)\
 <a name="Operator+precedence"></a>
 
-### operator.precedence : <code>number</code>
+### operator.precedence
 Priority to sort the operators with.
 
-**Kind**: instance property of [<code>Operator</code>](#Operator)  
+**Kind**: instance property of [<code>Operator</code>](#Operator)\
 <a name="Operator+toJSON"></a>
 
-### operator.toJSON() ⇒ <code>\*</code>
+### operator.toJSON() ⇒
 Returns the value as is for JSON.
 
-**Kind**: instance method of [<code>Operator</code>](#Operator)  
-**Returns**: <code>\*</code> - value.  
+**Kind**: instance method of [<code>Operator</code>](#Operator)\
+**Returns**: value.\
 <a name="Operator+toString"></a>
 
-### operator.toString() ⇒ <code>string</code>
+### operator.toString() ⇒
 Returns the value as its string format.
 
-**Kind**: instance method of [<code>Operator</code>](#Operator)  
-**Returns**: <code>string</code> - String representation of value.  
+**Kind**: instance method of [<code>Operator</code>](#Operator)\
+**Returns**: String representation of value.\
 <a name="Operator.type"></a>
 
-### Operator.type(type) ⇒ <code>number</code> \| <code>symbol</code>
+### Operator.type(type) ⇒
 Returns a type for a given string.
 
-**Kind**: static method of [<code>Operator</code>](#Operator)  
-**Returns**: <code>number</code> \| <code>symbol</code> - Either number of parameters or Unary Minus Symbol.  
+**Kind**: static method of [<code>Operator</code>](#Operator)\
+**Returns**: Either number of parameters or Unary Minus Symbol.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| type | <code>string</code> | The type to lookup. |
+| Param | Description |
+| --- | --- |
+| type | The type to lookup. |
 
 <a name="OPERATOR_UNARY_MINUS"></a>
 
 ## OPERATOR\_UNARY\_MINUS
 To distinguish between the binary minus and unary.
 
-**Kind**: global constant  
+**Kind**: global constant\
 <a name="OPERATOR_TYPE_UNARY"></a>
 
 ## OPERATOR\_TYPE\_UNARY
 Number of operands in a unary operation.
 
-**Kind**: global constant  
+**Kind**: global constant\
 <a name="OPERATOR_TYPE_BINARY"></a>
 
 ## OPERATOR\_TYPE\_BINARY
 Number of operands in a binary operation.
 
-**Kind**: global constant  
+**Kind**: global constant\
 <a name="OPERATOR_TYPE_TERNARY"></a>
 
 ## OPERATOR\_TYPE\_TERNARY
 Number of operands in a ternary operation.
 
-**Kind**: global constant  
+**Kind**: global constant\
+
+## TypeScript declarations
+
+<details>
+<summary>View documented types and signatures</summary>
+
+```typescript
+/**
+ * A wrapper class around operators to distinguish them from regular tokens.
+ * @example <caption>Init TokenizeThis</caption>
+ * const op = new Operator(value, type, precedence);
+ */
+declare class Operator {
+    /** The value. */
+    value: string | symbol;
+    /** The type of operator. */
+    type: number | symbol;
+    /** Priority to sort the operators with. */
+    precedence: number;
+    /**
+     * Creates an instance of Operator.
+     * @param value The value.
+     * @param type The type of operator.
+     * @param precedence Priority to sort the operators with.
+     */
+    constructor(value: string | symbol, type: number | symbol, precedence: number);
+    /**
+     * Returns the value as is for JSON.
+     * @returns value.
+     */
+    toJSON(): unknown;
+    /**
+     * Returns the value as its string format.
+     * @returns String representation of value.
+     */
+    toString(): string;
+    /**
+     * Returns a type for a given string.
+     * @param type - The type to lookup.
+     * @returns Either number of parameters or Unary Minus Symbol.
+     */
+    static type(type: string): number | symbol;
+}
+export default Operator;
+```
+
+</details>

@@ -1,0 +1,1 @@
+{"version":3,"file":"custom.js","sourceRoot":"","sources":["../src/custom.ts"],"names":[],"mappings":"","sourcesContent":["export type * from './types/custom.js';\n"]}

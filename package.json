@@ -24,7 +24,14 @@
     "node": ">= 24"
   },
   "dependencies": {
-    "@uttori/data-tools": "^4.0.0",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^5.0.6",
+    "@types/express-session": "^1.19.0",
+    "@types/lunr": "^2.3.7",
+    "@types/node": "^26.6.3",
+    "@types/ws": "^8.18.1",
+    "@uttori/data-tools": "^4.1.0",
     "@uttori/event-dispatcher": "^3.0.2"
   },
   "optionalDependencies": {
@@ -33,35 +40,28 @@
     "debug": "^4.4.3",
     "ejs": "^6.0.1",
     "express-session": "^1.19.0",
-    "googleapis": "^181.0.0",
+    "googleapis": "^182.0.0",
     "lunr": "^2.3.9",
     "lunr-languages": "^1.22.0",
     "markdown-it": "^15.0.2",
     "memorystore": "^1.6.8",
     "multer": "^2.4.0",
-    "nodemailer": "^10.0.10",
+    "nodemailer": "^10.0.11",
     "pdfreader": "^3.0.8",
     "sanitize-filename": "^1.6.4",
     "slugify": "^1.6.9",
     "sqlite-vec": "^0.1.9",
-    "ws": "^8.21.3"
+    "ws": "^8.22.0"
   },
   "peerDependencies": {
     "express": "^5"
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^5.10.0",
-    "@types/better-sqlite3": "^9.6.0",
     "@types/debug": "^4.1.13",
-    "@types/ejs": "^3.1.5",
-    "@types/express": "^5.0.6",
-    "@types/express-session": "^1.19.0",
-    "@types/lunr": "^2.3.7",
     "@types/multer": "^2.2.0",
-    "@types/node": "^26.6.2",
     "@types/sinon": "^22.0.0",
     "@types/supertest": "^7.2.1",
-    "@types/ws": "^8.18.1",
     "ava": "^8.0.1",
     "better-sqlite3": "^13.0.3",
     "c8": "^12.0.0",
@@ -78,7 +78,7 @@
     "markdown-it": "^15.0.2",
     "memorystore": "^1.6.8",
     "oxlint": "^1.85.0",
-    "oxlint-tsgolint": "^7.0.2002",
+    "oxlint-tsgolint": "^7.0.2003",
     "pdfreader": "^3.0.8",
     "pre-commit": "^2.0.0",
     "release-it": "^21.1.0",
@@ -93,161 +93,157 @@
     "yargs": "^18.0.0"
   },
   "files": [
-    "dist/*",
-    "src/*"
+    "dist",
+    "src"
   ],
-  "module": "src/index.js",
+  "module": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",
   "sideEffects": false,
   "exports": {
     ".": {
-      "import": "./src/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./config": {
-      "import": "./src/config.js",
-      "types": "./dist/config.d.ts"
-    },
-    "./middleware": {
-      "import": "./src/middleware.js",
-      "types": "./dist/middleware.d.ts"
+      "types": "./dist/config.d.ts",
+      "import": "./dist/config.js"
     },
     "./redirect": {
-      "import": "./src/redirect.js",
-      "types": "./dist/redirect.d.ts"
+      "types": "./dist/redirect.d.ts",
+      "import": "./dist/redirect.js"
     },
     "./wiki-flash": {
-      "import": "./src/wiki-flash.js",
-      "types": "./dist/wiki-flash.d.ts"
+      "types": "./dist/wiki-flash.d.ts",
+      "import": "./dist/wiki-flash.js"
     },
     "./wiki": {
-      "import": "./src/wiki.js",
-      "types": "./dist/wiki.d.ts"
+      "types": "./dist/wiki.d.ts",
+      "import": "./dist/wiki.js"
     },
     "./plugins/csrf": {
-      "import": "./src/plugins/csrf.js",
-      "types": "./dist/plugins/csrf.d.ts"
+      "types": "./dist/plugins/csrf.d.ts",
+      "import": "./dist/plugins/csrf.js"
     },
     "./plugins/download-route": {
-      "import": "./src/plugins/download-route.js",
-      "types": "./dist/plugins/download-route.d.ts"
+      "types": "./dist/plugins/download-route.d.ts",
+      "import": "./dist/plugins/download-route.js"
     },
     "./plugins/ejs-includes": {
-      "import": "./src/plugins/ejs-includes.js",
-      "types": "./dist/plugins/ejs-includes.d.ts"
+      "types": "./dist/plugins/ejs-includes.d.ts",
+      "import": "./dist/plugins/ejs-includes.js"
     },
     "./plugins/query-output": {
-      "import": "./src/plugins/query-output.js",
-      "types": "./dist/plugins/query-output.d.ts"
+      "types": "./dist/plugins/query-output.d.ts",
+      "import": "./dist/plugins/query-output.js"
     },
     "./plugins/import-document": {
-      "import": "./src/plugins/import-document.js",
-      "types": "./dist/plugins/import-document.d.ts"
+      "types": "./dist/plugins/import-document.d.ts",
+      "import": "./dist/plugins/import-document.js"
     },
     "./plugins/filter-ip-address": {
-      "import": "./src/plugins/filter-ip-address.js",
-      "types": "./dist/plugins/filter-ip-address.d.ts"
+      "types": "./dist/plugins/filter-ip-address.d.ts",
+      "import": "./dist/plugins/filter-ip-address.js"
     },
     "./plugins/filter-spam-edit": {
-      "import": "./src/plugins/filter-spam-edit.js",
-      "types": "./dist/plugins/filter-spam-edit.d.ts"
+      "types": "./dist/plugins/filter-spam-edit.d.ts",
+      "import": "./dist/plugins/filter-spam-edit.js"
     },
     "./plugins/upload-multer": {
-      "import": "./src/plugins/upload-multer.js",
-      "types": "./dist/plugins/upload-multer.d.ts"
+      "types": "./dist/plugins/upload-multer.d.ts",
+      "import": "./dist/plugins/upload-multer.js"
     },
     "./plugins/analytics-json-file": {
-      "import": "./src/plugins/analytics-json-file.js",
-      "types": "./dist/plugins/analytics-json-file.d.ts"
+      "types": "./dist/plugins/analytics-json-file.d.ts",
+      "import": "./dist/plugins/analytics-json-file.js"
     },
     "./plugins/sitemap-generator": {
-      "import": "./src/plugins/sitemap-generator.js",
-      "types": "./dist/plugins/sitemap-generator.d.ts"
+      "types": "./dist/plugins/sitemap-generator.d.ts",
+      "import": "./dist/plugins/sitemap-generator.js"
     },
     "./plugins/renderer-markdown-it": {
-      "import": "./src/plugins/renderer-markdown-it.js",
-      "types": "./dist/plugins/renderer-markdown-it.d.ts"
+      "types": "./dist/plugins/renderer-markdown-it.d.ts",
+      "import": "./dist/plugins/renderer-markdown-it.js"
     },
     "./plugins/static-site-generator": {
-      "import": "./src/plugins/static-site-generator.js",
-      "types": "./dist/plugins/static-site-generator.d.ts"
+      "types": "./dist/plugins/static-site-generator.d.ts",
+      "import": "./dist/plugins/static-site-generator.js"
     },
     "./plugins/renderer-replacer": {
-      "import": "./src/plugins/renderer-replacer.js",
-      "types": "./dist/plugins/renderer-replacer.d.ts"
+      "types": "./dist/plugins/renderer-replacer.d.ts",
+      "import": "./dist/plugins/renderer-replacer.js"
     },
     "./plugins/ai-chat-bot": {
-      "import": "./src/plugins/ai-chat-bot.js",
-      "types": "./dist/plugins/ai-chat-bot.d.ts"
+      "types": "./dist/plugins/ai-chat-bot.d.ts",
+      "import": "./dist/plugins/ai-chat-bot.js"
     },
     "./plugins/mcp-provider": {
-      "import": "./src/plugins/mcp-provider.js",
-      "types": "./dist/plugins/mcp-provider.d.ts"
+      "types": "./dist/plugins/mcp-provider.d.ts",
+      "import": "./dist/plugins/mcp-provider.js"
     },
     "./plugins/search-provider-sqlite": {
-      "import": "./src/plugins/search-provider-sqlite.js",
-      "types": "./dist/plugins/search-provider-sqlite.d.ts"
+      "types": "./dist/plugins/search-provider-sqlite.d.ts",
+      "import": "./dist/plugins/search-provider-sqlite.js"
     },
     "./plugins/utilities/search-sqlite": {
-      "import": "./src/plugins/utilities/search-sqlite.js",
-      "types": "./dist/plugins/utilities/search-sqlite.d.ts"
+      "types": "./dist/plugins/utilities/search-sqlite.d.ts",
+      "import": "./dist/plugins/utilities/search-sqlite.js"
     },
     "./plugins/markdown-it-plugin/footnotes": {
-      "import": "./src/plugins/markdown-it-plugin/footnotes.js",
-      "types": "./dist/plugins/markdown-it-plugin/footnotes.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/footnotes.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/footnotes.js"
     },
     "./plugins/markdown-it-plugin/toc": {
-      "import": "./src/plugins/markdown-it-plugin/toc.js",
-      "types": "./dist/plugins/markdown-it-plugin/toc.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/toc.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/toc.js"
     },
     "./plugins/markdown-it-plugin/wikilinks": {
-      "import": "./src/plugins/markdown-it-plugin/wikilinks.js",
-      "types": "./dist/plugins/markdown-it-plugin/wikilinks.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/wikilinks.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/wikilinks.js"
     },
     "./plugins/markdown-it-plugin/youtube": {
-      "import": "./src/plugins/markdown-it-plugin/youtube.js",
-      "types": "./dist/plugins/markdown-it-plugin/youtube.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/youtube.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/youtube.js"
     },
     "./plugins/markdown-it-plugin/video": {
-      "import": "./src/plugins/markdown-it-plugin/video.js",
-      "types": "./dist/plugins/markdown-it-plugin/video.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/video.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/video.js"
     },
     "./plugins/markdown-it-plugin/uttori-inline": {
-      "import": "./src/plugins/markdown-it-plugin/uttori-inline.js",
-      "types": "./dist/plugins/markdown-it-plugin/uttori-inline.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/uttori-inline.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/uttori-inline.js"
     },
     "./plugins/markdown-it-plugin/line-breaker": {
-      "import": "./src/plugins/markdown-it-plugin/line-breaker.js",
-      "types": "./dist/plugins/markdown-it-plugin/line-breaker.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/line-breaker.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/line-breaker.js"
     },
     "./plugins/markdown-it-plugin/markdown-it-plugin": {
-      "import": "./src/plugins/markdown-it-plugin/markdown-it-plugin.js",
-      "types": "./dist/plugins/markdown-it-plugin/markdown-it-plugin.d.ts"
+      "types": "./dist/plugins/markdown-it-plugin/markdown-it-plugin.d.ts",
+      "import": "./dist/plugins/markdown-it-plugin/markdown-it-plugin.js"
     },
     "./plugins/utilities/analytics-provider": {
-      "import": "./src/plugins/utilities/analytics-provider.js",
-      "types": "./dist/plugins/utilities/analytics-provider.d.ts"
+      "types": "./dist/plugins/utilities/analytics-provider.d.ts",
+      "import": "./dist/plugins/utilities/analytics-provider.js"
     },
     "./plugins/chat-bot/memory": {
-      "import": "./src/plugins/chat-bot/memory.js",
-      "types": "./dist/plugins/chat-bot/memory.d.ts"
+      "types": "./dist/plugins/chat-bot/memory.d.ts",
+      "import": "./dist/plugins/chat-bot/memory.js"
     },
     "./plugins/chat-bot/ollama-embedder": {
-      "import": "./src/plugins/chat-bot/ollama-embedder.js",
-      "types": "./dist/plugins/chat-bot/ollama-embedder.d.ts"
+      "types": "./dist/plugins/chat-bot/ollama-embedder.d.ts",
+      "import": "./dist/plugins/chat-bot/ollama-embedder.js"
     },
     "./plugins/chat-bot/utilities": {
-      "import": "./src/plugins/chat-bot/utilities.js",
-      "types": "./dist/plugins/chat-bot/utilities.d.ts"
+      "types": "./dist/plugins/chat-bot/utilities.d.ts",
+      "import": "./dist/plugins/chat-bot/utilities.js"
     },
     "./plugins/chat-bot/tools": {
-      "import": "./src/plugins/chat-bot/tools.js",
-      "types": "./dist/plugins/chat-bot/tools.d.ts"
+      "types": "./dist/plugins/chat-bot/tools.d.ts",
+      "import": "./dist/plugins/chat-bot/tools.js"
     },
     "./plugins/chat-bot/tool-registry": {
-      "import": "./src/plugins/chat-bot/tool-registry.js",
-      "types": "./dist/plugins/chat-bot/tool-registry.d.ts"
+      "types": "./dist/plugins/chat-bot/tool-registry.d.ts",
+      "import": "./dist/plugins/chat-bot/tool-registry.js"
     }
   },
   "ava": {
@@ -265,9 +261,10 @@
     "per-file": true,
     "check-coverage": false,
     "include": [
-      "src/**/*.js"
+      "src/**/*.ts"
     ],
-    "exclude": []
+    "exclude": [],
+    "exclude-after-remap": true
   },
   "release-it": {
     "github": {
@@ -275,19 +272,27 @@
     }
   },
   "scripts": {
-    "lint": "time oxlint",
-    "lint:fix": "time oxlint --fix",
-    "make": "npm run make-types && npm run make-docs",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
+    "make": "npm run make-docs",
     "make-docs": "time node build/make-docs.js",
-    "make-types": "time node build/make-types.js",
     "release": "release-it",
-    "pretest": "killall -SIGINT uttori-wiki-test-server && node test/_helpers/server.js uttori-wiki-test-server &",
-    "posttest": "killall -SIGINT uttori-wiki-test-server || true",
+    "pretest": "npm run build && tsc -p test/types/tsconfig.json",
     "test": "AVA_FAST=1 NODE_ENV=test c8 ava",
     "test:full": "NODE_ENV=test c8 ava",
     "test:slow": "NODE_ENV=test c8 ava test/plugins/search-sqlite.test.js test/plugins/search-provider-sqlite.test.js",
     "test-debug": "DEBUG=Uttori* NODE_ENV=test ava --serial --concurrency=1",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepack": "npm run build",
+    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\"",
+    "pretest:full": "npm run pretest",
+    "pretest:slow": "npm run build",
+    "pretest-debug": "npm run build",
+    "premake-docs": "npm run build",
+    "pretest:types": "npm run build",
+    "test:types": "tsc -p test/types/tsconfig.json"
   },
   "directories": {
     "test": "test"
@@ -299,5 +304,6 @@
   "allowScripts": {
     "pre-commit@2.0.0": true,
     "better-sqlite3@13.0.3": true
-  }
+  },
+  "main": "dist/index.js"
 }

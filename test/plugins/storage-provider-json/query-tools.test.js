@@ -1,5 +1,5 @@
 import test from 'ava';
-import processQuery from '../../../src/plugins/storeage-provider-json/query-tools.js';
+import processQuery from '../../../dist/plugins/storeage-provider-json/query-tools.js';
 
 const docs = [
   {

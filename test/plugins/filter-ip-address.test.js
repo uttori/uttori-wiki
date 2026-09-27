@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import fs from 'fs';
 import * as url from 'url';
-import FilterIPAddress from '../../src/plugins/filter-ip-address.js';
+import FilterIPAddress from '../../dist/plugins/filter-ip-address.js';
 import path from 'node:path';
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -27,7 +27,7 @@ test('defaultConfig: should return the default configuration', (t) => {
       validateIP: ['validate-save'],
       validateConfig: ['validate-config'],
     },
-    logPath: path.join(__dirname, 'logs').replace(/test/g, 'src'),
+    logPath: path.join(__dirname, 'logs').replace(/test/g, 'dist'),
     blocklist: [],
     trustProxy: false,
   });

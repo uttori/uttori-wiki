@@ -1,8 +1,8 @@
 import test from 'ava';
 import localeFr from 'lunr-languages/lunr.fr.js';
 import { EventDispatcher } from '@uttori/event-dispatcher';
-import StoragePlugin from '../../src/plugins/storage-provider-json-memory.js';
-import SearchLunrPlugin from '../../src/plugins/search-provider-lunr.js';
+import StoragePlugin from '../../dist/plugins/storage-provider-json-memory.js';
+import SearchLunrPlugin from '../../dist/plugins/search-provider-lunr.js';
 
 test('Plugin.register(context): can register', async (t) => {
   await t.notThrowsAsync(async () => {

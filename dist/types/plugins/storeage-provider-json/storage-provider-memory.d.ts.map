@@ -1,0 +1,1 @@
+{"version":3,"file":"storage-provider-memory.d.ts","sourceRoot":"","sources":["../../../../src/types/plugins/storeage-provider-json/storage-provider-memory.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,qBAAqB;IACpC,yDAAyD;IACzD,gBAAgB,CAAC,EAAE,OAAO,CAAC;IAC3B,yCAAyC;IACzC,UAAU,CAAC,EAAE,OAAO,CAAC;IACrB,gCAAgC;IAChC,MAAM,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,EAAE,CAAC,CAAC;CACnC"}

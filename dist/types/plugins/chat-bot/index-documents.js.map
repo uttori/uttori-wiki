@@ -1,0 +1,1 @@
+{"version":3,"file":"index-documents.js","sourceRoot":"","sources":["../../../../src/types/plugins/chat-bot/index-documents.ts"],"names":[],"mappings":"","sourcesContent":["export interface ChatIndexSchemaOptions {\n  /** Whether to rebuild index tables. */\n  rebuild?: boolean;\n}\n"]}

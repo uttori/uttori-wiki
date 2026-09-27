@@ -1,0 +1,1 @@
+{"version":3,"file":"footnotes.d.ts","sourceRoot":"","sources":["../../../../src/types/plugins/markdown-it-plugin/footnotes.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,sBAAsB;IACrC,gCAAgC;IAChC,MAAM,EAAE,MAAM,CAAC;IACf,2BAA2B;IAC3B,IAAI,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,CAAC,CAAC;CAC9B;AAED,0DAA0D;AAC1D,MAAM,WAAW,2BAA2B;IAC1C,qDAAqD;IACrD,SAAS,CAAC,EAAE,sBAAsB,CAAC;CACpC"}

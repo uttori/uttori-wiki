@@ -1,8 +1,8 @@
 import test from 'ava';
 import MarkdownIt from 'markdown-it';
-import Plugin from '../../../src/plugins/markdown-it-plugin/markdown-it-plugin.js';
-import { mermaid } from '../../../src/plugins/markdown-it-plugin/mermaid.js';
-import MarkdownItRenderer from '../../../src/plugins/renderer-markdown-it.js';
+import Plugin from '../../../dist/plugins/markdown-it-plugin/markdown-it-plugin.js';
+import { mermaid } from '../../../dist/plugins/markdown-it-plugin/mermaid.js';
+import MarkdownItRenderer from '../../../dist/plugins/renderer-markdown-it.js';
 
 const diagrams = {
   flowchart: 'flowchart TD\n  A[Start] --> B{Ready?}\n  B -->|Yes| C[Done]',

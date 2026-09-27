@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import request from 'supertest';
-import MulterUpload from '../../src/plugins/upload-multer.js';
+import MulterUpload from '../../dist/plugins/upload-multer.js';
 
 test('MulterUpload.register(context): can register', (t) => {
   t.notThrows(() => {

@@ -6,7 +6,7 @@ import express from 'express';
 import request from 'supertest';
 import child_process from 'node:child_process';
 
-import ImportDocument from '../../src/plugins/import-document.js';
+import ImportDocument from '../../dist/plugins/import-document.js';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
 let sandbox;

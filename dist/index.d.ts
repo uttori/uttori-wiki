@@ -81,6 +81,5 @@ export * from './plugins/chat-bot/utilities.js';
 export * from './plugins/chat-bot/tool-registry.js';
 export * from './plugins/form-handlers/email-handler.js';
 export * from './plugins/form-handlers/google-docs-handler.js';
-
-export * from "./custom.d.ts";
+export type * from './custom.js';
 //# sourceMappingURL=index.d.ts.map

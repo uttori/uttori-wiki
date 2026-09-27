@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import AddQueryOutputToViewModel from '../../src/plugins/query-output.js';
+import AddQueryOutputToViewModel from '../../dist/plugins/query-output.js';
 
 let sandbox;
 test.beforeEach(() => {

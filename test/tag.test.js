@@ -2,7 +2,7 @@ import test from 'ava';
 import sinon from 'sinon';
 import request from 'supertest';
 
-import { TagRoutesPlugin, UttoriWiki } from '../src/index.js';
+import { TagRoutesPlugin, UttoriWiki } from '../dist/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 

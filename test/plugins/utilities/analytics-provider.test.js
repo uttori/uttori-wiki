@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import test from 'ava';
-import AnalyticsProvider from '../../../src/plugins/utilities/analytics-provider.js';
+import AnalyticsProvider from '../../../dist/plugins/utilities/analytics-provider.js';
 
 test.beforeEach(async () => {
   await fs.mkdir('test/site/data', { recursive: true });

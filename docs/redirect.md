@@ -1,106 +1,120 @@
 ## Functions
 
 <dl>
-<dt><a href="#parsePath">parsePath(path)</a> ⇒ <code>Array.&lt;(ParsedPathKey|string)&gt;</code></dt>
+<dt><a href="#parsePath">parsePath(path)</a> ⇒</dt>
 <dd><p>Parse an Express compatible path into an array containing literal path segments and ParsedPathKey objects.</p>
 </dd>
-<dt><a href="#prepareTarget">prepareTarget(route, target)</a> ⇒ <code>Array.&lt;(ParsedPathKey|string)&gt;</code></dt>
+<dt><a href="#prepareTarget">prepareTarget(route, target)</a> ⇒</dt>
 <dd><p>The function iterates over the parsed segments of the target.
 For each segment, if it&#39;s an object representing a key, it checks against the routeKeyMap to see if the key is present in the route.
 If the key is not in the route, it checks if the key is optional or has a default value.
 String segments (path elements) are returned as is, while key objects are returned with their modifications (if any).</p>
 </dd>
-<dt><a href="#buildPath">buildPath(params, route, target)</a> ⇒ <code>string</code></dt>
+<dt><a href="#buildPath">buildPath(params, route, target)</a> ⇒</dt>
 <dd><p>The buildPath function constructs the final path string.
 It iterates over the combined segments, assembling the path segment-by-segment.
 This function handles the inclusion of parameters and defaults and concatenates the final path.</p>
 </dd>
 </dl>
 
-## Typedefs
-
-<dl>
-<dt><a href="#ParsedPathKey">ParsedPathKey</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
 <a name="parsePath"></a>
 
-## parsePath(path) ⇒ <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
+## parsePath(path) ⇒
 Parse an Express compatible path into an array containing literal path segments and ParsedPathKey objects.
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;(ParsedPathKey\|string)&gt;</code> - The parsed path segments.  
+**Kind**: global function\
+**Returns**: The parsed path segments.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| path | <code>string</code> | The path to parse. |
+| Param | Description |
+| --- | --- |
+| path | The path to parse. |
 
-
-* [parsePath(path)](#parsePath) ⇒ <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
-    * [~segments](#parsePath..segments) : <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
-    * [~processVariable(innerVariableBuffer)](#parsePath..processVariable)
-
-<a name="parsePath..segments"></a>
-
-### parsePath~segments : <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
-**Kind**: inner constant of [<code>parsePath</code>](#parsePath)  
 <a name="parsePath..processVariable"></a>
 
 ### parsePath~processVariable(innerVariableBuffer)
 Processes the collected variable buffer into a key object.
 
-**Kind**: inner method of [<code>parsePath</code>](#parsePath)  
+**Kind**: inner method of [<code>parsePath</code>](#parsePath)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| innerVariableBuffer | <code>string</code> | Variable buffer to process. |
+| Param | Description |
+| --- | --- |
+| innerVariableBuffer | Variable buffer to process. |
 
 <a name="prepareTarget"></a>
 
-## prepareTarget(route, target) ⇒ <code>Array.&lt;(ParsedPathKey\|string)&gt;</code>
+## prepareTarget(route, target) ⇒
 The function iterates over the parsed segments of the target.
 For each segment, if it's an object representing a key, it checks against the routeKeyMap to see if the key is present in the route.
 If the key is not in the route, it checks if the key is optional or has a default value.
 String segments (path elements) are returned as is, while key objects are returned with their modifications (if any).
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;(ParsedPathKey\|string)&gt;</code> - The processed segments, ready to be used for path construction.  
+**Kind**: global function\
+**Returns**: The processed segments, ready to be used for path construction.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| route | <code>string</code> | The route to process. |
-| target | <code>string</code> | The target to process. |
+| Param | Description |
+| --- | --- |
+| route | The route to process. |
+| target | The target to process. |
 
-<a name="prepareTarget..routeKeyMap"></a>
-
-### prepareTarget~routeKeyMap : <code>Map.&lt;string, ParsedPathKey&gt;</code>
-**Kind**: inner constant of [<code>prepareTarget</code>](#prepareTarget)  
 <a name="buildPath"></a>
 
-## buildPath(params, route, target) ⇒ <code>string</code>
+## buildPath(params, route, target) ⇒
 The buildPath function constructs the final path string.
 It iterates over the combined segments, assembling the path segment-by-segment.
 This function handles the inclusion of parameters and defaults and concatenates the final path.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The compiled path.  
+**Kind**: global function\
+**Returns**: The compiled path.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| params | <code>Record.&lt;string, (string\|undefined)&gt;</code> | The key/value pairs to compile. |
-| route | <code>string</code> | The route to. |
-| target | <code>string</code> | The target to compile. |
+| Param | Description |
+| --- | --- |
+| params | The key/value pairs to compile. |
+| route | The route to. |
+| target | The target to compile. |
 
-<a name="ParsedPathKey"></a>
+## TypeScript declarations
 
-## ParsedPathKey : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+<details>
+<summary>View documented types and signatures</summary>
 
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The name of the segment variable. |
-| optional | <code>boolean</code> | When true, the segment is optional. |
-| [def] | <code>string</code> | The default value of the segment, if set. |
+```typescript
+import type { ParsedPathKey } from './types/redirect.js';
+export type { ParsedPathKey } from './types/redirect.js';
+/**
+ * Parse an Express compatible path into an array containing literal path segments and ParsedPathKey objects.
+ * @param path The path to parse.
+ * @returns The parsed path segments.
+ */
+export declare function parsePath(path: string): (ParsedPathKey | string)[];
+/**
+ * The function iterates over the parsed segments of the target.
+ * For each segment, if it's an object representing a key, it checks against the routeKeyMap to see if the key is present in the route.
+ * If the key is not in the route, it checks if the key is optional or has a default value.
+ * String segments (path elements) are returned as is, while key objects are returned with their modifications (if any).
+ * @param route The route to process.
+ * @param target The target to process.
+ * @returns The processed segments, ready to be used for path construction.
+ */
+export declare function prepareTarget(route: string, target: string): (ParsedPathKey | string)[];
+/**
+ * The buildPath function constructs the final path string.
+ * It iterates over the combined segments, assembling the path segment-by-segment.
+ * This function handles the inclusion of parameters and defaults and concatenates the final path.
+ * @param params The key/value pairs to compile.
+ * @param route The route to.
+ * @param target The target to compile.
+ * @returns The compiled path.
+ */
+export declare function buildPath(params: Record<string, string | undefined>, route: string, target: string): string;
 
+export interface ParsedPathKey {
+    /** The name of the segment variable. */
+    name: string;
+    /** When true, the segment is optional. */
+    optional: boolean;
+    /** The default value of the segment, if set. */
+    def?: string;
+}
+```
+
+</details>

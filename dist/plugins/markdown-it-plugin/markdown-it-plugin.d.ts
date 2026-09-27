@@ -5,8 +5,8 @@
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
  * - Mermaid fenced diagrams (requires Mermaid on the host page)
- * @param {import('markdown-it').MarkdownIt} md The MarkdownIt instance.
- * @returns {import('markdown-it').MarkdownIt} The MarkdownIt instance.
+ * @param md The MarkdownIt instance.
+ * @returns The MarkdownIt instance.
  */
 declare function Plugin(md: import('markdown-it').MarkdownIt): import('markdown-it').MarkdownIt;
 export default Plugin;

@@ -1,5 +1,5 @@
 import test from 'ava';
-import Operator from '../../../src/plugins/storeage-provider-json/operator.js';
+import Operator from '../../../dist/plugins/storeage-provider-json/operator.js';
 
 test('#toJSON: returns the JSON value', (t) => {
   t.is(new Operator('=', 2, 5).toJSON(), '=');

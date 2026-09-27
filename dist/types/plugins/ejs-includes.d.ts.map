@@ -1,0 +1,1 @@
+{"version":3,"file":"ejs-includes.d.ts","sourceRoot":"","sources":["../../../src/types/plugins/ejs-includes.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,GAAG,MAAM,KAAK,CAAC;AAE3B,MAAM,WAAW,iBAAiB;IAChC,yBAAyB;IACzB,MAAM,CAAC,EAAE,MAAM,CAAC,MAAM,EAAE,MAAM,EAAE,CAAC,CAAC;IAClC,yBAAyB;IACzB,GAAG,CAAC,EAAE,GAAG,CAAC,OAAO,CAAC;CACnB"}

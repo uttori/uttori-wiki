@@ -1,45 +1,45 @@
-## Functions
-
-<dl>
-<dt><a href="#youtube">youtube(state)</a></dt>
-<dd><p>Find and replace the <youtube> tags with safe iframes.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#YoutubeTagAttributes">YoutubeTagAttributes</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
 <a name="youtube"></a>
 
 ## youtube(state)
 Find and replace the <youtube> tags with safe iframes.
 
-**Kind**: global function  
-**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)  
+**Kind**: global function\
+**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| state | <code>module:markdown-it~StateCore</code> | State of MarkdownIt. |
+| Param | Description |
+| --- | --- |
+| state | State of MarkdownIt. |
 
-<a name="youtube..keys"></a>
+## TypeScript declarations
 
-### youtube~keys : [<code>YoutubeTagAttributes</code>](#YoutubeTagAttributes)
-**Kind**: inner constant of [<code>youtube</code>](#youtube)  
-<a name="YoutubeTagAttributes"></a>
+<details>
+<summary>View documented types and signatures</summary>
 
-## YoutubeTagAttributes : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+```typescript
+export type { YoutubeTagAttributes } from '../../types/plugins/markdown-it-plugin/youtube.js';
+/**
+ * Find and replace the <youtube> tags with safe iframes.
+ * @param state State of MarkdownIt.
+ * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
+ */
+export declare function youtube(state: import('markdown-it').StateCore): void;
+declare const _default: {
+    youtube: typeof youtube;
+};
+export default _default;
 
-| Name | Type | Description |
-| --- | --- | --- |
-| v | <code>string</code> | Video ID |
-| width | <code>string</code> | Iframe width attribute |
-| height | <code>string</code> | Iframe height attribute |
-| title | <code>string</code> | Iframe title attribute |
-| start | <code>string</code> | Video start offset time in seconds |
+export interface YoutubeTagAttributes {
+    /** Video ID */
+    v: string;
+    /** Iframe width attribute */
+    width: string;
+    /** Iframe height attribute */
+    height: string;
+    /** Iframe title attribute */
+    title: string;
+    /** Video start offset time in seconds */
+    start: string;
+}
+```
 
+</details>

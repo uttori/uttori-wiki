@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { google } from 'googleapis';
-import GoogleDocsHandler from '../../../src/plugins/form-handlers/google-docs-handler.js';
+import GoogleDocsHandler from '../../../dist/plugins/form-handlers/google-docs-handler.js';
 
 /** @type {import('sinon').SinonSandbox} */
 let sandbox;
@@ -15,7 +15,7 @@ test.afterEach(() => {
 
 /**
  * Returns a minimal GoogleDocsHandlerConfig for tests.
- * @returns {import('../../../src/plugins/form-handlers/google-docs-handler.js').GoogleDocsHandlerConfig}
+ * @returns {import('../../../dist/plugins/form-handlers/google-docs-handler.js').GoogleDocsHandlerConfig} Minimal handler configuration.
  */
 const baseConfig = () => ({
   credentialsPath: '/fake/credentials.json',
@@ -25,9 +25,9 @@ const baseConfig = () => ({
 
 /**
  * Returns a minimal FormConfig for tests.
- * @returns {import('../../../src/plugins/form-handler.js').FormConfig}
+ * @returns {import('../../../dist/plugins/form-handler.js').FormConfig} Minimal form configuration.
  */
-const baseFormConfig = () => /** @type {any} */ ({
+const baseFormConfig = () => ({
   name: 'contact-form',
   route: '/contact',
   fields: [
@@ -41,8 +41,8 @@ const baseFormConfig = () => /** @type {any} */ ({
 /**
  * Stubs google.auth.GoogleAuth and google.sheets with in-memory fakes.
  * Returns the append stub so callers can assert on it.
- * @param {{ rejectAppend?: boolean }} [opts]
- * @returns {{ appendStub: import('sinon').SinonStub, updateStub: import('sinon').SinonStub, createStub: import('sinon').SinonStub, getStub: import('sinon').SinonStub }}
+ * @param {{ rejectAppend?: boolean }} [opts] Whether append should reject for failure tests.
+ * @returns {{ appendStub: import('sinon').SinonStub, updateStub: import('sinon').SinonStub, createStub: import('sinon').SinonStub, getStub: import('sinon').SinonStub }} Stubs for assertions.
  */
 const stubGoogleSheets = ({ rejectAppend = false } = {}) => {
   const fakeAuth = {};
@@ -68,8 +68,8 @@ const stubGoogleSheets = ({ rejectAppend = false } = {}) => {
 
 /**
  * Stubs google.auth.GoogleAuth and google.drive with in-memory fakes.
- * @param {{ rejectList?: boolean }} [opts]
- * @returns {{ listStub: import('sinon').SinonStub }}
+ * @param {{ rejectList?: boolean }} [opts] Whether listing should reject for failure tests.
+ * @returns {{ listStub: import('sinon').SinonStub }} List stub for assertions.
  */
 const stubGoogleDrive = ({ rejectList = false } = {}) => {
   const fakeAuth = {};
@@ -345,7 +345,7 @@ test('prepareRowData: handles empty fields array', (t) => {
 test('prepareRowData: does not add timestamp when prependTimestamp is undefined', (t) => {
   const result = GoogleDocsHandler.prepareRowData(
     { name: 'Test' },
-    /** @type {any} */ ({ name: 'test-form', route: '/test', fields: [{ name: 'name', type: 'text', required: false }], successMessage: 'Success!', errorMessage: 'Error!' }),
+    ({ name: 'test-form', route: '/test', fields: [{ name: 'name', type: 'text', required: false }], successMessage: 'Success!', errorMessage: 'Error!' }),
     baseConfig(),
   );
 
@@ -400,7 +400,7 @@ test.serial('createSpreadsheet: throws when sheets API rejects', async (t) => {
 
 test('checkSpreadsheetExists: returns false when spreadsheetId is missing', async (t) => {
   const config = { credentialsPath: '/fake/creds.json', sheetName: 'Sheet1', spreadsheetId: '' };
-  const result = await GoogleDocsHandler.checkSpreadsheetExists(/** @type {any} */ (config));
+  const result = await GoogleDocsHandler.checkSpreadsheetExists((config));
   t.false(result);
 });
 

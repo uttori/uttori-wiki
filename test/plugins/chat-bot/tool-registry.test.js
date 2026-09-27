@@ -7,7 +7,7 @@ import {
   toOllamaTool,
   toMcpTool,
   executeWikiTool,
-} from '../../../src/plugins/chat-bot/tool-registry.js';
+} from '../../../dist/plugins/chat-bot/tool-registry.js';
 
 /**
  * Build a fake Uttori hooks dispatcher that records the most recent fetch call.

@@ -9,10 +9,10 @@
 ## Members
 
 <dl>
-<dt><a href="#baseRoute">baseRoute</a> : <code>string</code></dt>
+<dt><a href="#baseRoute">baseRoute</a></dt>
 <dd><p>Base route prefix for all forms</p>
 </dd>
-<dt><a href="#forms">forms</a> : <code><a href="#FormConfig">Array.&lt;FormConfig&gt;</a></code></dt>
+<dt><a href="#forms">forms</a></dt>
 <dd><p>Array of form configurations</p>
 </dd>
 </dl>
@@ -20,30 +20,9 @@
 ## Functions
 
 <dl>
-<dt><a href="#defaultHandler">defaultHandler(formData, formConfig, _req, _res)</a> ⇒ <code><a href="#FormHandlerResult">Promise.&lt;FormHandlerResult&gt;</a></code></dt>
+<dt><a href="#defaultHandler">defaultHandler(formData, formConfig, _req, _res)</a> ⇒</dt>
 <dd><p>Default handler function for forms without custom handlers</p>
 </dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#FormFieldValidationFunction">FormFieldValidationFunction</a> ⇒ <code>boolean</code></dt>
-<dd><p>Validates a single form field value.</p>
-</dd>
-<dt><a href="#FormField">FormField</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#FormConfig">FormConfig</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#FormHandlerConfig">FormHandlerConfig</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#FormHandlerFunction">FormHandlerFunction</a> ⇒ <code><a href="#FormHandlerResult">Promise.&lt;FormHandlerResult&gt;</a></code></dt>
-<dd><p>Handles a validated form submission.</p>
-</dd>
-<dt><a href="#FormHandlerResult">FormHandlerResult</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#FormHandlerValidationResult">FormHandlerValidationResult</a> : <code>object</code></dt>
-<dd></dd>
 </dl>
 
 <a name="FormHandler"></a>
@@ -51,44 +30,44 @@
 ## FormHandler
 Uttori Form Handler Plugin
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [FormHandler](#FormHandler)
     * [new FormHandler()](#new_FormHandler_new)
-    * [.configKey](#FormHandler.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#FormHandler.defaultConfig) ⇒ [<code>FormHandlerConfig</code>](#FormHandlerConfig)
+    * [.configKey](#FormHandler.configKey) ⇒
+    * [.defaultConfig()](#FormHandler.defaultConfig) ⇒
     * [.validateConfig(config, [_context])](#FormHandler.validateConfig)
     * [.register(context)](#FormHandler.register)
     * [.bindRoutes(server, context)](#FormHandler.bindRoutes)
-    * [.createFormHandler(formConfig, defaultHandler)](#FormHandler.createFormHandler) ⇒ <code>module:express~RequestHandler</code>
-    * [.validateFormData(formData, formConfig)](#FormHandler.validateFormData) ⇒ [<code>FormHandlerValidationResult</code>](#FormHandlerValidationResult)
+    * [.createFormHandler(formConfig, defaultHandler)](#FormHandler.createFormHandler) ⇒
+    * [.validateFormData(formData, formConfig)](#FormHandler.validateFormData) ⇒
 
 <a name="new_FormHandler_new"></a>
 
 ### new FormHandler()
-**Example** *(FormHandler)*  
+**Example** *(FormHandler)*\
 ```js
 const formHandler = new FormHandler(config);
 ```
 <a name="FormHandler.configKey"></a>
 
-### FormHandler.configKey ⇒ <code>string</code>
+### FormHandler.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>FormHandler</code>](#FormHandler)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(FormHandler.configKey)*  
+**Kind**: static property of [<code>FormHandler</code>](#FormHandler)\
+**Returns**: The configuration key.\
+**Example** *(FormHandler.configKey)*\
 ```js
 const config = { ...FormHandler.defaultConfig(), ...context.config[FormHandler.configKey] };
 ```
 <a name="FormHandler.defaultConfig"></a>
 
-### FormHandler.defaultConfig() ⇒ [<code>FormHandlerConfig</code>](#FormHandlerConfig)
+### FormHandler.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
-**Returns**: [<code>FormHandlerConfig</code>](#FormHandlerConfig) - The configuration.  
-**Example** *(FormHandler.defaultConfig())*  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
+**Returns**: The configuration.\
+**Example** *(FormHandler.defaultConfig())*\
 ```js
 const config = { ...FormHandler.defaultConfig(), ...context.config[FormHandler.configKey] };
 ```
@@ -97,14 +76,14 @@ const config = { ...FormHandler.defaultConfig(), ...context.config[FormHandler.c
 ### FormHandler.validateConfig(config, [_context])
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>Record.&lt;string, FormHandlerConfig&gt;</code> | A provided configuration to use. |
-| [_context] | <code>object</code> | Unused. |
+| Param | Description |
+| --- | --- |
+| config | A provided configuration to use. |
+| [_context] | Unused. |
 
-**Example** *(FormHandler.validateConfig(config, _context))*  
+**Example** *(FormHandler.validateConfig(config, _context))*\
 ```js
 FormHandler.validateConfig({ ... });
 ```
@@ -113,13 +92,13 @@ FormHandler.validateConfig({ ... });
 ### FormHandler.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-form-handler&#x27;, FormHandlerConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example**  
+**Example**\
 ```js
 const context = {
   hooks: {
@@ -138,157 +117,203 @@ Plugin.register(context);
 ### FormHandler.bindRoutes(server, context)
 Binds routes to the Express app.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| server | <code>module:express~Application</code> | The Express app. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-form-handler&#x27;, FormHandlerConfig&gt;</code> | The context. |
+| Param | Description |
+| --- | --- |
+| server | The Express app. |
+| context | The context. |
 
 <a name="FormHandler.createFormHandler"></a>
 
-### FormHandler.createFormHandler(formConfig, defaultHandler) ⇒ <code>module:express~RequestHandler</code>
+### FormHandler.createFormHandler(formConfig, defaultHandler) ⇒
 Creates a form handler middleware function.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
-**Returns**: <code>module:express~RequestHandler</code> - Express middleware function.  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
+**Returns**: Express middleware function.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
-| defaultHandler | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | The default handler function. |
+| Param | Description |
+| --- | --- |
+| formConfig | The form configuration. |
+| defaultHandler | The default handler function. |
 
 <a name="FormHandler.validateFormData"></a>
 
-### FormHandler.validateFormData(formData, formConfig) ⇒ [<code>FormHandlerValidationResult</code>](#FormHandlerValidationResult)
+### FormHandler.validateFormData(formData, formConfig) ⇒
 Validates form data against form configuration.
 
-**Kind**: static method of [<code>FormHandler</code>](#FormHandler)  
-**Returns**: [<code>FormHandlerValidationResult</code>](#FormHandlerValidationResult) - Validation result.  
+**Kind**: static method of [<code>FormHandler</code>](#FormHandler)\
+**Returns**: Validation result.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| formData | <code>Record.&lt;string, unknown&gt;</code> | The form data to validate. |
-| formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
+| Param | Description |
+| --- | --- |
+| formData | The form data to validate. |
+| formConfig | The form configuration. |
 
 <a name="baseRoute"></a>
 
-## baseRoute : <code>string</code>
+## baseRoute
 Base route prefix for all forms
 
-**Kind**: global variable  
+**Kind**: global variable\
 <a name="forms"></a>
 
-## forms : [<code>Array.&lt;FormConfig&gt;</code>](#FormConfig)
+## forms
 Array of form configurations
 
-**Kind**: global variable  
+**Kind**: global variable\
 <a name="defaultHandler"></a>
 
-## defaultHandler(formData, formConfig, _req, _res) ⇒ [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult)
+## defaultHandler(formData, formConfig, _req, _res) ⇒
 Default handler function for forms without custom handlers
 
-**Kind**: global function  
-**Returns**: [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult) - The result.  
+**Kind**: global function\
+**Returns**: The result.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| formData | <code>Record.&lt;string, any&gt;</code> | The form data. |
-| formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
-| _req | <code>module:express~Request</code> | The request. |
-| _res | <code>module:express~Response</code> | The response. |
+| Param | Description |
+| --- | --- |
+| formData | The form data. |
+| formConfig | The form configuration. |
+| _req | The request. |
+| _res | The response. |
 
-<a name="FormFieldValidationFunction"></a>
+## TypeScript declarations
 
-## FormFieldValidationFunction ⇒ <code>boolean</code>
-Validates a single form field value.
+<details>
+<summary>View documented types and signatures</summary>
 
-**Kind**: global typedef  
-**Returns**: <code>boolean</code> - Whether the field is valid.  
+```typescript
+import type { FormConfig, FormHandlerConfig, FormHandlerFunction, FormHandlerValidationResult } from '../types/plugins/form-handler.js';
+export type { FormFieldValidationFunction, FormField, FormConfig, FormHandlerConfig, FormHandlerFunction, FormHandlerResult, FormHandlerValidationResult, } from '../types/plugins/form-handler.js';
+/**
+ * Uttori Form Handler Plugin
+ * @example <caption>FormHandler</caption>
+ * const formHandler = new FormHandler(config);
+ */
+declare class FormHandler {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>FormHandler.configKey</caption>
+     * const config = { ...FormHandler.defaultConfig(), ...context.config[FormHandler.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-form-handler';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>FormHandler.defaultConfig()</caption>
+     * const config = { ...FormHandler.defaultConfig(), ...context.config[FormHandler.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<FormHandlerConfig, 'baseRoute' | 'forms' | 'defaultHandler'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param config - A provided configuration to use.
+     * @param [_context] Unused.
+     * @example <caption>FormHandler.validateConfig(config, _context)</caption>
+     * FormHandler.validateConfig({ ... });
+     */
+    static validateConfig(config: Record<string, FormHandlerConfig>, _context?: unknown): void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example
+     * ```js
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [Plugin.configKey]: {
+     *       forms: [...],
+     *     },
+     *   },
+     * };
+     * Plugin.register(context);
+     * ```
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-form-handler', FormHandlerConfig>): void;
+    /**
+     * Binds routes to the Express app.
+     * @param server The Express app.
+     * @param context The context.
+     */
+    static bindRoutes(server: import('express').Application, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-form-handler', FormHandlerConfig>): void;
+    /**
+     * Creates a form handler middleware function.
+     * @param formConfig The form configuration.
+     * @param defaultHandler The default handler function.
+     * @returns Express middleware function.
+     */
+    static createFormHandler(formConfig: FormConfig, defaultHandler: FormHandlerFunction): import('express').RequestHandler;
+    /**
+     * Validates form data against form configuration.
+     * @param formData The form data to validate.
+     * @param formConfig The form configuration.
+     * @returns Validation result.
+     */
+    static validateFormData(formData: Record<string, unknown>, formConfig: FormConfig): FormHandlerValidationResult;
+}
+export default FormHandler;
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>string</code> | The field value. |
+/** Validates a single form field value. */
+export type FormFieldValidationFunction = (value: string) => boolean;
+export interface FormField {
+    /** The field name. */
+    name: string;
+    /** The field type (text, email, textarea, etc.). */
+    type: string;
+    /** Whether the field is required. */
+    required: boolean;
+    /** The field label for display. */
+    label?: string;
+    /** The field placeholder text. */
+    placeholder?: string;
+    /** Custom validation function. */
+    validation?: FormFieldValidationFunction;
+    /** Custom error message for validation. */
+    errorMessage?: string;
+}
+export interface FormConfig {
+    /** The form name/identifier. */
+    name: string;
+    /** The route path for the form submission. */
+    route: string;
+    /** The form fields configuration. */
+    fields: FormField[];
+    /** Custom handler function for form submission. */
+    handler?: FormHandlerFunction;
+    /** Success message to return. */
+    successMessage: string;
+    /** Error message to return. */
+    errorMessage: string;
+    /** Custom middleware for the form route. */
+    middleware?: import('express').RequestHandler[];
+}
+export interface FormHandlerConfig {
+    /** Events to bind to. */
+    events?: Record<string, string[]>;
+    /** Array of form configurations. */
+    forms: FormConfig[];
+    /** Base route prefix for all forms. */
+    baseRoute?: string;
+    /** Default handler function for forms without custom handlers. */
+    defaultHandler?: FormHandlerFunction;
+}
+/** Handles a validated form submission. */
+export type FormHandlerFunction = (formData: Record<string, unknown>, formConfig: FormConfig, req: import('express').Request, res: import('express').Response) => Promise<FormHandlerResult>;
+export interface FormHandlerResult {
+    /** Whether the form submission was successful. */
+    success: boolean;
+    /** The result message. */
+    message?: string;
+}
+export interface FormHandlerValidationResult {
+    /** Whether the form data is valid. */
+    valid: boolean;
+    /** The validation errors. */
+    errors: string[];
+}
+```
 
-<a name="FormField"></a>
-
-## FormField : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The field name. |
-| type | <code>string</code> | The field type (text, email, textarea, etc.). |
-| required | <code>boolean</code> | Whether the field is required. |
-| [label] | <code>string</code> | The field label for display. |
-| [placeholder] | <code>string</code> | The field placeholder text. |
-| [validation] | [<code>FormFieldValidationFunction</code>](#FormFieldValidationFunction) | Custom validation function. |
-| [errorMessage] | <code>string</code> | Custom error message for validation. |
-
-<a name="FormConfig"></a>
-
-## FormConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| name | <code>string</code> | The form name/identifier. |
-| route | <code>string</code> | The route path for the form submission. |
-| fields | [<code>Array.&lt;FormField&gt;</code>](#FormField) | The form fields configuration. |
-| [handler] | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | Custom handler function for form submission. |
-| successMessage | <code>string</code> | Success message to return. |
-| errorMessage | <code>string</code> | Error message to return. |
-| [middleware] | <code>Array.&lt;module:express~RequestHandler&gt;</code> | Custom middleware for the form route. |
-
-<a name="FormHandlerConfig"></a>
-
-## FormHandlerConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | Events to bind to. |
-| forms | [<code>Array.&lt;FormConfig&gt;</code>](#FormConfig) | Array of form configurations. |
-| [baseRoute] | <code>string</code> | Base route prefix for all forms. |
-| [defaultHandler] | [<code>FormHandlerFunction</code>](#FormHandlerFunction) | Default handler function for forms without custom handlers. |
-
-<a name="FormHandlerFunction"></a>
-
-## FormHandlerFunction ⇒ [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult)
-Handles a validated form submission.
-
-**Kind**: global typedef  
-**Returns**: [<code>Promise.&lt;FormHandlerResult&gt;</code>](#FormHandlerResult) - The result.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| formData | <code>Record.&lt;string, unknown&gt;</code> | The form data. |
-| formConfig | [<code>FormConfig</code>](#FormConfig) | The form configuration. |
-| req | <code>module:express~Request</code> | The request. |
-| res | <code>module:express~Response</code> | The response. |
-
-<a name="FormHandlerResult"></a>
-
-## FormHandlerResult : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| success | <code>boolean</code> | Whether the form submission was successful. |
-| [message] | <code>string</code> | The result message. |
-
-<a name="FormHandlerValidationResult"></a>
-
-## FormHandlerValidationResult : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| valid | <code>boolean</code> | Whether the form data is valid. |
-| errors | <code>Array.&lt;string&gt;</code> | The validation errors. |
-
+</details>

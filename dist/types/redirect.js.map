@@ -1,0 +1,1 @@
+{"version":3,"file":"redirect.js","sourceRoot":"","sources":["../../src/types/redirect.ts"],"names":[],"mappings":"","sourcesContent":["export interface ParsedPathKey {\n  /** The name of the segment variable. */\n  name: string;\n  /** When true, the segment is optional. */\n  optional: boolean;\n  /** The default value of the segment, if set. */\n  def?: string;\n}\n"]}

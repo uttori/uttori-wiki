@@ -1,77 +1,46 @@
-export type LunrLocale = Function;
-export type SearchLunrConfig = {
-    /**
-     * A list of locales to add support for from lunr-languages.
-     */
-    lunr_locales?: string[];
-    /**
-     * A list of locales to add support for from lunr-languages.
-     */
-    lunrLocaleFunctions?: LunrLocale[];
-    /**
-     * A list of slugs to not consider when indexing documents.
-     */
-    ignoreSlugs?: string[];
-    /**
-     * The events to listen for.
-     */
-    events?: Record<string, string[]>;
-};
-/**
- * @typedef {Function} LunrLocale
- * @param {lunr} lunr The Lunr instance.
- */
-/**
- * @typedef {object} SearchLunrConfig
- * @property {string[]} [lunr_locales] A list of locales to add support for from lunr-languages.
- * @property {LunrLocale[]} [lunrLocaleFunctions] A list of locales to add support for from lunr-languages.
- * @property {string[]} [ignoreSlugs] A list of slugs to not consider when indexing documents.
- * @property {Record<string, string[]>} [events] The events to listen for.
- */
+import type { SearchLunrConfig } from '../types/plugins/search-provider-lunr.js';
+export type { LunrLocale, SearchLunrConfig } from '../types/plugins/search-provider-lunr.js';
 /**
  * Uttori Search Provider - Lunr, Uttori Plugin Adapter
  * @example
  * ```js
  * const search = Plugin.callback(viewModel, context);
  * ```
- * @class
  */
 declare class SearchLunrPlugin {
     /**
      * Export the provider's actual indexing logic for a static browser search.
-     * @param {import('../wiki.js').UttoriWikiDocument[]} documents Public documents.
-     * @returns {object} A serialized Lunr index.
+     * @param documents Public documents.
+     * @returns A serialized Lunr index.
      */
     static exportIndex(documents: import('../wiki.js').UttoriWikiDocument[]): object;
     /**
      * The configuration key for plugin to look for in the provided configuration.
-     * @type {string}
-     * @returns {string} The configuration key.
+     *
+     * @returns The configuration key.
      * @example
      * ```js
      * const config = { ...Plugin.defaultConfig(), ...context.config[Plugin.configKey] };
      * ```
-     * @static
      */
-    static get configKey(): string;
+    static get configKey(): 'uttori-plugin-search-provider-lunr';
     /**
      * The default configuration.
-     * @returns {SearchLunrConfig} The configuration.
+     * @returns The configuration.
      * @example
      * ```js
      * const config = { ...Plugin.defaultConfig(), ...context.config[Plugin.configKey] };
      * ```
-     * @static
      */
-    static defaultConfig(): SearchLunrConfig;
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<SearchLunrConfig, 'ignoreSlugs' | 'lunr_locales' | 'events'>;
     /**
      * Validates the provided configuration for required entries and types.
-     * @param {Record<string, SearchLunrConfig>} config A provided configuration to use.
+     * @param config A provided configuration to use.
      */
     static validateConfig(config: Record<string, SearchLunrConfig>): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', SearchLunrConfig>} context A Uttori-like context.
+     * @param context A Uttori-like context.
      * @example
      * ```js
      * const context = {
@@ -92,9 +61,8 @@ declare class SearchLunrPlugin {
      * };
      * Plugin.register(context);
      * ```
-     * @static
      */
-    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', SearchLunrConfig>): Promise<void>;
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', SearchLunrConfig>): Promise<void>;
 }
 export default SearchLunrPlugin;
 //# sourceMappingURL=search-provider-lunr.d.ts.map

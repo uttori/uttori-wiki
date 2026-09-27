@@ -8,13 +8,13 @@ import cors from 'cors';
 
 const MemoryStore = createMemoryStore(session);
 
-import StorageProviderJSON from '../../src/plugins/storage-provider-json-memory.js';
-import SearchProviderLunr from '../../src/plugins/search-provider-lunr.js';
-import defaultConfig from '../../src/config.js';
-import { middleware as flash } from '../../src/wiki-flash.js';
-import TagRoutesPlugin from '../../src/plugins/tag-routes.js';
+import StorageProviderJSON from '../../dist/plugins/storage-provider-json-memory.js';
+import SearchProviderLunr from '../../dist/plugins/search-provider-lunr.js';
+import defaultConfig from '../../dist/config.js';
+import { middleware as flash } from '../../dist/wiki-flash.js';
+import TagRoutesPlugin from '../../dist/plugins/tag-routes.js';
 
-/** @type {import('../../src/config.js').UttoriWikiConfig} */
+/** @type {import('../../dist/config.js').UttoriWikiConfig} */
 export const config = {
   ...defaultConfig,
   homePage: 'home-page',

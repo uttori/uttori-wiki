@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import { UttoriWiki } from '../src/index.js';
+import { UttoriWiki } from '../dist/index.js';
 
 import { config, serverSetup } from './_helpers/server.js';
 
@@ -34,7 +34,7 @@ test('saveValid: parses tags as a string', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['tag-1', 'tag-2', 'tag-3']);
@@ -71,7 +71,7 @@ test('saveValid: parses tags as an array', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['tag-1', 'tag-2', 'tag-3']);
@@ -94,7 +94,7 @@ test('saveValid: sorts tags', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.tags, ['a', 'b', 'c']);
@@ -118,7 +118,7 @@ test('saveValid: parses redirects as a string', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url', 'somehow-older']);
@@ -142,7 +142,7 @@ test('saveValid: parses redirects as an array', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.redirects, ['old-url', 'older-url', 'oldest-url']);
@@ -195,7 +195,7 @@ test('saveValid: handles attachments as an array and generates IDs', async (t) =
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 2);
@@ -234,7 +234,7 @@ test('saveValid: parses attachment metadata when it is a JSON string', async (t)
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -269,7 +269,7 @@ test('saveValid: handles invalid JSON string in attachment metadata', async (t) 
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -304,7 +304,7 @@ test('saveValid: handles attachment metadata that is not an object or string', a
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -330,7 +330,7 @@ test('saveValid: handles missing attachments', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.attachments, []);
@@ -355,7 +355,7 @@ test('saveValid: ignores non-array attachments', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.deepEqual(document.attachments, []);
@@ -392,7 +392,7 @@ test('saveValid: stores image as ID reference to attachment', async (t) => {
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.image, imageId);
@@ -430,7 +430,7 @@ test('saveValid: stores image as path and finds attachment by path (backward com
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.image, 'image-123');
@@ -469,7 +469,7 @@ test('saveValid: rejects image references to non-image attachments', async (t) =
     },
     wikiFlash }), ({ ...response, redirect }), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document, undefined);
   t.true(redirect.calledWith('/edit'));
@@ -501,7 +501,7 @@ test('saveValid: rejects image references missing from attachments', async (t) =
     },
     wikiFlash }), ({ ...response, redirect }), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document, undefined);
   t.true(redirect.calledWith('/edit'));
@@ -564,7 +564,7 @@ test('saveValid: preserves attachment IDs when updating existing document', asyn
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -603,7 +603,7 @@ test('saveValid: generates IDs for existing attachments without IDs when updatin
   }), (response), () => {});
 
   // Get the document and manually remove IDs to simulate old data
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [initialDoc] = await uttori.hooks.fetch('storage-get', slug, this);
   // Manually remove IDs to test the branch
   if (initialDoc.attachments) {
@@ -635,7 +635,7 @@ test('saveValid: generates IDs for existing attachments without IDs when updatin
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -695,7 +695,7 @@ test('saveValid: generates new IDs for new attachments when updating existing do
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -724,7 +724,7 @@ test('saveValid: preserves createDate when updating existing document', async (t
   }), (response), () => {});
 
   // Get the actual createDate that was saved (Date.now() for new documents)
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [initialDocument] = await uttori.hooks.fetch('storage-get', slug, this);
   const originalCreateDate = initialDocument.createDate;
 
@@ -740,7 +740,7 @@ test('saveValid: preserves createDate when updating existing document', async (t
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.createDate, originalCreateDate);
@@ -787,7 +787,7 @@ test('saveValid: handles update when existing document has no attachments', asyn
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);
@@ -815,7 +815,7 @@ test('saveValid: handles update when existing document attachments is not an arr
   }), (response), () => {});
 
   // Get the document and manually set invalid attachments to test the branch
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [initialDoc] = await uttori.hooks.fetch('storage-get', slug, this);
   initialDoc.attachments = 'not-an-array';
   await uttori.hooks.fetch('storage-update', { document: initialDoc, originalSlug: slug }, this);
@@ -841,7 +841,7 @@ test('saveValid: handles update when existing document attachments is not an arr
     },
     wikiFlash }), (response), () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [document] = await uttori.hooks.fetch('storage-get', slug, this);
   t.is(document.slug, slug);
   t.is(document.attachments.length, 1);

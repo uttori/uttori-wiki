@@ -1,7 +1,7 @@
 import test from 'ava';
-import EmailHandler from '../../../src/plugins/form-handlers/email-handler.js';
+import EmailHandler from '../../../dist/plugins/form-handlers/email-handler.js';
 
-const formConfig = /** @type {import('../../../src/plugins/form-handler.js').FormConfig} */ ({ name: 'contact', fields: [] });
+const formConfig = /** @type {import('../../../dist/plugins/form-handler.js').FormConfig} */ ({ name: 'contact', fields: [] });
 
 test('template placeholders use literal field names and replacement values', (t) => {
   const fields = { 'a.b': '$&', 'name[': 'valid' };

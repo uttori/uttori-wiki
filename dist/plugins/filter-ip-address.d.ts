@@ -1,58 +1,31 @@
-export type FilterIPAddressConfig = {
-    /**
-     * Events to bind to.
-     */
-    events?: Record<string, string[]>;
-    /**
-     * Directory where IP logs will be stored.
-     */
-    logPath?: string;
-    /**
-     * List of IP addresses to block.
-     */
-    blocklist?: string[];
-    /**
-     * Whether to trust the X-Forwarded-For header.
-     */
-    trustProxy?: boolean;
-};
-/**
- * @typedef {object} FilterIPAddressConfig
- * @property {Record<string, string[]>} [events] Events to bind to.
- * @property {string} [logPath='./logs'] Directory where IP logs will be stored.
- * @property {string[]} [blocklist=[]] List of IP addresses to block.
- * @property {boolean} [trustProxy=false] Whether to trust the X-Forwarded-For header.
- */
+import type { FilterIPAddressConfig } from '../types/plugins/filter-ip-address.js';
+export type { FilterIPAddressConfig } from '../types/plugins/filter-ip-address.js';
 /**
  * Uttori IP Address Filter
  * @example <caption>FilterIPAddress</caption>
  * const valid = await FilterIPAddress.validateIP(request, context);
- * @class
  */
 declare class FilterIPAddress {
     /**
      * The configuration key for plugin to look for in the provided configuration.
-     * @type {string}
-     * @returns {string} The configuration key.
-     * @static
+     *
+     * @returns The configuration key.
      */
-    static get configKey(): string;
+    static get configKey(): 'uttori-plugin-filter-ip-address';
     /**
      * The default configuration.
-     * @returns {FilterIPAddressConfig} The configuration.
-     * @static
+     * @returns The configuration.
      */
-    static defaultConfig(): FilterIPAddressConfig;
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<FilterIPAddressConfig, 'events' | 'logPath' | 'blocklist' | 'trustProxy'>;
     /**
      * Validates the provided configuration for required entries.
-     * @param {Record<string, FilterIPAddressConfig>} config A configuration object.
-     * @param {object} _context Unused context object.
-     * @static
+     * @param config A configuration object.
+     * @param _context Unused context object.
      */
-    static validateConfig(config: Record<string, FilterIPAddressConfig>, _context: object): void;
+    static validateConfig(config: Record<string, FilterIPAddressConfig>, _context: unknown): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context A Uttori-like context.
+     * @param context A Uttori-like context.
      * @example <caption>FilterIPAddress.register(context)</caption>
      * const context = {
      *   hooks: {
@@ -68,33 +41,29 @@ declare class FilterIPAddress {
      *   },
      * };
      * FilterIPAddress.register(context);
-     * @static
      */
-    static register(context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): void;
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): void;
     /**
      * Gets the real IP address from the request, considering proxy headers if configured.
-     * @param {FilterIPAddressConfig} config The configuration object.
-     * @param {import('express').Request} request The Express request object.
-     * @returns {string} The client's IP address.
-     * @static
+     * @param config The configuration object.
+     * @param request The Express request object.
+     * @returns The client's IP address.
      */
     static getClientIP(config: FilterIPAddressConfig, request: import('express').Request): string;
     /**
      * Logs the IP address and content to a file.
-     * @param {FilterIPAddressConfig} config The configuration object.
-     * @param {string} ip The IP address to log.
-     * @param {import('express').Request} request The content being submitted.
-     * @static
+     * @param config The configuration object.
+     * @param ip The IP address to log.
+     * @param request The content being submitted.
      */
     static logIPActivity(config: FilterIPAddressConfig, ip: string, request: import('express').Request): void;
     /**
      * Validates the request IP against the blocklist and logs the activity.
-     * @param {import('express').Request} request The Express request object.
-     * @param {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>} context Unused context object.
-     * @returns {boolean} Returns `true` if the IP is blocklisted (invalid), `false` otherwise.
-     * @static
+     * @param request The Express request object.
+     * @param context Unused context object.
+     * @returns Returns `true` if the IP is blocklisted (invalid), `false` otherwise.
      */
-    static validateIP(request: import('express').Request, context: import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): boolean;
+    static validateIP(request: import('express').Request, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-filter-ip-address', FilterIPAddressConfig>): boolean;
 }
 export default FilterIPAddress;
 //# sourceMappingURL=filter-ip-address.d.ts.map

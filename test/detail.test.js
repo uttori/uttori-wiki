@@ -2,7 +2,7 @@ import test from 'ava';
 import request from 'supertest';
 import sinon from 'sinon';
 
-import { UttoriWiki } from '../src/index.js';
+import { UttoriWiki } from '../dist/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 

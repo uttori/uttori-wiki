@@ -4,12 +4,17 @@ import fs from 'fs';
 import child_process from 'node:child_process';
 import { EventEmitter } from 'node:events';
 
-import ImportDocument from '../../src/plugins/import-document.js';
+import ImportDocument from '../../dist/plugins/import-document.js';
 
 /** @type {sinon.SinonSandbox} */
 let sandbox;
 
-/** @param {{ wgetError?: boolean, failPandocForHtml?: string[] }} [options] */
+/**
+ * Stub external download and conversion commands for scrape tests.
+ * @param {sinon.SinonSandbox} sandbox Sandbox owning the command stub.
+ * @param {{ wgetError?: boolean, failPandocForHtml?: string[] }} [options] Failures to simulate.
+ * @returns {sinon.SinonStub} Command stub for assertions.
+ */
 function stubScrapeCmd(sandbox, options = {}) {
   const { wgetError = false, failPandocForHtml = [] } = options;
   return sandbox.stub(child_process, 'execFile').callsFake((file, args) => {
@@ -40,13 +45,18 @@ function stubScrapeCmd(sandbox, options = {}) {
   });
 }
 
-/** @param {() => Promise<unknown>} run */
+/**
+ * Run a scrape scenario without waiting for retry delays.
+ * @param {() => Promise<unknown>} run Scenario to execute.
+ * @returns {Promise<unknown>} Scenario result.
+ */
 async function withoutScrapeDelay(run) {
   const original = global.setTimeout;
-  global.setTimeout = ((fn) => {
+  const runImmediately = (fn) => {
     fn();
     return 0;
-  });
+  };
+  global.setTimeout = runImmediately;
   try {
     return await run();
   } finally {
@@ -86,7 +96,7 @@ test.serial('processPage: scrape skips non-html and favicon files', async (t) =>
   const readFile = sandbox.stub(fs.promises, 'readFile').callsFake(async (filePath) => {
     if (String(filePath).endsWith('index.md')) return 'Index markdown';
     if (String(filePath).endsWith('page.md')) return 'Page markdown';
-    throw new Error(`unexpected read: ${filePath}`);
+    throw new Error(`unexpected read: ${String(filePath)}`);
   });
 
   const result = await withoutScrapeDelay(() => ImportDocument.processPage({
@@ -110,7 +120,7 @@ test.serial('processPage: scrape continues when pandoc fails for one file', asyn
   sandbox.stub(fs.promises, 'readdir').resolves(['bad.html', 'good.html']);
   sandbox.stub(fs.promises, 'readFile').callsFake(async (filePath) => {
     if (String(filePath).endsWith('good.md')) return 'Good markdown';
-    throw new Error(`unexpected read: ${filePath}`);
+    throw new Error(`unexpected read: ${String(filePath)}`);
   });
 
   const result = await withoutScrapeDelay(() => ImportDocument.processPage({
@@ -133,7 +143,7 @@ test.serial('processPage: scrape skips content when markdown read fails', async 
   sandbox.stub(fs.promises, 'readFile').callsFake(async (filePath) => {
     if (String(filePath).endsWith('fail.md')) throw new Error('read failed');
     if (String(filePath).endsWith('ok.md')) return 'OK markdown';
-    throw new Error(`unexpected read: ${filePath}`);
+    throw new Error(`unexpected read: ${String(filePath)}`);
   });
 
   const result = await withoutScrapeDelay(() => ImportDocument.processPage({

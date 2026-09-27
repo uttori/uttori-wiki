@@ -1,65 +1,45 @@
-## Classes
-
-<dl>
-<dt><a href="#AddQueryOutputToViewModel">AddQueryOutputToViewModel</a></dt>
-<dd><p>Add queries output to the view model.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#AddQueryOutputToViewModelQuery">AddQueryOutputToViewModelQuery</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#AddQueryOutputToViewModelConfig">AddQueryOutputToViewModelConfig</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#AddQueryOutputToViewModelContext">AddQueryOutputToViewModelContext</a> : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code></dt>
-<dd><p>Uttori context narrowed to this plugin&#39;s config shape.</p>
-</dd>
-</dl>
-
 <a name="AddQueryOutputToViewModel"></a>
 
 ## AddQueryOutputToViewModel
 Add queries output to the view model.
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [AddQueryOutputToViewModel](#AddQueryOutputToViewModel)
     * [new AddQueryOutputToViewModel()](#new_AddQueryOutputToViewModel_new)
-    * [.configKey](#AddQueryOutputToViewModel.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
+    * [.configKey](#AddQueryOutputToViewModel.configKey) ⇒
+    * [.defaultConfig()](#AddQueryOutputToViewModel.defaultConfig) ⇒
     * [.validateConfig(config, _context)](#AddQueryOutputToViewModel.validateConfig)
     * [.register(context)](#AddQueryOutputToViewModel.register)
-    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒ <code>Promise.&lt;T&gt;</code>
-    * [.callback(eventLabel)](#AddQueryOutputToViewModel.callback) ⇒ <code>AddQueryOutputToViewModelCallback</code>
+    * [.callbackCurry(eventLabel, viewModel, context)](#AddQueryOutputToViewModel.callbackCurry) ⇒
+    * [.callback(eventLabel)](#AddQueryOutputToViewModel.callback) ⇒
 
 <a name="new_AddQueryOutputToViewModel_new"></a>
 
 ### new AddQueryOutputToViewModel()
-**Example** *(AddQueryOutputToViewModel)*  
+**Example** *(AddQueryOutputToViewModel)*\
 ```js
 const viewModel = AddQueryOutputToViewModel.callback(viewModel, context);
 ```
 <a name="AddQueryOutputToViewModel.configKey"></a>
 
-### AddQueryOutputToViewModel.configKey ⇒ <code>string</code>
+### AddQueryOutputToViewModel.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(AddQueryOutputToViewModel.configKey)*  
+**Kind**: static property of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
+**Returns**: The configuration key.\
+**Example** *(AddQueryOutputToViewModel.configKey)*\
 ```js
 const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
 ```
 <a name="AddQueryOutputToViewModel.defaultConfig"></a>
 
-### AddQueryOutputToViewModel.defaultConfig() ⇒ [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig)
+### AddQueryOutputToViewModel.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: [<code>AddQueryOutputToViewModelConfig</code>](#AddQueryOutputToViewModelConfig) - The configuration.  
-**Example** *(AddQueryOutputToViewModel.defaultConfig())*  
+**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
+**Returns**: The configuration.\
+**Example** *(AddQueryOutputToViewModel.defaultConfig())*\
 ```js
 const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
 ```
@@ -68,14 +48,14 @@ const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config
 ### AddQueryOutputToViewModel.validateConfig(config, _context)
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
+**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>Record.&lt;string, AddQueryOutputToViewModelConfig&gt;</code> | A configuration object. |
-| _context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context (unused). |
+| Param | Description |
+| --- | --- |
+| config | A configuration object. |
+| _context | A Uttori-like context (unused). |
 
-**Example** *(AddQueryOutputToViewModel.validateConfig(config, _context))*  
+**Example** *(AddQueryOutputToViewModel.validateConfig(config, _context))*\
 ```js
 AddQueryOutputToViewModel.validateConfig({ ... });
 ```
@@ -84,13 +64,13 @@ AddQueryOutputToViewModel.validateConfig({ ... });
 ### AddQueryOutputToViewModel.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
+**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(AddQueryOutputToViewModel.register(context))*  
+**Example** *(AddQueryOutputToViewModel.register(context))*\
 ```js
 const context = {
   hooks: {
@@ -111,19 +91,19 @@ AddQueryOutputToViewModel.register(context);
 ```
 <a name="AddQueryOutputToViewModel.callbackCurry"></a>
 
-### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒ <code>Promise.&lt;T&gt;</code>
+### AddQueryOutputToViewModel.callbackCurry(eventLabel, viewModel, context) ⇒
 Queries for related documents based on similar tags and searches the storage provider.
 
-**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: <code>Promise.&lt;T&gt;</code> - The provided view-model document.  
+**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
+**Returns**: The provided view-model document.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| eventLabel | <code>string</code> | The event label to run queries for. |
-| viewModel | <code>T</code> | A Uttori view-model object. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| eventLabel | The event label to run queries for. |
+| viewModel | A Uttori view-model object. |
+| context | A Uttori-like context. |
 
-**Example** *(AddQueryOutputToViewModel.callback(viewModel, context))*  
+**Example** *(AddQueryOutputToViewModel.callback(viewModel, context))*\
 ```js
 const context = {
   config: {
@@ -140,73 +120,132 @@ AddQueryOutputToViewModel.callback(viewModel, context);
 ```
 <a name="AddQueryOutputToViewModel.callback"></a>
 
-### AddQueryOutputToViewModel.callback(eventLabel) ⇒ <code>AddQueryOutputToViewModelCallback</code>
+### AddQueryOutputToViewModel.callback(eventLabel) ⇒
 Curry the hook function to take the current event label.
 
-**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)  
-**Returns**: <code>AddQueryOutputToViewModelCallback</code> - The provided view-model document.  
+**Kind**: static method of [<code>AddQueryOutputToViewModel</code>](#AddQueryOutputToViewModel)\
+**Returns**: The provided view-model document.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| eventLabel | <code>string</code> | The event label to run queries for. |
+| Param | Description |
+| --- | --- |
+| eventLabel | The event label to run queries for. |
 
-**Example** *(AddQueryOutputToViewModel.callback(eventLabel))*  
+**Example** *(AddQueryOutputToViewModel.callback(eventLabel))*\
 ```js
 ```
-<a name="AddQueryOutputToViewModelQuery"></a>
 
-## AddQueryOutputToViewModelQuery : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+## TypeScript declarations
 
-| Name | Type | Description |
-| --- | --- | --- |
-| [query] | <code>string</code> | The query to be run. |
-| key | <code>string</code> | The key to add the query output to. |
-| fallback | <code>Array.&lt;UttoriWikiDocument&gt;</code> | The fallback value to use if the query fails. |
-| [format] | <code>AddQueryOutputToViewModelFormatFunction</code> | An optional function to format the query output. |
-| [queryFunction] | <code>AddQueryOutputToViewModelQueryFunction</code> | An optional custom function to execut the query. |
+<details>
+<summary>View documented types and signatures</summary>
 
-**Example** *(Query with a custom function)*  
-```js
-{
-  query: 'query',
-  key: 'key',
-  fallback: [],
-  format: (results) => results.map((result) => result.slug),
-  queryFunction: async (target, context) => {
-    const ignoreSlugs = ['home-page'];
-    const [popular] = await context.hooks.fetch('example-documents', { limit: 5 }, context);
-    const slugs = `"${popular.map(({ slug }) => slug).join('", "')}"`;
-    const query = `SELECT 'slug', 'title' FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND slug IN (${slugs}) ORDER BY updateDate DESC LIMIT 5`;
-    const [results] = await context.hooks.fetch('storage-query', query);
-    return [results];
-  },
+```typescript
+import type { AddQueryOutputToViewModelConfig } from '../types/plugins/query-output.js';
+export type { AddQueryOutputToViewModelQuery, AddQueryOutputToViewModelConfig, AddQueryOutputToViewModelContext, } from '../types/plugins/query-output.js';
+/**
+ * Add queries output to the view model.
+ * @example <caption>AddQueryOutputToViewModel</caption>
+ * const viewModel = AddQueryOutputToViewModel.callback(viewModel, context);
+ */
+declare class AddQueryOutputToViewModel {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>AddQueryOutputToViewModel.configKey</caption>
+     * const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-add-query-output-to-view-model';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>AddQueryOutputToViewModel.defaultConfig()</caption>
+     * const config = { ...AddQueryOutputToViewModel.defaultConfig(), ...context.config[AddQueryOutputToViewModel.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<AddQueryOutputToViewModelConfig, 'queries' | 'events'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param config A configuration object.
+     * @param _context A Uttori-like context (unused).
+     * @example <caption>AddQueryOutputToViewModel.validateConfig(config, _context)</caption>
+     * AddQueryOutputToViewModel.validateConfig({ ... });
+     */
+    static validateConfig(config: Record<string, AddQueryOutputToViewModelConfig>, _context: unknown): void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example <caption>AddQueryOutputToViewModel.register(context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [AddQueryOutputToViewModel.configKey]: {
+     *       ...,
+     *       events: {
+     *         callback: ['document-save', 'document-delete'],
+     *         validateConfig: ['validate-config'],
+     *       },
+     *       queries: [...],
+     *     },
+     *   },
+     * };
+     * AddQueryOutputToViewModel.register(context);
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>): void;
+    /**
+     * Queries for related documents based on similar tags and searches the storage provider.
+     * @param eventLabel The event label to run queries for.
+     * @param viewModel A Uttori view-model object.
+     * @param context A Uttori-like context.
+     * @returns The provided view-model document.
+     * @example <caption>AddQueryOutputToViewModel.callback(viewModel, context)</caption>
+     * const context = {
+     *   config: {
+     *     [AddQueryOutputToViewModel.configKey]: {
+     *       queries: [...],
+     *     },
+     *   },
+     *   hooks: {
+     *     on: (event) => { ... },
+     *     fetch: (event, query) => { ... },
+     *   },
+     * };
+     * AddQueryOutputToViewModel.callback(viewModel, context);
+     */
+    static callbackCurry<T extends Record<string, unknown>>(eventLabel: string, viewModel: T, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>): Promise<T>;
+    /**
+     * Curry the hook function to take the current event label.
+     * @param eventLabel The event label to run queries for.
+     * @returns The provided view-model document.
+     * @example <caption>AddQueryOutputToViewModel.callback(eventLabel)</caption>
+     */
+    static callback(eventLabel: string): import('../custom.js').AddQueryOutputToViewModelCallback;
 }
-```
-**Example** *(Query with a formatting function)*  
-```js
-{
-  key: 'tags',
-  query: `SELECT tags FROM documents WHERE slug NOT_IN ("${ignoreSlugs.join('", "')}") ORDER BY id ASC LIMIT -1`,
-  format: (tags) => [...new Set(tags.flatMap((t) => t.tags))].filter(Boolean).sort((a, b) => a.localeCompare(b)),
-  fallback: [],
+export default AddQueryOutputToViewModel;
+
+export interface AddQueryOutputToViewModelQuery {
+    /** The query to be run. */
+    query?: string;
+    /** The key to add the query output to. */
+    key: string;
+    /** The fallback value to use if the query fails. */
+    fallback: import('../../wiki.js').UttoriWikiDocument[];
+    /** An optional function to format the query output. */
+    format?: import('../../custom.js').AddQueryOutputToViewModelFormatFunction;
+    /** An optional custom function to execut the query. */
+    queryFunction?: import('../../custom.js').AddQueryOutputToViewModelQueryFunction;
 }
+export interface AddQueryOutputToViewModelConfig {
+    /**
+     * The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added.
+     */
+    queries: Record<string, AddQueryOutputToViewModelQuery[]>;
+    /** An object whose keys correspond to methods, and contents are events to listen for. */
+    events?: Record<string, string[]>;
+}
+/** Uttori context narrowed to this plugin's config shape. */
+export type AddQueryOutputToViewModelContext = import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-add-query-output-to-view-model', AddQueryOutputToViewModelConfig>;
 ```
-<a name="AddQueryOutputToViewModelConfig"></a>
 
-## AddQueryOutputToViewModelConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| queries | <code>Record.&lt;string, Array.&lt;AddQueryOutputToViewModelQuery&gt;&gt;</code> | The array of quieries to be run and returned that will be added to the passed in object and returned with the querie output added. |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
-
-<a name="AddQueryOutputToViewModelContext"></a>
-
-## AddQueryOutputToViewModelContext : <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-add-query-output-to-view-model&#x27;, AddQueryOutputToViewModelConfig&gt;</code>
-Uttori context narrowed to this plugin's config shape.
-
-**Kind**: global typedef  
+</details>

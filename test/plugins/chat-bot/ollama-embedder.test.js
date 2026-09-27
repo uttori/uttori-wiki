@@ -1,6 +1,6 @@
 import test from 'ava';
 import sinon from 'sinon';
-import OllamaEmbedder, { stopwordsEnglish } from '../../../src/plugins/chat-bot/ollama-embedder.js';
+import OllamaEmbedder, { stopwordsEnglish } from '../../../dist/plugins/chat-bot/ollama-embedder.js';
 
 let sandbox;
 

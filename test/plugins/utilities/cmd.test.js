@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { EventEmitter } from 'node:events';
 import child_process from 'node:child_process';
 
-import { cmd } from '../../../src/plugins/utilities/cmd.js';
+import { cmd } from '../../../dist/plugins/utilities/cmd.js';
 
 /** @type {sinon.SinonSandbox} */
 let sandbox;

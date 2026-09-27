@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import test from 'ava';
 import { EventDispatcher } from '@uttori/event-dispatcher';
-import AnalyticsPlugin from '../../src/plugins/analytics-json-file.js';
+import AnalyticsPlugin from '../../dist/plugins/analytics-json-file.js';
 import path from 'node:path';
 
 test.beforeEach(async () => {
@@ -115,7 +115,7 @@ test.serial('AnalyticsPlugin: E2E', async (t) => {
       limit: 10,
     },
   };
-  /** @type {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', import('../../dist/plugins/analytics-json-file.d.ts').AnalyticsPluginConfig>} */
+  /** @type {import('../../dist/custom.js').UttoriContextWithPluginConfig<'uttori-plugin-analytics-json-file', import('../../dist/plugins/analytics-json-file.js').AnalyticsPluginConfig>} */
   const context = {
     hooks,
     config,

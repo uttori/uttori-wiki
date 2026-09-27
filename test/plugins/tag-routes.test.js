@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { EventDispatcher } from '@uttori/event-dispatcher';
-import TagRoutesPlugin from '../../src/plugins/tag-routes.js';
+import TagRoutesPlugin from '../../dist/plugins/tag-routes.js';
 
 let sandbox;
 test.beforeEach(() => {
@@ -73,7 +73,7 @@ test('TagRoutesPlugin.extendConfig(): handles undefined config', (t) => {
 
 test('TagRoutesPlugin.validateConfig(): throws when config key is missing', (t) => {
   t.throws(() => {
-    TagRoutesPlugin.validateConfig({}, /** @type {any} */ ({}));
+    TagRoutesPlugin.validateConfig({}, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes\' configuration key is missing.' });
 });
 
@@ -81,7 +81,7 @@ test('TagRoutesPlugin.validateConfig(): throws when tagIndexRoute is missing', (
   t.throws(() => {
     TagRoutesPlugin.validateConfig({
       [TagRoutesPlugin.configKey]: {},
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.tagIndexRoute\' is missing or not a string.' });
 });
 
@@ -91,7 +91,7 @@ test('TagRoutesPlugin.validateConfig(): throws when tagIndexRoute is not a strin
       [TagRoutesPlugin.configKey]: {
         tagIndexRoute: /** @type {any} */ (123),
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.tagIndexRoute\' is missing or not a string.' });
 });
 
@@ -101,7 +101,7 @@ test('TagRoutesPlugin.validateConfig(): throws when tagRoute is missing', (t) =>
       [TagRoutesPlugin.configKey]: {
         tagIndexRoute: 'tags',
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.tagRoute\' is missing or not a string.' });
 });
 
@@ -112,7 +112,7 @@ test('TagRoutesPlugin.validateConfig(): throws when tagRoute is not a string', (
         tagIndexRoute: 'tags',
         tagRoute: /** @type {any} */ (123),
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.tagRoute\' is missing or not a string.' });
 });
 
@@ -123,7 +123,7 @@ test('TagRoutesPlugin.validateConfig(): throws when apiRoute is missing', (t) =>
         tagIndexRoute: 'tags',
         tagRoute: 'tags',
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.apiRoute\' is missing or not a string.' });
 });
 
@@ -135,7 +135,7 @@ test('TagRoutesPlugin.validateConfig(): throws when apiRoute is not a string', (
         tagRoute: 'tags',
         apiRoute: /** @type {any} */ (123),
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.apiRoute\' is missing or not a string.' });
 });
 
@@ -147,7 +147,7 @@ test('TagRoutesPlugin.validateConfig(): throws when title is missing', (t) => {
         tagRoute: 'tags',
         apiRoute: 'tag-api',
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.title\' is missing or not a string.' });
 });
 
@@ -160,7 +160,7 @@ test('TagRoutesPlugin.validateConfig(): throws when title is not a string', (t) 
         apiRoute: 'tag-api',
         title: /** @type {any} */ (123),
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   }, { message: 'Config Error: \'uttori-plugin-tag-routes.title\' is missing or not a string.' });
 });
 
@@ -173,13 +173,13 @@ test('TagRoutesPlugin.validateConfig(): validates successfully with valid config
         apiRoute: 'tag-api',
         title: 'Tags',
       },
-    }, /** @type {any} */ ({}));
+    }, ({}));
   });
 });
 
 test('TagRoutesPlugin.register(): throws when context is missing', (t) => {
   t.throws(() => {
-    TagRoutesPlugin.register(/** @type {any} */ (undefined));
+    TagRoutesPlugin.register((undefined));
   }, { message: 'Missing event dispatcher in \'context.hooks.on(event, callback)\' format.' });
 });
 
@@ -252,7 +252,7 @@ test('TagRoutesPlugin.register(): handles missing methods gracefully', (t) => {
 });
 
 test('TagRoutesPlugin.normalizeDocumentTags(): normalizes string and array tags', (t) => {
-  const stringTags = TagRoutesPlugin.normalizeDocumentTags(/** @type {any} */ ({
+  const stringTags = TagRoutesPlugin.normalizeDocumentTags(({
     slug: 'example',
     title: 'Example',
     content: 'Example',
@@ -260,7 +260,7 @@ test('TagRoutesPlugin.normalizeDocumentTags(): normalizes string and array tags'
     updateDate: 1,
     tags: 'z, a, z,',
   }), /** @type {any} */ ({}));
-  const arrayTags = TagRoutesPlugin.normalizeDocumentTags(/** @type {any} */ ({
+  const arrayTags = TagRoutesPlugin.normalizeDocumentTags(({
     slug: 'example',
     title: 'Example',
     content: 'Example',

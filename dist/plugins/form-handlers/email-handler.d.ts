@@ -1,65 +1,33 @@
-export type EmailHandlerConfig = {
-    /**
-     * Nodemailer transport options.
-     */
-    transportOptions: import('nodemailer').TransportOptions;
-    /**
-     * Email address to send from.
-     */
-    from: string;
-    /**
-     * Email address to send to.
-     */
-    to: string;
-    /**
-     * Email subject template.
-     */
-    subject: string;
-    /**
-     * Email body template (optional).
-     */
-    template?: string;
-};
-/**
- * @typedef {object} EmailHandlerConfig
- * @property {import('nodemailer').TransportOptions} transportOptions Nodemailer transport options.
- * @property {string} from Email address to send from.
- * @property {string} to Email address to send to.
- * @property {string} subject Email subject template.
- * @property {string} [template] Email body template (optional).
- */
+import type { EmailHandlerConfig } from '../../types/plugins/form-handlers/email-handler.js';
+export type { EmailHandlerConfig } from '../../types/plugins/form-handlers/email-handler.js';
 /**
  * Email handler for form submissions.
  * @example <caption>EmailHandler</caption>
  * const emailHandler = EmailHandler.create(config);
- * @class
  */
 declare class EmailHandler {
     /**
      * Creates an email handler with the provided configuration.
-     * @param {EmailHandlerConfig} config Email configuration.
-     * @returns {import('../form-handler.js').FormHandlerFunction} Form handler function.
-     * @static
+     * @param config Email configuration.
+     * @returns Form handler function.
      */
     static create(config: EmailHandlerConfig): import('../form-handler.js').FormHandlerFunction;
     /**
      * Generates email subject from template.
-     * @param {string | undefined} template Subject template; an empty value uses the default subject.
-     * @param {Record<string, any>} formData Form data.
-     * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
-     * @returns {string} Generated subject.
-     * @static
+     * @param template Subject template; an empty value uses the default subject.
+     * @param formData Form data.
+     * @param formConfig Form configuration.
+     * @returns Generated subject.
      */
-    static generateSubject(template: string | undefined, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
+    static generateSubject(template: string | undefined, formData: Record<string, unknown>, formConfig: import('../form-handler.js').FormConfig): string;
     /**
      * Generates email body from template.
-     * @param {string | null | undefined} template Body template; an empty value uses the default HTML body.
-     * @param {Record<string, any>} formData Form data.
-     * @param {import('../form-handler.js').FormConfig} formConfig Form configuration.
-     * @returns {string} Generated body.
-     * @static
+     * @param template Body template; an empty value uses the default HTML body.
+     * @param formData Form data.
+     * @param formConfig Form configuration.
+     * @returns Generated body.
      */
-    static generateBody(template: string | null | undefined, formData: Record<string, any>, formConfig: import('../form-handler.js').FormConfig): string;
+    static generateBody(template: string | null | undefined, formData: Record<string, unknown>, formConfig: import('../form-handler.js').FormConfig): string;
 }
 export default EmailHandler;
 //# sourceMappingURL=email-handler.d.ts.map

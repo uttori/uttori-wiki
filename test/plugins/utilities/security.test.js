@@ -7,7 +7,7 @@ import {
   validateAndSanitizeUrl,
   sanitizeFilename,
   validateMimeType,
-} from '../../../src/plugins/utilities/security.js';
+} from '../../../dist/plugins/utilities/security.js';
 
 test('sanitizeSearchQuery: should sanitize normal search queries', (t) => {
   t.is(sanitizeSearchQuery('hello world'), 'hello world');

@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { EventDispatcher } from '@uttori/event-dispatcher';
-import CategoryRoutesPlugin from '../../src/plugins/category-routes.js';
+import CategoryRoutesPlugin from '../../dist/plugins/category-routes.js';
 
 /** @type {import('sinon').SinonSandbox} */
 let sandbox;
@@ -15,7 +15,7 @@ test.afterEach(() => {
 
 /**
  * Returns a minimal valid plugin config block (the inner value).
- * @returns {import('../../src/plugins/category-routes.js').CategoryRoutesPluginConfig}
+ * @returns {import('../../dist/plugins/category-routes.js').CategoryRoutesPluginConfig} Minimal valid plugin settings.
  */
 const validPluginConfig = () => ({
   categoryIndexRoute: 'categories',
@@ -37,7 +37,7 @@ const validPluginConfig = () => ({
 
 /**
  * Builds a minimal context object for testing.
- * @param {Partial<import('../../src/plugins/category-routes.js').CategoryRoutesPluginConfig>} [pluginOverrides]
+ * @param {Partial<import('../../dist/plugins/category-routes.js').CategoryRoutesPluginConfig>} [pluginOverrides] Settings to replace in the test context.
  * @returns {any} context
  */
 const makeContext = (pluginOverrides = {}) => {
@@ -68,8 +68,8 @@ const makeContext = (pluginOverrides = {}) => {
 
 /**
  * Builds a fake Express request object.
- * @param {object} [overrides]
- * @returns {object}
+ * @param {object} [overrides] Request fields to replace.
+ * @returns {object} Fake request for route handlers.
  */
 const makeRequest = (overrides = {}) => ({
   session: { user: null },
@@ -81,7 +81,7 @@ const makeRequest = (overrides = {}) => ({
 
 /**
  * Builds a fake Express response object.
- * @returns {object}
+ * @returns {object} Fake response for route handlers.
  */
 const makeResponse = () => ({
   set: sandbox.stub(),

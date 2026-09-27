@@ -1,5 +1,5 @@
 import test from 'ava';
-import validateQuery from '../../../src/plugins/storeage-provider-json/validate-query.js';
+import validateQuery from '../../../dist/plugins/storeage-provider-json/validate-query.js';
 
 const query = 'SELECT field_a, field_b FROM table WHERE field_a IS "test" ORDER BY field_b DESC LIMIT 1';
 

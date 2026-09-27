@@ -1,6 +1,6 @@
 import test from 'ava';
-import SqlWhereParser from '../../../src/plugins/storeage-provider-json/where-parser.js';
-import parseQueryToFilterFunctions from '../../../src/plugins/storeage-provider-json/parse-query-filter-functions.js';
+import SqlWhereParser from '../../../dist/plugins/storeage-provider-json/where-parser.js';
+import parseQueryToFilterFunctions from '../../../dist/plugins/storeage-provider-json/parse-query-filter-functions.js';
 
 const docs = [
   {

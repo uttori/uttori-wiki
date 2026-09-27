@@ -1,213 +1,249 @@
 ## Functions
 
 <dl>
-<dt><a href="#getFootnotesEnv">getFootnotesEnv(state)</a> ⇒ <code><a href="#MarkdownItFootnotesEnv">MarkdownItFootnotesEnv</a></code></dt>
+<dt><a href="#getFootnotesEnv">getFootnotesEnv(state)</a> ⇒</dt>
 <dd><p>Ensure footnotes state exists on the MarkdownIt env object.</p>
 </dd>
-<dt><a href="#footnoteDefinition">footnoteDefinition(state, startLine, endLine, silent)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#footnoteDefinition">footnoteDefinition(state, startLine, endLine, silent)</a> ⇒</dt>
 <dd><p>Converts Footnote definitions to linkable anchor tags.</p>
 </dd>
-<dt><a href="#footnoteReferences">footnoteReferences(state, silent)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#footnoteReferences">footnoteReferences(state, silent)</a> ⇒</dt>
 <dd><p>Converts Footnote definitions to linkable anchor tags.</p>
 </dd>
-<dt><a href="#referenceTag">referenceTag(token)</a> ⇒ <code>string</code></dt>
+<dt><a href="#referenceTag">referenceTag(token)</a> ⇒</dt>
 <dd><p>Default configuration for rendering footnote references.</p>
 </dd>
-<dt><a href="#definitionOpenTag">definitionOpenTag(token)</a> ⇒ <code>string</code></dt>
+<dt><a href="#definitionOpenTag">definitionOpenTag(token)</a> ⇒</dt>
 <dd><p>Default configuration for rendering footnote definitions.</p>
 </dd>
-<dt><a href="#configFootnoteReference">configFootnoteReference(tokens, index, options, _env, _slf)</a> ⇒ <code>string</code></dt>
+<dt><a href="#configFootnoteReference">configFootnoteReference(tokens, index, options, _env, _slf)</a> ⇒</dt>
 <dd><p>Creates the tag for the Footnote reference.</p>
 </dd>
-<dt><a href="#configFootnoteOpen">configFootnoteOpen(tokens, index, options, _env, _slf)</a> ⇒ <code>string</code></dt>
+<dt><a href="#configFootnoteOpen">configFootnoteOpen(tokens, index, options, _env, _slf)</a> ⇒</dt>
 <dd><p>Creates the opening tag of the Footnote items block.</p>
 </dd>
-<dt><a href="#configFootnoteClose">configFootnoteClose(_tokens, _index, options, _env, _slf)</a> ⇒ <code>string</code></dt>
+<dt><a href="#configFootnoteClose">configFootnoteClose(_tokens, _index, options, _env, _slf)</a> ⇒</dt>
 <dd><p>Creates the closing tag of the Footnote items block.</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#MarkdownItFootnotesEnv">MarkdownItFootnotesEnv</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#MarkdownItFootnotesStateEnv">MarkdownItFootnotesStateEnv</a> : <code>object</code></dt>
-<dd><p>MarkdownIt env object extended with footnote state.</p>
 </dd>
 </dl>
 
 <a name="getFootnotesEnv"></a>
 
-## getFootnotesEnv(state) ⇒ [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv)
+## getFootnotesEnv(state) ⇒
 Ensure footnotes state exists on the MarkdownIt env object.
 
-**Kind**: global function  
-**Returns**: [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv) - Footnotes env state.  
+**Kind**: global function\
+**Returns**: Footnotes env state.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| state | <code>module:markdown-it~StateBlock</code> \| <code>module:markdown-it~StateInline</code> | MarkdownIt state. |
+| Param | Description |
+| --- | --- |
+| state | MarkdownIt state. |
 
-<a name="getFootnotesEnv..env"></a>
-
-### getFootnotesEnv~env : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
-**Kind**: inner constant of [<code>getFootnotesEnv</code>](#getFootnotesEnv)  
 <a name="footnoteDefinition"></a>
 
-## footnoteDefinition(state, startLine, endLine, silent) ⇒ <code>boolean</code>
+## footnoteDefinition(state, startLine, endLine, silent) ⇒
 Converts Footnote definitions to linkable anchor tags.
 
-**Kind**: global function  
-**Returns**: <code>boolean</code> - Returns if parsing was successful or not.  
-**See**: [Ruler.before](https://markdown-it.github.io/markdown-it/#Ruler.before)  
+**Kind**: global function\
+**Returns**: Returns if parsing was successful or not.\
+**See**: [Ruler.before](https://markdown-it.github.io/markdown-it/#Ruler.before)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| state | <code>module:markdown-it~StateBlock</code> | State of MarkdownIt. |
-| startLine | <code>number</code> | The starting line of the block. |
-| endLine | <code>number</code> | The ending line of the block. |
-| silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
+| Param | Description |
+| --- | --- |
+| state | State of MarkdownIt. |
+| startLine | The starting line of the block. |
+| endLine | The ending line of the block. |
+| silent | Used to validating parsing without output in MarkdownIt. |
 
-<a name="footnoteDefinition..pos"></a>
-
-### footnoteDefinition~pos : <code>number</code>
-**Kind**: inner property of [<code>footnoteDefinition</code>](#footnoteDefinition)  
 <a name="footnoteReferences"></a>
 
-## footnoteReferences(state, silent) ⇒ <code>boolean</code>
+## footnoteReferences(state, silent) ⇒
 Converts Footnote definitions to linkable anchor tags.
 
-**Kind**: global function  
-**Returns**: <code>boolean</code> - Returns if parsing was successful or not.  
-**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)  
+**Kind**: global function\
+**Returns**: Returns if parsing was successful or not.\
+**See**: [Ruler.after](https://markdown-it.github.io/markdown-it/#Ruler.after)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| state | <code>module:markdown-it~StateInline</code> | State of MarkdownIt. |
-| silent | <code>boolean</code> | Used to validating parsing without output in MarkdownIt. |
+| Param | Description |
+| --- | --- |
+| state | State of MarkdownIt. |
+| silent | Used to validating parsing without output in MarkdownIt. |
 
-
-* [footnoteReferences(state, silent)](#footnoteReferences) ⇒ <code>boolean</code>
-    * [~pos](#footnoteReferences..pos) : <code>number</code>
-    * [~env](#footnoteReferences..env) : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
-
-<a name="footnoteReferences..pos"></a>
-
-### footnoteReferences~pos : <code>number</code>
-**Kind**: inner property of [<code>footnoteReferences</code>](#footnoteReferences)  
-<a name="footnoteReferences..env"></a>
-
-### footnoteReferences~env : [<code>MarkdownItFootnotesStateEnv</code>](#MarkdownItFootnotesStateEnv)
-**Kind**: inner constant of [<code>footnoteReferences</code>](#footnoteReferences)  
 <a name="referenceTag"></a>
 
-## referenceTag(token) ⇒ <code>string</code>
+## referenceTag(token) ⇒
 Default configuration for rendering footnote references.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The HTML markup for the current footnote reference.  
+**Kind**: global function\
+**Returns**: The HTML markup for the current footnote reference.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>object</code> | The MarkdownIt Token meta object. |
-| token.id | <code>number</code> | The ID of the current footnote. |
-| token.label | <code>string</code> | The label of the current footnote. |
+| Param | Description |
+| --- | --- |
+| token | The MarkdownIt Token meta object. |
+| token.id | The ID of the current footnote. |
+| token.label | The label of the current footnote. |
 
 <a name="definitionOpenTag"></a>
 
-## definitionOpenTag(token) ⇒ <code>string</code>
+## definitionOpenTag(token) ⇒
 Default configuration for rendering footnote definitions.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The HTML markup for the current footnote definition.  
+**Kind**: global function\
+**Returns**: The HTML markup for the current footnote definition.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| token | <code>object</code> | The MarkdownIt Token meta object. |
-| token.id | <code>number</code> | The ID of the current footnote. |
-| token.label | <code>string</code> | The label of the current footnote. |
+| Param | Description |
+| --- | --- |
+| token | The MarkdownIt Token meta object. |
+| token.id | The ID of the current footnote. |
+| token.label | The label of the current footnote. |
 
 <a name="configFootnoteReference"></a>
 
-## configFootnoteReference(tokens, index, options, _env, _slf) ⇒ <code>string</code>
+## configFootnoteReference(tokens, index, options, _env, _slf) ⇒
 Creates the tag for the Footnote reference.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The tag for the Footnote reference.  
+**Kind**: global function\
+**Returns**: The tag for the Footnote reference.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
-| index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code> | Option parameters of the parser instance. |
-| _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
+| Param | Description |
+| --- | --- |
+| tokens | Collection of tokens to render. |
+| index | The index of the current token in the Tokens array. |
+| options | Option parameters of the parser instance. |
+| _env | Additional data from parsed input (references, for example). |
+| _slf | The current parser instance. |
 
-<a name="configFootnoteReference..opts"></a>
-
-### configFootnoteReference~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
-**Kind**: inner constant of [<code>configFootnoteReference</code>](#configFootnoteReference)  
 <a name="configFootnoteOpen"></a>
 
-## configFootnoteOpen(tokens, index, options, _env, _slf) ⇒ <code>string</code>
+## configFootnoteOpen(tokens, index, options, _env, _slf) ⇒
 Creates the opening tag of the Footnote items block.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The opening tag of the Footnote items block.  
+**Kind**: global function\
+**Returns**: The opening tag of the Footnote items block.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
-| index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it~MarkdownItOptions</code> | Option parameters of the parser instance. |
-| _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
+| Param | Description |
+| --- | --- |
+| tokens | Collection of tokens to render. |
+| index | The index of the current token in the Tokens array. |
+| options | Option parameters of the parser instance. |
+| _env | Additional data from parsed input (references, for example). |
+| _slf | The current parser instance. |
 
-<a name="configFootnoteOpen..opts"></a>
-
-### configFootnoteOpen~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
-**Kind**: inner constant of [<code>configFootnoteOpen</code>](#configFootnoteOpen)  
 <a name="configFootnoteClose"></a>
 
-## configFootnoteClose(_tokens, _index, options, _env, _slf) ⇒ <code>string</code>
+## configFootnoteClose(_tokens, _index, options, _env, _slf) ⇒
 Creates the closing tag of the Footnote items block.
 
-**Kind**: global function  
-**Returns**: <code>string</code> - The closing tag of the Footnote section block.  
+**Kind**: global function\
+**Returns**: The closing tag of the Footnote section block.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| _tokens | <code>Array.&lt;module:markdown-it~Token&gt;</code> | Collection of tokens to render. |
-| _index | <code>number</code> | The index of the current token in the Tokens array. |
-| options | <code>module:markdown-it~MarkdownItOptions</code> | Option parameters of the parser instance. |
-| _env | <code>object</code> | Additional data from parsed input (references, for example). |
-| _slf | <code>module:markdown-it~Renderer</code> | The current parser instance. |
+| Param | Description |
+| --- | --- |
+| _tokens | Collection of tokens to render. |
+| _index | The index of the current token in the Tokens array. |
+| options | Option parameters of the parser instance. |
+| _env | Additional data from parsed input (references, for example). |
+| _slf | The current parser instance. |
 
-<a name="configFootnoteClose..opts"></a>
+## TypeScript declarations
 
-### configFootnoteClose~opts : <code>module:markdown-it~MarkdownItOptions</code> \| <code>Object</code>
-**Kind**: inner constant of [<code>configFootnoteClose</code>](#configFootnoteClose)  
-<a name="MarkdownItFootnotesEnv"></a>
+<details>
+<summary>View documented types and signatures</summary>
 
-## MarkdownItFootnotesEnv : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+```typescript
+export type { MarkdownItFootnotesEnv, MarkdownItFootnotesStateEnv, } from '../../types/plugins/markdown-it-plugin/footnotes.js';
+/**
+ * Converts Footnote definitions to linkable anchor tags.
+ * @param state State of MarkdownIt.
+ * @param startLine The starting line of the block.
+ * @param endLine The ending line of the block.
+ * @param silent Used to validating parsing without output in MarkdownIt.
+ * @returns Returns if parsing was successful or not.
+ * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.before|Ruler.before}
+ */
+export declare function footnoteDefinition(state: import('markdown-it').StateBlock, startLine: number, endLine: number, silent: boolean): boolean;
+/**
+ * Converts Footnote definitions to linkable anchor tags.
+ * @param state State of MarkdownIt.
+ * @param silent Used to validating parsing without output in MarkdownIt.
+ * @returns Returns if parsing was successful or not.
+ * @see {@link https://markdown-it.github.io/markdown-it/#Ruler.after|Ruler.after}
+ */
+export declare function footnoteReferences(state: import('markdown-it').StateInline, silent: boolean): boolean;
+/**
+ * Default configuration for rendering footnote references.
+ * @param token The MarkdownIt Token meta object.
+ * @param token.id The ID of the current footnote.
+ * @param token.label The label of the current footnote.
+ * @returns The HTML markup for the current footnote reference.
+ */
+export declare function referenceTag({ id, label }: {
+    id: number;
+    label: string;
+}): string;
+/**
+ * Default configuration for rendering footnote definitions.
+ * @param token The MarkdownIt Token meta object.
+ * @param token.id The ID of the current footnote.
+ * @param token.label The label of the current footnote.
+ * @returns The HTML markup for the current footnote definition.
+ */
+export declare function definitionOpenTag({ id, label }: {
+    id: number;
+    label: string;
+}): string;
+/**
+ * Creates the tag for the Footnote reference.
+ * @param tokens Collection of tokens to render.
+ * @param index The index of the current token in the Tokens array.
+ * @param options Option parameters of the parser instance.
+ * @param _env Additional data from parsed input (references, for example).
+ * @param _slf The current parser instance.
+ * @returns The tag for the Footnote reference.
+ */
+export declare function configFootnoteReference(tokens: import('markdown-it').Token[], index: number, options: Partial<import('../renderer-markdown-it.js').MarkdownItRendererOptions>, _env: object | undefined, _slf: import('markdown-it').Renderer): string;
+/**
+ * Creates the opening tag of the Footnote items block.
+ * @param tokens Collection of tokens to render.
+ * @param index The index of the current token in the Tokens array.
+ * @param options Option parameters of the parser instance.
+ * @param _env Additional data from parsed input (references, for example).
+ * @param _slf The current parser instance.
+ * @returns The opening tag of the Footnote items block.
+ */
+export declare function configFootnoteOpen(tokens: import('markdown-it').Token[], index: number, options: Partial<import('../renderer-markdown-it.js').MarkdownItRendererOptions>, _env: object | undefined, _slf: import('markdown-it').Renderer): string;
+/**
+ * Creates the closing tag of the Footnote items block.
+ * @param _tokens Collection of tokens to render.
+ * @param _index The index of the current token in the Tokens array.
+ * @param options Option parameters of the parser instance.
+ * @param _env Additional data from parsed input (references, for example).
+ * @param _slf The current parser instance.
+ * @returns The closing tag of the Footnote section block.
+ */
+export declare function configFootnoteClose(_tokens: import('markdown-it').Token[], _index: number, options: Partial<import('../renderer-markdown-it.js').MarkdownItRendererOptions>, _env: object | undefined, _slf: import('markdown-it').Renderer): string;
+declare const _default: {
+    footnoteDefinition: typeof footnoteDefinition;
+    footnoteReferences: typeof footnoteReferences;
+    referenceTag: typeof referenceTag;
+    definitionOpenTag: typeof definitionOpenTag;
+    configFootnoteReference: typeof configFootnoteReference;
+    configFootnoteOpen: typeof configFootnoteOpen;
+    configFootnoteClose: typeof configFootnoteClose;
+};
+export default _default;
 
-| Name | Type | Description |
-| --- | --- | --- |
-| length | <code>number</code> | Next footnote id counter. |
-| refs | <code>Record.&lt;string, number&gt;</code> | Label to id mapping. |
+export interface MarkdownItFootnotesEnv {
+    /** Next footnote id counter. */
+    length: number;
+    /** Label to id mapping. */
+    refs: Record<string, number>;
+}
+/** MarkdownIt env object extended with footnote state. */
+export interface MarkdownItFootnotesStateEnv {
+    /** Footnote definitions collected during parsing. */
+    footnotes?: MarkdownItFootnotesEnv;
+}
+```
 
-<a name="MarkdownItFootnotesStateEnv"></a>
-
-## MarkdownItFootnotesStateEnv : <code>object</code>
-MarkdownIt env object extended with footnote state.
-
-**Kind**: global typedef  
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| [footnotes] | [<code>MarkdownItFootnotesEnv</code>](#MarkdownItFootnotesEnv) | Footnote definitions collected during parsing. |
-
+</details>

@@ -1,6 +1,6 @@
 
 import test from 'ava';
-import MarkdownItRenderer from '../../src/plugins/renderer-markdown-it.js';
+import MarkdownItRenderer from '../../dist/plugins/renderer-markdown-it.js';
 
 test('MarkdownItRenderer.register(context): can register', (t) => {
   t.notThrows(() => {

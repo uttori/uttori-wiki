@@ -1,6 +1,6 @@
 import test from 'ava';
 import MarkdownIt from 'markdown-it';
-import Plugin from '../../../src/plugins/markdown-it-plugin/markdown-it-plugin.js';
+import Plugin from '../../../dist/plugins/markdown-it-plugin/markdown-it-plugin.js';
 
 test('registered examples render escaped static input and output', (t) => {
   const md = new MarkdownIt({ html: false, uttori: {

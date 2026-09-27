@@ -1,8 +1,8 @@
 
 import test from 'ava';
-import SqlWhereParser from '../../../src/plugins/storeage-provider-json/where-parser.js';
-import Operator from '../../../src/plugins/storeage-provider-json/operator.js';
-import { TokenizeThis } from '../../../src/plugins/storeage-provider-json/tokenizer.js';
+import SqlWhereParser from '../../../dist/plugins/storeage-provider-json/where-parser.js';
+import Operator from '../../../dist/plugins/storeage-provider-json/operator.js';
+import { TokenizeThis } from '../../../dist/plugins/storeage-provider-json/tokenizer.js';
 
 test('parse(sql): parses the WHERE portion of an SQL-like string into an abstract syntax tree', (t) => {
   const sql = 'name = "First Last" AND age >= 27';
@@ -28,7 +28,7 @@ test('You can also evaluate the query in-line as the expressions are being built
    * This evaluator function will evaluate the "+" operator with its operands by adding its operands together.
    */
   const parsed = parser.parse(sql, (operatorValue, operands) => {
-    if (operatorValue === '+') {
+    if (operatorValue === '+' && typeof operands[0] === 'number' && typeof operands[1] === 'number') {
       return operands[0] + operands[1];
     }
     return SqlWhereParser.defaultEvaluator(operatorValue, operands);

@@ -1,0 +1,1 @@
+{"version":3,"file":"ejs-includes.js","sourceRoot":"","sources":["../../../src/types/plugins/ejs-includes.ts"],"names":[],"mappings":"","sourcesContent":["import type ejs from 'ejs';\n\nexport interface EJSRendererConfig {\n  /** Events to bind to. */\n  events?: Record<string, string[]>;\n  /** EJS configuration. */\n  ejs?: ejs.Options;\n}\n"]}

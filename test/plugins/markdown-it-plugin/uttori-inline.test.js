@@ -1,5 +1,5 @@
 import test from 'ava';
-import MarkdownItRenderer from '../../../src/plugins/renderer-markdown-it.js';
+import MarkdownItRenderer from '../../../dist/plugins/renderer-markdown-it.js';
 
 test('MarkdownItRenderer.render(content, config): prepends the baseURL when set', (t) => {
   t.is(MarkdownItRenderer.render('[Test]', { markdownIt: { uttori: { baseUrl: '/wiki' } } }), '<p>[Test]</p>');

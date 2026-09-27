@@ -14,7 +14,7 @@ import {
   buildCitations,
   embedQuery,
   retrieve,
-} from '../../../src/plugins/chat-bot/retrieval.js';
+} from '../../../dist/plugins/chat-bot/retrieval.js';
 import { slow } from '../../_helpers/slow.js';
 
 const baseConfig = {
@@ -27,7 +27,14 @@ const baseConfig = {
   maxPerSource: Infinity,
 };
 
-/** Build a minimal RetrievedChunk */
+/**
+ * Build a minimal retrieved chunk with a configurable score.
+ * @param {number} rowid Database row identifier.
+ * @param {string} source_id Source document identifier.
+ * @param {number} [token_count] Number of tokens in the chunk.
+ * @param {number} [score] Retrieval score.
+ * @returns {object} Chunk fixture.
+ */
 const makeChunk = (rowid, source_id, token_count = 100, score = 0.5) => ({
   rowid,
   source_id,
@@ -56,7 +63,7 @@ const DIM = 3;
 
 /**
  * Build a throwaway SQLite file populated with test data and return its path.
- * @param {{ sources?: object[], chunks?: object[] }} [opts]
+ * @param {{ sources?: object[], chunks?: object[] }} [opts] Rows to seed in the database.
  * @returns {string} Absolute path to the temp DB file.
  */
 function makeTestDb(opts = {}) {
@@ -138,9 +145,9 @@ function makeTestDb(opts = {}) {
 
 /**
  * Minimal config object for retrieve() calls.
- * @param {string} databasePath
- * @param {object} [overrides]
- * @returns {object}
+ * @param {string} databasePath Path to the temporary database.
+ * @param {object} [overrides] Retrieval settings to replace.
+ * @returns {object} Minimal retrieval configuration.
  */
 const makeRetrieveConfig = (databasePath, overrides = {}) => ({
   databasePath,
@@ -159,7 +166,11 @@ const makeRetrieveConfig = (databasePath, overrides = {}) => ({
   ...overrides,
 });
 
-/** Stub fetch to return a DIM-element embedding. */
+/**
+ * Stub fetch to return a DIM-element embedding.
+ * @param {number[]} [vec] Embedding vector returned by the stub.
+ * @returns {sinon.SinonStub} Fetch stub for assertions and cleanup.
+ */
 const stubEmbedding = (vec = [0.8, 0.1, 0.1]) =>
   sinon.stub(global, 'fetch').resolves({
     ok: true,

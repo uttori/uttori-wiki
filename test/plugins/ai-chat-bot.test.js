@@ -4,7 +4,7 @@ import sinon from 'sinon';
 import { WebSocketServer } from 'ws';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
-import AIChatBot from '../../src/plugins/ai-chat-bot.js';
+import AIChatBot from '../../dist/plugins/ai-chat-bot.js';
 
 test('AIChatBot.defaultConfig(): wires chat route and chat-query events only', (t) => {
   const config = AIChatBot.defaultConfig();
@@ -116,7 +116,7 @@ test('AIChatBot.documentsHandler(): responds 500 when the hook throws', async (t
 
 test('AIChatBot.chatQuery(): returns an empty string for an empty query without calling the LLM', async (t) => {
   const context = { hooks: new EventDispatcher(), config: { [AIChatBot.configKey]: {} } };
-  const result = await AIChatBot.chatQuery(/** @type {any} */ ({ query: '   ' }), /** @type {any} */ (context));
+  const result = await AIChatBot.chatQuery(({ query: '   ' }), /** @type {any} */ (context));
   t.is(result, '');
 });
 
@@ -208,9 +208,13 @@ function makeSSEResponse() {
   };
 }
 
-/** @returns {AIChatBotConfig} */
+/**
+ * Build chat settings with optional test overrides.
+ * @param {Partial<AIChatBotConfig>} [overrides] Settings to replace.
+ * @returns {AIChatBotConfig} Chat plugin configuration.
+ */
 function chatConfig(overrides = {}) {
-  return /** @type {any} */ ({ ...AIChatBot.defaultConfig(), ollamaBaseUrl: 'http://localhost:11434', ...overrides });
+  return ({ ...AIChatBot.defaultConfig(), ollamaBaseUrl: 'http://localhost:11434', ...overrides });
 }
 
 test.serial('AIChatBot.runChatPass(): forwards thinking and tokens then finalizes the assistant turn', async (t) => {
@@ -225,7 +229,7 @@ test.serial('AIChatBot.runChatPass(): forwards thinking and tokens then finalize
   const ws = { send: (message) => sent.push(message) };
   const context = { hooks: new EventDispatcher(), config: { [AIChatBot.configKey]: {} } };
   try {
-    const { messages, finished } = await AIChatBot.runChatPass(/** @type {any} */ (ws), [{ role: 'user', content: 'hi' }], chatConfig(), /** @type {any} */ (context));
+    const { messages, finished } = await AIChatBot.runChatPass((ws), [{ role: 'user', content: 'hi' }], chatConfig(), /** @type {any} */ (context));
     t.true(finished);
     t.is(messages[messages.length - 1].content, 'Hello world');
     t.true(sent.some(message => message.includes('"thinking"')));
@@ -247,7 +251,7 @@ test.serial('AIChatBot.runChatPass(): executes tool calls and returns unfinished
   const ws = { send: (message) => sent.push(message) };
   const context = { hooks, config: { [AIChatBot.configKey]: {} } };
   try {
-    const { messages, finished } = await AIChatBot.runChatPass(/** @type {any} */ (ws), [{ role: 'user', content: 'cats?' }], chatConfig(), /** @type {any} */ (context));
+    const { messages, finished } = await AIChatBot.runChatPass((ws), [{ role: 'user', content: 'cats?' }], chatConfig(), /** @type {any} */ (context));
     t.false(finished);
     t.is(messages[messages.length - 1].role, 'tool');
     t.true(sent.some(message => message.includes('"tool_call"')));
@@ -277,7 +281,7 @@ test.serial('AIChatBot.chatQuery(): runs a full turn and returns the final assis
   ]));
   const context = { hooks: new EventDispatcher(), config: { [AIChatBot.configKey]: {} } };
   try {
-    const result = await AIChatBot.chatQuery(/** @type {any} */ ({ query: 'What?', slugs: ['a'] }), /** @type {any} */ (context));
+    const result = await AIChatBot.chatQuery(({ query: 'What?', slugs: ['a'] }), /** @type {any} */ (context));
     t.is(result, 'Answer.');
   } finally {
     globalThis.fetch = originalFetch;
@@ -396,7 +400,7 @@ test.serial('AIChatBot.runChatPass(): skips malformed NDJSON lines', async (t) =
   const ws = { send: () => {} };
   try {
     const { messages, finished } = await AIChatBot.runChatPass(
-      /** @type {any} */ (ws),
+      (ws),
       [{ role: 'user', content: 'hi' }],
       chatConfig(),
       /** @type {any} */ ({ hooks: new EventDispatcher(), config: { [AIChatBot.configKey]: {} } }),
@@ -420,9 +424,9 @@ test('AIChatBot.bindWebSocket(): registers an upgrade handler that rejects non-m
 });
 
 /**
- * @param {sinon.SinonSandbox} sandbox
- * @param {object} [contextOverrides]
- * @returns {{ server: EventEmitter, ws: EventEmitter & { send: sinon.SinonSpy, uniqueId?: string }, wss: WebSocketServer }}
+ * @param {sinon.SinonSandbox} sandbox Sandbox owning the network stubs.
+ * @param {object} [contextOverrides] Context fields to replace.
+ * @returns {{ server: EventEmitter, ws: EventEmitter & { send: sinon.SinonSpy, uniqueId?: string }, wss: WebSocketServer }} Mock server and sockets.
  */
 function bindMockWebSocket(sandbox, contextOverrides = {}) {
   /** @type {EventEmitter & { send: sinon.SinonSpy, uniqueId?: string } | undefined} */
@@ -585,5 +589,5 @@ test.serial('AIChatBot.bindWebSocket(): handles wss error and close events', (t)
 });
 
 /**
- * @typedef {import('../../src/plugins/ai-chat-bot.js').AIChatBotConfig} AIChatBotConfig
+ * @typedef {import('../../dist/plugins/ai-chat-bot.js').AIChatBotConfig} AIChatBotConfig
  */

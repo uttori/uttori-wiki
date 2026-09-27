@@ -1,46 +1,76 @@
 ## Functions
 
 <dl>
-<dt><a href="#wikiFlash">wikiFlash([key], [value])</a> ⇒ <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | <code>Array</code> | <code>boolean</code></dt>
+<dt><a href="#wikiFlash">wikiFlash([key], [value])</a> ⇒</dt>
 <dd><p>Flash messages are stored in the session.
 First, use <code>wikiFlash(key, value)</code> to set a flash message.
 Then, on subsequent requests, you can retrieve the message with <code>wikiFlash(key)</code>.</p>
 </dd>
-<dt><a href="#middleware">middleware(request, _response, next)</a> : <code>module:express~RequestHandler</code></dt>
+<dt><a href="#middleware">middleware(request, _response, next)</a></dt>
 <dd><p>Return the middleware that adds <code>wikiFlash</code>.</p>
 </dd>
 </dl>
 
 <a name="wikiFlash"></a>
 
-## wikiFlash([key], [value]) ⇒ <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> \| <code>Array</code> \| <code>boolean</code>
+## wikiFlash([key], [value]) ⇒
 Flash messages are stored in the session.
 First, use `wikiFlash(key, value)` to set a flash message.
 Then, on subsequent requests, you can retrieve the message with `wikiFlash(key)`.
 
-**Kind**: global function  
-**Returns**: <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> \| <code>Array</code> \| <code>boolean</code> - Returns the current flash data, or the data for the given key, or false if no data is found.  
-**this**: <code>{{</code>  
+**Kind**: global function\
+**Returns**: Returns the current flash data, or the data for the given key, or false if no data is found.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| [key] | <code>string</code> | The key to get or set flash data under. |
-| [value] | <code>string</code> | The value to store as flash data. |
+| Param | Description |
+| --- | --- |
+| [key] | The key to get or set flash data under. |
+| [value] | The value to store as flash data. |
 
-<a name="wikiFlash..current"></a>
-
-### wikiFlash~current : <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code>
-**Kind**: inner constant of [<code>wikiFlash</code>](#wikiFlash)  
 <a name="middleware"></a>
 
-## middleware(request, _response, next) : <code>module:express~RequestHandler</code>
+## middleware(request, _response, next)
 Return the middleware that adds `wikiFlash`.
 
-**Kind**: global function  
+**Kind**: global function\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| request | <code>module:express~Request</code> | The Express Request object. |
-| _response | <code>module:express~Response</code> | The Express Response object. |
-| next | <code>module:express~NextFunction</code> | The Express Next function. |
+| Param | Description |
+| --- | --- |
+| request | The Express Request object. |
+| _response | The Express Response object. |
+| next | The Express Next function. |
 
+## TypeScript declarations
+
+<details>
+<summary>View documented types and signatures</summary>
+
+```typescript
+/**
+ * Flash messages are stored in the session.
+ * First, use `wikiFlash(key, value)` to set a flash message.
+ * Then, on subsequent requests, you can retrieve the message with `wikiFlash(key)`.
+ * @param [key] The key to get or set flash data under.
+ * @param [value] The value to store as flash data.
+ * @returns Returns the current flash data, or the data for the given key, or false if no data is found.
+ */
+export declare function wikiFlash(this: {
+    session?: {
+        wikiFlash?: Record<string, string[]>;
+    };
+}, key?: string, value?: string): Record<string, string[]> | unknown[] | boolean;
+/**
+ * Return the middleware that adds `wikiFlash`.
+ *
+ * @param request The Express Request object.
+ * @param _response The Express Response object.
+ * @param next The Express Next function.
+ */
+export declare function middleware(request: import('express').Request, _response: import('express').Response, next: import('express').NextFunction): void;
+declare const _default: {
+    wikiFlash: typeof wikiFlash;
+    middleware: typeof middleware;
+};
+export default _default;
+```
+
+</details>

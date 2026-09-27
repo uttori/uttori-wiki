@@ -1,114 +1,59 @@
-export type TagRoutesPluginConfig = {
-    /**
-     * An object whose keys correspond to methods, and contents are events to listen for.
-     */
-    events?: Record<string, string[]>;
-    /**
-     * The default title for tag pages.
-     */
-    title?: string;
-    /**
-     * The maximum number of documents to return for a tag.
-     */
-    limit?: number;
-    /**
-     * Middleware for tag routes.
-     */
-    middleware?: Record<string, import("express").RequestHandler[]>;
-    /**
-     * A replacement route for the tag index route.
-     */
-    tagIndexRoute?: string;
-    /**
-     * A replacement route for the tag show route.
-     */
-    tagRoute?: string;
-    /**
-     * A replacement route for the tag index route.
-     */
-    apiRoute?: string;
-    /**
-     * A replacement route handler for the tag index route.
-     */
-    tagIndexRequestHandler?: TagRoutesRequestHandler;
-    /**
-     * A replacement route handler for the tag show route.
-     */
-    tagRequestHandler?: TagRoutesRequestHandler;
-    /**
-     * A request handler for the API route.
-     */
-    apiRequestHandler?: TagRoutesRequestHandler;
-};
-export type TagRoutesContext = import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>;
-export type TagRoutesRequestHandler = (context: TagRoutesContext) => import('express').RequestHandler;
-/**
- * @typedef {object} TagRoutesPluginConfig
- * @property {Record<string, string[]>} [events] An object whose keys correspond to methods, and contents are events to listen for.
- * @property {string} [title] The default title for tag pages.
- * @property {number} [limit] The maximum number of documents to return for a tag.
- * @property {Record<string, import("express").RequestHandler[]>} [middleware] Middleware for tag routes.
- * @property {string} [tagIndexRoute] A replacement route for the tag index route.
- * @property {string} [tagRoute] A replacement route for the tag show route.
- * @property {string} [apiRoute] A replacement route for the tag index route.
- * @property {TagRoutesRequestHandler} [tagIndexRequestHandler] A replacement route handler for the tag index route.
- * @property {TagRoutesRequestHandler} [tagRequestHandler] A replacement route handler for the tag show route.
- * @property {TagRoutesRequestHandler} [apiRequestHandler] A request handler for the API route.
- */
-/**
- * Uttori context narrowed to this plugin's config shape.
- * @typedef {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-tag-routes', TagRoutesPluginConfig>} TagRoutesContext
- */
-/**
- * Builds an Express handler for a tag route.
- * @callback TagRoutesRequestHandler
- * @param {TagRoutesContext} context A Uttori-like context.
- * @returns {import('express').RequestHandler} The Express request handler.
- */
+import type { TagRoutesPluginConfig, TagRoutesContext } from '../types/plugins/tag-routes.js';
+export type { TagRoutesPluginConfig, TagRoutesContext, TagRoutesRequestHandler } from '../types/plugins/tag-routes.js';
 /**
  * Tag routes plugin for Uttori Wiki.
  * Provides tag index and individual tag pages functionality.
- * @property {TagRoutesPluginConfig} config The configuration object.
  * @example <caption>Init TagRoutesPlugin</caption>
  * const tagPlugin = new TagRoutesPlugin();
- * @class
  */
 declare class TagRoutesPlugin {
     /**
      * The configuration key for plugin to look for in the provided configuration.
-     * @type {string}
-     * @returns {string} The configuration key.
+     *
+     * @returns The configuration key.
      * @example <caption>TagRoutesPlugin.configKey</caption>
      * const config = { ...TagRoutesPlugin.defaultConfig(), ...context.config[TagRoutesPlugin.configKey] };
-     * @static
      */
-    static get configKey(): string;
+    static get configKey(): 'uttori-plugin-tag-routes';
     /**
      * The default configuration.
-     * @returns {TagRoutesPluginConfig} The configuration.
+     * @returns The configuration.
      * @example <caption>TagRoutesPlugin.defaultConfig()</caption>
      * const config = { ...TagRoutesPlugin.defaultConfig(), ...context.config[TagRoutesPlugin.configKey] };
-     * @static
      */
-    static defaultConfig(): TagRoutesPluginConfig;
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<TagRoutesPluginConfig, 'title' | 'limit' | 'tagIndexRoute' | 'tagRoute' | 'apiRoute' | 'middleware' | 'events' | 'tagIndexRequestHandler' | 'tagRequestHandler' | 'apiRequestHandler'>;
     /**
      * Create a config that is extended from the default config.
-     * @param {TagRoutesPluginConfig} config The user provided configuration.
-     * @returns {TagRoutesPluginConfig} The new configration.
+     * @param config The user provided configuration.
+     * @returns The new configration.
      */
-    static extendConfig(config?: TagRoutesPluginConfig): TagRoutesPluginConfig;
+    static extendConfig(config?: TagRoutesPluginConfig): {
+        title: string;
+        limit: number;
+        tagIndexRoute: string;
+        tagRoute: string;
+        apiRoute: string;
+        tagIndexRequestHandler: import("../types/plugins/tag-routes.js").TagRoutesRequestHandler;
+        tagRequestHandler: import("../types/plugins/tag-routes.js").TagRoutesRequestHandler;
+        apiRequestHandler: import("../types/plugins/tag-routes.js").TagRoutesRequestHandler;
+        events: {
+            [x: string]: string[];
+        };
+        middleware: {
+            [x: string]: import("express").RequestHandler<import("express-serve-static-core").ParamsDictionary, any, any, import("qs").ParsedQs, Record<string, any>>[];
+        };
+    };
     /**
      * Validates the provided configuration for required entries.
-     * @param {Record<string, TagRoutesPluginConfig>} config A configuration object.
-     * @param {TagRoutesContext} _context - A Uttori-like context (unused).
+     * @param config A configuration object.
+     * @param _context - A Uttori-like context (unused).
      * @example <caption>TagRoutesPlugin.validateConfig(config, _context)</caption>
      * TagRoutesPlugin.validateConfig({ ... });
-     * @static
      */
-    static validateConfig(config: Record<string, TagRoutesPluginConfig>, _context: TagRoutesContext): void;
+    static validateConfig(config: Record<string, TagRoutesPluginConfig>, _context: unknown): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {TagRoutesContext} context A Uttori-like context.
+     * @param context A Uttori-like context.
      * @example <caption>TagRoutesPlugin.register(context)</caption>
      * const context = {
      *   hooks: {
@@ -121,13 +66,12 @@ declare class TagRoutesPlugin {
      *   },
      * };
      * TagRoutesPlugin.register(context);
-     * @static
      */
     static register(context: TagRoutesContext): void;
     /**
      * Wrapper function for binding tag routes.
-     * @param {import('express').Application} server An Express server instance.
-     * @param {TagRoutesContext} context A Uttori-like context.
+     * @param server An Express server instance.
+     * @param context A Uttori-like context.
      * @example <caption>TagRoutesPlugin.bindRoutes(plugin)</caption>
      * const context = {
      *   config: {
@@ -137,15 +81,13 @@ declare class TagRoutesPlugin {
      *   },
      * };
      * TagRoutesPlugin.bindRoutes(plugin);
-     * @static
      */
     static bindRoutes(server: import('express').Application, context: TagRoutesContext): void;
     /**
      * Normalize document tags before the document is saved.
-     * @param {import('../wiki.js').UttoriWikiDocument} document The document being saved.
-     * @param {TagRoutesContext} _context A Uttori-like context.
-     * @returns {import('../wiki.js').UttoriWikiDocument} The document with normalized tags.
-     * @static
+     * @param document The document being saved.
+     * @param _context A Uttori-like context.
+     * @returns The document with normalized tags.
      */
     static normalizeDocumentTags(document: import('../wiki.js').UttoriWikiDocument, _context: TagRoutesContext): import('../wiki.js').UttoriWikiDocument;
     /**
@@ -155,9 +97,9 @@ declare class TagRoutesPlugin {
      * Hooks:
      * - `fetch` - `storage-query` - Searched for the tagged documents.
      * @async
-     * @param {TagRoutesContext} context A Uttori-like context.
-     * @param {string} tag The tag to look for in documents.
-     * @returns {Promise<import('../wiki.js').UttoriWikiDocument[]>} Promise object that resolves to the array of the documents.
+     * @param context A Uttori-like context.
+     * @param tag The tag to look for in documents.
+     * @returns Promise object that resolves to the array of the documents.
      * @example
      * plugin.getTaggedDocuments('example', 10);
      * ➜ [{ slug: 'example', title: 'Example', content: 'Example content.', tags: ['example'] }]
@@ -168,9 +110,8 @@ declare class TagRoutesPlugin {
      *
      * Hooks:
      * - `filter` - `view-model-tag-index` - Passes in the viewModel.
-     * @param {TagRoutesContext} context A Uttori-like context.
-     * @returns {import('express').RequestHandler} The function to pass to Express.
-     * @static
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
      */
     static tagIndexRequestHandler(context: TagRoutesContext): import('express').RequestHandler;
     /**
@@ -180,9 +121,8 @@ declare class TagRoutesPlugin {
      *
      * Hooks:
      * - `filter` - `view-model-tag` - Passes in the viewModel.
-     * @param {TagRoutesContext} context A Uttori-like context.
-     * @returns {import('express').RequestHandler} The function to pass to Express.
-     * @static
+     * @param context A Uttori-like context.
+     * @returns The function to pass to Express.
      */
     static tagRequestHandler(context: TagRoutesContext): import('express').RequestHandler;
 }

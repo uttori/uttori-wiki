@@ -4,12 +4,21 @@ import fs from 'node:fs';
 import os from 'node:os';
 import sinon from 'sinon';
 import { PdfReader } from 'pdfreader';
-import { extractAttachmentText } from '../../../src/plugins/chat-bot/attachment-extractor.js';
+import { extractAttachmentText } from '../../../dist/plugins/chat-bot/attachment-extractor.js';
 
-/** Minimal config – only attachmentsRoot is used */
+/**
+ * Minimal config containing the attachments root.
+ * @param {string} root Directory containing attachment fixtures.
+ * @returns {{ attachmentsRoot: string }} Attachment extractor settings.
+ */
 const makeConfig = (root) => ({ attachmentsRoot: root });
 
-/** Write a temp file and return its basename + tmpdir root */
+/**
+ * Write an attachment fixture in a temporary directory.
+ * @param {string} name Filename to write.
+ * @param {string} content File contents.
+ * @returns {Promise<{ dir: string, name: string }>} Fixture directory and filename.
+ */
 async function writeTempFile(name, content) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'uttori-test-'));
   const filePath = path.join(dir, name);

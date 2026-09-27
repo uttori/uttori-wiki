@@ -9,8 +9,8 @@ import {
   markdownItAST,
   stripImagesFromMarkdown,
   countWords,
-} from '../src/plugins/chat-bot/utilities.js';
-import MarkdownItRenderer from '../src/plugins/renderer-markdown-it.js';
+} from '../dist/plugins/chat-bot/utilities.js';
+import MarkdownItRenderer from '../dist/plugins/renderer-markdown-it.js';
 
 /**
  * Display help information

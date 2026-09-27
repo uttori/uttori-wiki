@@ -6,7 +6,7 @@ import {
   buildChatTools,
   formatRetrievalResult,
   executeChatTool,
-} from '../../../src/plugins/chat-bot/tools.js';
+} from '../../../dist/plugins/chat-bot/tools.js';
 
 test('vectorSearchTool: type is "function"', (t) => {
   t.is(vectorSearchTool.type, 'function');
@@ -34,7 +34,11 @@ test('BUILT_IN_TOOLS: contains vectorSearch', (t) => {
   t.deepEqual(BUILT_IN_TOOLS.get('vectorSearch'), vectorSearchTool);
 });
 
-/** @param {any} tools */
+/**
+ * Build tool settings for registry tests.
+ * @param {any} tools Tool declarations supplied to the registry.
+ * @returns {{ tools: any }} Tool configuration.
+ */
 const makeConfig = (tools) => ({ tools });
 
 test('buildChatTools: empty array returns built-in tools', (t) => {
@@ -57,7 +61,11 @@ test('buildChatTools: undefined disables tools (returns empty array)', (t) => {
   t.deepEqual(buildChatTools(makeConfig(undefined)), []);
 });
 
-/** @returns {import('../../../src/plugins/search-provider-sqlite.js').RetrieveResponse} */
+/**
+ * Build a retrieval response for tool tests.
+ * @param {object} [overrides] Response fields to replace.
+ * @returns {import('../../../dist/plugins/search-provider-sqlite.js').RetrieveResponse} Retrieval fixture.
+ */
 function makeRetrieveResponse(overrides = {}) {
   return {
     query: 'test',

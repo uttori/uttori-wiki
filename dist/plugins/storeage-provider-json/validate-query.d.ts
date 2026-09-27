@@ -1,42 +1,11 @@
-import type { SqlWhereParserAst } from '../../../dist/custom.d.ts';
-export type ValidatedQueryOrder = {
-    /**
-     * Property to sort by (`RANDOM` selects random order).
-     */
-    prop: string;
-    /**
-     * Sort direction.
-     */
-    sort: 'ASC' | 'DESC';
-};
-export type ValidatedQuery = {
-    /**
-     * Selected field names from the SELECT clause.
-     */
-    fields: string[];
-    /**
-     * Source table name from the FROM clause.
-     */
-    table: string;
-    /**
-     * Parsed WHERE clause AST.
-     */
-    where: SqlWhereParserAst;
-    /**
-     * Sort directives from the ORDER BY clause.
-     */
-    order: ValidatedQueryOrder[];
-    /**
-     * Maximum number of results from the LIMIT clause.
-     */
-    limit: number;
-};
+import type { ValidatedQuery } from '../../types/plugins/storeage-provider-json/validate-query.js';
+export type { ValidatedQueryOrder, ValidatedQuery } from '../../types/plugins/storeage-provider-json/validate-query.js';
 /**
  * Validates and parses a SQL-like query structure.
  * Pass in: fields, table, conditions, order, limit as a query string:
  * `SELECT {fields} FROM {table} WHERE {conditions} ORDER BY {order} LIMIT {limit}`
- * @param {string} query The SQL-like query to parse.
- * @returns {ValidatedQuery} Parsed SELECT, FROM, WHERE, ORDER BY, and LIMIT parts.
+ * @param query The SQL-like query to parse.
+ * @returns Parsed SELECT, FROM, WHERE, ORDER BY, and LIMIT parts.
  * @example
  * ```js
  * validateQuery('SELECT slug FROM documents WHERE slug IS "home" ORDER BY updateDate DESC LIMIT 10');

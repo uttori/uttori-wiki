@@ -1,161 +1,81 @@
-export type MarkdownItExample = {
-    /**
-     * Editable input shown in the rendered block.
-     */
-    source: string;
-    /**
-     * Output visible before client-side enhancement.
-     */
-    expectedOutput: string;
-    /**
-     * Input field label; defaults to "Input".
-     */
-    inputLabel?: string;
-    /**
-     * Output field label; defaults to "Output".
-     */
-    outputLabel?: string;
-};
-export type MarkdownItRendererOptionsUttori = {
-    /**
-     * Prefix for relative URLs, useful when the Express app is not at URI root.
-     */
-    baseUrl: string;
-    /**
-     * Allowed External Domains, if a domain is not in this list, it is set to 'nofollow'. Values should be strings of the hostname portion of the URL object (like example.org).
-     */
-    allowedExternalDomains: string[];
-    /**
-     * Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled.
-     */
-    disableValidation: boolean;
-    /**
-     * Open external domains in a new window.
-     */
-    openNewWindow: boolean;
-    /**
-     * Add lazy loading params to image tags.
-     */
-    lazyImages: boolean;
-    /**
-     * Defaults to true.Emit escaped Mermaid fences as `pre.mermaid` for client-side rendering, false keeps ordinary code blocks.
-     */
-    mermaid?: boolean;
-    /**
-     * Registered editable input and expected output for `[example:id]` blocks.
-     */
-    examples?: Record<string, MarkdownItExample>;
-    /**
-     * Footnote settings.
-     */
-    footnotes?: {
-        referenceTag: Function;
-        definitionOpenTag: Function;
-        definitionCloseTag: string;
-    };
-    /**
-     * Table of Contents settings.
-     */
-    toc?: {
-        extract: boolean;
-        openingTag: string;
-        closingTag: string;
-        slugify: object;
-        stableIds?: boolean;
-    };
-    /**
-     * WikiLinks settings.
-     */
-    wikilinks?: {
-        slugify: object;
-    };
-};
-export type MarkdownItRendererOptions = {
-    /**
-     * Enable HTML tags in source.
-     */
-    html?: boolean;
-    /**
-     * Use '/' to close single tags.
-     */
-    xhtmlOut?: boolean;
-    /**
-     * Convert '\n' in paragraphs into <br>.
-     */
-    breaks?: boolean;
-    /**
-     * CSS language prefix for fenced blocks.
-     */
-    langPrefix?: string;
-    /**
-     * Autoconvert URL-like text to links.
-     */
-    linkify?: boolean;
-    /**
-     * Enable some language-neutral replacement + quotes beautification.
-     */
-    typographer?: boolean;
-    /**
-     * Double + single quotes replacement pairs.
-     */
-    quotes?: string;
-    /**
-     * The Uttori specific configuration.
-     */
-    uttori: MarkdownItRendererOptionsUttori;
-};
-export type MarkdownItRendererConfig = {
-    /**
-     * An object whose keys correspond to methods, and contents are events to listen for.
-     */
-    events?: Record<string, string[]>;
-    /**
-     * The MarkdownIt configuration.
-     */
-    markdownIt: MarkdownItRendererOptions;
-};
+import { referenceTag, definitionOpenTag } from './markdown-it-plugin/footnotes.js';
+import type { MarkdownItRendererOptions, MarkdownItRendererConfig } from '../types/plugins/renderer-markdown-it.js';
+export type { MarkdownItExample, MarkdownItRendererOptionsUttori, MarkdownItRendererOptions, MarkdownItRendererConfig, MarkdownItRendererInputOptions, } from '../types/plugins/renderer-markdown-it.js';
 /**
  * Uttori MarkdownIt Renderer
  * @example <caption>MarkdownItRenderer</caption>
  * const content = MarkdownItRenderer.render("...");
- * @class
  */
 declare class MarkdownItRenderer {
     /**
      * The configuration key for plugin to look for in the provided configuration.
-     * @type {string}
-     * @returns {string} The configuration key.
+     *
+     * @returns The configuration key.
      * @example <caption>MarkdownItRenderer.configKey</caption>
      * const config = { ...MarkdownItRenderer.defaultConfig(), ...context.config[MarkdownItRenderer.configKey] };
-     * @static
      */
-    static get configKey(): string;
+    static get configKey(): 'uttori-plugin-renderer-markdown-it';
     /**
      * The default configuration.
-     * @returns {MarkdownItRendererConfig} The default configuration.
+     * @returns The default configuration.
      * @example <caption>MarkdownItRenderer.defaultConfig()</caption>
      * const config = { ...MarkdownItRenderer.defaultConfig(), ...context.config[MarkdownItRenderer.configKey] };
-     * @static
      */
-    static defaultConfig(): MarkdownItRendererConfig;
+    static defaultConfig(): {
+        markdownIt: MarkdownItRendererOptions;
+    };
     /**
      * Create a config that is extended from the default config.
-     * @param {MarkdownItRendererConfig} config The user provided configuration.
-     * @returns {MarkdownItRendererConfig} The new configration.
+     * @param config The user provided configuration.
+     * @returns The new configration.
      */
-    static extendConfig(config?: MarkdownItRendererConfig): MarkdownItRendererConfig;
+    static extendConfig(config?: MarkdownItRendererConfig): {
+        events?: Record<string, string[]>;
+        markdownIt: {
+            html?: boolean;
+            xhtmlOut?: boolean;
+            breaks?: boolean;
+            langPrefix?: string;
+            linkify?: boolean;
+            typographer?: boolean;
+            quotes?: string | string[];
+            uttori: {
+                baseUrl: string;
+                allowedExternalDomains: string[];
+                disableValidation: boolean;
+                openNewWindow: boolean;
+                lazyImages: boolean;
+                mermaid?: boolean;
+                examples?: Record<string, import("../types/plugins/renderer-markdown-it.js").MarkdownItExample>;
+                footnotes: {
+                    referenceTag: typeof import("./markdown-it-plugin/footnotes.js").referenceTag;
+                    definitionOpenTag: typeof import("./markdown-it-plugin/footnotes.js").definitionOpenTag;
+                    definitionCloseTag: string;
+                };
+                toc: {
+                    extract: boolean;
+                    openingTag: string;
+                    closingTag: string;
+                    slugify: object;
+                    stableIds?: boolean;
+                };
+                wikilinks: {
+                    slugify: object;
+                };
+            };
+        };
+    };
     /**
      * Validates the provided configuration for required entries.
-     * @param {Record<string, MarkdownItRendererConfig>} config A provided configuration to use.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} _context Unused
+     * @param config A provided configuration to use.
+     * @param _context Unused
      * @example <caption>MarkdownItRenderer.validateConfig(config, _context)</caption>
      * MarkdownItRenderer.validateConfig({ ... });
-     * @static
      */
-    static validateConfig(config: Record<string, MarkdownItRendererConfig>, _context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): void;
+    static validateConfig(config: Record<string, MarkdownItRendererConfig>, _context: unknown): void;
     /**
      * Register the plugin with a provided set of events on a provided Hook system.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} context A Uttori-like context.
+     * @param context A Uttori-like context.
      * @example <caption>MarkdownItRenderer.register(context)</caption>
      * const context = {
      *   hooks: {
@@ -173,14 +93,13 @@ declare class MarkdownItRenderer {
      *   },
      * };
      * MarkdownItRenderer.register(context);
-     * @static
      */
-    static register(context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): void;
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): void;
     /**
      * Renders Markdown for a provided string with a provided context.
-     * @param {string} content Markdown content to be converted to HTML.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} context A Uttori-like context.
-     * @returns {string} The rendered content.
+     * @param content Markdown content to be converted to HTML.
+     * @param context A Uttori-like context.
+     * @returns The rendered content.
      * @example <caption>MarkdownItRenderer.renderContent(content, context)</caption>
      * const context = {
      *   config: {
@@ -190,14 +109,13 @@ declare class MarkdownItRenderer {
      *   },
      * };
      * MarkdownItRenderer.renderContent(content, context);
-     * @static
      */
-    static renderContent(content: string, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): string;
+    static renderContent(content: string, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): string;
     /**
      * Renders Markdown for a collection of Uttori documents with a provided context.
-     * @param {import('../wiki.js').UttoriWikiDocument[]} collection A collection of Uttori documents.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} context A Uttori-like context.
-     * @returns {import('../wiki.js').UttoriWikiDocument[]} The rendered documents.
+     * @param collection A collection of Uttori documents.
+     * @param context A Uttori-like context.
+     * @returns The rendered documents.
      * @example <caption>MarkdownItRenderer.renderCollection(collection, context)</caption>
      * const context = {
      *   config: {
@@ -207,55 +125,50 @@ declare class MarkdownItRenderer {
      *   },
      * };
      * MarkdownItRenderer.renderCollection(collection, context);
-     * @static
      */
-    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
+    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
     /**
      * Renders Markdown for a provided string with a provided MarkdownIt configuration.
-     * @param {string} content Markdown content to be converted to HTML.
-     * @param {MarkdownItRendererConfig} [config] A provided MarkdownIt configuration to use.
-     * @returns {string} The rendered content.
+     * @param content Markdown content to be converted to HTML.
+     * @param [config] A provided MarkdownIt configuration to use.
+     * @returns The rendered content.
      * @example <caption>MarkdownItRenderer.render(content, config)</caption>
      * const html = MarkdownItRenderer.render(content, config);
-     * @static
      */
-    static render(content: string, config?: MarkdownItRendererConfig): string;
+    static render(content: string | undefined, config?: MarkdownItRendererConfig): string;
     /**
      * Parse Markdown for a provided string with a provided MarkdownIt configuration.
-     * @param {string} content Markdown content to be converted to HTML.
-     * @param {MarkdownItRendererConfig} [config] A provided MarkdownIt configuration to use.
-     * @returns {import('markdown-it').Token[]} The rendered content.
+     * @param content Markdown content to be converted to HTML.
+     * @param [config] A provided MarkdownIt configuration to use.
+     * @returns The rendered content.
      * @example <caption>MarkdownItRenderer.parse(content, config)</caption>
      * const tokens = MarkdownItRenderer.parse(content, config);
      * @see {@link https://markdown-it.github.io/markdown-it/#MarkdownIt.parse|MarkdownIt.parse}
-     * @static
      */
     static parse(content: string, config?: MarkdownItRendererConfig): import('markdown-it').Token[];
     /**
      * Removes empty links and fills placeholder links outside fenced and indented code.
      * Code source is preserved so diagram labels and code examples are not rewritten.
-     * @param {string} content Markdown content to be converted to HTML.
-     * @param {import('markdown-it').MarkdownIt} [md] Parser used to recognize code boundaries, including nested blocks.
-     * @returns {string} The rendered content.
-     * @static
+     * @param content Markdown content to be converted to HTML.
+     * @param [md] Parser used to recognize code boundaries, including nested blocks.
+     * @returns The rendered content.
      */
     static cleanContent(content: string, md?: import('markdown-it').MarkdownIt): string;
     /**
      * Apply legacy placeholder-link cleanup to a source region known to be outside code.
-     * @param {string} content Markdown prose to clean.
-     * @returns {string} Prose with empty links removed and missing destinations filled.
+     * @param content Markdown prose to clean.
+     * @returns Prose with empty links removed and missing destinations filled.
      */
     static cleanLinks(content: string): string;
     /**
      * Will attempt to extract the table of contents when set to and add it to the view model.
-     * @param {import('../wiki.js').UttoriWikiViewModel} viewModel Markdown content to be converted to HTML.
-     * @param {import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>} context A Uttori-like context.
-     * @returns {import('../wiki.js').UttoriWikiViewModel | { toc: string }} The view model.
+     * @param viewModel Markdown content to be converted to HTML.
+     * @param context A Uttori-like context.
+     * @returns The view model.
      * @example <caption>MarkdownItRenderer.viewModelDetail(viewModel, context)</caption>
      * viewModel = MarkdownItRenderer.viewModelDetail(viewModel, context);
-     * @static
      */
-    static viewModelDetail(viewModel: import('../wiki.js').UttoriWikiViewModel, context: import('../../dist/custom.d.ts').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiViewModel | {
+    static viewModelDetail(viewModel: import('../wiki.js').UttoriWikiViewModel, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-markdown-it', MarkdownItRendererConfig>): import('../wiki.js').UttoriWikiViewModel | {
         toc: string;
     };
 }

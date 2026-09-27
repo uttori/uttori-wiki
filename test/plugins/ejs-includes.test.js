@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 
-import EJSRenderer from '../../src/plugins/ejs-includes.js';
+import EJSRenderer from '../../dist/plugins/ejs-includes.js';
 
 
 let sandbox;

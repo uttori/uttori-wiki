@@ -1,63 +1,46 @@
-## Classes
-
-<dl>
-<dt><a href="#ReplacerRenderer">ReplacerRenderer</a></dt>
-<dd><p>Uttori Replacer Renderer</p>
-</dd>
-</dl>
-
-## Typedefs
-
-<dl>
-<dt><a href="#ReplacerRendererRule">ReplacerRendererRule</a> : <code>object</code></dt>
-<dd></dd>
-<dt><a href="#ReplacerRendererConfig">ReplacerRendererConfig</a> : <code>object</code></dt>
-<dd></dd>
-</dl>
-
 <a name="ReplacerRenderer"></a>
 
 ## ReplacerRenderer
 Uttori Replacer Renderer
 
-**Kind**: global class  
+**Kind**: global class\
 
 * [ReplacerRenderer](#ReplacerRenderer)
     * [new ReplacerRenderer()](#new_ReplacerRenderer_new)
-    * [.configKey](#ReplacerRenderer.configKey) ⇒ <code>string</code>
-    * [.defaultConfig()](#ReplacerRenderer.defaultConfig) ⇒ [<code>ReplacerRendererConfig</code>](#ReplacerRendererConfig)
+    * [.configKey](#ReplacerRenderer.configKey) ⇒
+    * [.defaultConfig()](#ReplacerRenderer.defaultConfig) ⇒
     * [.validateConfig(config, [_context])](#ReplacerRenderer.validateConfig)
     * [.register(context)](#ReplacerRenderer.register)
-    * [.renderContent(content, context)](#ReplacerRenderer.renderContent) ⇒ <code>string</code>
-    * [.renderCollection(collection, context)](#ReplacerRenderer.renderCollection) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
-    * [.render(content, config)](#ReplacerRenderer.render) ⇒ <code>string</code>
+    * [.renderContent(content, context)](#ReplacerRenderer.renderContent) ⇒
+    * [.renderCollection(collection, context)](#ReplacerRenderer.renderCollection) ⇒
+    * [.render(content, config)](#ReplacerRenderer.render) ⇒
 
 <a name="new_ReplacerRenderer_new"></a>
 
 ### new ReplacerRenderer()
-**Example** *(ReplacerRenderer)*  
+**Example** *(ReplacerRenderer)*\
 ```js
 const content = ReplacerRenderer.render("...");
 ```
 <a name="ReplacerRenderer.configKey"></a>
 
-### ReplacerRenderer.configKey ⇒ <code>string</code>
+### ReplacerRenderer.configKey ⇒
 The configuration key for plugin to look for in the provided configuration.
 
-**Kind**: static property of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
-**Returns**: <code>string</code> - The configuration key.  
-**Example** *(ReplacerRenderer.configKey)*  
+**Kind**: static property of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
+**Returns**: The configuration key.\
+**Example** *(ReplacerRenderer.configKey)*\
 ```js
 const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
 ```
 <a name="ReplacerRenderer.defaultConfig"></a>
 
-### ReplacerRenderer.defaultConfig() ⇒ [<code>ReplacerRendererConfig</code>](#ReplacerRendererConfig)
+### ReplacerRenderer.defaultConfig() ⇒
 The default configuration.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
-**Returns**: [<code>ReplacerRendererConfig</code>](#ReplacerRendererConfig) - The configuration.  
-**Example** *(ReplacerRenderer.defaultConfig())*  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
+**Returns**: The configuration.\
+**Example** *(ReplacerRenderer.defaultConfig())*\
 ```js
 const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
 ```
@@ -66,14 +49,14 @@ const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[Replacer
 ### ReplacerRenderer.validateConfig(config, [_context])
 Validates the provided configuration for required entries.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| config | <code>Record.&lt;string, ReplacerRendererConfig&gt;</code> | A configuration object. |
-| [_context] | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-replacer&#x27;, ReplacerRendererConfig&gt;</code> | Unused. |
+| Param | Description |
+| --- | --- |
+| config | A configuration object. |
+| [_context] | Unused. |
 
-**Example** *(ReplacerRenderer.validateConfig(config, _context))*  
+**Example** *(ReplacerRenderer.validateConfig(config, _context))*\
 ```js
 ReplacerRenderer.validateConfig({ ... });
 ```
@@ -82,13 +65,13 @@ ReplacerRenderer.validateConfig({ ... });
 ### ReplacerRenderer.register(context)
 Register the plugin with a provided set of events on a provided Hook system.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-replacer&#x27;, ReplacerRendererConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| context | A Uttori-like context. |
 
-**Example** *(ReplacerRenderer.register(context))*  
+**Example** *(ReplacerRenderer.register(context))*\
 ```js
 const context = {
   hooks: {
@@ -109,18 +92,18 @@ ReplacerRenderer.register(context);
 ```
 <a name="ReplacerRenderer.renderContent"></a>
 
-### ReplacerRenderer.renderContent(content, context) ⇒ <code>string</code>
+### ReplacerRenderer.renderContent(content, context) ⇒
 Replace content in a provided string with a provided context.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
-**Returns**: <code>string</code> - The rendered content.  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
+**Returns**: The rendered content.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| content | <code>string</code> | Content to be converted to HTML. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-replacer&#x27;, ReplacerRendererConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| content | Content to be converted to HTML. |
+| context | A Uttori-like context. |
 
-**Example** *(ReplacerRenderer.renderContent(content, context))*  
+**Example** *(ReplacerRenderer.renderContent(content, context))*\
 ```js
 const context = {
   config: {
@@ -133,18 +116,18 @@ ReplacerRenderer.renderContent(content, context);
 ```
 <a name="ReplacerRenderer.renderCollection"></a>
 
-### ReplacerRenderer.renderCollection(collection, context) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
+### ReplacerRenderer.renderCollection(collection, context) ⇒
 Replace content in a collection of Uttori documents with a provided context.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
-**Returns**: <code>Array.&lt;UttoriWikiDocument&gt;</code> - The rendered documents.  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
+**Returns**: The rendered documents.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| collection | <code>Array.&lt;UttoriWikiDocument&gt;</code> | A collection of Uttori documents. |
-| context | <code>UttoriContextWithPluginConfig.&lt;&#x27;uttori-plugin-renderer-replacer&#x27;, ReplacerRendererConfig&gt;</code> | A Uttori-like context. |
+| Param | Description |
+| --- | --- |
+| collection | A collection of Uttori documents. |
+| context | A Uttori-like context. |
 
-**Example** *(ReplacerRenderer.renderCollection(collection, context))*  
+**Example** *(ReplacerRenderer.renderCollection(collection, context))*\
 ```js
 const context = {
   config: {
@@ -157,40 +140,137 @@ ReplacerRenderer.renderCollection(collection, context);
 ```
 <a name="ReplacerRenderer.render"></a>
 
-### ReplacerRenderer.render(content, config) ⇒ <code>string</code>
+### ReplacerRenderer.render(content, config) ⇒
 Replace content in a provided string with a provided set of rules.
 
-**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)  
-**Returns**: <code>string</code> - The rendered content.  
+**Kind**: static method of [<code>ReplacerRenderer</code>](#ReplacerRenderer)\
+**Returns**: The rendered content.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| content | <code>string</code> | Content to be searched through to make replacements. |
-| config | [<code>ReplacerRendererConfig</code>](#ReplacerRendererConfig) | A provided configuration to use. |
+| Param | Description |
+| --- | --- |
+| content | Content to be searched through to make replacements. |
+| config | A provided configuration to use. |
 
-**Example** *(ReplacerRenderer.render(content, config))*  
+**Example** *(ReplacerRenderer.render(content, config))*\
 ```js
 const html = ReplacerRenderer.render(content, config);
 ```
-<a name="ReplacerRendererRule"></a>
 
-## ReplacerRendererRule : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+## TypeScript declarations
 
-| Name | Type | Description |
-| --- | --- | --- |
-| test | <code>string</code> \| <code>RegExp</code> | The test to use for replacing content. |
-| output | <code>string</code> | The output to use for replacing content. |
+<details>
+<summary>View documented types and signatures</summary>
 
-<a name="ReplacerRendererConfig"></a>
+```typescript
+import type { ReplacerRendererConfig } from '../types/plugins/renderer-replacer.js';
+export type { ReplacerRendererRule, ReplacerRendererConfig } from '../types/plugins/renderer-replacer.js';
+/**
+ * Uttori Replacer Renderer
+ * @example <caption>ReplacerRenderer</caption>
+ * const content = ReplacerRenderer.render("...");
+ */
+declare class ReplacerRenderer {
+    /**
+     * The configuration key for plugin to look for in the provided configuration.
+     *
+     * @returns The configuration key.
+     * @example <caption>ReplacerRenderer.configKey</caption>
+     * const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
+     */
+    static get configKey(): 'uttori-plugin-renderer-replacer';
+    /**
+     * The default configuration.
+     * @returns The configuration.
+     * @example <caption>ReplacerRenderer.defaultConfig()</caption>
+     * const config = { ...ReplacerRenderer.defaultConfig(), ...context.config[ReplacerRenderer.configKey] };
+     */
+    static defaultConfig(): import('../custom.js').DefaultPluginConfig<ReplacerRendererConfig, 'rules'>;
+    /**
+     * Validates the provided configuration for required entries.
+     * @param config A configuration object.
+     * @param [_context] Unused.
+     * @example <caption>ReplacerRenderer.validateConfig(config, _context)</caption>
+     * ReplacerRenderer.validateConfig({ ... });
+     */
+    static validateConfig(config: Record<string, ReplacerRendererConfig>, _context?: unknown): void;
+    /**
+     * Register the plugin with a provided set of events on a provided Hook system.
+     * @param context A Uttori-like context.
+     * @example <caption>ReplacerRenderer.register(context)</caption>
+     * const context = {
+     *   hooks: {
+     *     on: (event, callback) => { ... },
+     *   },
+     *   config: {
+     *     [ReplacerRenderer.configKey]: {
+     *       ...,
+     *       events: {
+     *         renderContent: ['render-content', 'render-meta-description'],
+     *         renderCollection: ['render-search-results'],
+     *         validateConfig: ['validate-config'],
+     *       },
+     *     },
+     *   },
+     * };
+     * ReplacerRenderer.register(context);
+     */
+    static register(context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): void;
+    /**
+     * Replace content in a provided string with a provided context.
+     * @param content Content to be converted to HTML.
+     * @param context A Uttori-like context.
+     * @returns The rendered content.
+     * @example <caption>ReplacerRenderer.renderContent(content, context)</caption>
+     * const context = {
+     *   config: {
+     *     [ReplacerRenderer.configKey]: {
+     *       ...,
+     *     },
+     *   },
+     * };
+     * ReplacerRenderer.renderContent(content, context);
+     */
+    static renderContent(content: string, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): string;
+    /**
+     * Replace content in a collection of Uttori documents with a provided context.
+     * @param collection A collection of Uttori documents.
+     * @param context A Uttori-like context.
+     * @returns The rendered documents.
+     * @example <caption>ReplacerRenderer.renderCollection(collection, context)</caption>
+     * const context = {
+     *   config: {
+     *     [ReplacerRenderer.configKey]: {
+     *       ...,
+     *     },
+     *   },
+     * };
+     * ReplacerRenderer.renderCollection(collection, context);
+     */
+    static renderCollection(collection: import('../wiki.js').UttoriWikiDocument[], context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-renderer-replacer', ReplacerRendererConfig>): import('../wiki.js').UttoriWikiDocument[];
+    /**
+     * Replace content in a provided string with a provided set of rules.
+     * @param content Content to be searched through to make replacements.
+     * @param config A provided configuration to use.
+     * @returns The rendered content.
+     * @example <caption>ReplacerRenderer.render(content, config)</caption>
+     * const html = ReplacerRenderer.render(content, config);
+     */
+    static render(content: string, config: ReplacerRendererConfig): string;
+}
+export default ReplacerRenderer;
 
-## ReplacerRendererConfig : <code>object</code>
-**Kind**: global typedef  
-**Properties**
+export interface ReplacerRendererRule {
+    /** The test to use for replacing content. */
+    test: string | RegExp;
+    /** The output to use for replacing content. */
+    output: string;
+}
+export interface ReplacerRendererConfig {
+    /** The rules to use for replacing content. */
+    rules: ReplacerRendererRule[];
+    /** An object whose keys correspond to methods, and contents are events to listen for. */
+    events?: Record<string, string[]>;
+}
+```
 
-| Name | Type | Description |
-| --- | --- | --- |
-| rules | [<code>Array.&lt;ReplacerRendererRule&gt;</code>](#ReplacerRendererRule) | The rules to use for replacing content. |
-| [events] | <code>Record.&lt;string, Array.&lt;string&gt;&gt;</code> | An object whose keys correspond to methods, and contents are events to listen for. |
-
+</details>

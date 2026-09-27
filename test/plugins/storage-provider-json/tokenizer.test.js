@@ -1,5 +1,5 @@
 import test from 'ava';
-import { TokenizeThis } from '../../../src/plugins/storeage-provider-json/tokenizer.js';
+import { TokenizeThis } from '../../../dist/plugins/storeage-provider-json/tokenizer.js';
 
 test('TokenizeThis: It turns a string into tokens!', (t) => {
   const tokenizer = new TokenizeThis();

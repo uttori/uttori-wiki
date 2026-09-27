@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import config from '../src/config.js';
+import config from '../dist/config.js';
 
 test('config can be parsed', (t) => {
   t.notThrows(() => {

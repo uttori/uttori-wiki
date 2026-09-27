@@ -16,7 +16,7 @@ Rendering happens in a pipeline making it easy to render to Markdown, then filte
 
 ## Configuration
 
-Please see `src/config.js` or [the config doc](https://github.com/uttori/uttori-wiki/blob/master/docs/config.md) for all options. Below is an example configuration using some plugins:
+Please see `src/config.ts` or [the config doc](https://github.com/uttori/uttori-wiki/blob/master/docs/config.md) for all options. Below is an example configuration using some plugins:
 
 - [@uttori/storage-provider-json-file](https://github.com/uttori/uttori-storage-provider-json-file)
 - [@uttori/search-provider-lunr](https://github.com/uttori/uttori-search-provider-lunr)
@@ -400,9 +400,7 @@ A flexible form handling plugin for Uttori Wiki that allows you to easily define
 Add the plugin to your Uttori Wiki configuration:
 
 ```javascript
-import FormHandler from './src/plugins/form-handler.js';
-import EmailHandler from './src/plugins/form-handlers/email-handler.js';
-import GoogleDocsHandler from './src/plugins/form-handlers/google-docs-handler.js';
+import { FormHandler, EmailHandler, GoogleDocsHandler } from '@uttori/wiki';
 
 const config = {
   // ... other config
@@ -511,7 +509,7 @@ If no custom handler is provided, the form data will be logged to the console:
 Send form submissions via email using `nodemailer`:
 
 ```javascript
-import EmailHandler from './src/plugins/form-handlers/email-handler.js';
+import { EmailHandler } from '@uttori/wiki';
 
 // In your form configuration
 handler: EmailHandler.create({
@@ -552,7 +550,7 @@ handler: EmailHandler.create({
 Write form submissions to Google Sheets:
 
 ```javascript
-import GoogleDocsHandler from './src/plugins/form-handlers/google-docs-handler.js';
+import { GoogleDocsHandler } from '@uttori/wiki';
 
 // In your form configuration
 handler: GoogleDocsHandler.create({
@@ -840,8 +838,7 @@ The plugin expects the following templates to exist in your theme:
 ### Example Usage
 
 ```javascript
-import UttoriWiki from './src/wiki.js';
-import TagRoutesPlugin from './src/plugins/tag-routes.js';
+import { UttoriWiki, TagRoutesPlugin } from '@uttori/wiki';
 
 const config = {
   plugins: [TagRoutesPlugin],
@@ -864,14 +861,34 @@ This will create routes at `/categories` and `/categories/:tag` with the specifi
 
 ---
 
-## Tests
+## Development and TypeScript
 
-To run the test suite, first install the dependencies, then run `npm test`:
+The source lives in `src/**/*.ts`. `npm run build` cleans `dist/` and emits ESM JavaScript, declarations, and source maps. The package entry points all use `dist/**/*.js`, so JavaScript applications do not need a TypeScript loader. TypeScript sources are included for source and declaration map navigation.
+
+Declaration files retain the source JSDoc, including parameter descriptions, defaults, and examples. Edit types and documentation in `src/`; the build generates all of `dist/`. There is no separate `make-types` step or handwritten declaration patching.
 
 ```bash
 npm install
-DEBUG=Uttori* npm test
+npm run build       # Emit JavaScript and documented declarations
+npm run typecheck   # Check source types without emitting files
+npm run lint        # Check code; warnings fail the command
+npm test            # Build, check public types, and test emitted JavaScript
+npm run test:full   # Include the slower SQLite and embedding tests
+npm run test:types  # Build, then check public package types and augmentation
+npm run make        # Build, then generate Markdown API docs and type signatures
 ```
+
+Coverage maps the compiled JavaScript back to the TypeScript source. `npm pack` and `npm publish` build the package automatically through `prepack`. Use `DEBUG=Uttori* npm test` to enable debug output.
+
+Import public types from the package root or an exported plugin path:
+
+```typescript
+import { config, type UttoriWikiConfig } from '@uttori/wiki';
+
+const settings: UttoriWikiConfig = { ...config, publicUrl: 'https://wiki.example.com' };
+```
+
+See [TypeScript plugin extensions](docs/typescript-plugin-extensions.md) for document augmentation and typed plugin contexts.
 
 ## Contributors
 

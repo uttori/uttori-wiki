@@ -3,7 +3,7 @@ import test from 'ava';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
 import { slow } from '../_helpers/slow.js';
-import SearchSQLitePlugin from '../../src/plugins/search-provider-sqlite.js';
+import SearchSQLitePlugin from '../../dist/plugins/search-provider-sqlite.js';
 
 const folder = 'test/site-search-provider-sqlite';
 

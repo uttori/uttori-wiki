@@ -1,12 +1,10 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import path from 'node:path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'node:child_process';
 import { glob } from 'glob';
 
-// Configuration
 // jsdoc-api stores its cache under the user's home directory, which may be read-only in build environments.
-const config = '--no-cache --configure ./jsdoc.conf.json --private --example-lang js';
-// const template = '--template rm.hbs';
+const config = ['--no-cache', '--configure', './jsdoc.conf.json', '--private', '--example-lang', 'js'];
 
 // Ensure docs directories exist
 const ensureDir = (dir) => {
@@ -15,12 +13,23 @@ const ensureDir = (dir) => {
   }
 };
 
-// Generate documentation for a single file
-const generateDoc = (file, outputPath, useTemplate = false) => {
-  // const cmd = `jsdoc2md ${config} ${useTemplate ? '' : 'template rm.hbs' } ${file} > ${outputPath}`;
-  const cmd = `jsdoc2md ${config} ${file} > ${outputPath}`;
+/** Generate runtime API prose and include native signatures and field JSDoc from declarations. */
+const generateDoc = (file, outputPath) => {
   console.log(`Generating docs for ${file} -> ${outputPath}`);
-  execSync(cmd, { stdio: 'inherit' });
+  const prose = execFileSync('node_modules/.bin/jsdoc2md', [...config, file], { encoding: 'utf8' })
+    .replace(/ {2,}$/gm, '\\').trim();
+  const typeFile = file.replace(/^dist\//, 'dist/types/').replace(/\.js$/, '.d.ts');
+  const declarationFiles = [file.replace(/\.js$/, '.d.ts')];
+  if (fs.existsSync(typeFile)) {
+    declarationFiles.push(typeFile);
+  }
+  // Runtime modules re-export their types; include the adjacent type module so the field JSDoc
+  // remains visible in generated docs as well as in the published declarations.
+  const declarations = declarationFiles.map((declarationFile) => fs.readFileSync(declarationFile, 'utf8')
+    .replace(/^\/\/# sourceMappingURL=.*$/m, '').trim()).join('\n\n');
+  const api = `## TypeScript declarations\n\n<details>\n<summary>View documented types and signatures</summary>\n\n\`\`\`typescript\n${declarations}\n\`\`\`\n\n</details>`;
+  // Write only after generation succeeds, preserving the previous page on a JSDoc error.
+  fs.writeFileSync(outputPath, `${prose}\n\n${api}\n`.trimStart());
 };
 
 // Main execution
@@ -31,9 +40,9 @@ const main = async () => {
   ensureDir('docs');
   ensureDir('docs/plugins');
 
-  // Find all JavaScript files, excluding utilities
-  const files = await glob('src/**/*.js', {
-    ignore: ['src/plugins/utilities/**']
+  // Read the same compiled JavaScript and declarations that package consumers receive.
+  const files = await glob('dist/**/*.js', {
+    ignore: ['dist/plugins/utilities/**', 'dist/types/**', 'dist/custom.js'],
   });
 
   // Separate main files from plugin files
@@ -44,15 +53,14 @@ const main = async () => {
   mainFiles.forEach(file => {
     const baseName = path.basename(file, '.js');
     const outputPath = `docs/${baseName}.md`;
-    // const useTemplate = file === 'src/wiki.js' ? true : false;
-    generateDoc(file, outputPath, false);
+    generateDoc(file, outputPath);
   });
 
   // Generate documentation for plugin files
   pluginFiles.forEach(file => {
     const baseName = path.basename(file, '.js');
     const outputPath = `docs/plugins/${baseName}.md`;
-    generateDoc(file, outputPath, false);
+    generateDoc(file, outputPath);
   });
 
   console.log('Documentation generation complete!');

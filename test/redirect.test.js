@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import { parsePath, prepareTarget, buildPath } from '../src/redirect.js';
+import { parsePath, prepareTarget, buildPath } from '../dist/redirect.js';
 
 test('parsePath: works with no path', (t) => {
   const output = parsePath('');

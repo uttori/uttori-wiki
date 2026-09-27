@@ -2,7 +2,7 @@ import test from 'ava';
 import request from 'supertest';
 import sinon from 'sinon';
 
-import { UttoriWiki } from '../src/index.js';
+import { UttoriWiki } from '../dist/index.js';
 
 import { config, serverSetup, seed } from './_helpers/server.js';
 
@@ -255,7 +255,7 @@ test('historyDetail: compares image field when image ID does not reference attac
 
   // Manually set image ID that doesn't match any attachment to test the branch where
   // newImageAttachment is undefined, so it uses `newImageId`
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [currentDoc] = await uttori.hooks.fetch('storage-get', slug, this);
   currentDoc.image = 'another-missing-id';
   await uttori.hooks.fetch('storage-update', { document: currentDoc, originalSlug: slug }, this);
@@ -346,7 +346,7 @@ test('historyDetail: compares tags when tags are strings', async (t) => {
     wikiFlash }), (response), () => {});
 
   // Manually modify document to have tags as string
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [doc] = await uttori.hooks.fetch('storage-get', slug, this);
   doc.tags = 'tag1';
   await uttori.hooks.fetch('storage-update', { document: doc, originalSlug: slug }, this);
@@ -444,7 +444,7 @@ test('historyDetail: compares redirects when redirects are strings', async (t) =
     wikiFlash }), (response), () => {});
 
   // Manually modify document to have redirects as string
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [doc] = await uttori.hooks.fetch('storage-get', slug, this);
   doc.redirects = 'old-slug';
   await uttori.hooks.fetch('storage-update', { document: doc, originalSlug: slug }, this);
@@ -490,7 +490,7 @@ test('historyDetail: handles image when attachments array does not exist', async
     wikiFlash }), (response), () => {});
 
   // Manually remove attachments to test the branch
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [doc] = await uttori.hooks.fetch('storage-get', slug, this);
   doc.image = 'image-id-1';
   delete doc.attachments;
@@ -576,7 +576,7 @@ test('historyDetail: uses image id when previous revision has no attachments', a
     wikiFlash,
   }, response, () => {});
 
-  /** @type {import('../src/wiki.js').UttoriWikiDocument[]} */
+  /** @type {import('../dist/wiki.js').UttoriWikiDocument[]} */
   const [doc] = await uttori.hooks.fetch('storage-get', slug, uttori);
   doc.image = 'orphan-image-id';
   delete doc.attachments;

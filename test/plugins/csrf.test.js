@@ -2,8 +2,8 @@ import test from 'ava';
 import sinon from 'sinon';
 import request from 'supertest';
 
-import CsrfProtection from '../../src/plugins/csrf.js';
-import { UttoriWiki } from '../../src/index.js';
+import CsrfProtection from '../../dist/plugins/csrf.js';
+import { UttoriWiki } from '../../dist/index.js';
 import { config, serverSetup, seed } from '../_helpers/server.js';
 
 /**
@@ -29,7 +29,7 @@ const makeContext = (configOverrides = {}) => ({
 
 /**
  * Builds a minimal Express-like request object with a mutable session.
- * @param {object} [opts]
+ * @param {object} [opts] Request fields to customize.
  * @param {object} [opts.body] The POST body to attach.
  * @param {object} [opts.headers] The request headers to attach.
  * @param {object|null} [opts.session] The session object (`null` to simulate no session).
@@ -204,7 +204,7 @@ test('register: throws when context.hooks.on is not a function', (t) => {
 });
 
 test('register: throws when events are missing', (t) => {
-  const resolveConfigStub = sinon.stub(CsrfProtection, 'resolveConfig').returns(/** @type {any} */ ({ events: undefined }));
+  const resolveConfigStub = sinon.stub(CsrfProtection, 'resolveConfig').returns(({ events: undefined }));
   t.throws(() => CsrfProtection.register({ hooks: { on: () => {} }, config: {} }), {
     message: 'Missing events to listen to for in \'config.events\'.',
   });

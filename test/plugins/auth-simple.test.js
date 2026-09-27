@@ -2,9 +2,9 @@ import test from 'ava';
 import sinon from 'sinon';
 import request from 'supertest';
 
-import AuthSimple from '../../src/plugins/auth-simple.js';
+import AuthSimple from '../../dist/plugins/auth-simple.js';
 import { config, seed, serverSetup } from '../_helpers/server.js';
-import UttoriWiki from '../../src/wiki.js';
+import UttoriWiki from '../../dist/wiki.js';
 
 
 let sandbox;

@@ -1,7 +1,7 @@
 import test from 'ava';
-import SearchProvider from '../../../src/plugins/utilities/search-lunr.js';
+import SearchProvider from '../../../dist/plugins/utilities/search-lunr.js';
 import localeFr from 'lunr-languages/lunr.fr.js';
-import SearchLunrPlugin from '../../../src/plugins/search-provider-lunr.js';
+import SearchLunrPlugin from '../../../dist/plugins/search-provider-lunr.js';
 
 const documents = [
   {

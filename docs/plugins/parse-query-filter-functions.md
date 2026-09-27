@@ -1,137 +1,136 @@
 ## Functions
 
 <dl>
-<dt><a href="#isBetween">isBetween(value, min, max)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#isBetween">isBetween(value, min, max)</a> ⇒</dt>
 <dd><p>Checks if a value is between two bounds.</p>
 </dd>
-<dt><a href="#isIn">isIn(list, value)</a> ⇒ <code>boolean</code></dt>
+<dt><a href="#isIn">isIn(list, value)</a> ⇒</dt>
 <dd><p>Checks if a value is included in a list.</p>
 </dd>
-<dt><a href="#toOperands">toOperands(nodeValue)</a> ⇒ <code>Array.&lt;ParserOperand&gt;</code></dt>
+<dt><a href="#toOperands">toOperands(nodeValue)</a> ⇒</dt>
 <dd><p>Normalize an AST node value to its operand list.</p>
 </dd>
-<dt><a href="#getFieldValue">getFieldValue(item, fieldOperand)</a> ⇒ <code>unknown</code></dt>
+<dt><a href="#getFieldValue">getFieldValue(item, fieldOperand)</a> ⇒</dt>
 <dd><p>Read a field value from an item using a parser operand as the key.</p>
 </dd>
-<dt><a href="#toArray">toArray(value)</a> ⇒ <code>Array.&lt;unknown&gt;</code></dt>
+<dt><a href="#toArray">toArray(value)</a> ⇒</dt>
 <dd><p>Coerce a value to an array for INCLUDES/EXCLUDES checks.</p>
 </dd>
-<dt><a href="#parseQueryToFilterFunctions">parseQueryToFilterFunctions(ast)</a> ⇒ <code><a href="#QueryFilterFunction">QueryFilterFunction</a></code></dt>
+<dt><a href="#parseQueryToFilterFunctions">parseQueryToFilterFunctions(ast)</a> ⇒</dt>
 <dd><p>Using default SQL tree output, iterate over that to convert to items to be checked group by group (AND, OR), prop by prop to filter functions.
 Both <code>+</code> and <code>-</code> should be done in a pre-parser step or before the query is constructed, or after results are returned.</p>
 </dd>
 </dl>
 
-## Typedefs
-
-<dl>
-<dt><a href="#QueryFilterItem">QueryFilterItem</a> : <code>Record.&lt;string, unknown&gt;</code></dt>
-<dd><p>Document-like object passed to query filter functions.</p>
-</dd>
-<dt><a href="#QueryFilterFunction">QueryFilterFunction</a> ⇒ <code>boolean</code></dt>
-<dd></dd>
-</dl>
-
 <a name="isBetween"></a>
 
-## isBetween(value, min, max) ⇒ <code>boolean</code>
+## isBetween(value, min, max) ⇒
 Checks if a value is between two bounds.
 
-**Kind**: global function  
-**Returns**: <code>boolean</code> - Returns true if the value is between the min and max.  
+**Kind**: global function\
+**Returns**: Returns true if the value is between the min and max.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>unknown</code> | The value to check. |
-| min | <code>unknown</code> | The minimum value. |
-| max | <code>unknown</code> | The maximum value. |
+| Param | Description |
+| --- | --- |
+| value | The value to check. |
+| min | The minimum value. |
+| max | The maximum value. |
 
 <a name="isIn"></a>
 
-## isIn(list, value) ⇒ <code>boolean</code>
+## isIn(list, value) ⇒
 Checks if a value is included in a list.
 
-**Kind**: global function  
-**Returns**: <code>boolean</code> - Returns true if the value is in the list.  
+**Kind**: global function\
+**Returns**: Returns true if the value is in the list.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| list | <code>unknown</code> | The list of values to check. |
-| value | <code>unknown</code> | The value to check. |
+| Param | Description |
+| --- | --- |
+| list | The list of values to check. |
+| value | The value to check. |
 
 <a name="toOperands"></a>
 
-## toOperands(nodeValue) ⇒ <code>Array.&lt;ParserOperand&gt;</code>
+## toOperands(nodeValue) ⇒
 Normalize an AST node value to its operand list.
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;ParserOperand&gt;</code> - The operands for the operator.  
+**Kind**: global function\
+**Returns**: The operands for the operator.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| nodeValue | <code>SqlWhereParserValue</code> | The AST node value. |
+| Param | Description |
+| --- | --- |
+| nodeValue | The AST node value. |
 
 <a name="getFieldValue"></a>
 
-## getFieldValue(item, fieldOperand) ⇒ <code>unknown</code>
+## getFieldValue(item, fieldOperand) ⇒
 Read a field value from an item using a parser operand as the key.
 
-**Kind**: global function  
-**Returns**: <code>unknown</code> - The field value.  
+**Kind**: global function\
+**Returns**: The field value.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| item | [<code>QueryFilterItem</code>](#QueryFilterItem) | The item to read from. |
-| fieldOperand | <code>ParserOperand</code> | The field name operand. |
+| Param | Description |
+| --- | --- |
+| item | The item to read from. |
+| fieldOperand | The field name operand. |
 
 <a name="toArray"></a>
 
-## toArray(value) ⇒ <code>Array.&lt;unknown&gt;</code>
+## toArray(value) ⇒
 Coerce a value to an array for INCLUDES/EXCLUDES checks.
 
-**Kind**: global function  
-**Returns**: <code>Array.&lt;unknown&gt;</code> - The normalized array.  
+**Kind**: global function\
+**Returns**: The normalized array.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| value | <code>unknown</code> | The value to normalize. |
+| Param | Description |
+| --- | --- |
+| value | The value to normalize. |
 
 <a name="parseQueryToFilterFunctions"></a>
 
-## parseQueryToFilterFunctions(ast) ⇒ [<code>QueryFilterFunction</code>](#QueryFilterFunction)
+## parseQueryToFilterFunctions(ast) ⇒
 Using default SQL tree output, iterate over that to convert to items to be checked group by group (AND, OR), prop by prop to filter functions.
 Both `+` and `-` should be done in a pre-parser step or before the query is constructed, or after results are returned.
 
-**Kind**: global function  
-**Returns**: [<code>QueryFilterFunction</code>](#QueryFilterFunction) - The top level filter function.  
+**Kind**: global function\
+**Returns**: The top level filter function.\
 
-| Param | Type | Description |
-| --- | --- | --- |
-| ast | <code>SqlWhereParserAst</code> | The parsed output of SqlWhereParser to be filtered. |
+| Param | Description |
+| --- | --- |
+| ast | The parsed output of SqlWhereParser to be filtered. |
 
-**Example** *(parseQueryToFilterFunctions(ast))*  
+**Example** *(parseQueryToFilterFunctions(ast))*\
 ```js
 const whereFunctions = parseQueryToFilterFunctions(ast);
 return objects.filter(whereFunctions);
 ➜ [{ ... }, { ... }, ...]
 ```
-<a name="parseQueryToFilterFunctions..operations"></a>
 
-### parseQueryToFilterFunctions~operations : [<code>Array.&lt;QueryFilterFunction&gt;</code>](#QueryFilterFunction)
-**Kind**: inner constant of [<code>parseQueryToFilterFunctions</code>](#parseQueryToFilterFunctions)  
-<a name="QueryFilterItem"></a>
+## TypeScript declarations
 
-## QueryFilterItem : <code>Record.&lt;string, unknown&gt;</code>
-Document-like object passed to query filter functions.
+<details>
+<summary>View documented types and signatures</summary>
 
-**Kind**: global typedef  
-<a name="QueryFilterFunction"></a>
+```typescript
+import type { SqlWhereParserAst } from '../../custom.js';
+import type { QueryFilterFunction } from '../../types/plugins/storeage-provider-json/parse-query-filter-functions.js';
+export type { QueryFilterItem, QueryFilterFunction, } from '../../types/plugins/storeage-provider-json/parse-query-filter-functions.js';
+/**
+ * Using default SQL tree output, iterate over that to convert to items to be checked group by group (AND, OR), prop by prop to filter functions.
+ * Both `+` and `-` should be done in a pre-parser step or before the query is constructed, or after results are returned.
+ * @param ast The parsed output of SqlWhereParser to be filtered.
+ * @returns The top level filter function.
+ * @example <caption>parseQueryToFilterFunctions(ast)</caption>
+ * const whereFunctions = parseQueryToFilterFunctions(ast);
+ * return objects.filter(whereFunctions);
+ * ➜ [{ ... }, { ... }, ...]
+ */
+declare const parseQueryToFilterFunctions: (ast: SqlWhereParserAst) => QueryFilterFunction;
+export default parseQueryToFilterFunctions;
 
-## QueryFilterFunction ⇒ <code>boolean</code>
-**Kind**: global typedef  
-**Returns**: <code>boolean</code> - Whether the item matches the query.  
+/** Document-like object passed to query filter functions. */
+export type QueryFilterItem = Record<string, unknown>;
+export type QueryFilterFunction = (item: QueryFilterItem) => boolean;
+```
 
-| Param | Type | Description |
-| --- | --- | --- |
-| item | [<code>QueryFilterItem</code>](#QueryFilterItem) | The item to test. |
-
+</details>

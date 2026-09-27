@@ -1,0 +1,1 @@
+{"version":3,"file":"plugin-method.js","sourceRoot":"","sources":["../../../../src/types/plugins/utilities/plugin-method.ts"],"names":[],"mappings":"","sourcesContent":["/** A hook method selected dynamically from plugin configuration. */\nexport type PluginMethod = (...args: never[]) => unknown;\n"]}

@@ -3,7 +3,7 @@ import express from 'express';
 import { promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import StaticSiteGenerator from '../../src/plugins/static-site-generator.js';
+import StaticSiteGenerator from '../../dist/plugins/static-site-generator.js';
 
 test('export validates links and retains the previous complete build', async (t) => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'uttori-static-'));
