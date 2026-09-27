@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased](https://github.com/uttori/uttori-wiki/compare/v9.2.0...HEAD)
 
-## [9.1.0](https://github.com/uttori/uttori-wiki/compare/v9.1.0...v9.2.0) - 2026-09-27
+## [9.2.0](https://github.com/uttori/uttori-wiki/compare/v9.1.0...v9.2.0) - 2026-09-27
 
 - 🧰 Add Mermaid chart support
 - 🛠 Migrate to TypeScript fully
