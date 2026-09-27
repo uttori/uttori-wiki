@@ -23,6 +23,7 @@ The bundled markdown extensions (always on when this renderer is used):
 | **youtube** | `<youtube v="ID" width="560" height="315">` becomes a privacy-friendly embed. | Write the tag inline. |
 | **video** | `<video src="...">` becomes a safe embed; external sources must be allow-listed. | Write the tag; allow hosts via `allowedExternalDomains`. |
 | **uttori-inline** | Link/image post-processing: lazy loading, external `rel`/`target`, `baseUrl` prefixing, `color:#hex` pseudo-links. | Driven by the `uttori` options below. |
+| **mermaid** | Escaped diagram source ready for Mermaid on the host page. | Use a fenced `mermaid` block; disable with `markdownIt.uttori.mermaid: false`. |
 | **line-breaker** | Converts literal `<br>` in inline content to hard breaks. | Automatic. |
 
 ## What it doesn't do
@@ -72,6 +73,7 @@ const config = {
 | `markdownIt.uttori.baseUrl` | `''` | Prefix prepended to relative link hrefs (handy when mounted under a sub-path). |
 | `markdownIt.uttori.allowedExternalDomains` | `[]` | Hosts that get `rel="external noopener noreferrer"` instead of `nofollow`. |
 | `markdownIt.uttori.openNewWindow` | `true` | Add `target="_blank"` to external links. |
+| `markdownIt.uttori.mermaid` | `true` | Render Mermaid fences as `pre.mermaid`; `false` uses the normal code renderer. |
 | `markdownIt.uttori.lazyImages` | `true` | Add `loading="lazy"` to images. |
 | `markdownIt.uttori.disableValidation` | `false` | Bypass markdown-it link validation (risky). |
 | `markdownIt.uttori.toc.extract` | `false` | Split the rendered TOC out into `viewModel.toc`. |
@@ -79,6 +81,31 @@ const config = {
 | `markdownIt.uttori.toc.slugify` | `{ lower: true }` | Slugify options for heading anchors. |
 | `markdownIt.uttori.wikilinks.slugify` | `{ lower: true }` | Slugify options for `[[wikilink]]` targets. |
 | `markdownIt.uttori.footnotes.*` | built-in helpers | Customize footnote markup. |
+
+## Mermaid Diagrams
+
+Use a fenced code block with the language `mermaid`:
+
+````markdown
+```mermaid
+flowchart TD
+  A[Markdown] --> B[HTML]
+  B --> C[Diagram]
+```
+````
+
+We emit `<pre class="mermaid">` containing escaped diagram source. Fences accept backticks or tildes, case-insensitive `mermaid`, and metadata after the language name. Flowcharts, sequence, class, state, ER, Gantt, pie, mindmap, timeline, git graphs, and other diagram types are passed through without a diagram-type allowlist. Support for a particular syntax depends on the Mermaid version loaded by the host page.
+
+You will need to load Mermaid once in your site's browser entry point, following the [Mermaid integration guide](https://mermaid.js.org/config/usage.html). For a browser bundle with `mermaid` installed:
+
+```javascript
+import mermaid from 'mermaid';
+
+mermaid.initialize({ startOnLoad: false, securityLevel: 'strict' });
+await mermaid.run({ querySelector: 'pre.mermaid' });
+```
+
+You will need to uun this after the document content is in the DOM. For dynamic previews, call `mermaid.run()` again after inserting the new HTML, selecting the preview's `pre.mermaid` nodes. Static exports need the same runtime in their page template. Set `markdownIt.uttori.mermaid: false` to render diagrams as ordinary `language-mermaid` code blocks.
 
 ## Good to know
 

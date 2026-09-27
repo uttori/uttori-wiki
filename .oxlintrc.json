@@ -43,8 +43,23 @@
     "src/**/*.png"
   ],
   "rules": {
+    "approx-constant": "error",
+    "bad-bitwise-operator": "error",
+    "branches-sharing-code": "error",
     "no-array-constructor": "error",
+    "no-empty": [
+      "error",
+      {
+        "allowEmptyCatch": true
+      }
+    ],
+    "no-nested-ternary": "error",
+    "no-param-reassign": "off",
+    "no-plusplus": "off",
+    "no-underscore-dangle": "off",
     "no-unused-expressions": "error",
+    "no-unused-labels": "error",
+    "no-unused-private-class-members": "error",
     "no-unused-vars": [
       "error",
       {
@@ -54,12 +69,7 @@
       }
     ],
     "no-useless-constructor": "error",
-    "no-empty": [
-      "error",
-      {
-        "allowEmptyCatch": true
-      }
-    ],
+
     "@stylistic/indent": [
       "error",
       2
@@ -84,27 +94,12 @@
         "minimumDescriptionLength": 10
       }
     ],
-    "typescript/no-duplicate-enum-values": "error",
-    "typescript/no-empty-object-type": "error",
-    "typescript/no-explicit-any": "error",
-    "typescript/no-extra-non-null-assertion": "error",
-    "typescript/no-invalid-void-type": "error",
-    "typescript/no-misused-new": "error",
-    "typescript/no-namespace": "error",
-    "typescript/no-non-null-asserted-nullish-coalescing": "error",
-    "typescript/no-non-null-asserted-optional-chain": "error",
-    "typescript/no-non-null-assertion": "error",
-    "typescript/no-require-imports": "error",
-    "typescript/no-this-alias": "error",
-    "typescript/no-unnecessary-type-constraint": "error",
-    "typescript/no-unsafe-declaration-merging": "error",
-    "typescript/no-unsafe-function-type": "error",
-    "typescript/no-wrapper-object-types": "error",
-    "typescript/prefer-as-const": "error",
-    "typescript/prefer-literal-enum-member": "error",
-    "typescript/prefer-namespace-keyword": "error",
-    "typescript/triple-slash-reference": "error",
-    "typescript/unified-signatures": "error",
+    "typescript/consistent-return": [
+      "warn",
+      {
+        "treatUndefinedAsUnspecified": false
+      }
+    ],
     "typescript/adjacent-overload-signatures": "error",
     "typescript/array-type": "error",
     "typescript/ban-tslint-comment": "error",
@@ -113,18 +108,44 @@
     "typescript/consistent-type-assertions": "error",
     "typescript/consistent-type-definitions": "error",
     "typescript/no-confusing-non-null-assertion": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-empty-object-type": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-extra-non-null-assertion": "error",
     "typescript/no-inferrable-types": "error",
+    "typescript/no-invalid-void-type": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-nullish-coalescing": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-non-null-assertion": "error",
+    "typescript/no-require-imports": "error",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-assertion": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-argument": "error",
+    "typescript/no-unsafe-assignment": "warn",
+    "typescript/no-unsafe-call": "warn",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-enum-comparison": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-unsafe-member-access": "error",
+    "typescript/no-unsafe-return": "warn",
+    "typescript/no-unsafe-unary-minus": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/only-throw-error": "error",
+    "typescript/prefer-as-const": "error",
     "typescript/prefer-for-of": "error",
     "typescript/prefer-function-type": "error",
-    "typescript/no-unsafe-argument": "warn",
-    "typescript/no-unsafe-member-access": "warn",
-    "typescript/no-unsafe-return": "warn",
-    "typescript/consistent-return": [
-      "warn",
-      {
-        "treatUndefinedAsUnspecified": false
-      }
-    ]
+    "typescript/prefer-literal-enum-member": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/require-await": "off",
+    "typescript/restrict-plus-operands": "error",
+    "typescript/restrict-template-expressions": "error",
+    "typescript/triple-slash-reference": "error",
+    "typescript/unbound-method": "off",
+    "typescript/unified-signatures": "error"
   },
   "overrides": [
     {

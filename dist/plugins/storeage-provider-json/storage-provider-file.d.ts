@@ -40,19 +40,32 @@ export type StorageProviderJsonFileConfig = {
      */
     events?: Record<string, string[]>;
 };
-/**
- * @typedef StorageProviderJsonFileConfig The configuration object for the StorageProviderJsonFile.
- * @property {string} contentDirectory The directory to store documents.
- * @property {string} historyDirectory The directory to store document histories.
- * @property {string} [extension] The file extension to use for file.
- * @property {string} [sidecarContentExtension] When set, load Markdown content from a matching sidecar file and reject writes. For example, `md` pairs `page.json` with `page.md`.
- * @property {boolean} [updateTimestamps] Should update times be marked at the time of edit.
- * @property {boolean} [useHistory] Should history entries be created.
- * @property {boolean} [useCache] Should we cache files in memory?
- * @property {number} [spacesDocument] The spaces parameter for JSON stringifying documents.
- * @property {number} [spacesHistory] The spaces parameter for JSON stringifying history.
- * @property {Record<string, string[]>} [events] The events to listen for.
- */
+export type SidecarMetadata = {
+    /**
+     * Document slug; must match the metadata filename.
+     */
+    slug: string;
+    /**
+     * Document title.
+     */
+    title: string;
+    /**
+     * Optional summary.
+     */
+    excerpt?: string;
+    /**
+     * Optional tag list.
+     */
+    tags?: unknown[];
+    /**
+     * Optional creation time in Unix milliseconds.
+     */
+    createDate?: number;
+    /**
+     * Optional update time in Unix milliseconds.
+     */
+    updateDate?: number;
+};
 /**
  * Storage for Uttori documents using JSON files stored on the local file system.
  * @property {StorageProviderJsonFileConfig} config The configuration object.

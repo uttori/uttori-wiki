@@ -21,6 +21,44 @@ const debug = createDebug('Uttori.StorageProvider.JSON');
  */
 
 /**
+ * Metadata stored beside a Markdown sidecar. Body text stays in the paired file.
+ * @typedef {object} SidecarMetadata
+ * @property {string} slug Document slug; must match the metadata filename.
+ * @property {string} title Document title.
+ * @property {string} [excerpt] Optional summary.
+ * @property {unknown[]} [tags] Optional tag list.
+ * @property {number} [createDate] Optional creation time in Unix milliseconds.
+ * @property {number} [updateDate] Optional update time in Unix milliseconds.
+ */
+
+/**
+ * Accept sidecar JSON only when the filename slug and required fields are intact.
+ * @param {unknown} value Parsed sidecar JSON.
+ * @param {string} slug Slug taken from the metadata filename.
+ * @returns {value is SidecarMetadata} Whether the value can be paired with Markdown content.
+ */
+const isSidecarMetadata = (value, slug) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) return false;
+  if (Object.hasOwn(value, 'content') || Object.hasOwn(value, 'html')) return false;
+  const {
+    slug: metadataSlug,
+    title,
+    excerpt,
+    tags,
+    createDate,
+    updateDate,
+  } = /** @type {Record<string, unknown>} */ (value);
+  if (metadataSlug !== slug) return false;
+  if (typeof title !== 'string' || !title.trim()) return false;
+  if (excerpt !== undefined && typeof excerpt !== 'string') return false;
+  if (tags !== undefined && !Array.isArray(tags)) return false;
+  if (createDate !== undefined && (typeof createDate !== 'number' || !Number.isFinite(createDate))) return false;
+  if (updateDate !== undefined && (typeof updateDate !== 'number' || !Number.isFinite(updateDate))) return false;
+  return true;
+};
+
+/**
  * Storage for Uttori documents using JSON files stored on the local file system.
  * @property {StorageProviderJsonFileConfig} config The configuration object.
  * @property {Record<string, import('./wiki.js').UttoriWikiDocument>} documents The collection of documents where the slug is the key and the value is the document.
@@ -86,29 +124,28 @@ class StorageProviderJsonFile {
     const metadataPath = path.join(this.config.contentDirectory, name);
     const slug = path.basename(name, `.${this.config.extension}`);
     const contentPath = path.join(this.config.contentDirectory, `${slug}.${this.config.sidecarContentExtension}`);
+    /** @type {unknown} */
     let metadata;
     try {
       metadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
     } catch (error) {
-      throw new Error(`Invalid metadata at ${metadataPath}: ${error.message}`, { cause: error });
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Invalid metadata at ${metadataPath}: ${message}`, { cause: error });
     }
-    if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)
-      || metadata.slug !== slug || !/^[a-z0-9][a-z0-9-]*$/.test(slug)
-      || typeof metadata.title !== 'string' || !metadata.title.trim()
-      || (metadata.excerpt !== undefined && typeof metadata.excerpt !== 'string')
-      || (metadata.tags !== undefined && !Array.isArray(metadata.tags))
-      || (metadata.createDate !== undefined && !Number.isFinite(metadata.createDate))
-      || (metadata.updateDate !== undefined && !Number.isFinite(metadata.updateDate))
-      || Object.hasOwn(metadata, 'content') || Object.hasOwn(metadata, 'html')) {
+    if (!isSidecarMetadata(metadata, slug)) {
       throw new Error(`Invalid sidecar metadata or mismatched slug at ${metadataPath}`);
     }
     let content;
     try {
       content = await fs.readFile(contentPath, 'utf8');
     } catch (error) {
-      throw new Error(`Missing or unreadable content at ${contentPath}: ${error.message}`, { cause: error });
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Missing or unreadable content at ${contentPath}: ${message}`, { cause: error });
     }
-    return { ...metadata, content };
+    return /** @type {import('../../wiki.js').UttoriWikiDocument} */ ({
+      ...metadata,
+      content,
+    });
   };
 
   /**

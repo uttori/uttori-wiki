@@ -4,6 +4,7 @@
  * - External Links with Domain Filters
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
+ * - Mermaid fenced diagrams (requires Mermaid on the host page)
  * @param {import('markdown-it').MarkdownIt} md The MarkdownIt instance.
  * @returns {import('markdown-it').MarkdownIt} The MarkdownIt instance.
  */

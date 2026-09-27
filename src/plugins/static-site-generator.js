@@ -133,7 +133,9 @@ class StaticSiteGenerator {
     if (!app || !Array.isArray(routes) || routes.length === 0 || !outputDirectory) {
       throw new Error('Static export requires an app, routes, and outputDirectory.');
     }
+    /** @type {Set<string>} */
     const destinations = new Set();
+    /** @type {Set<string>} */
     const urls = new Set();
     for (const route of routes) {
       const output = StaticSiteGenerator.outputPath(route);
@@ -147,6 +149,7 @@ class StaticSiteGenerator {
     if (canonicalOrigin && destinations.has('sitemap.xml')) throw new Error('Route overlaps sitemap.xml');
     if (searchDocuments.length) destinations.add('search-index.json');
     if (canonicalOrigin) destinations.add('sitemap.xml');
+    /** @type {string[]} */
     const assetTargets = [];
     for (const asset of assets) {
       const target = StaticSiteGenerator.safeRelative(asset.target);
@@ -158,15 +161,26 @@ class StaticSiteGenerator {
     const parent = path.dirname(outputDirectory);
     await fs.mkdir(parent, { recursive: true });
     const staging = await fs.mkdtemp(path.join(parent, '.uttori-static-'));
+    /** @type {Map<string, string>} */
     const pages = new Map();
-    let server;
+    /** @type {import('http').Server | undefined} */
+    let server = undefined;
     try {
       server = await new Promise((resolve, reject) => {
         const listener = app.listen(0, '127.0.0.1');
         listener.once('error', reject);
-        listener.once('listening', () => resolve(listener));
+        listener.once('listening', () => {
+          resolve(listener);
+        });
       });
-      const origin = `http://127.0.0.1:${server.address().port}`;
+      if (!server) {
+        throw new Error('Static export listener did not start.');
+      }
+      const address = server.address();
+      if (!address || typeof address === 'string') {
+        throw new Error('Static export listener did not bind a TCP port.');
+      }
+      const origin = `http://127.0.0.1:${address.port}`;
       for (const route of routes) {
         const html = await StaticSiteGenerator.capture(origin, route);
         pages.set(route.url, html);
@@ -209,7 +223,19 @@ class StaticSiteGenerator {
       }
       return { pages: routes.length, assets: assets.length };
     } finally {
-      if (server) await new Promise((resolve) => server.close(resolve));
+      if (server) {
+        /** @type {Promise<void>} */
+        const closed = new Promise((resolve) => {
+          if (!server) {
+            resolve();
+            return;
+          }
+          server.close(() => {
+            resolve();
+          });
+        });
+        await closed;
+      }
       await fs.rm(staging, { recursive: true, force: true });
     }
   }

@@ -68,6 +68,7 @@ export * from './plugins/markdown-it-plugin/uttori-inline.js';
 export * from './plugins/markdown-it-plugin/line-breaker.js';
 export * from './plugins/markdown-it-plugin/markdown-it-plugin.js';
 export * from './plugins/markdown-it-plugin/examples.js';
+export * from './plugins/markdown-it-plugin/mermaid.js';
 
 export * from './plugins/storeage-provider-json/fisher-yates-shuffle.js';
 export * from './plugins/storeage-provider-json/operator.js';

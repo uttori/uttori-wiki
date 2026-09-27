@@ -21,6 +21,7 @@ const debug = createDebug('Uttori.Plugin.Render.MarkdownIt');
  * @property {boolean} disableValidation Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled.
  * @property {boolean} openNewWindow Open external domains in a new window.
  * @property {boolean} lazyImages Add lazy loading params to image tags.
+ * @property {boolean} [mermaid] Defaults to true.Emit escaped Mermaid fences as `pre.mermaid` for client-side rendering, false keeps ordinary code blocks.
  * @property {Record<string, MarkdownItExample>} [examples] Registered editable input and expected output for `[example:id]` blocks.
  * @property {object} [footnotes] Footnote settings.
  * @property {Function} footnotes.referenceTag A funciton to return the default HTML for a footnote reference.
@@ -115,6 +116,7 @@ class MarkdownItRenderer {
           disableValidation: false,
           openNewWindow: true,
           lazyImages: true,
+          mermaid: true,
           footnotes: {
             referenceTag,
             definitionOpenTag,
@@ -320,7 +322,7 @@ class MarkdownItRenderer {
     const md = createParser(config);
 
     // Clean up the content.
-    content = MarkdownItRenderer.cleanContent(content);
+    content = MarkdownItRenderer.cleanContent(content, md);
     return md.render(content).trim();
   }
 
@@ -343,18 +345,46 @@ class MarkdownItRenderer {
     const md = createParser(config);
 
     // Clean up the content.
-    content = MarkdownItRenderer.cleanContent(content);
+    content = MarkdownItRenderer.cleanContent(content, md);
     return md.parse(content, {});
   }
 
   /**
-   * Removes empty links, as these have caused issues.
-   * Find missing links, and link them to the slug from the provided text.
+   * Removes empty links and fills placeholder links outside fenced and indented code.
+   * Code source is preserved so diagram labels and code examples are not rewritten.
    * @param {string} content Markdown content to be converted to HTML.
+   * @param {import('markdown-it').MarkdownIt} [md] Parser used to recognize code boundaries, including nested blocks.
    * @returns {string} The rendered content.
    * @static
    */
-  static cleanContent(content) {
+  static cleanContent(content, md = new MarkdownIt()) {
+    // Only scan block boundaries when cleanup could change the input. MarkdownIt's
+    // line maps handle nested, tilde, and unclosed fences without a second fence grammar.
+    if (!/\[.*]\(\s?\)/.test(content)) return content;
+    const normalized = content.replace(/\r\n?/g, '\n').replace(/\0/g, '\uFFFD');
+    /** @type {import('markdown-it').Token[]} */
+    const tokens = [];
+    md.block.parse(normalized, md, {}, tokens);
+    const lines = normalized.split(/(?<=\n)/);
+    const parts = [];
+    let start = 0;
+    for (const token of tokens) {
+      if ((token.type !== 'fence' && token.type !== 'code_block') || !token.map) continue;
+      const [first, last] = token.map;
+      parts.push(MarkdownItRenderer.cleanLinks(lines.slice(start, first).join('')));
+      parts.push(lines.slice(first, last).join(''));
+      start = last;
+    }
+    parts.push(MarkdownItRenderer.cleanLinks(lines.slice(start).join('')));
+    return parts.join('');
+  }
+
+  /**
+   * Apply legacy placeholder-link cleanup to a source region known to be outside code.
+   * @param {string} content Markdown prose to clean.
+   * @returns {string} Prose with empty links removed and missing destinations filled.
+   */
+  static cleanLinks(content) {
     // Remove empty links, as these have caused issues.
     content = content.replace(/\[]\(\)/g, '');
 

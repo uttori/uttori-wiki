@@ -1,7 +1,15 @@
-/** Escape registered example data before inserting it into trusted component markup. */
-const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({
-  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;',
-})[character]);
+/**
+ * Escape registered example data before inserting it into trusted component markup.
+ * @param {unknown} value Raw example text.
+ * @returns {string} HTML-escaped text.
+ */
+const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => {
+  if (character === '&') return '&amp;';
+  if (character === '<') return '&lt;';
+  if (character === '>') return '&gt;';
+  if (character === '"') return '&quot;';
+  return '&#39;';
+});
 
 /**
  * Render a known `[example:id]` block as a static source/result pair. The
@@ -18,7 +26,10 @@ export function exampleBlock(state, startLine, _endLine, silent) {
   const end = state.eMarks[startLine];
   const marker = /^\[example:([a-z0-9-]+)]$/.exec(state.src.slice(start, end).trim());
   if (!marker) return false;
-  const example = state.md.options.uttori?.examples?.[marker[1]];
+  const { uttori } = /** @type {import('../renderer-markdown-it.js').MarkdownItRendererOptions} */ (
+    /** @type {unknown} */ (state.md.options)
+  );
+  const example = uttori?.examples?.[marker[1]];
   if (!example) throw new Error(`Unknown Markdown example ID: ${marker[1]}`);
   if (silent) return true;
   if (typeof example.source !== 'string' || typeof example.expectedOutput !== 'string') {

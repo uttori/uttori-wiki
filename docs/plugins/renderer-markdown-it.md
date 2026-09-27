@@ -45,7 +45,8 @@ Uttori MarkdownIt Renderer
     * [.renderCollection(collection, context)](#MarkdownItRenderer.renderCollection) ⇒ <code>Array.&lt;UttoriWikiDocument&gt;</code>
     * [.render(content, [config])](#MarkdownItRenderer.render) ⇒ <code>string</code>
     * [.parse(content, [config])](#MarkdownItRenderer.parse) ⇒ <code>Array.&lt;module:markdown-it~Token&gt;</code>
-    * [.cleanContent(content)](#MarkdownItRenderer.cleanContent) ⇒ <code>string</code>
+    * [.cleanContent(content, [md])](#MarkdownItRenderer.cleanContent) ⇒ <code>string</code>
+    * [.cleanLinks(content)](#MarkdownItRenderer.cleanLinks) ⇒ <code>string</code>
     * [.viewModelDetail(viewModel, context)](#MarkdownItRenderer.viewModelDetail) ⇒ <code>UttoriWikiViewModel</code> \| <code>Object</code>
 
 <a name="new_MarkdownItRenderer_new"></a>
@@ -220,9 +221,9 @@ const tokens = MarkdownItRenderer.parse(content, config);
 ```
 <a name="MarkdownItRenderer.cleanContent"></a>
 
-### MarkdownItRenderer.cleanContent(content) ⇒ <code>string</code>
-Removes empty links, as these have caused issues.
-Find missing links, and link them to the slug from the provided text.
+### MarkdownItRenderer.cleanContent(content, [md]) ⇒ <code>string</code>
+Removes empty links and fills placeholder links outside fenced and indented code.
+Code source is preserved so diagram labels and code examples are not rewritten.
 
 **Kind**: static method of [<code>MarkdownItRenderer</code>](#MarkdownItRenderer)  
 **Returns**: <code>string</code> - The rendered content.  
@@ -230,6 +231,19 @@ Find missing links, and link them to the slug from the provided text.
 | Param | Type | Description |
 | --- | --- | --- |
 | content | <code>string</code> | Markdown content to be converted to HTML. |
+| [md] | <code>module:markdown-it~MarkdownIt</code> | Parser used to recognize code boundaries, including nested blocks. |
+
+<a name="MarkdownItRenderer.cleanLinks"></a>
+
+### MarkdownItRenderer.cleanLinks(content) ⇒ <code>string</code>
+Apply legacy placeholder-link cleanup to a source region known to be outside code.
+
+**Kind**: static method of [<code>MarkdownItRenderer</code>](#MarkdownItRenderer)  
+**Returns**: <code>string</code> - Prose with empty links removed and missing destinations filled.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| content | <code>string</code> | Markdown prose to clean. |
 
 <a name="MarkdownItRenderer.viewModelDetail"></a>
 
@@ -286,6 +300,7 @@ Creates the parser shared by render and parse so both paths use the same link ru
 | disableValidation | <code>boolean</code> |  | Optionally disable the built in Markdown-It link validation, large security risks when link validation is disabled. |
 | openNewWindow | <code>boolean</code> |  | Open external domains in a new window. |
 | lazyImages | <code>boolean</code> |  | Add lazy loading params to image tags. |
+| [mermaid] | <code>boolean</code> |  | Defaults to true.Emit escaped Mermaid fences as `pre.mermaid` for client-side rendering, false keeps ordinary code blocks. |
 | [examples] | <code>Record.&lt;string, MarkdownItExample&gt;</code> |  | Registered editable input and expected output for `[example:id]` blocks. |
 | [footnotes] | <code>object</code> |  | Footnote settings. |
 | footnotes.referenceTag | <code>function</code> |  | A funciton to return the default HTML for a footnote reference. |

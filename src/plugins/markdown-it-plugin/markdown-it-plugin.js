@@ -6,6 +6,7 @@ import { video } from './video.js';
 import { uttoriInline } from './uttori-inline.js';
 import { lineBreaker } from './line-breaker.js';
 import { exampleBlock } from './examples.js';
+import { mermaid } from './mermaid.js';
 
 /**
  * Extend MarkdownIt with Uttori specific items:
@@ -13,10 +14,12 @@ import { exampleBlock } from './examples.js';
  * - External Links with Domain Filters
  * - Footnote Support with `[^label]` & `[^label]: Definition`
  * - Image Lazyloading
+ * - Mermaid fenced diagrams (requires Mermaid on the host page)
  * @param {import('markdown-it').MarkdownIt} md The MarkdownIt instance.
  * @returns {import('markdown-it').MarkdownIt} The MarkdownIt instance.
  */
 function Plugin(md) {
+  mermaid(md);
   // Registered examples become trusted static components before paragraphs are parsed.
   md.block.ruler.before('paragraph', 'example', exampleBlock);
   /**

@@ -38,6 +38,10 @@ export type MarkdownItRendererOptionsUttori = {
      */
     lazyImages: boolean;
     /**
+     * Defaults to true.Emit escaped Mermaid fences as `pre.mermaid` for client-side rendering, false keeps ordinary code blocks.
+     */
+    mermaid?: boolean;
+    /**
      * Registered editable input and expected output for `[example:id]` blocks.
      */
     examples?: Record<string, MarkdownItExample>;
@@ -228,13 +232,20 @@ declare class MarkdownItRenderer {
      */
     static parse(content: string, config?: MarkdownItRendererConfig): import('markdown-it').Token[];
     /**
-     * Removes empty links, as these have caused issues.
-     * Find missing links, and link them to the slug from the provided text.
+     * Removes empty links and fills placeholder links outside fenced and indented code.
+     * Code source is preserved so diagram labels and code examples are not rewritten.
      * @param {string} content Markdown content to be converted to HTML.
+     * @param {import('markdown-it').MarkdownIt} [md] Parser used to recognize code boundaries, including nested blocks.
      * @returns {string} The rendered content.
      * @static
      */
-    static cleanContent(content: string): string;
+    static cleanContent(content: string, md?: import('markdown-it').MarkdownIt): string;
+    /**
+     * Apply legacy placeholder-link cleanup to a source region known to be outside code.
+     * @param {string} content Markdown prose to clean.
+     * @returns {string} Prose with empty links removed and missing destinations filled.
+     */
+    static cleanLinks(content: string): string;
     /**
      * Will attempt to extract the table of contents when set to and add it to the view model.
      * @param {import('../wiki.js').UttoriWikiViewModel} viewModel Markdown content to be converted to HTML.

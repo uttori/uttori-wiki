@@ -6,6 +6,7 @@ Extend MarkdownIt with Uttori specific items:
 - External Links with Domain Filters
 - Footnote Support with `[^label]` & `[^label]: Definition`
 - Image Lazyloading
+- Mermaid fenced diagrams (requires Mermaid on the host page)
 
 **Kind**: global function  
 **Returns**: <code>module:markdown-it~MarkdownIt</code> - The MarkdownIt instance.  
