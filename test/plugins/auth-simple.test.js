@@ -221,7 +221,7 @@ test('AuthSimple.login(context): returns a Express route and will call next if v
 });
 
 test('AuthSimple.login(context): returns a Express route and can successfully login', async (t) => {
-  t.plan(4);
+  t.plan(5);
   const loginPath = '/login';
   const context = {
     config: {
@@ -254,7 +254,8 @@ test('AuthSimple.login(context): returns a Express route and can successfully lo
     .set('Content-Type', 'application/json')
     .send({ token: 'abcd' });
   t.is(response.status, 302);
-  t.is(response.text, '<p>Found. Redirecting to /1</p>');
+  t.is(response.headers.location, '/1');
+  t.is(response.type, 'text/html');
 
   const response2 = await request(server)
     .post(loginPath)
@@ -266,7 +267,7 @@ test('AuthSimple.login(context): returns a Express route and can successfully lo
 });
 
 test('AuthSimple.login(context): returns a Express route and can fail to login', async (t) => {
-  t.plan(4);
+  t.plan(5);
   const loginPath = '/login';
   const context = {
     config: {
@@ -299,7 +300,8 @@ test('AuthSimple.login(context): returns a Express route and can fail to login',
     .set('Content-Type', 'application/json')
     .send({ token: 'abcd' });
   t.is(response.status, 302);
-  t.is(response.text, '<p>Found. Redirecting to /login</p>');
+  t.is(response.headers.location, '/login');
+  t.is(response.type, 'text/html');
 
   const response2 = await request(server).post(loginPath)
     .set('Accept', 'application/json')
@@ -310,7 +312,7 @@ test('AuthSimple.login(context): returns a Express route and can fail to login',
 });
 
 test('AuthSimple.login(context): returns a Express route and can attempt to logout as HTML', async (t) => {
-  t.plan(4);
+  t.plan(5);
   const loginPath = '/login';
   const logoutPath = '/logout';
   const context = {
@@ -341,7 +343,8 @@ test('AuthSimple.login(context): returns a Express route and can attempt to logo
   AuthSimple.bindRoutes(server, context);
   const response = await request(server).post(logoutPath).set('Accept', 'text/html');
   t.is(response.status, 302);
-  t.is(response.text, '<p>Found. Redirecting to /2</p>');
+  t.is(response.headers.location, '/2');
+  t.is(response.type, 'text/html');
 
   const response2 = await request(server).post(logoutPath).set('Accept', 'application/json');
   t.is(response2.status, 200);

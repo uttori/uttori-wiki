@@ -1,11 +1,10 @@
 import { createDebug } from '../../debug.js';
 import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
-import Database from 'better-sqlite3';
-import * as sqliteVec from 'sqlite-vec';
 import validateQuery from '../storeage-provider-json/validate-query.js';
-import { retrieve as retrieveFromDatabase } from '../chat-bot/retrieval.js';
 const debug = createDebug('Uttori.SearchProvider.SQLite');
+const loadModule = createRequire(import.meta.url);
 import { ensureChatIndexSchema, indexDocumentInDatabase, removeIndexedDocumentFromDatabase, } from '../chat-bot/index-documents.js';
 /**
  * Normalize an AST node value to its operand list.
@@ -68,8 +67,12 @@ class SearchProviderSQLite {
      * Open the SQLite database and create core tables.
      *
      * @returns The database.
+     * @throws If the SQLite driver or vector extension cannot be loaded.
      */
     openDatabase = () => {
+        // Defer optional SQLite dependencies while keeping database initialization synchronous.
+        const Database = loadModule('better-sqlite3');
+        const sqliteVec = loadModule('sqlite-vec');
         const options = {
             ...(this.config.databaseOptions ?? {}),
             ...(this.config.databseOptions ?? {}),
@@ -935,6 +938,8 @@ class SearchProviderSQLite {
         if (!query) {
             return { query: '', chunks: [], citations: [] };
         }
+        // The retrieval module also imports SQLite dependencies.
+        const { retrieve: retrieveFromDatabase } = await import('../chat-bot/retrieval.js');
         return retrieveFromDatabase(query, {
             ...this.config,
             chunkLimit: limit ?? this.config.chunkLimit,

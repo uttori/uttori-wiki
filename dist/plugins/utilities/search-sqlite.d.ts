@@ -20,6 +20,7 @@ declare class SearchProviderSQLite {
      * Open the SQLite database and create core tables.
      *
      * @returns The database.
+     * @throws If the SQLite driver or vector extension cannot be loaded.
      */
     openDatabase: () => import('better-sqlite3').Database;
     /**

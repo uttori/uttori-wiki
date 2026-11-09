@@ -1,8 +1,17 @@
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import test from 'ava';
 
 const root = new URL('../', import.meta.url);
 const manifest = JSON.parse(await fs.readFile(new URL('package.json', root), 'utf8'));
+
+test('the lockfile keeps optional runtime dependencies in production installs', async (t) => {
+  const lockfile = JSON.parse(await fs.readFile(new URL('package-lock.json', root), 'utf8'));
+  for (const name of Object.keys(manifest.optionalDependencies)) {
+    const entry = lockfile.packages[`node_modules/${name}`];
+    t.true(Boolean(entry) && !entry.dev, name);
+  }
+});
 
 test('public package entry points resolve to emitted JavaScript and declarations', async (t) => {
   t.is(manifest.main, 'dist/index.js');
@@ -17,6 +26,32 @@ test('public package entry points resolve to emitted JavaScript and declarations
     await fs.access(new URL(entry.types, root));
     await t.notThrowsAsync(import(specifier), specifier);
   }
+});
+
+test('the wiki starts with JSON storage and Lunr when SQLite packages are absent', (t) => {
+  t.notThrows(() => execFileSync(process.execPath, ['--input-type=module', '--eval', `
+    import assert from 'node:assert/strict';
+    import { registerHooks } from 'node:module';
+    import express from 'express';
+
+    // Simulate missing optional packages in a fresh process without altering node_modules.
+    registerHooks({
+      resolve(specifier, context, nextResolve) {
+        if (specifier === 'better-sqlite3' || specifier === 'sqlite-vec') {
+          throw new Error('SQLite package unavailable: ' + specifier);
+        }
+        return nextResolve(specifier, context);
+      },
+    });
+
+    const { UttoriWiki, StorageProviderJsonMemory, SearchProviderLunr } = await import('@uttori/wiki');
+    const wiki = new UttoriWiki({
+      plugins: [StorageProviderJsonMemory, SearchProviderLunr],
+      [SearchProviderLunr.configKey]: SearchProviderLunr.defaultConfig(),
+    }, express());
+    assert.ok(wiki.hooks.events['storage-add']);
+    assert.ok(wiki.hooks.events['search-query']);
+  `], { cwd: root }));
 });
 
 test('published declarations retain JSDoc and map to shipped TypeScript sources', async (t) => {

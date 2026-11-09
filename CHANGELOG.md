@@ -6,7 +6,13 @@ All notable changes to this project will be documented in this file. This projec
 
 - Discord Notifications
 
-## [Unreleased](https://github.com/uttori/uttori-wiki/compare/v9.2.0...HEAD)
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/v9.3.0...HEAD)
+
+## [9.2.0](https://github.com/uttori/uttori-wiki/compare/v9.2.0...v9.3.0) - 2026-11-08
+
+- 🪲 Load `better-sqlite3` and `sqlite-vec` only when `SearchProviderSQLite` opens a database, so other providers can run without SQLite.
+- 🪲 Keep optional runtime dependencies available in `npm ci --omit=dev` installs by removing duplicate development entries.
+- 🎁 Upgrade dependencies, including Express 5.3, EJS 7, and `@uttori/data-tools` 5.
 
 ## [9.2.0](https://github.com/uttori/uttori-wiki/compare/v9.1.0...v9.2.0) - 2026-09-27
 
