@@ -6,9 +6,15 @@ All notable changes to this project will be documented in this file. This projec
 
 - Discord Notifications
 
-## [Unreleased](https://github.com/uttori/uttori-wiki/compare/v9.3.0...HEAD)
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.3.1...HEAD)
 
-## [9.2.0](https://github.com/uttori/uttori-wiki/compare/v9.2.0...v9.3.0) - 2026-11-08
+## [9.3.1](https://github.com/uttori/uttori-wiki/compare/9.3.0...9.3.1) - 2026-11-18
+
+- 🪲 JSON analytics starts with empty counters when its visits file is missing and persists them on the first update. Existing unreadable or malformed files still raise an error.
+- 🪲 JSON analytics accepts its default popular-document limit of 10 when the configuration omits it.
+- 📝 Update the Express startup example to use the exported `UttoriWiki` constructor and plugin lifecycle events.
+
+## [9.3.0](https://github.com/uttori/uttori-wiki/compare/9.2.0...9.3.0) - 2026-11-08
 
 - 🪲 Load `better-sqlite3` and `sqlite-vec` only when `SearchProviderSQLite` opens a database, so other providers can run without SQLite.
 - 🪲 Keep optional runtime dependencies available in `npm ci --omit=dev` installs by removing duplicate development entries.

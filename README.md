@@ -321,8 +321,7 @@ Use in an example Express.js app:
 // Server
 import express from 'express';
 
-// Reference the Uttori Wiki middleware
-import { wiki as middleware } from '@uttori/wiki';
+import { UttoriWiki, wikiFlash } from '@uttori/wiki';
 
 // Pull in our custom config, example above
 import config from './config.js';
@@ -338,11 +337,18 @@ app.set('ip', process.env.IP || '127.0.0.1');
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Setup the wiki, could also mount under a sub directory path with other applications
-app.use('/', middleware(config));
+// Apply the view engine and layout settings from the configuration above before mounting routes.
+app.use(wikiFlash.middleware);
+for (const [method, ...args] of config.middleware) {
+  app[method](...args);
+}
+app.use(express.static(config.publicPath));
 
-// Listen for connections
-app.listen(app.get('port'), app.get('ip'), () => {
+const wiki = new UttoriWiki(config, app);
+wiki.hooks.dispatch('before-server-listening', app, wiki);
+
+const server = app.listen(app.get('port'), app.get('ip'), () => {
+  wiki.hooks.dispatch('server-listening', server, wiki);
   console.log('✔ listening at %s:%d', app.get('ip'), app.get('port'));
 });
 ```

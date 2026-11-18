@@ -54,7 +54,9 @@ class AnalyticsPlugin {
                 debug('Config Error: `directory` is required should be the path to the location you want the JSON file to be writtent to.');
                 throw new Error('directory is required should be the path to the location you want the JSON file to be writtent to.');
             }
-            if (!config[AnalyticsPlugin.configKey].limit || typeof config[AnalyticsPlugin.configKey].limit !== 'number') {
+            // Validate the same effective limit that getPopularDocuments passes to the provider.
+            const { limit } = { ...AnalyticsPlugin.defaultConfig(), ...config[AnalyticsPlugin.configKey] };
+            if (!limit || typeof limit !== 'number') {
                 debug('Config Error: `limit` is required should be the number of documents to return.');
                 throw new Error('limit is required should be the number of documents to return.');
             }

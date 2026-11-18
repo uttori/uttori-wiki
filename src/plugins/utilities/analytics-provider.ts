@@ -24,7 +24,8 @@ class AnalyticsProvider {
   declare pageVisits: AnalyticsProviderPageVisits;
 
   /**
-   * Creates an instance of AnalyticsProvider.
+   * Loads persisted counters. A new store is written on the first update.
+   * @throws When existing counters cannot be read or parsed.
    * @param config A configuration object.
    */
   constructor(config: AnalyticsProviderConfig) {
@@ -46,7 +47,14 @@ class AnalyticsProvider {
 
     fs.mkdirSync(this.config.directory, { recursive: true });
 
-    this.pageVisits = JSON.parse(fs.readFileSync(path.join(this.config.directory, `${this.config.name}.${this.config.extension}`), 'utf8')) as Record<string, number>;
+    const filename = path.join(this.config.directory, `${this.config.name}.${this.config.extension}`);
+    try {
+      this.pageVisits = JSON.parse(fs.readFileSync(filename, 'utf8')) as AnalyticsProviderPageVisits;
+    } catch (error) {
+      // Only a missing store starts empty. An unreadable or corrupt file needs attention.
+      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+      this.pageVisits = {};
+    }
   }
 
   /**

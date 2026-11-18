@@ -49,6 +49,12 @@ test('AnalyticsPlugin.validateConfig(config, _context): throws when limit is not
   }, { message: 'limit is required should be the number of documents to return.' });
 });
 
+test('AnalyticsPlugin.validateConfig(config, _context): accepts the default limit', (t) => {
+  t.notThrows(() => AnalyticsPlugin.validateConfig()({
+    [AnalyticsPlugin.configKey]: { directory: './' },
+  }));
+});
+
 test('AnalyticsPlugin.validateConfig(config, _context): can validate', (t) => {
   t.notThrows(() => {
     AnalyticsPlugin.validateConfig()({

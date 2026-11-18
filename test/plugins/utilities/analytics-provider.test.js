@@ -1,4 +1,6 @@
 import fs from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import test from 'ava';
 import AnalyticsProvider from '../../../dist/plugins/utilities/analytics-provider.js';
 
@@ -13,6 +15,20 @@ const config = {
 
 test('constructor(config): does not error', (t) => {
   t.notThrows(() => new AnalyticsProvider(config));
+});
+
+test('constructor(config): a fresh store persists on first update and preserves existing data', async (t) => {
+  const directory = await fs.mkdtemp(path.join(tmpdir(), 'uttori-visits-'));
+  t.teardown(() => fs.rm(directory, { recursive: true, force: true }));
+  const file = path.join(directory, 'visits.json');
+  const analytics = new AnalyticsProvider({ directory });
+  t.is(analytics.get('start'), 0);
+  t.is(analytics.update('start'), 1);
+  t.is(new AnalyticsProvider({ directory }).get('start'), 1);
+
+  await fs.writeFile(file, 'invalid json');
+  t.throws(() => new AnalyticsProvider({ directory }), { instanceOf: SyntaxError });
+  t.is(await fs.readFile(file, 'utf8'), 'invalid json');
 });
 
 test('constructor(config): throws an error when missing config', (t) => {

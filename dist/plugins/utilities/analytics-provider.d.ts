@@ -11,7 +11,8 @@ declare class AnalyticsProvider {
     /** The page visits object. */
     pageVisits: AnalyticsProviderPageVisits;
     /**
-     * Creates an instance of AnalyticsProvider.
+     * Loads persisted counters. A new store is written on the first update.
+     * @throws When existing counters cannot be read or parsed.
      * @param config A configuration object.
      */
     constructor(config: AnalyticsProviderConfig);
