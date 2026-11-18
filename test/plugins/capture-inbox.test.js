@@ -14,29 +14,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { CaptureInbox, ImportDocument, McpProvider, SearchProviderLunr, StorageProviderJsonFile, UttoriWiki } from '../../dist/index.js';
 
-/**
- * Build a real single-page PDF so the inbox runs Uttori's parser with an actual text layer.
- * @returns {Buffer} PDF with one searchable line.
- */
-function pdfFixture() {
-  const stream = 'BT /F1 12 Tf 72 700 Td (PDF pressure calibration 17.) Tj ET';
-  const objects = [
-    '<< /Type /Catalog /Pages 2 0 R >>',
-    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
-    '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>',
-    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
-    `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`,
-  ];
-  let pdf = '%PDF-1.4\n';
-  const offsets = objects.map((object, index) => {
-    const offset = pdf.length;
-    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
-    return offset;
-  });
-  const xref = pdf.length;
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map(offset => String(offset).padStart(10, '0') + ' 00000 n \n').join('')}`;
-  return Buffer.from(pdf + `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
-}
+import { pdfFixture } from '../_helpers/pdf.js';
 
 /**
  * Extract the server-issued state and CSRF token from a review screen.
@@ -176,7 +154,7 @@ test.serial('browser capture inbox resumes URL extraction and publication, then 
   t.deepEqual(results.map(document => document.slug), ['captured-guide']);
 
   const token = formState((await get(inbox)).text)._csrf;
-  const upload = await browser.post(inbox + '/pdf').set(auth).field('_csrf', token).attach('pdf', pdfFixture(), {
+  const upload = await browser.post(inbox + '/pdf').set(auth).field('_csrf', token).attach('pdf', pdfFixture(['PDF pressure calibration 17.']), {
     filename: 'calibration.pdf', contentType: 'application/pdf',
   });
   t.is(upload.status, 303);
@@ -235,9 +213,9 @@ test.serial('approved PDF and URL captures write Git sidecars and verify private
   t.is(spawnSync('git', ['add', 'content'], { cwd: wikiRoot }).status, 0);
 
   const htmlQuote = 'Captured HTML sensor drift is 3 mm.';
-  const pdfQuote = 'PDF pressure calibration 17.';
+  const pdfQuote = 'PDF pressure calibration 17% (tolerance %20).';
   const html = Buffer.from(`<h1>Sensor report</h1><p>${htmlQuote}</p><p>Private capture context.</p>`);
-  const pdf = pdfFixture();
+  const pdf = pdfFixture(['Cover sheet', '', pdfQuote]);
   const upstream = express();
   upstream.get('/report', (_req, response) => response.type('html').send(html));
   const upstreamServer = upstream.listen(0, '127.0.0.1');

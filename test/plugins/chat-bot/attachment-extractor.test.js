@@ -2,9 +2,8 @@ import test from 'ava';
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import sinon from 'sinon';
-import { PdfReader } from 'pdfreader';
-import { extractAttachmentText } from '../../../dist/plugins/chat-bot/attachment-extractor.js';
+import { pdfFixture } from '../../_helpers/pdf.js';
+import { extractAttachmentText, extractPdfText } from '../../../dist/plugins/chat-bot/attachment-extractor.js';
 
 /**
  * Minimal config containing the attachments root.
@@ -16,7 +15,7 @@ const makeConfig = (root) => ({ attachmentsRoot: root });
 /**
  * Write an attachment fixture in a temporary directory.
  * @param {string} name Filename to write.
- * @param {string} content File contents.
+ * @param {string | Buffer} content File contents.
  * @returns {Promise<{ dir: string, name: string }>} Fixture directory and filename.
  */
 async function writeTempFile(name, content) {
@@ -93,56 +92,17 @@ test('extractAttachmentText: returns empty string for unsupported file extension
   t.is(result, '');
 });
 
-test.serial('extractAttachmentText: returns empty string when PDF parser errors', async (t) => {
-  const pdfSandbox = sinon.createSandbox();
-  try {
-    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
-      cb(new Error('parse failed'));
-    });
-    const { dir, name } = await writeTempFile('document.pdf', Buffer.from('not a real pdf file'));
-    const config = makeConfig(dir);
-    const result = await extractAttachmentText(config, { path: name });
-    fs.rmSync(dir, { recursive: true });
-    t.is(result, '');
-  } finally {
-    pdfSandbox.restore();
-  }
+test('extractAttachmentText: keeps malformed PDFs out of indexed text', async (t) => {
+  const { dir, name } = await writeTempFile('broken.dat', 'Invalid PDF');
+  t.teardown(() => fs.rmSync(dir, { recursive: true }));
+  t.is(await extractAttachmentText(makeConfig(dir), { path: name, type: 'application/pdf' }), '');
 });
 
-test.serial('extractAttachmentText: returns empty string for PDF detected via mime type', async (t) => {
-  const pdfSandbox = sinon.createSandbox();
-  try {
-    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
-      cb(new Error('parse failed'));
-    });
-    const { dir, name } = await writeTempFile('document.dat', Buffer.from('not a real pdf file'));
-    const config = makeConfig(dir);
-    const result = await extractAttachmentText(config, { path: name, type: 'application/pdf' });
-    fs.rmSync(dir, { recursive: true });
-    t.is(result, '');
-  } finally {
-    pdfSandbox.restore();
-  }
-});
-
-test.serial('extractAttachmentText: extracts page-separated text from valid PDF buffers', async (t) => {
-  const pdfSandbox = sinon.createSandbox();
-  try {
-    pdfSandbox.stub(PdfReader.prototype, 'parseBuffer').callsFake((_buffer, cb) => {
-      cb(null, { page: 1, text: 'Page one text' });
-      cb(null, { page: 2, text: 'Page two text' });
-      cb(null, null);
-    });
-
-    const { dir, name } = await writeTempFile('manual.pdf', Buffer.from('%PDF-1.4 fake'));
-    const config = makeConfig(dir);
-    const result = await extractAttachmentText(config, { path: name, type: 'application/pdf' });
-    fs.rmSync(dir, { recursive: true });
-
-    t.true(result.includes('[Page 1]'));
-    t.true(result.includes('Page one text'));
-    t.true(result.includes('[Page 2]\nPage two text'));
-  } finally {
-    pdfSandbox.restore();
-  }
+test('extractPdfText: preserves literal text and physical page numbers across blank pages', async (t) => {
+  const bytes = pdfFixture(['Page one text', '', 'Page three: 97% (%20)']);
+  const { dir, name } = await writeTempFile('manual.pdf', bytes);
+  t.teardown(() => fs.rmSync(dir, { recursive: true }));
+  t.is(await extractAttachmentText(makeConfig(dir), { path: name }), '[Page 1]\nPage one text\n\n---\n\n[Page 3]\nPage three: 97% (%20)');
+  t.is(await extractPdfText(pdfFixture([''])), '');
+  await t.throwsAsync(extractPdfText(Buffer.alloc(0)), { message: /empty PDF/ });
 });

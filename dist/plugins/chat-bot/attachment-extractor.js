@@ -2,7 +2,6 @@ import { createDebug } from '../../debug.js';
 import path from 'node:path';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
-import { PdfReader } from 'pdfreader';
 const debug = createDebug('Uttori.Plugin.AIChatBot.AttachmentExtractor');
 /**
  * Extract text from an attachment.
@@ -51,35 +50,29 @@ export async function extractAttachmentText(config, attachment) {
  * @returns Page-labeled text, or an empty string when the PDF has no text layer.
  * @throws {Error} If the PDF parser rejects the original.
  */
-export function extractPdfText(buffer) {
-    return new Promise((resolve, reject) => {
-        const pages = [];
-        let page = 0;
-        let chunks = [];
-        const flush = () => {
-            const text = chunks.join(' ').trim();
-            if (page && text)
-                pages.push(`[Page ${page}]\n${text}`);
-            chunks = [];
-        };
-        new PdfReader().parseBuffer(buffer, (error, item) => {
-            if (error) {
-                reject(new Error(String(error)));
-                return;
-            }
-            if (!item) {
-                // The parser emits no following page event for the last page or for single-page files.
-                flush();
-                resolve(pages.join('\n\n---\n\n'));
-                return;
-            }
-            if (item.page !== undefined && item.page !== page) {
-                flush();
-                page = item.page;
-            }
-            if (item.text)
-                chunks.push(item.text);
+export async function extractPdfText(buffer) {
+    // The parser emits no completion event for an empty buffer.
+    if (!buffer.length)
+        throw new Error('Cannot parse an empty PDF.');
+    const { default: PDFParser } = await import('pdf2json');
+    const parser = new PDFParser();
+    try {
+        const { Pages } = await new Promise((resolve, reject) => {
+            parser.on('pdfParser_dataReady', resolve);
+            parser.on('pdfParser_dataError', error => reject(error instanceof Error ? error : new Error(String(error.parserError))));
+            parser.parseBuffer(buffer, 0);
         });
-    });
+        const pages = [];
+        for (const [index, page] of Pages.entries()) {
+            // A style change inside a text block need not separate words. The parser supplies literal text, including percent signs.
+            const text = page.Texts.map(block => block.R.map(run => run.T).join('')).filter(Boolean).join(' ').trim();
+            if (text)
+                pages.push(`[Page ${index + 1}]\n${text}`);
+        }
+        return pages.join('\n\n---\n\n');
+    }
+    finally {
+        parser.destroy();
+    }
 }
 //# sourceMappingURL=attachment-extractor.js.map

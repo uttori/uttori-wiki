@@ -24,7 +24,7 @@ const config = {
 };
 ```
 
-`authorize` must check identity and permission established by your application. Set optional `middleware` on the inbox config if it should run additional authentication middleware before that check. Install the optional `multer` and `pdfreader` packages for PDF uploads and extraction. URL captures of HTML use the existing importer’s Pandoc conversion and require `pandoc` on the server's PATH. Enabling the inbox uses importer code directly and leaves the importer’s legacy routes disabled unless you separately enable them.
+`authorize` must check identity and permission established by your application. Set optional `middleware` on the inbox config if it should run additional authentication middleware before that check. Install the optional `multer` and `pdf2json` packages for PDF uploads and extraction. URL captures of HTML use the existing importer’s Pandoc conversion and require `pandoc` on the server's PATH. Enabling the inbox uses importer code directly and leaves the importer’s legacy routes disabled unless you separately enable them.
 
 ## Capture and review
 

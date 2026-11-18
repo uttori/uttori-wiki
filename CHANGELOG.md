@@ -4,9 +4,22 @@ All notable changes to this project will be documented in this file. This projec
 
 ## PLANNED / TODO / WIP
 
-- Discord Notifications
+- Discord notifications.
+- The development dependency audit still reports nine findings under `c8` and `release-it` (five high and four moderate) as of 9.4.1.
 
-## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.4.0...HEAD)
+### Current capture and skill limits
+
+- The importer extracts embedded PDF text. Image-only pages require OCR or manual transcription before their text can be quoted and verified.
+- The Capture Inbox supports one publishing wiki process per checkout. A maintainer reviews and commits the resulting Git diff.
+- Structural lint checks page targets. Heading fragments, raw HTML links, custom routes, and the factual support for claims require review.
+
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.4.1...HEAD)
+
+## [9.4.1](https://github.com/uttori/uttori-wiki/compare/9.4.0...9.4.1) - 2026-11-18
+
+- Replace `pdfreader` and its pinned `pdf2json` 3.x and `@xmldom/xmldom` dependencies with the optional `pdf2json` 4.1.1 parser. This removes all three production npm audit findings from the release lockfile.
+- Preserve physical page numbers across blank pages and literal text such as `17%` and `%20` in PDF captures and indexed attachments. Existing citations continue to use the original bytes and importer text pinned at approval.
+- Verify a real multipage PDF through browser approval, Git sidecar publication, and exact-quote checks through the bundled CLI and authenticated MCP endpoint. A clean install of the 9.4.1 package also verified a quote archived with the 9.4.0 parser.
 
 ## [9.4.0](https://github.com/uttori/uttori-wiki/compare/9.3.1...9.4.0) - 2026-11-18
 
@@ -15,6 +28,9 @@ All notable changes to this project will be documented in this file. This projec
 - Add a maintainer Capture Inbox for PDF uploads and allowed URLs. Preview drafts and publish to mutable storage or Git sidecars while keeping original bytes and citation text private.
 - Publish a reviewed sidecar set as one wiki generation. Reads stay available during interrupted publication, and resuming finishes the approved changes and search indexing.
 - Verify exact quotations against pinned archive revisions through the local CLI and authorized MCP tool. Report missing or changed evidence explicitly.
+- Record approved Git captures in the topic, digest-based source note, `wiki-index`, and `wiki-log`. Identical originals reuse the source note. Keep URL parameters, upload filenames, and unapproved draft text in the private inbox unless a maintainer includes them in reviewed page content.
+- Check both the archived original and importer text for captured citations. Return the matching line range, a mismatch, or an unavailable-revision result without returning private archive text.
+- Preserve existing aliases when merging or renaming, rewrite inbound Markdown links and wikilinks, and recheck the reviewed corpus before applying the change.
 - Update dependencies and the lockfile, including Google APIs 190, better-sqlite3 13.2, Nodemailer 10.6, and oxlint 1.94.
 
 ## [9.3.1](https://github.com/uttori/uttori-wiki/compare/9.3.0...9.3.1) - 2026-11-18
