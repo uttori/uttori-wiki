@@ -867,6 +867,26 @@ This will create routes at `/categories` and `/categories/:tag` with the specifi
 
 ---
 
+## Agent-maintained wiki
+
+`@uttori/wiki` includes the [`uttori-llm-wiki` Agent Skill](skills/uttori-llm-wiki/SKILL.md) for ingesting curated sources, answering with citations, and linting a Git-managed wiki. The agent edits Markdown and JSON sidecars in the checkout. Uttori reads and serves those files.
+
+1. Install a release of `@uttori/wiki` that includes the skill. Copy `node_modules/@uttori/wiki/skills/uttori-llm-wiki` into your agent client's skill directory, then ask it to use `uttori-llm-wiki` to set up a wiki in your checkout.
+2. Point `StorageProviderJsonFile` at the wiki's `content/` directory with `sidecarContentExtension: 'md'` and `useHistory: false`. Set `allowCRUDRoutes: false` and `publicHistory: false` in the wiki config. Use Git for review and history. Restart or rebuild the site and its search index after publishing changed files. See [sidecar configuration](PLUGINS/storage-provider-json-file.md#markdownjson-sidecars).
+3. Put a curated Markdown source under the wiki's private `raw/` directory and ask the agent to ingest it. Review the Git diff, ask a question against the wiki, or run the structural check from the project that installed `@uttori/wiki`:
+
+   ```sh
+   node node_modules/@uttori/wiki/skills/uttori-llm-wiki/scripts/lint.mjs <wiki-root>
+   ```
+
+Keep `raw/` and the maintainer's `WIKI.md` outside published content and static asset directories. Source-note metadata, including archive-relative filenames, is visible to clients that can read full wiki records. Use public-safe filenames and review the derived pages before publishing. For mutable JSON-file wikis, the [MCP provider's hosted edits](PLUGINS/mcp-provider.md#hosted-edits) can apply an authenticated, reviewed ingest over HTTP. Git-managed sidecars are edited in their checkout.
+
+Use the [citation verifier](skills/uttori-llm-wiki/references/citations.md) to check exact quotes against the original archive revision. Hosted queries can use the [opt-in MCP verifier](PLUGINS/mcp-provider.md#revision-verified-citations).
+
+The [rename and merge workflow](skills/uttori-llm-wiki/references/refactors.md) previews inbound link changes and preserves old slugs as redirects for both local sidecars and authenticated hosted writes.
+
+The [Capture Inbox](PLUGINS/capture-inbox.md) gives maintainers a browser queue for PDF and URL captures, draft review, and resumable publication. Its sidecar mode records approved captures in the Git checkout and keeps the original bytes and citation text in the private inbox.
+
 ## Development and TypeScript
 
 The source lives in `src/**/*.ts`. `npm run build` cleans `dist/` and emits ESM JavaScript, declarations, and source maps. The package entry points all use `dist/**/*.js`, so JavaScript applications do not need a TypeScript loader. TypeScript sources are included for source and declaration map navigation.

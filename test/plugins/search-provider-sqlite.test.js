@@ -1,5 +1,7 @@
 import { promises as fs } from 'node:fs';
 import test from 'ava';
+import sinon from 'sinon';
+import OllamaEmbedder from '../../dist/plugins/chat-bot/ollama-embedder.js';
 import { EventDispatcher } from '@uttori/event-dispatcher';
 
 import { slow } from '../_helpers/slow.js';
@@ -23,8 +25,6 @@ function makeContext(overrides = {}) {
         databasePath: `${folder}/db-${counter}.sqlite`,
         bootstrapIndexOnStartup: false,
         rebuildIndexOnStartup: false,
-        // Avoid attempting to talk to Ollama during indexing in these tests.
-        ollamaBaseUrl: 'http://127.0.0.1:1',
         ...overrides,
       },
     },
@@ -32,11 +32,14 @@ function makeContext(overrides = {}) {
 }
 
 test.before(async () => {
+  // Exercise the real SQLite/vector index without waiting for Ollama's model-restart backoff.
+  sinon.stub(OllamaEmbedder.prototype, 'embed').resolves([1, 0, 0]);
   await fs.rm(folder, { recursive: true, force: true });
   await fs.mkdir(folder, { recursive: true });
 });
 
 test.after.always(async () => {
+  sinon.restore();
   await fs.rm(folder, { recursive: true, force: true });
 });
 

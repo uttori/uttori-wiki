@@ -6,7 +6,16 @@ All notable changes to this project will be documented in this file. This projec
 
 - Discord Notifications
 
-## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.3.1...HEAD)
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.4.0...HEAD)
+
+## [9.4.0](https://github.com/uttori/uttori-wiki/compare/9.3.1...9.4.0) - 2026-11-18
+
+- Ship the `uttori-llm-wiki` skill for Git-managed ingest, cited queries, structural lint, and link-safe renames and merges with redirects.
+- Add opt-in authenticated MCP writes with review previews, stale-edit checks, and retryable publication through wiki storage, history, and search.
+- Add a maintainer Capture Inbox for PDF uploads and allowed URLs. Preview drafts and publish to mutable storage or Git sidecars while keeping original bytes and citation text private.
+- Publish a reviewed sidecar set as one wiki generation. Reads stay available during interrupted publication, and resuming finishes the approved changes and search indexing.
+- Verify exact quotations against pinned archive revisions through the local CLI and authorized MCP tool. Report missing or changed evidence explicitly.
+- Update dependencies and the lockfile, including Google APIs 190, better-sqlite3 13.2, Nodemailer 10.6, and oxlint 1.94.
 
 ## [9.3.1](https://github.com/uttori/uttori-wiki/compare/9.3.0...9.3.1) - 2026-11-18
 

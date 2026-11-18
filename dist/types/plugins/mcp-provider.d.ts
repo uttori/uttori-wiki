@@ -24,6 +24,17 @@ export interface MCPProviderConfig {
     prompts: boolean;
     /** Custom middleware for the HTTP route. */
     middleware: import('express').RequestHandler[];
+    /** Opt in to HTTP write tools. Verify the request's write permission and return a stable principal ID, or undefined to deny. */
+    authorizeWrite?: (request: import('express').Request) => string | undefined | Promise<string | undefined>;
+    /** Opt in to quote verification for HTTP callers who can check private originals. */
+    citationVerification?: {
+        /** Absolute path to the private archive for curated Markdown sources. */
+        archiveDirectory: string;
+        /** Absolute Capture Inbox directory for verifying captured PDF and HTML sources. */
+        captureDirectory?: string;
+        /** Return true only after verifying the request's permission to check originals. */
+        authorize: (request: import('express').Request) => boolean | Promise<boolean>;
+    };
 }
 /** Uttori context narrowed to this plugin's config shape. */
 export type MCPProviderContext = import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-mcp-provider', MCPProviderConfig>;

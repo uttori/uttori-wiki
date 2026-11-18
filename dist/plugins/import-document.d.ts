@@ -110,6 +110,20 @@ declare class ImportDocument {
         type: string;
     }): Promise<void>;
     /**
+     * Convert one local HTML file using the same Markdown format as scraped imports.
+     * @param input Absolute path to the saved HTML.
+     * @param output Destination Markdown path.
+     */
+    static convertHtml(input: string, output: string): Promise<void>;
+    /**
+     * Build a Markdown draft from an already captured original without publishing attachments.
+     * @param original Private path to the saved PDF or HTML.
+     * @param output Private Markdown output path for the HTML converter.
+     * @param pdf Original PDF bytes when the capture is a PDF.
+     * @returns Imported Markdown for maintainer review.
+     */
+    static captureMarkdown(original: string, output: string, pdf?: Buffer): Promise<string>;
+    /**
      * Processes a page and returns the content and attachment.
      * @param config The configuration object.
      * @param slug The slug of the document.

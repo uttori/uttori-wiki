@@ -1,0 +1,1 @@
+{"version":3,"file":"sidecar-generation.d.ts","sourceRoot":"","sources":["../../../src/plugins/storeage-provider-json/sidecar-generation.ts"],"names":[],"mappings":"AAGA,uFAAuF;AACvF,eAAO,MAAM,gBAAgB,cAAe,MAAM,KAAG,MAAsD,CAAC;AAE5G,kFAAkF;AAClF,wBAAsB,iBAAiB,CAAC,SAAS,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,GAAG,SAAS,CAAC,CAQtF;AAED,sFAAsF;AACtF,wBAAsB,iBAAiB,CAAC,SAAS,EAAE,MAAM;;;GAQxD"}

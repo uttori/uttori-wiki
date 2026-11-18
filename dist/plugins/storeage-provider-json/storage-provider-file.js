@@ -1,9 +1,27 @@
 import { createDebug } from '../../debug.js';
+import { sidecarGeneration } from './sidecar-generation.js';
+import { documentVersion } from '../../document-write.js';
 import { promises as fs } from 'node:fs';
 import sanitize from 'sanitize-filename';
 import path from 'node:path';
 import processQuery from './query-tools.js';
 const debug = createDebug('Uttori.StorageProvider.JSON');
+/**
+ * Replace one file atomically, using a sibling temp file so the rename stays on the same filesystem.
+ * @param file Destination file.
+ * @param content Serialized document bytes.
+ * @param revision Unique suffix for this write's temporary file.
+ */
+async function writeRevisionFile(file, content, revision) {
+    const temporary = `${file}.${revision}.tmp`;
+    try {
+        await fs.writeFile(temporary, content, 'utf8');
+        await fs.rename(temporary, file);
+    }
+    finally {
+        await fs.rm(temporary, { force: true });
+    }
+}
 /**
  * Accept sidecar JSON only when the filename slug and required fields are intact.
  * @param value Parsed sidecar JSON.
@@ -81,13 +99,14 @@ class StorageProviderJsonFile {
     /**
      * Read and validate one metadata/Markdown pair. Sidecar mode is intentionally
      * strict so a partial checkout cannot silently produce an incomplete site.
-     * @param name Metadata filename, relative to contentDirectory.
+     * @param name Metadata filename, relative to the selected generation.
+     * @param directory Directory containing both sidecar partners.
      * @returns The complete document.
      */
-    loadSidecar = async (name) => {
-        const metadataPath = path.join(this.config.contentDirectory, name);
+    loadSidecar = async (name, directory = this.config.contentDirectory) => {
+        const metadataPath = path.join(directory, name);
         const slug = path.basename(name, `.${this.config.extension}`);
-        const contentPath = path.join(this.config.contentDirectory, `${slug}.${this.config.sidecarContentExtension}`);
+        const contentPath = path.join(directory, `${slug}.${this.config.sidecarContentExtension}`);
         let metadata;
         try {
             metadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
@@ -112,6 +131,44 @@ class StorageProviderJsonFile {
             content,
         });
     };
+    /** Retry a read spanning promotion so one response never combines two complete generations. */
+    async readSidecars() {
+        const root = this.config.contentDirectory;
+        let generation = await sidecarGeneration(root);
+        while (true) {
+            const { directory, identity } = generation;
+            const documents = {};
+            try {
+                const fileNames = await fs.readdir(directory);
+                const metadataSuffix = `.${this.config.extension}`;
+                const contentSuffix = `.${this.config.sidecarContentExtension}`;
+                const metadataNames = fileNames.filter((name) => name.endsWith(metadataSuffix)).sort();
+                const contentNames = fileNames.filter((name) => name.endsWith(contentSuffix)).sort();
+                const expectedContent = new Set(metadataNames.map((name) => `${name.slice(0, -metadataSuffix.length)}${contentSuffix}`));
+                for (const name of contentNames) {
+                    if (!expectedContent.has(name)) {
+                        throw new Error(`Missing metadata for ${path.join(directory, name)}`);
+                    }
+                }
+                const loadedDocuments = await Promise.all(metadataNames.map((name) => this.loadSidecar(name, directory)));
+                for (const document of loadedDocuments) {
+                    if (documents[document.slug]) {
+                        throw new Error(`Duplicate sidecar slug ${document.slug} in ${directory}`);
+                    }
+                    documents[document.slug] = document;
+                }
+            }
+            catch (error) {
+                generation = await sidecarGeneration(root);
+                if (generation.identity === identity && generation.directory === directory)
+                    throw error;
+                continue;
+            }
+            generation = await sidecarGeneration(root);
+            if (generation.identity === identity && generation.directory === directory)
+                return documents;
+        }
+    }
     /**
      * Returns all documents.
      * @returns All documents.
@@ -124,33 +181,17 @@ class StorageProviderJsonFile {
         if (this.config.useCache && this.refresh === false) {
             return this.documents;
         }
+        if (this.config.sidecarContentExtension) {
+            const pages = await this.readSidecars();
+            if (this.config.useCache) {
+                this.documents = pages;
+                this.refresh = false;
+            }
+            return pages;
+        }
         const documents = {};
         try {
             const fileNames = await fs.readdir(this.config.contentDirectory);
-            if (this.config.sidecarContentExtension) {
-                const metadataSuffix = `.${this.config.extension}`;
-                const contentSuffix = `.${this.config.sidecarContentExtension}`;
-                const metadataNames = fileNames.filter((name) => name.endsWith(metadataSuffix)).sort();
-                const contentNames = fileNames.filter((name) => name.endsWith(contentSuffix)).sort();
-                const expectedContent = new Set(metadataNames.map((name) => `${name.slice(0, -metadataSuffix.length)}${contentSuffix}`));
-                for (const name of contentNames) {
-                    if (!expectedContent.has(name)) {
-                        throw new Error(`Missing metadata for ${path.join(this.config.contentDirectory, name)}`);
-                    }
-                }
-                const loadedDocuments = await Promise.all(metadataNames.map((name) => this.loadSidecar(name)));
-                for (const document of loadedDocuments) {
-                    if (documents[document.slug]) {
-                        throw new Error(`Duplicate sidecar slug ${document.slug} in ${this.config.contentDirectory}`);
-                    }
-                    documents[document.slug] = document;
-                }
-                if (this.config.useCache) {
-                    this.documents = documents;
-                    this.refresh = false;
-                }
-                return documents;
-            }
             const validFiles = fileNames.filter((name) => (name.length >= 6) && name.endsWith(this.config.extension));
             const readPromises = validFiles.map(async (name) => {
                 const file = path.join(this.config.contentDirectory, name);
@@ -177,9 +218,6 @@ class StorageProviderJsonFile {
         } /* c8 ignore next 2 */
         catch (error) {
             debug('all: Error:', error);
-            if (this.config.sidecarContentExtension) {
-                throw error;
-            }
         }
         return documents;
     };
@@ -255,12 +293,11 @@ class StorageProviderJsonFile {
             if (this.config.useHistory) {
                 await this.updateHistory(document.slug, JSON.stringify(document, undefined, this.config.spacesHistory));
             }
-            if (this.config.useCache) {
-                this.documents[document.slug] = document;
-            }
             try {
                 debug('add: Creating content file:', file);
                 await fs.writeFile(file, JSON.stringify(document, undefined, this.config.spacesDocument), 'utf8');
+                if (this.config.useCache)
+                    this.documents[document.slug] = document;
             } /* c8 ignore next 2 */
             catch (error) {
                 debug('add: Error creating content file:', error);
@@ -282,13 +319,13 @@ class StorageProviderJsonFile {
         if (this.config.useHistory) {
             await this.updateHistory(document.slug, JSON.stringify(document, undefined, this.config.spacesHistory), originalSlug);
         }
-        if (this.config.useCache) {
-            this.documents[document.slug] = document;
-        }
         try {
             const file = path.join(this.config.contentDirectory, `${document.slug}.${this.config.extension}`);
             debug('updateValid: Updating content file:', file);
             await fs.writeFile(file, JSON.stringify(document, undefined, this.config.spacesDocument), 'utf8');
+            // A failed browser save must not give a later MCP preview a version that was never stored.
+            if (this.config.useCache)
+                this.documents[document.slug] = document;
         } /* c8 ignore next 2 */
         catch (error) {
             debug('updateValid: Error updating content file:', error);
@@ -346,6 +383,82 @@ class StorageProviderJsonFile {
             debug(`update: No document found to update with slug "${originalSlug}", adding document with slug "${document.slug}"`);
             await this.add(document);
         }
+    };
+    /**
+     * Save a fixed revision while the caller holds the wiki write slot. Repeating the same
+     * revision can repair a missing history file after an interrupted save.
+     * @param params The filtered document, its base version, and its caller-assigned revision ID.
+     * @returns The acknowledged revision ID, or throws if the write is incomplete.
+     */
+    writeRevision = async ({ document, revision, expectedVersion }) => {
+        if (this.config.sidecarContentExtension)
+            throw new Error('Sidecar content is read-only.');
+        if (!/^[a-z0-9][a-z0-9-]{0,127}$/.test(document.slug) || !/^\d+-[a-f0-9-]{36}$/.test(revision)) {
+            throw new Error('Invalid document slug or revision.');
+        }
+        const file = path.join(this.config.contentDirectory, `${document.slug}.${this.config.extension}`);
+        const currentVersion = documentVersion(await this.readRevisionDocument(file, document.slug));
+        if (currentVersion !== documentVersion(document)) {
+            if (currentVersion !== expectedVersion)
+                throw new Error('Document changed before storage could save it.');
+            await writeRevisionFile(file, JSON.stringify(document, undefined, this.config.spacesDocument), revision);
+        }
+        // Only expose bytes that reached disk, even if the history write still needs a retry.
+        if (this.config.useCache)
+            this.documents[document.slug] = document;
+        if (this.config.useHistory) {
+            // Keep the history name stable across retries, even when the page already reached disk.
+            const directory = path.join(this.config.historyDirectory, document.slug);
+            await fs.mkdir(directory, { recursive: true });
+            await writeRevisionFile(path.join(directory, `${revision}.${this.config.extension}`), JSON.stringify(document, undefined, this.config.spacesHistory), revision);
+        }
+        return revision;
+    };
+    /**
+     * Read a checked write's current file without confusing corrupt content with a missing page.
+     * @param file Absolute path inside storage or history.
+     * @param slug The identity expected in the record.
+     * @returns The record, or undefined only when the file is missing.
+     */
+    async readRevisionDocument(file, slug) {
+        try {
+            const document = JSON.parse(await fs.readFile(file, 'utf8'));
+            if (document?.slug !== slug)
+                throw new Error('Stored document has an invalid slug.');
+            return document;
+        }
+        catch (error) {
+            if (error.code !== 'ENOENT')
+                throw error;
+            return undefined;
+        }
+    }
+    /**
+     * Archive the exact reviewed source before removing it from live storage. The caller holds the wiki write slot.
+     * @param params Source slug, reviewed version and stable history revision ID.
+     * @returns The revision ID, including when retrying an already retired source.
+     */
+    retireRevision = async ({ slug, expectedVersion, revision }) => {
+        if (this.config.sidecarContentExtension || !this.config.useHistory || !/^[a-z0-9][a-z0-9-]{0,127}$/.test(slug) || !/^\d+-[a-f0-9-]{36}$/.test(revision)) {
+            throw new Error('Retiring a page requires mutable storage with revision history.');
+        }
+        const file = path.join(this.config.contentDirectory, `${slug}.${this.config.extension}`);
+        const directory = path.join(this.config.historyDirectory, slug);
+        const history = path.join(directory, `${revision}.${this.config.extension}`);
+        const current = await this.readRevisionDocument(file, slug);
+        if (current) {
+            if (documentVersion(current) !== expectedVersion)
+                throw new Error('Document changed before retirement.');
+            await fs.mkdir(directory, { recursive: true });
+            await writeRevisionFile(history, JSON.stringify(current, undefined, this.config.spacesHistory), revision);
+            await fs.unlink(file);
+        }
+        else if (documentVersion(await this.readRevisionDocument(history, slug)) !== expectedVersion) {
+            throw new Error('The retired page could not be verified in history.');
+        }
+        if (this.config.useCache)
+            delete this.documents[slug];
+        return revision;
     };
     /**
      * Removes a document from the file system.

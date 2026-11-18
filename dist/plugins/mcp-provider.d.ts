@@ -41,6 +41,12 @@ declare class MCPProvider {
         resources: boolean;
         prompts: boolean;
         middleware: import('express').RequestHandler[];
+        authorizeWrite?: (request: import('express').Request) => string | undefined | Promise<string | undefined>;
+        citationVerification?: {
+            archiveDirectory: string;
+            captureDirectory?: string;
+            authorize: (request: import('express').Request) => boolean | Promise<boolean>;
+        };
         events: {
             [x: string]: string[];
         };
@@ -65,9 +71,11 @@ declare class MCPProvider {
      * Build an MCP `Server` instance wired to the wiki capabilities.
      * Returns undefined when the SDK is not installed.
      * @param context A Uttori-like context.
+     * @param [writePrincipal] The verified HTTP caller, if authorized for writes.
+     * @param [canVerifyCitations] Whether the HTTP caller passed archive verification authorization.
      * @returns The connected-ready MCP server, or undefined.
      */
-    static buildServer(context: MCPProviderContext): Promise<McpSdkServer | undefined>;
+    static buildServer(context: MCPProviderContext, writePrincipal?: string, canVerifyCitations?: boolean): Promise<McpSdkServer | undefined>;
     /**
      * List the wiki tools in MCP `Tool` shape.
      * @returns The MCP tool descriptors.

@@ -38,3 +38,28 @@ test('sidecar loading rejects an incomplete or mismatched pair', async (t) => {
     await fs.rm(directory, { recursive: true, force: true });
   }
 });
+
+test('a sidecar read spanning directory promotion retries against one complete generation', async (t) => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'uttori-sidecar-read-'));
+  t.teardown(() => fs.rm(root, { recursive: true, force: true }));
+  const live = path.join(root, 'content');
+  const stage = path.join(root, 'stage');
+  for (const [directory, title] of [[live, 'Old'], [stage, 'New']]) {
+    await fs.mkdir(directory);
+    await fs.writeFile(path.join(directory, 'hello.json'), JSON.stringify({ slug: 'hello', title }));
+    await fs.writeFile(path.join(directory, 'hello.md'), title);
+  }
+  const provider = new StorageProvider({ contentDirectory: live, sidecarContentExtension: 'md', useHistory: false });
+  const load = provider.loadSidecar;
+  let reads = 0;
+  provider.loadSidecar = async (name, directory) => {
+    const document = await load(name, directory);
+    if (++reads === 1) {
+      await fs.rename(live, `${live}.uttori-previous`);
+      await fs.rename(stage, live);
+    }
+    return document;
+  };
+  t.deepEqual(await provider.get('hello'), { slug: 'hello', title: 'New', content: 'New' });
+  t.is(reads, 2);
+});

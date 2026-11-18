@@ -33,47 +33,7 @@ export async function extractAttachmentText(config: import('../search-provider-s
   if (attachment.type?.includes('pdf') || fileExtension === '.pdf') {
     try {
 
-      const text = await new Promise<string>((resolve, reject) => {
-        const reader = new PdfReader();
-        const textChunks: string[] = [];
-        let currentPage = 0;
-
-        const pageTexts: string[] = [];
-
-        reader.parseBuffer(buffer, (err, item) => {
-          if (err) {
-            debug('extractAttachmentText: error parsing pdf:', err);
-            reject(new Error(String(err)));
-            return;
-          }
-          if (!item) {
-            // End of parsing, resolve with page-separated text
-            debug('extractAttachmentText: end of parsing pdf:', textChunks.length, 'pages:', pageTexts.length);
-            // Join pages with clear separators to help with chunking
-            const pageSeparatedText = pageTexts.map((pageText, idx) =>
-              `[Page ${idx + 1}]\n${pageText.trim()}`,
-            ).join('\n\n---\n\n');
-            resolve(pageSeparatedText);
-            return;
-          }
-          if (item.text) {
-            textChunks.push(item.text);
-          }
-          // Detect page breaks - PdfReader emits page items
-          if (item.page !== undefined && item.page !== currentPage) {
-            if (currentPage > 0 && textChunks.length > 0) {
-              // Save the previous page's text
-              const pageText = textChunks.join(' ');
-              debug('extractAttachmentText: page', currentPage, 'text length:', pageText.length);
-              pageTexts.push(pageText);
-              textChunks.length = 0; // Clear for next page
-            }
-            currentPage = item.page;
-            debug('extractAttachmentText: new page:', currentPage);
-          }
-        });
-      });
-      return text || '';
+      return await extractPdfText(buffer);
     } catch (error) {
       debug('extractAttachmentText: error parsing pdf:', error);
       return '';
@@ -85,4 +45,41 @@ export async function extractAttachmentText(config: import('../search-provider-s
   }
   debug(`extractAttachmentText: mime type ${attachment.type} / file type ${fileExtension} is not yet supported: ${absolutePath}`);
   return '';
+}
+
+/**
+ * Extract the text layer of a PDF and preserve its original page numbers.
+ * @param buffer Original PDF bytes.
+ * @returns Page-labeled text, or an empty string when the PDF has no text layer.
+ * @throws {Error} If the PDF parser rejects the original.
+ */
+export function extractPdfText(buffer: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const pages: string[] = [];
+    let page = 0;
+    let chunks: string[] = [];
+    const flush = () => {
+      const text = chunks.join(' ').trim();
+      if (page && text) pages.push(`[Page ${page}]\n${text}`);
+      chunks = [];
+    };
+
+    new PdfReader().parseBuffer(buffer, (error, item) => {
+      if (error) {
+        reject(new Error(String(error)));
+        return;
+      }
+      if (!item) {
+        // The parser emits no following page event for the last page or for single-page files.
+        flush();
+        resolve(pages.join('\n\n---\n\n'));
+        return;
+      }
+      if (item.page !== undefined && item.page !== page) {
+        flush();
+        page = item.page;
+      }
+      if (item.text) chunks.push(item.text);
+    });
+  });
 }

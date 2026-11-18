@@ -30,10 +30,13 @@ declare class StorageProviderJsonFile {
     /**
      * Read and validate one metadata/Markdown pair. Sidecar mode is intentionally
      * strict so a partial checkout cannot silently produce an incomplete site.
-     * @param name Metadata filename, relative to contentDirectory.
+     * @param name Metadata filename, relative to the selected generation.
+     * @param directory Directory containing both sidecar partners.
      * @returns The complete document.
      */
-    loadSidecar: (name: string) => Promise<import('../../wiki.js').UttoriWikiDocument>;
+    loadSidecar: (name: string, directory?: string) => Promise<import('../../wiki.js').UttoriWikiDocument>;
+    /** Retry a read spanning promotion so one response never combines two complete generations. */
+    private readSidecars;
     /**
      * Returns all documents.
      * @returns All documents.
@@ -81,6 +84,34 @@ declare class StorageProviderJsonFile {
         document: import('../../wiki.js').UttoriWikiDocument;
         originalSlug: string;
     }) => Promise<void>;
+    /**
+     * Save a fixed revision while the caller holds the wiki write slot. Repeating the same
+     * revision can repair a missing history file after an interrupted save.
+     * @param params The filtered document, its base version, and its caller-assigned revision ID.
+     * @returns The acknowledged revision ID, or throws if the write is incomplete.
+     */
+    writeRevision: ({ document, revision, expectedVersion }: {
+        document: import('../../wiki.js').UttoriWikiDocument;
+        revision: string;
+        expectedVersion: string | null;
+    }) => Promise<string>;
+    /**
+     * Read a checked write's current file without confusing corrupt content with a missing page.
+     * @param file Absolute path inside storage or history.
+     * @param slug The identity expected in the record.
+     * @returns The record, or undefined only when the file is missing.
+     */
+    private readRevisionDocument;
+    /**
+     * Archive the exact reviewed source before removing it from live storage. The caller holds the wiki write slot.
+     * @param params Source slug, reviewed version and stable history revision ID.
+     * @returns The revision ID, including when retrying an already retired source.
+     */
+    retireRevision: ({ slug, expectedVersion, revision }: {
+        slug: string;
+        expectedVersion: string;
+        revision: string;
+    }) => Promise<string>;
     /**
      * Removes a document from the file system.
      * @async

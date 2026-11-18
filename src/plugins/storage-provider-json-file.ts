@@ -47,6 +47,8 @@ class StorageProviderJsonFilePlugin {
         getRevision: ['storage-get-revision'],
         getQuery: ['storage-query'],
         update: ['storage-update'],
+        writeRevision: ['storage-write-revision'],
+        retireRevision: ['storage-retire-revision'],
         validateConfig: ['validate-config'],
       },
     };
@@ -92,7 +94,7 @@ class StorageProviderJsonFilePlugin {
     const storage = new StorageProvider(config);
     for (const [method, eventNames] of Object.entries(config.events)) {
       // Git-owned sidecar documents have no paired-write or history contract.
-      if (config.sidecarContentExtension && ['add', 'update', 'delete', 'getHistory', 'getRevision'].includes(method)) {
+      if (config.sidecarContentExtension && ['add', 'update', 'delete', 'getHistory', 'getRevision', 'writeRevision', 'retireRevision'].includes(method)) {
         continue;
       }
       const storageMethod = getPluginMethod<import('@uttori/event-dispatcher').UttoriEventCallback<unknown, unknown, unknown>>(storage, method);

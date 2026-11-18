@@ -27,6 +27,7 @@ export interface KnownPluginConfigs {
   'uttori-plugin-filter-spam-edit': import('../plugins/filter-spam-edit.js').FilterSpamEditConfig;
   'uttori-plugin-form-handler': import('../plugins/form-handler.js').FormHandlerConfig;
   'uttori-plugin-import-document': import('../plugins/import-document.js').ImportDocumentConfig;
+  'uttori-plugin-capture-inbox': import('./plugins/capture-inbox.js').CaptureInboxConfig;
   'uttori-plugin-mcp-provider': import('../plugins/mcp-provider.js').MCPProviderConfig;
   'uttori-plugin-add-query-output-to-view-model': import('../plugins/query-output.js').AddQueryOutputToViewModelConfig;
   'uttori-plugin-renderer-markdown-it': import('../plugins/renderer-markdown-it.js').MarkdownItRendererConfig;

@@ -1,5 +1,6 @@
 import { getPluginMethod } from './utilities/plugin-method.js';
 import { createDebug } from '../debug.js';
+import { storeDocument, updateDocumentSearch, withDocumentWrite } from '../document-write.js';
 
 const debug = createDebug('Uttori.Plugin.ImportDocument');
 import fs, { createWriteStream } from 'node:fs';
@@ -354,11 +355,11 @@ class ImportDocument {
         updateDate,
         attachments,
       };
-      document = await context.hooks.filter('document-save', document, context);
-
-      // Save document, write the joined file, and a history entry
-      await context.hooks.fetch('storage-update', { document }, context);
-      context.hooks.dispatch('search-update', [{ document }], context);
+      await withDocumentWrite(context, async () => {
+        document = await context.hooks.filter('document-save', document, context);
+        await storeDocument(context, document);
+        await updateDocumentSearch(context, document);
+      });
 
       response.set('Content-Type', 'application/json');
       response.status(200).send(document);
@@ -448,6 +449,35 @@ class ImportDocument {
       const message = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to download file from ${url}: ${message}`);
     }
+  }
+
+  /**
+   * Convert one local HTML file using the same Markdown format as scraped imports.
+   * @param input Absolute path to the saved HTML.
+   * @param output Destination Markdown path.
+   */
+  static async convertHtml(input: string, output: string): Promise<void> {
+    await cmd({ file: 'pandoc', args: [
+      '--from=html', '--wrap=none',
+      '--to=gfm+gfm_auto_identifiers+autolink_bare_uris-raw_html-fenced_divs-bracketed_spans',
+      '--output', output, input,
+    ] });
+  }
+
+  /**
+   * Build a Markdown draft from an already captured original without publishing attachments.
+   * @param original Private path to the saved PDF or HTML.
+   * @param output Private Markdown output path for the HTML converter.
+   * @param pdf Original PDF bytes when the capture is a PDF.
+   * @returns Imported Markdown for maintainer review.
+   */
+  static async captureMarkdown(original: string, output: string, pdf?: Buffer): Promise<string> {
+    if (pdf) {
+      const { extractPdfText } = await import('./chat-bot/attachment-extractor.js');
+      return extractPdfText(pdf);
+    }
+    await ImportDocument.convertHtml(original, output);
+    return fs.promises.readFile(output, 'utf8');
   }
 
   /**
@@ -574,17 +604,9 @@ class ImportDocument {
           debug('processPage: path traversal detected:', { htmlFile, htmlFilePath, mdFilePath });
           continue;
         }
-        const convertArgs = [
-          '--from=html',
-          '--wrap=none',
-          '--to=gfm+gfm_auto_identifiers+autolink_bare_uris-raw_html-fenced_divs-bracketed_spans',
-          '--output',
-          mdFilePath,
-          htmlFilePath,
-        ];
         try {
           debug('converting page:', { htmlFile: htmlFilePath, mdFile: mdFilePath });
-          await cmd({ file: 'pandoc', args: convertArgs });
+          await ImportDocument.convertHtml(htmlFilePath, mdFilePath);
           // Wait for the file to be written
           await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (error) {

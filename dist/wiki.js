@@ -4,6 +4,7 @@ import { EventDispatcher } from '@uttori/event-dispatcher';
 import crypto from 'node:crypto';
 import express from 'express';
 import defaultConfig from './config.js';
+import { storeDocument, updateDocumentSearch, withDocumentWrite } from './document-write.js';
 import { buildPath } from './redirect.js';
 import { sanitizeSearchQuery, sanitizeSlug } from './plugins/utilities/security.js';
 const debug = createDebug('Uttori.Wiki');
@@ -520,26 +521,28 @@ class UttoriWiki {
             return;
         }
         const { slug } = request.params;
-        let document;
-        try {
-            [document] = await this.hooks.fetch('storage-get', slug, this);
-            /* c8 ignore next 3 */
-        }
-        catch (error) {
-            debug('Error fetching document:', error);
-        }
-        if (document) {
-            this.hooks.dispatch('document-delete', document, this);
-            debug('Deleting document', document);
-            await this.hooks.fetch('storage-delete', slug, this);
-            this.hooks.dispatch('search-delete', document, this);
-            request.wikiFlash('success', `Deleted '${String(slug)}' successfully.`);
-            response.redirect(this.config.publicUrl || '/');
-        }
-        else {
-            debug('Nothing found to delete, next.');
-            next();
-        }
+        await withDocumentWrite(this, async () => {
+            let document;
+            try {
+                [document] = await this.hooks.fetch('storage-get', slug, this);
+                /* c8 ignore next 3 */
+            }
+            catch (error) {
+                debug('Error fetching document:', error);
+            }
+            if (document) {
+                this.hooks.dispatch('document-delete', document, this);
+                debug('Deleting document', document);
+                await this.hooks.fetch('storage-delete', slug, this);
+                this.hooks.dispatch('search-delete', document, this);
+                request.wikiFlash('success', `Deleted '${String(slug)}' successfully.`);
+                response.redirect(this.config.publicUrl || '/');
+            }
+            else {
+                debug('Nothing found to delete, next.');
+                next();
+            }
+        });
     };
     /**
      * Attempts to update an existing document and redirects to the detail view of that document when successful.
@@ -730,10 +733,11 @@ class UttoriWiki {
             // [document] = await this.hooks.fetch('storage-get', request.params.slug, this);
             const ignoreSlugs = `"${this.config.ignoreSlugs.join('", "')}"`;
             const safeSlug = escapeQueryValue(slug);
-            const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${safeSlug}" OR redirects INCLUDES ("${safeSlug}")) ORDER BY slug ASC LIMIT 1`;
+            const query = `SELECT * FROM documents WHERE slug NOT_IN (${ignoreSlugs}) AND (slug = "${safeSlug}" OR redirects INCLUDES ("${safeSlug}")) ORDER BY slug ASC LIMIT -1`;
             const results = await this.hooks.fetch('storage-query', query, this);
             if (results) {
-                document = results[0][0];
+                // During a reviewed move the alias can exist before the old canonical page is retired.
+                document = results[0].find(page => page.slug === slug) ?? results[0][0];
             }
             /* c8 ignore next 3 */
         }
@@ -748,7 +752,10 @@ class UttoriWiki {
         }
         // Check for redirects and handle the 301 redirect to the actual slug.
         if (document.slug !== slug) {
-            response.redirect(301, `${this.config.publicUrl}/${document.slug}`);
+            const originalUrl = request.originalUrl || request.url || '';
+            const queryIndex = originalUrl.indexOf('?');
+            const query = queryIndex === -1 ? '' : originalUrl.slice(queryIndex);
+            response.redirect(301, `${this.config.publicUrl}/${document.slug}${query}`);
             return;
         }
         document.html = await this.hooks.filter('render-content', document.content, this);
@@ -1240,11 +1247,12 @@ class UttoriWiki {
             updateDate: Date.now(),
             attachments,
         };
-        document = await this.hooks.filter('document-save', document, this);
-        // Save document
-        const originalSlug = request.body['original-slug'];
-        await this.hooks.fetch('storage-update', { document, originalSlug }, this);
-        this.hooks.dispatch('search-update', [{ document, originalSlug }], this);
+        const originalSlug = typeof request.body['original-slug'] === 'string' ? request.body['original-slug'] : undefined;
+        await withDocumentWrite(this, async () => {
+            document = await this.hooks.filter('document-save', document, this);
+            await storeDocument(this, document, { originalSlug });
+            await updateDocumentSearch(this, document, { originalSlug });
+        });
         response.redirect(`${this.config.publicUrl}/${slug}`);
     };
 }

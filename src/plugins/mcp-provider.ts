@@ -1,4 +1,5 @@
 import { getPluginMethod } from './utilities/plugin-method.js';
+import { isAbsolute } from 'node:path';
 import { createDebug } from '../debug.js';
 import {
   WIKI_TOOLS,
@@ -6,6 +7,8 @@ import {
   executeWikiTool,
 } from './chat-bot/tool-registry.js';
 import { buildPromptMessages } from './chat-bot/prompts.js';
+import { callWriteTool, refactorTool, supportsRefactors, supportsWrites, writeTools } from './mcp-writes.js';
+import { parseCitationRequest, verifySourceCitation } from './utilities/source-citations.js';
 import type {
   McpServerCapabilities, McpStreamableHttpServerTransport, McpStdioServerTransport, MCPProviderConfig,
   MCPProviderContext, McpSdkServer, McpSdkModule, McpToolResult, McpWikiDocumentSummary,
@@ -32,6 +35,21 @@ const RESOURCE_PREFIX = 'wiki://doc/';
  *
  */
 const ASSISTANT_PROMPT_NAME = 'wiki-assistant';
+
+const citationTool = {
+  name: 'verifyCitation',
+  description: 'Check a literal quote against an exact archived revision. For captures, lines refer to the pinned importer text. Returns a verdict and line numbers, never archive text.',
+  inputSchema: {
+    type: 'object' as const, additionalProperties: false, required: ['sourceSlug', 'sha256', 'quote'],
+    properties: {
+      sourceSlug: { type: 'string' },
+      sha256: { type: 'string', description: 'Full digest from the source note.' },
+      quote: { type: 'string' },
+      startLine: { type: 'integer', minimum: 1, description: 'Optional first line of an inclusive range. Supply both bounds.' },
+      endLine: { type: 'integer', minimum: 1, description: 'Optional last line of an inclusive range.' },
+    },
+  },
+};
 
 /**
  * Uttori MCP Provider.
@@ -119,6 +137,17 @@ class MCPProvider {
       debug(error);
       throw new Error(error);
     }
+    if (pluginConfig.authorizeWrite !== undefined && typeof pluginConfig.authorizeWrite !== 'function') {
+      throw new TypeError('Config Error: `authorizeWrite` must verify the request and return a principal ID.');
+    }
+    if (pluginConfig.citationVerification !== undefined && (typeof pluginConfig.citationVerification?.archiveDirectory !== 'string'
+      || !isAbsolute(pluginConfig.citationVerification.archiveDirectory) || typeof pluginConfig.citationVerification.authorize !== 'function')) {
+      throw new TypeError('Config Error: `citationVerification` requires an absolute archiveDirectory and an authorize callback.');
+    }
+    const captureDirectory = pluginConfig.citationVerification?.captureDirectory;
+    if (captureDirectory !== undefined && (typeof captureDirectory !== 'string' || !isAbsolute(captureDirectory))) {
+      throw new TypeError('Config Error: `citationVerification.captureDirectory` must be absolute.');
+    }
     debug('Validated config.');
   }
 
@@ -180,9 +209,11 @@ class MCPProvider {
    * Build an MCP `Server` instance wired to the wiki capabilities.
    * Returns undefined when the SDK is not installed.
    * @param context A Uttori-like context.
+   * @param [writePrincipal] The verified HTTP caller, if authorized for writes.
+   * @param [canVerifyCitations] Whether the HTTP caller passed archive verification authorization.
    * @returns The connected-ready MCP server, or undefined.
    */
-  static async buildServer(context: MCPProviderContext): Promise<McpSdkServer | undefined> {
+  static async buildServer(context: MCPProviderContext, writePrincipal?: string, canVerifyCitations = false): Promise<McpSdkServer | undefined> {
     const sdk = await MCPProvider.loadSdk();
     if (!sdk) {
       debug('buildServer: SDK unavailable, skipping server creation.');
@@ -201,9 +232,41 @@ class MCPProvider {
     const server: McpSdkServer = new Server({ name: config.name, version: config.version }, { capabilities });
 
     if (config.tools) {
-      server.setRequestHandler(schemas.ListToolsRequestSchema, async () => ({ tools: MCPProvider.listTools() }));
+      const writable = Boolean(writePrincipal && config.authorizeWrite && supportsWrites(context));
+      const archiveDirectory = canVerifyCitations ? config.citationVerification?.archiveDirectory : undefined;
+      const writes: (typeof writeTools[number] | typeof refactorTool)[] = writable ? [...writeTools] : [];
+      if (writable && supportsRefactors(context)) writes.push(refactorTool);
+      const tools = [...MCPProvider.listTools(), ...writes];
+      if (archiveDirectory) tools.push(citationTool);
+      server.setRequestHandler(schemas.ListToolsRequestSchema, async () => ({ tools }));
       server.setRequestHandler(schemas.CallToolRequestSchema, async (request) => {
         const { name, arguments: toolArguments } = request.params;
+        if (name === citationTool.name) {
+          // Direct tool calls need the same archive permission as discovery. Keep candidate quotes out of debug logs.
+          if (!archiveDirectory) return { content: [{ type: 'text', text: 'Unknown Tool: verifyCitation' }], isError: true };
+          let citation: ReturnType<typeof parseCitationRequest>;
+          try {
+            citation = parseCitationRequest(toolArguments);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Invalid citation.';
+            return { content: [{ type: 'text', text: JSON.stringify({ error: message }) }], isError: true };
+          }
+          const [document] = await context.hooks.fetch<import('../wiki.js').UttoriWikiDocument | undefined>('storage-get', citation.sourceSlug, context).catch(error => {
+            debug('Citation source note lookup failed:', error);
+            return [];
+          });
+          const result = await verifySourceCitation(citation, document, archiveDirectory, config.citationVerification?.captureDirectory);
+          return { content: [{ type: 'text', text: JSON.stringify(result) }], isError: false };
+        }
+        if (writePrincipal && writes.some(tool => tool.name === name)) {
+          try {
+            const result = await callWriteTool(name, toolArguments ?? {}, context, writePrincipal);
+            return { content: [{ type: 'text', text: JSON.stringify(result) }], isError: 'error' in result };
+          } catch (error) {
+            const message = error instanceof Error ? error.message : 'Hosted write request failed.';
+            return { content: [{ type: 'text', text: JSON.stringify({ error: message }) }], isError: true };
+          }
+        }
         return MCPProvider.callTool(name, toolArguments ?? {}, context);
       });
     }
@@ -385,7 +448,17 @@ class MCPProvider {
       }
       try {
 
-        const server: McpSdkServer | undefined = await MCPProvider.buildServer(context);
+        const { authorizeWrite, citationVerification } = MCPProvider.mergeConfig(context);
+        let writePrincipal: string | undefined;
+        if (typeof authorizeWrite === 'function' && supportsWrites(context)) {
+          // Authenticate each stateless request. Never accept an identity from MCP tool arguments.
+          const principal = await authorizeWrite(request);
+          if (typeof principal === 'string' && principal.trim()) writePrincipal = principal;
+        }
+        const canVerifyCitations = typeof citationVerification?.archiveDirectory === 'string'
+          && isAbsolute(citationVerification.archiveDirectory) && typeof citationVerification.authorize === 'function'
+          && await citationVerification.authorize(request) === true;
+        const server: McpSdkServer | undefined = await MCPProvider.buildServer(context, writePrincipal, canVerifyCitations);
         if (!server) {
           response.status(501).json({ error: 'MCP SDK is not installed.' });
           return;

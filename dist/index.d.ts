@@ -10,6 +10,7 @@ export { default as FilterIPAddress } from './plugins/filter-ip-address.js';
 export { default as FilterSpamEdit } from './plugins/filter-spam-edit.js';
 export { ipEditHistory } from './plugins/filter-spam-edit.js';
 export { default as ImportDocument } from './plugins/import-document.js';
+export { default as CaptureInbox } from './plugins/capture-inbox.js';
 export { default as MarkdownItRenderer } from './plugins/renderer-markdown-it.js';
 export { default as MulterUpload } from './plugins/upload-multer.js';
 export { default as ReplacerRenderer } from './plugins/renderer-replacer.js';
@@ -82,4 +83,5 @@ export * from './plugins/chat-bot/tool-registry.js';
 export * from './plugins/form-handlers/email-handler.js';
 export * from './plugins/form-handlers/google-docs-handler.js';
 export type * from './custom.js';
+export type { CaptureInboxConfig } from './types/plugins/capture-inbox.js';
 //# sourceMappingURL=index.d.ts.map

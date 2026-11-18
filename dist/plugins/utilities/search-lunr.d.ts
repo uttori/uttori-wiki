@@ -31,12 +31,13 @@ declare class SearchProvider {
      * Rebuild the search index of documents.
      * @param _data Unused.
      * @param context A Uttori-like context.
+     * @param [verified] Propagate storage failures when the caller needs an indexing receipt.
      * @example
      * ```js
      * await searchProvider.buildIndex(_data, context);
      * ```
      */
-    buildIndex: (_data: unknown, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;
+    buildIndex: (_data: unknown, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>, verified?: boolean) => Promise<void>;
     /**
      * Build the same Lunr index for server queries and offline static search.
      * @param documents Complete documents to index.
@@ -75,7 +76,7 @@ declare class SearchProvider {
     /**
      * Updates documents in the index.
      * For this implementation, it is rebuilding the index.
-     * @param documents Unused. An array of documents to be indexed.
+     * @param documents Update payloads. Hosted saves require a successful rebuild before they report completion.
      * @param context A Uttori-like context.
      */
     indexUpdate: (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => Promise<void>;

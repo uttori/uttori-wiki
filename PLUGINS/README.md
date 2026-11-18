@@ -43,6 +43,7 @@ const config = {
 ### Content tools
 - [Multer Upload](upload-multer.md) - a file-upload endpoint.
 - [Import Document](import-document.md) - bulk-import from Markdown, PDFs, images, or scraped sites.
+- [Capture Inbox](capture-inbox.md) - private PDF and URL captures, browser draft review, and resumable publishing.
 - [Form Handler](form-handler.md) - config-defined forms ➜ email, Google Sheets, or custom handlers.
 - [Query Output ➜ View Model](query-output.md) - attach query results to your templates.
 

@@ -65,12 +65,13 @@ class SearchProvider {
    * Rebuild the search index of documents.
    * @param _data Unused.
    * @param context A Uttori-like context.
+   * @param [verified] Propagate storage failures when the caller needs an indexing receipt.
    * @example
    * ```js
    * await searchProvider.buildIndex(_data, context);
    * ```
    */
-  buildIndex = async (_data: unknown, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
+  buildIndex = async (_data: unknown, context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>, verified = false) => {
     if (!context || !context.hooks || !context.hooks.fetch) {
       debug('buildIndex: context or hooks missing');
       return;
@@ -85,10 +86,12 @@ class SearchProvider {
     try {
       [documents] = await context.hooks.fetch('storage-query', query, context);
     } /* c8 ignore next 3 */ catch (error) {
+      if (verified) throw error;
       debug('Error:', error);
     }
 
     if (!Array.isArray(documents)) {
+      if (verified) throw new Error('Storage did not return documents to index.');
       debug('Documents Error: documents was not an array', typeof documents);
       return;
     }
@@ -190,12 +193,12 @@ class SearchProvider {
   /**
    * Updates documents in the index.
    * For this implementation, it is rebuilding the index.
-   * @param documents Unused. An array of documents to be indexed.
+   * @param documents Update payloads. Hosted saves require a successful rebuild before they report completion.
    * @param context A Uttori-like context.
    */
   indexUpdate = async (documents: import('../../wiki.js').UttoriWikiDocument[], context: import('../../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-search-provider-lunr', import('../search-provider-lunr.js').SearchLunrConfig>) => {
     debug('indexUpdate');
-    await this.buildIndex(undefined, context);
+    await this.buildIndex(undefined, context, Array.isArray(documents) && documents.some(update => update?.verified === true));
   };
 
   /**

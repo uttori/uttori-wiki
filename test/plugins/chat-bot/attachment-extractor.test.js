@@ -141,6 +141,7 @@ test.serial('extractAttachmentText: extracts page-separated text from valid PDF 
 
     t.true(result.includes('[Page 1]'));
     t.true(result.includes('Page one text'));
+    t.true(result.includes('[Page 2]\nPage two text'));
   } finally {
     pdfSandbox.restore();
   }
