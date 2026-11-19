@@ -67,6 +67,7 @@ declare class MulterUpload {
     static bindRoutes(server: import('express').Application, context: import('../custom.js').UttoriContextWithPluginConfig<'uttori-plugin-upload-multer', MulterUploadConfig>): void;
     /**
      * The Express route method to process the upload request and provide a response.
+     * A successful upload returns the public path relative to the router mount with the filename unescaped.
      * @param context A Uttori-like context.
      * @returns The function to pass to Express.
      * @example <caption>MulterUpload.upload(context)(request, response, _next)</caption>

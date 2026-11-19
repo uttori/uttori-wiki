@@ -1,6 +1,9 @@
 import test from 'ava';
 import sinon from 'sinon';
 import request from 'supertest';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import MulterUpload from '../../dist/plugins/upload-multer.js';
 
 test('MulterUpload.register(context): can register', (t) => {
@@ -132,26 +135,40 @@ test('MulterUpload.bindRoutes(server, context): can bind routes', (t) => {
   t.true(post.calledOnce);
 });
 
-test('MulterUpload.upload(context): returns a Express route and can upload files and returns the file path', async (t) => {
-  t.plan(2);
+test('MulterUpload.upload(context): serves the uploaded file at its public path with the correct content type', async (t) => {
   const { serverSetup } = await import('./../_helpers/server.js');
+  const directory = await mkdtemp(path.join(tmpdir(), 'uttori-upload-'));
+  t.teardown(() => rm(directory, { recursive: true, force: true }));
   const route = '/upload';
   const context = {
     config: {
       [MulterUpload.configKey]: {
-        directory: '/tmp/uploads',
+        directory: path.relative(process.cwd(), directory),
         route,
+        publicRoute: '/media/uploads/',
       },
     },
   };
   const server = serverSetup();
   MulterUpload.bindRoutes(server, context);
-  const response = await request(server).post(route).attach('file', 'test/_helpers/am-i-human.png');
-  t.is(response.text.slice(0, 20), '/uploads/am-i-human-');
+  const response = await request(server).post(route).attach('file', 'test/_helpers/am-i-human.png', 'PCB Front.png');
   t.is(response.status, 200);
+  t.regex(response.text, /^\/media\/uploads\/PCB Front-\d+\.png$/);
+  const image = await request(server).get(encodeURI(response.text));
+  t.is(image.status, 200);
+  t.is(image.type, 'image/png');
+  t.is(image.headers['x-content-type-options'], 'nosniff');
+  t.is(image.headers['content-security-policy'], undefined);
+
+  const document = await request(server).post(route).attach('file', Buffer.from('<p>Uploaded document</p>'), 'document.html');
+  t.is(document.status, 200);
+  const html = await request(server).get(document.text);
+  t.is(html.status, 200);
+  t.is(html.type, 'text/html');
+  t.is(html.headers['content-security-policy'], 'sandbox');
 });
 
-test('MulterUpload.upload(context): returns a Express route and can upload nested files and returns the file path', async (t) => {
+test('MulterUpload.upload(context): ignores nested paths and preserves extensionless filenames', async (t) => {
   t.plan(2);
   const { serverSetup } = await import('./../_helpers/server.js');
   const route = '/upload';
@@ -165,9 +182,9 @@ test('MulterUpload.upload(context): returns a Express route and can upload neste
   };
   const server = serverSetup();
   MulterUpload.bindRoutes(server, context);
-  const response = await request(server).post(route).field('fullPath', '/fake dir/nested/am-i-human.png').attach('file', 'test/_helpers/am-i-human.png');
+  const response = await request(server).post(route).field('fullPath', '/fake dir/nested/am-i-human').attach('file', 'test/_helpers/am-i-human.png', 'am-i-human');
   t.is(response.status, 200);
-  t.is(response.text.slice(0, 20), '/uploads/am-i-human-');
+  t.regex(response.text, /^\/uploads\/am-i-human-\d+$/);
 });
 
 test('MulterUpload.upload(context): rejects disallowed mime types', async (t) => {

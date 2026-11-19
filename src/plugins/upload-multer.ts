@@ -159,12 +159,21 @@ class MulterUpload {
     const { directory, route, publicRoute, middleware } = { ...MulterUpload.defaultConfig(), ...context.config[MulterUpload.configKey] };
     debug('bindRoutes route:', route);
     debug('bindRoutes directory:', directory);
-    server.use(publicRoute, express.static(directory));
+    server.use(publicRoute, express.static(directory, {
+      setHeaders(response, filePath) {
+        response.setHeader('X-Content-Type-Options', 'nosniff');
+        // Restored extensions can make uploaded documents executable in the wiki's origin.
+        if (/\.(?:html?|shtml|xhtml?|svgz?|xml|xsl|xslt)$/i.test(filePath)) {
+          response.setHeader('Content-Security-Policy', 'sandbox');
+        }
+      },
+    }));
     server.post(route, ...middleware, MulterUpload.upload(context));
   }
 
   /**
    * The Express route method to process the upload request and provide a response.
+   * A successful upload returns the public path relative to the router mount with the filename unescaped.
    * @param context A Uttori-like context.
    * @returns The function to pass to Express.
    * @example <caption>MulterUpload.upload(context)(request, response, _next)</caption>
@@ -183,12 +192,10 @@ class MulterUpload {
           callback(null, baseDirectory);
         },
         filename(_request, file, callback) {
-          // Sanitize filename to prevent path traversal
+          // Sanitize before splitting so the extension keeps its leading dot.
           const sanitizedOriginalName = sanitizeFilename(file.originalname);
           const { name, ext } = path.parse(sanitizedOriginalName);
-          // Ensure extension is safe
-          const safeExt = sanitizeFilename(ext) || ext;
-          const filename = `${sanitizeFilename(name)}-${Date.now()}${safeExt}`;
+          const filename = `${sanitizeFilename(name)}-${Date.now()}${ext}`;
           callback(null, filename);
         },
       });
@@ -215,9 +222,8 @@ class MulterUpload {
 
       handler(request, response, (error) => {
         let status = 200;
-        // Respond with the relative path to the file.
-
-        let send: string | undefined = request.file?.path.replace(config.directory, config.publicRoute);
+        // Disk directory names and separators have no place in the public path.
+        let send = request.file && path.posix.join(config.publicRoute, request.file.filename);
         /* c8 ignore next 5 */
         if (error) {
           debug('Upload Error:', error);

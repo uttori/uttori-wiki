@@ -13,7 +13,12 @@ All notable changes to this project will be documented in this file. This projec
 - The Capture Inbox supports one publishing wiki process per checkout. A maintainer reviews and commits the resulting Git diff.
 - Structural lint checks page targets. Heading fragments, raw HTML links, custom routes, and the factual support for claims require review.
 
-## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.4.1...HEAD)
+## [Unreleased](https://github.com/uttori/uttori-wiki/compare/9.4.2...HEAD)
+
+## [9.4.2](https://github.com/uttori/uttori-wiki/compare/9.4.1...9.4.2) - 2026-11-18
+
+- Preserve file extensions on uploads and return paths under the configured public route for both relative and absolute storage directories.
+- Serve uploaded browser documents with a sandbox so their scripts cannot run in the wiki's origin.
 
 ## [9.4.1](https://github.com/uttori/uttori-wiki/compare/9.4.0...9.4.1) - 2026-11-18
 
